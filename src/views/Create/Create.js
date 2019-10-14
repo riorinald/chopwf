@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 // import Autosuggest from 'react-autosuggest'
 import { AppSwitch } from '@coreui/react';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 import {
   Button,
   CustomInput,
@@ -35,37 +37,12 @@ class Create extends Component {
     this.state = {
 
       //retrieve from department Types Table
-      department: [
-        { name: "Enterprise Governance & Internal Audit" },
-        { name: "Business Development & Strategy" },
-        { name: "car2go China" },
-        { name: "CEO Office" },
-        { name: "Credit-Dealer Credit" },
-        { name: "Credit-Retail Credit" },
-        { name: "Digital Solutions Center" },
-        { name: "F&C (AFC)" },
-        { name: "F&C (LC)" },
-        { name: "F&C (DGRC)" },
-        { name: "Fleet Management & Branch Administration" },
-        { name: "HR (AFC)" },
-        { name: "HR (DGRC)" },
-        { name: "Insurance Service" },
-        { name: "IT (AFC)" },
-        { name: "IT (DGRC)" },
-        { name: "IPS" },
-        { name: "Legal & Compliance " },
-        { name: "Daimler Mobility & Autonomous Services" },
-        { name: "NextGen" },
-        { name: "Ops (AFC)" },
-        { name: "Ops (LC)" },
-        { name: "S&M" },
-        { name: "Tax (DGRC)" },
-      ],
-
+      department: [],
       //retrieve from application types table
-      applicationTypes: ["Shor-Term use", "Long-Term use", "Long-Term initiation", "Contract(non-IPS)"],
+      applicationTypes: [],
       //retrieve from chop types table
-      chopTypes: ["Company Chop", "Legal Representative Chop", "Finance Chop", "Contract Chop"],
+      chopTypes: [],
+
       //retrieve from DH table
       deptHead: "",
       collapse: false,
@@ -76,9 +53,9 @@ class Create extends Component {
       //data to be created inside Request Table
       employeeId: 1234546,    //retrieved from user Info
       telNumber: 123456,      //retrieved from user Info
-      deptSelected: "",
-      applicationTypeSelected: "",
       contractNum: 0,
+      deptSelected: "",
+      appTypeSelected: "",
       chopTypeSelected: "",
       docName: "",
       purposeOfUse: "",
@@ -104,11 +81,19 @@ class Create extends Component {
 
   componentDidMount() {
     //Get User Details
+    this.getData("department",'http://192.168.1.47:4444/api/v1/department');
+    this.getData("applicationTypes",'http://192.168.1.47:4444/api/v1/apptype');
+    this.getData("chopTypes",'http://192.168.1.47:4444/api/v1/choptype');
+    
   }
 
   submitRequest() {
     //Create Request .
-
+    Swal.fire(
+      'Good job!',
+      'You clicked the button!',
+      'success'
+    )
   }
 
   //toggle useInOffice
@@ -123,6 +108,21 @@ class Create extends Component {
       modal: !this.state.modal,
     });
   }
+
+  //Axios
+  async getData(state,url) {
+    try {
+      const response = await axios.get(url);
+      this.setState({
+        [state] : response.data
+      })
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  
+
 
   //handle ChopType
   handleChopType = event => {
@@ -207,10 +207,10 @@ class Create extends Component {
               </FormGroup>
               <FormGroup>
                 <Label>Application Type</Label>
-                <Input type="select" onChange={this.handleChange("applicationType")} defaultValue="0" name="select" id="select">
+                <Input type="select" onChange={this.handleChange("appTypeSelected")} defaultValue="0" name="select" id="select">
                   <option disabled value="0">Please Select . . .</option>
-                  {this.state.applicationTypes.map((option, index) => (
-                    <option value={option} key={index}>{option}</option>
+                  {this.state.applicationTypes.map((option, id) => (
+                    <option value={option.name} key={id}>{option.name}</option>
                   ))}
                 </Input>
               </FormGroup>
@@ -224,8 +224,8 @@ class Create extends Component {
                 <Label>Chop Type</Label>
                 <Input type="select" onChange={this.handleChopType} defaultValue="0" name="chopType" >
                   <option disabled value="0">Please Select ..</option>
-                  {this.state.chopTypes.map((option, index) => (
-                    <option key={index} value={option}>{option}</option>
+                  {this.state.chopTypes.map((option, id) => (
+                    <option key={id} value={option.name}>{option.name}</option>
                   ))}
 
                 </Input>
