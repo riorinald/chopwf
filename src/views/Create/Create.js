@@ -37,11 +37,40 @@ class Create extends Component {
     this.state = {
 
       //retrieve from department Types Table
-      department: [],
+      // department: [],
+      department: [
+        { name: "Enterprise Governance & Internal Audit" },
+        { name: "Business Development & Strategy" },
+        { name: "car2go China" },
+        { name: "CEO Office" },
+        { name: "Credit-Dealer Credit" },
+        { name: "Credit-Retail Credit" },
+        { name: "Digital Solutions Center" },
+        { name: "F&C (AFC)" },
+        { name: "F&C (LC)" },
+        { name: "F&C (DGRC)" },
+        { name: "Fleet Management & Branch Administration" },
+        { name: "HR (AFC)" },
+        { name: "HR (DGRC)" },
+        { name: "Insurance Service" },
+        { name: "IT (AFC)" },
+        { name: "IT (DGRC)" },
+        { name: "IPS" },
+        { name: "Legal & Compliance " },
+        { name: "Daimler Mobility & Autonomous Services" },
+        { name: "NextGen" },
+        { name: "Ops (AFC)" },
+        { name: "Ops (LC)" },
+        { name: "S&M" },
+        { name: "Tax (DGRC)" },
+      ],
       //retrieve from application types table
-      applicationTypes: [],
+      // applicationTypes: [],
+      applicationTypes: ["Shor-Term use", "Long-Term use", "Long-Term initiation", "Contract(non-IPS)"],
+
       //retrieve from chop types table
-      chopTypes: [],
+      // chopTypes: [],
+      chopTypes: ["Company Chop", "Legal Representative Chop", "Finance Chop", "Contract Chop"],
 
       //retrieve from DH table
       deptHead: "",
@@ -81,10 +110,10 @@ class Create extends Component {
 
   componentDidMount() {
     //Get User Details
-    this.getData("department",'http://192.168.1.47:4444/api/v1/department');
-    this.getData("applicationTypes",'http://192.168.1.47:4444/api/v1/apptype');
-    this.getData("chopTypes",'http://192.168.1.47:4444/api/v1/choptype');
-    
+    // this.getData("department",'http://192.168.1.47:4444/api/v1/department');
+    // this.getData("applicationTypes",'http://192.168.1.47:4444/api/v1/apptype');
+    // this.getData("chopTypes",'http://192.168.1.47:4444/api/v1/choptype');
+
   }
 
   submitRequest() {
@@ -110,18 +139,18 @@ class Create extends Component {
   }
 
   //Axios
-  async getData(state,url) {
-    try {
-      const response = await axios.get(url);
-      this.setState({
-        [state] : response.data
-      })
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  // async getData(state,url) {
+  //   try {
+  //     const response = await axios.get(url);
+  //     this.setState({
+  //       [state] : response.data
+  //     })
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // }
 
-  
+
 
 
   //handle ChopType
@@ -291,11 +320,11 @@ class Create extends Component {
               <Col md="16">
                 <FormGroup check>
                   <FormGroup>
-                    <CustomInput 
-                    className="form-check-input" 
-                    type="checkbox" 
-                    onChange={this.agreeTerm} 
-                    id="confirm"  value="option1">
+                    <CustomInput
+                      className="form-check-input"
+                      type="checkbox"
+                      onChange={this.agreeTerm}
+                      id="confirm" value="option1">
                       <Label className="form-check-label" check >
                         By Ticking the box, I confirm the hereby acknowledge that i must comply the internal policies &
                        Guidelines regarding chop management and will not engage in any inappropriate chop usage or other inappropriate
