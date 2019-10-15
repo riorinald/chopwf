@@ -37,11 +37,39 @@ class Create extends Component {
     this.state = {
 
       //retrieve from department Types Table
-      department: [],
+      // department: [],
+      department: [
+        { name: "Enterprise Governance & Internal Audit" },
+        { name: "Business Development & Strategy" },
+        { name: "car2go China" },
+        { name: "CEO Office" },
+        { name: "Credit-Dealer Credit" },
+        { name: "Credit-Retail Credit" },
+        { name: "Digital Solutions Center" },
+        { name: "F&C (AFC)" },
+        { name: "F&C (LC)" },
+        { name: "F&C (DGRC)" },
+        { name: "Fleet Management & Branch Administration" },
+        { name: "HR (AFC)" },
+        { name: "HR (DGRC)" },
+        { name: "Insurance Service" },
+        { name: "IT (AFC)" },
+        { name: "IT (DGRC)" },
+        { name: "IPS" },
+        { name: "Legal & Compliance " },
+        { name: "Daimler Mobility & Autonomous Services" },
+        { name: "NextGen" },
+        { name: "Ops (AFC)" },
+        { name: "Ops (LC)" },
+        { name: "S&M" },
+        { name: "Tax (DGRC)" },
+      ],
       //retrieve from application types table
-      applicationTypes: [],
+      // applicationTypes: [],
+      applicationTypes: ["Shor-Term use", "Long-Term use", "Long-Term initiation", "Contract(non-IPS)"],
       //retrieve from chop types table
-      chopTypes: [],
+      // chopTypes: [],
+      chopTypes: ["Company Chop", "Legal Representative Chop", "Finance Chop", "Contract Chop"],
 
       //retrieve from DH table
       deptHead: "",
@@ -69,7 +97,18 @@ class Create extends Component {
 
       agreeTerms: false,
 
-      reqInfo: ["contractNum", "deptSelected", "appTypeSelected", "chopTypeSelected", "docName", "purposeOfUse", "numOfPages", "addressTo", "pickUpBy", "remarks", "selectedFile"]
+      reqInfo: [
+        { id: "contractNum", name: "Contract Number", errorMsg: "" },
+        { id: "deptSelected", name: "Departement Selected", errorMsg: "" },
+        { id: "appTypeSelected", name: "Application Type Selected", errorMsg: "" },
+        { id: "chopTypeSelected", name: "Chop Type Selected", errorMsg: "" },
+        { id: "docName", name: "Document Name", errorMsg: "" },
+        { id: "purposeOfUse", name: "Purpose of Use", errorMsg: "" },
+        { id: "numOfPages", name: "Number of Pages", errorMsg: "" },
+        { id: "addressTo", name: "Address", errorMsg: "" },
+        { id: "pickUpBy", name: "Name to search", errorMsg: "" },
+        { id: "remarks", name: "Remarks", errorMsg: "" },
+        { id: "selectedFile", name: "Selected File", errorMsg: "" }]
     };
 
 
@@ -78,70 +117,79 @@ class Create extends Component {
     this.toggleModal = this.toggleModal.bind(this);
     this.agreeTerm = this.agreeTerm.bind(this);
     this.submitRequest = this.submitRequest.bind(this);
+    this.validate = this.validate.bind(this);
 
 
   };
 
   componentDidMount() {
     //Get User Details
-    this.getData("department", 'http://192.168.1.47:4444/api/v1/department');
-    this.getData("applicationTypes", 'http://192.168.1.47:4444/api/v1/apptype');
-    this.getData("chopTypes", 'http://192.168.1.47:4444/api/v1/choptype');
+    // this.getData("department", 'http://192.168.1.47:4444/api/v1/department');
+    // this.getData("applicationTypes", 'http://192.168.1.47:4444/api/v1/apptype');
+    // this.getData("chopTypes", 'http://192.168.1.47:4444/api/v1/choptype');
 
   }
 
-  submitRequest() {
-
+  validate() {
     for (let i = 0; i < this.state.reqInfo.length; i++) {
-      console.log(this.state[this.state.reqInfo[i]])
-      if(this.state[this.state.reqInfo[i]])
-      {
-        this.setState({valid:true})
-      }
-      else{
-        
-      }
-    }
-
-
-    //Form Validation 
-    if (this.state.deptSelected) {
-      if (this.state.appTypeSelected) {
-        if (this.state.contractNum) {
-          if (this.state.chopTypeSelected) {
-            if (this.state.docName) {
-              if (this.state.purposeOfUse) {
-                if (this.state.numOfPages) {
-                  if (this.state.addressTo) {
-                    if (this.state.pickUpBy) {
-                      if (this.state.remarks) {
-                        if (this.state.deptHead) {
-                          // if (this.state.selectedFile) {
-                          Swal.fire(
-                            'Good job!',
-                            'You clicked the button!',
-                            'success'
-                          )
-                          // }
-                        }
-
-                      }
-                    }
-                  }
-                }
-              }
+      if (this.state[this.state.reqInfo[i].id]) {
+        this.setState(state => {
+          const reqInfo = state.reqInfo.map((item, j) => {
+            if (j === i) {
+              var valid = document.getElementById(this.state.reqInfo[i].id)
+              valid.className = "form-control"
+              return { id: item.id, name: item.name, errorMsg: "" }
             }
+            else {
+              return item
+            }
+          })
+          return {
+            reqInfo
           }
-        }
-
+        })
+      }
+      else {
+        this.setState(state => {
+          const reqInfo = state.reqInfo.map((item, j) => {
+            if (j === i) {
+              var invalid = document.getElementById(item.id)
+              invalid.className = "is-invalid form-control"
+              return { id: item.id, name: item.name, errorMsg: "Incorrect " + item.name }
+            }
+            else {
+              return item
+            }
+          })
+          return {
+            reqInfo
+          }
+        })
       }
     }
-    else {
-      var deptHead = document.getElementById("deptSelected")
-      deptHead.className = "is-invalid form-control "
+    for (let i = 0; i < this.state.reqInfo.length; i++) {
+      // console.log(this.state.reqInfo[i].errorMsg)
+      if (this.state.reqInfo[i].errorMsg === "") {
+        this.setState({ valid: true })
+      }
+      else {
+        this.setState({ valid: false })
+        break;
+      }
     }
+  }
 
-    //Create Request .
+  async submitRequest() {
+    // console.log(this.state.reqInfo.length)
+    await this.validate()
+    console.log(this.state.valid)
+    if (this.state.valid) {
+      Swal.fire(
+        'Good job!',
+        'You clicked the button!',
+        'success'
+      )
+    }
 
   }
 
@@ -159,16 +207,16 @@ class Create extends Component {
   }
 
   //Axios
-  async getData(state, url) {
-    try {
-      const response = await axios.get(url);
-      this.setState({
-        [state]: response.data
-      })
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  // async getData(state, url) {
+  //   try {
+  //     const response = await axios.get(url);
+  //     this.setState({
+  //       [state]: response.data
+  //     })
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // }
 
 
 
@@ -263,25 +311,25 @@ class Create extends Component {
               </FormGroup>
               <FormGroup>
                 <Label>Application Type</Label>
-                <Input type="select" onChange={this.handleChange("appTypeSelected")} defaultValue="0" name="select" id="select">
+                <Input type="select" onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" defaultValue="0" name="select">
                   <option disabled value="0">Please Select . . .</option>
                   {this.state.applicationTypes.map((option, id) => (
-                    <option value={option.name} key={id}>{option.name}</option>
+                    <option value={option} key={id}>{option}</option>
                   ))}
                 </Input>
               </FormGroup>
               <FormGroup>
                 <Label>Contract Number</Label>
                 <InputGroup>
-                  <Input id="appendedInput" size="16" type="text" onChange={this.handleChange("contractNum")} />
+                  <Input id="contractNum" size="16" type="text" onChange={this.handleChange("contractNum")} />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
                 <Label>Chop Type</Label>
-                <Input type="select" onChange={this.handleChopType("chopTypeSelected")} defaultValue="0" name="chopType" >
+                <Input type="select" id="chopTypeSelected" onChange={this.handleChopType("chopTypeSelected")} defaultValue="0" name="chopType" >
                   <option disabled value="0">Please Select ..</option>
                   {this.state.chopTypes.map((option, id) => (
-                    <option key={id} value={option.name}>{option.name}</option>
+                    <option key={id} value={option}>{option}</option>
                   ))}
 
                 </Input>
@@ -289,19 +337,19 @@ class Create extends Component {
               <FormGroup>
                 <Label>Document Name</Label>
                 <InputGroup>
-                  <Input ref="docName" value={this.state.docName} onChange={this.handleChange("docName")} type="textarea" name="textarea-input" id="textarea-input" rows="3" placeholder="please describe in English or Chinese" />
+                  <Input value={this.state.docName} onChange={this.handleChange("docName")} type="textarea" name="textarea-input" id="docName" rows="3" placeholder="please describe in English or Chinese" />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
                 <Label>Purpose of Use</Label>
                 <InputGroup>
-                  <Input value={this.state.purposeOfUse} onChange={this.handleChange("purposeOfUse")} type="textarea" name="textarea-input" id="textarea-input" rows="3" />
+                  <Input value={this.state.purposeOfUse} onChange={this.handleChange("purposeOfUse")} type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
                 <Label>Number of Pages to Be Chopped</Label>
                 <InputGroup>
-                  <Input value={this.state.numOfPages} onChange={this.handleChange("numOfPages")} id="appendedInput" size="16" type="text" />
+                  <Input value={this.state.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="text" />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
@@ -322,19 +370,19 @@ class Create extends Component {
               <FormGroup>
                 <Label>Address to</Label>
                 <InputGroup>
-                  <Input value={this.state.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="textarea-input" rows="5" placeholder="Docuemnts will be adressed to" />
+                  <Input value={this.state.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Docuemnts will be adressed to" />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
                 <Label>Pick Up By <i className="fa fa-user" /></Label>
                 <InputGroup>
-                  <Input onChange={this.handleChange("pickUpBy")} id="appendedInput" size="16" type="text" placeholder="enter name to search ..." />
+                  <Input onChange={this.handleChange("pickUpBy")} id="pickUpBy" size="16" type="text" placeholder="enter name to search ..." />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
                 <Label>Remark (e.g. tel.) </Label>
                 <InputGroup>
-                  <Input onChange={this.handleChange("remarks")} id="appendedInput" size="16" type="text" placeholder="pick up presons's phone number" />
+                  <Input onChange={this.handleChange("remarks")} id="remarks" size="16" type="text" placeholder="pick up presons's phone number" />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
@@ -363,7 +411,7 @@ class Create extends Component {
               <FormGroup>
                 <Label >Attachments</Label>
                 <Row />
-                <CustomInput id="upload" type="file" color="primary" label={this.state.fileName} onChange={this.uploadFile} />
+                <CustomInput id="selectedFile" type="file" color="primary" label={this.state.fileName} onChange={this.uploadFile} />
               </FormGroup>
             </Form>
           </CardBody>
