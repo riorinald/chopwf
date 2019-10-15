@@ -49,6 +49,7 @@ class Create extends Component {
       fadeIn: true,
       modal: false,
       timeout: 300,
+      valid: false,
 
       //data to be created inside Request Table
       employeeId: 1234546,    //retrieved from user Info
@@ -61,12 +62,14 @@ class Create extends Component {
       purposeOfUse: "",
       numOfPages: 0,
       addressTo: "",
-      pickBy: "",
-      remark: "",
+      pickUpBy: "",
+      remarks: "",
       selectedFile: null,
       fileName: "Choose File",
 
       agreeTerms: false,
+
+      reqInfo: ["contractNum", "deptSelected", "appTypeSelected", "chopTypeSelected", "docName", "purposeOfUse", "numOfPages", "addressTo", "pickUpBy", "remarks", "selectedFile"]
     };
 
 
@@ -81,19 +84,65 @@ class Create extends Component {
 
   componentDidMount() {
     //Get User Details
-    this.getData("department",'http://192.168.1.47:4444/api/v1/department');
-    this.getData("applicationTypes",'http://192.168.1.47:4444/api/v1/apptype');
-    this.getData("chopTypes",'http://192.168.1.47:4444/api/v1/choptype');
-    
+    this.getData("department", 'http://192.168.1.47:4444/api/v1/department');
+    this.getData("applicationTypes", 'http://192.168.1.47:4444/api/v1/apptype');
+    this.getData("chopTypes", 'http://192.168.1.47:4444/api/v1/choptype');
+
   }
 
   submitRequest() {
+
+    for (let i = 0; i < this.state.reqInfo.length; i++) {
+      console.log(this.state[this.state.reqInfo[i]])
+      if(this.state[this.state.reqInfo[i]])
+      {
+        this.setState({valid:true})
+      }
+      else{
+        
+      }
+    }
+
+
+    //Form Validation 
+    if (this.state.deptSelected) {
+      if (this.state.appTypeSelected) {
+        if (this.state.contractNum) {
+          if (this.state.chopTypeSelected) {
+            if (this.state.docName) {
+              if (this.state.purposeOfUse) {
+                if (this.state.numOfPages) {
+                  if (this.state.addressTo) {
+                    if (this.state.pickUpBy) {
+                      if (this.state.remarks) {
+                        if (this.state.deptHead) {
+                          // if (this.state.selectedFile) {
+                          Swal.fire(
+                            'Good job!',
+                            'You clicked the button!',
+                            'success'
+                          )
+                          // }
+                        }
+
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+      }
+    }
+    else {
+      var deptHead = document.getElementById("deptSelected")
+      deptHead.className = "is-invalid form-control "
+    }
+
     //Create Request .
-    Swal.fire(
-      'Good job!',
-      'You clicked the button!',
-      'success'
-    )
+
   }
 
   //toggle useInOffice
@@ -110,27 +159,27 @@ class Create extends Component {
   }
 
   //Axios
-  async getData(state,url) {
+  async getData(state, url) {
     try {
       const response = await axios.get(url);
       this.setState({
-        [state] : response.data
+        [state]: response.data
       })
     } catch (error) {
       console.error(error);
     }
   }
 
-  
+
 
 
   //handle ChopType
-  handleChopType = event => {
+  handleChopType = name => event => {
     if (event.target.value === "Contract Chop") {
       this.toggleModal();
     }
     this.setState({
-      [event.target.name]: event.target.value
+      [name]: event.target.value
     });
   };
 
@@ -139,6 +188,13 @@ class Create extends Component {
     this.setState({
       [name]: event.target.value
     });
+    if (event.target.value) {
+      event.target.className = "form-control"
+
+    }
+    else {
+      event.target.className = "is-invalid form-control"
+    }
   };
 
 
@@ -196,7 +252,7 @@ class Create extends Component {
               </FormGroup>
               <FormGroup>
                 <Label>Dept</Label>
-                <Input type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
+                <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
                   <option disabled value="0">Please Select . . .</option>
                   {this.state.department.map(option => (
                     <option value={option.name} key={option.name}>
@@ -222,7 +278,7 @@ class Create extends Component {
               </FormGroup>
               <FormGroup>
                 <Label>Chop Type</Label>
-                <Input type="select" onChange={this.handleChopType} defaultValue="0" name="chopType" >
+                <Input type="select" onChange={this.handleChopType("chopTypeSelected")} defaultValue="0" name="chopType" >
                   <option disabled value="0">Please Select ..</option>
                   {this.state.chopTypes.map((option, id) => (
                     <option key={id} value={option.name}>{option.name}</option>
@@ -233,7 +289,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Document Name</Label>
                 <InputGroup>
-                  <Input value={this.state.docName} onChange={this.handleChange("docName")} type="textarea" name="textarea-input" id="textarea-input" rows="3" placeholder="please describe in English or Chinese" />
+                  <Input ref="docName" value={this.state.docName} onChange={this.handleChange("docName")} type="textarea" name="textarea-input" id="textarea-input" rows="3" placeholder="please describe in English or Chinese" />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
@@ -272,30 +328,30 @@ class Create extends Component {
               <FormGroup>
                 <Label>Pick Up By <i className="fa fa-user" /></Label>
                 <InputGroup>
-                  <Input value={this.state.pickBy} onChange={this.handleChange("pickUpBy")} id="appendedInput" size="16" type="text" placeholder="enter name to search ..." />
+                  <Input onChange={this.handleChange("pickUpBy")} id="appendedInput" size="16" type="text" placeholder="enter name to search ..." />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
                 <Label>Remark (e.g. tel.) </Label>
                 <InputGroup>
-                  <Input value={this.state.remark} onChange={this.handleChange("remarks")} id="appendedInput" size="16" type="text" placeholder="pick up presons's phone number" />
+                  <Input onChange={this.handleChange("remarks")} id="appendedInput" size="16" type="text" placeholder="pick up presons's phone number" />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
                 <Label>Department Heads <i className="fa fa-user" /></Label>
                 <small> &ensp; If you apply for MBAFC Company Chop, then Department Head shall be from MBAFC entity</small>
                 <InputGroup>
-                  <Input id="appendedInput" size="16" type="text" placeholder="enter name to search ..." />
+                  <Input id="deptHead" onChange={this.handleChange("deptHead")} size="16" type="text" placeholder="enter name to search ..." />
                 </InputGroup>
               </FormGroup>
               <Col md="16">
                 <FormGroup check>
                   <FormGroup>
-                    <CustomInput 
-                    className="form-check-input" 
-                    type="checkbox" 
-                    onChange={this.agreeTerm} 
-                    id="confirm"  value="option1">
+                    <CustomInput
+                      className="form-check-input"
+                      type="checkbox"
+                      onChange={this.agreeTerm}
+                      id="confirm" value="option1">
                       <Label className="form-check-label" check >
                         By Ticking the box, I confirm the hereby acknowledge that i must comply the internal policies &
                        Guidelines regarding chop management and will not engage in any inappropriate chop usage or other inappropriate
