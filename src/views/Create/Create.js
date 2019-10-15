@@ -36,6 +36,9 @@ class Create extends Component {
     super(props);
     this.state = {
 
+      //defaul for {MBAFC} this will be handle from react hooks / global state
+      legalEntity: "MBAFC",
+
       //retrieve from department Types Table
       department: [],
       //retrieve from application types table
@@ -81,10 +84,10 @@ class Create extends Component {
 
   componentDidMount() {
     //Get User Details
-    this.getData("department",'http://192.168.1.47:4444/api/v1/department');
-    this.getData("applicationTypes",'http://192.168.1.47:4444/api/v1/apptype');
-    this.getData("chopTypes",'http://192.168.1.47:4444/api/v1/choptype');
-    
+    this.getData("department", 'http://192.168.1.47/echop/api/v1/departments');
+    this.getData("applicationTypes", 'http://192.168.1.47/echop/api/v1/applications/types');
+    this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/chops/types');
+
   }
 
   submitRequest() {
@@ -109,19 +112,29 @@ class Create extends Component {
     });
   }
 
-  //Axios
-  async getData(state,url) {
+  //Axios get
+  async getData(stateName, url) {
     try {
       const response = await axios.get(url);
       this.setState({
-        [state] : response.data
-      })
+        [stateName]: response.data
+      });
     } catch (error) {
       console.error(error);
     }
   }
 
-  
+  //axios post
+  // async postData(url){
+  //   try{
+  //     let res = await axios.post(url,
+  //       {
+  //         legalEntity: this.state.legalEntity
+  //       }
+  //       );
+  //     console.log(res);
+  //   }
+  // }
 
 
   //handle ChopType
@@ -130,7 +143,7 @@ class Create extends Component {
       this.toggleModal();
     }
     this.setState({
-      [event.target.name]: event.target.value
+      chopTypeSelected: event.target.value
     });
   };
 
@@ -199,7 +212,7 @@ class Create extends Component {
                 <Input type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
                   <option disabled value="0">Please Select . . .</option>
                   {this.state.department.map(option => (
-                    <option value={option.name} key={option.name}>
+                    <option value={option.id} key={option.id}>
                       {option.name}
                     </option>
                   ))}
@@ -210,7 +223,9 @@ class Create extends Component {
                 <Input type="select" onChange={this.handleChange("appTypeSelected")} defaultValue="0" name="select" id="select">
                   <option disabled value="0">Please Select . . .</option>
                   {this.state.applicationTypes.map((option, id) => (
-                    <option value={option.name} key={id}>{option.name}</option>
+                    <option value={option.id} key={id}>
+                      {option.name}
+                    </option>
                   ))}
                 </Input>
               </FormGroup>
@@ -225,7 +240,9 @@ class Create extends Component {
                 <Input type="select" onChange={this.handleChopType} defaultValue="0" name="chopType" >
                   <option disabled value="0">Please Select ..</option>
                   {this.state.chopTypes.map((option, id) => (
-                    <option key={id} value={option.name}>{option.name}</option>
+                    <option key={id} value={option.id}>
+                      {option.name}
+                    </option>
                   ))}
 
                 </Input>
@@ -291,11 +308,11 @@ class Create extends Component {
               <Col md="16">
                 <FormGroup check>
                   <FormGroup>
-                    <CustomInput 
-                    className="form-check-input" 
-                    type="checkbox" 
-                    onChange={this.agreeTerm} 
-                    id="confirm"  value="option1">
+                    <CustomInput
+                      className="form-check-input"
+                      type="checkbox"
+                      onChange={this.agreeTerm}
+                      id="confirm" value="option1">
                       <Label className="form-check-label" check >
                         By Ticking the box, I confirm the hereby acknowledge that i must comply the internal policies &
                        Guidelines regarding chop management and will not engage in any inappropriate chop usage or other inappropriate
