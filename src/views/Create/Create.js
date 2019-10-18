@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 import { AppSwitch } from '@coreui/react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import FileViewer from 'react-file-viewer';
+
 import {
   Button,
   CustomInput,
@@ -24,7 +26,8 @@ import {
   ModalBody,
   ModalFooter,
   Row,
-  FormFeedback
+  FormFeedback,
+  Table
 } from 'reactstrap';
 
 //notes can be updated by text only or editable in HTML editor
@@ -35,56 +38,28 @@ const notes = <p>如您需申请人事相关的证明文件包括但不限于“
 class Create extends Component {
   constructor(props) {
     super(props);
-    this.employeeId = React.createRef();
-    this.telNumber = React.createRef();
-    this.deptSelected = React.createRef();
-    this.appTypeSelected = React.createRef();
-    this.contractNum = React.createRef();
-    this.chopTypeSelected = React.createRef();
-    this.docName = React.createRef();
-    this.purposeOfUse = React.createRef();
-    this.numOfPages = React.createRef();
-    this.addressTo = React.createRef();
-    this.pickUpBy = React.createRef();
-    this.remarks = React.createRef();
-    this.selectedFile = React.createRef();
+    // this.employeeId = React.createRef();
+    // this.telNumber = React.createRef();
+    // this.deptSelected = React.createRef();
+    // this.appTypeSelected = React.createRef();
+    // this.contractNum = React.createRef();
+    // this.chopTypeSelected = React.createRef();
+    // this.docName = React.createRef();
+    // this.purposeOfUse = React.createRef();
+    // this.numOfPages = React.createRef();
+    // this.addressTo = React.createRef();
+    // this.pickUpBy = React.createRef();
+    // this.remarks = React.createRef();
+    // this.selectedFile = React.createRef();
 
     this.state = {
 
       //retrieve from department Types Table
-      // department: [],
-      department: [
-        { name: "Enterprise Governance & Internal Audit" },
-        { name: "Business Development & Strategy" },
-        { name: "car2go China" },
-        { name: "CEO Office" },
-        { name: "Credit-Dealer Credit" },
-        { name: "Credit-Retail Credit" },
-        { name: "Digital Solutions Center" },
-        { name: "F&C (AFC)" },
-        { name: "F&C (LC)" },
-        { name: "F&C (DGRC)" },
-        { name: "Fleet Management & Branch Administration" },
-        { name: "HR (AFC)" },
-        { name: "HR (DGRC)" },
-        { name: "Insurance Service" },
-        { name: "IT (AFC)" },
-        { name: "IT (DGRC)" },
-        { name: "IPS" },
-        { name: "Legal & Compliance " },
-        { name: "Daimler Mobility & Autonomous Services" },
-        { name: "NextGen" },
-        { name: "Ops (AFC)" },
-        { name: "Ops (LC)" },
-        { name: "S&M" },
-        { name: "Tax (DGRC)" },
-      ],
+      department: [],
       //retrieve from application types table
-      // applicationTypes: [],
-      applicationTypes: ["Shor-Term use", "Long-Term use", "Long-Term initiation", "Contract(non-IPS)"],
+      applicationTypes: [],
       //retrieve from chop types table
-      // chopTypes: [],
-      chopTypes: ["Company Chop", "Legal Representative Chop", "Finance Chop", "Contract Chop"],
+      chopTypes: [],
 
       //retrieve from DH table
       deptHead: "",
@@ -110,20 +85,41 @@ class Create extends Component {
       selectedFile: null,
       fileName: "Choose File",
 
+      documentTableLTI: [],
+
+      documentTableLTU: [],
+
       agreeTerms: false,
+      showDocAttach: false,
+      showDocDropdown: false,
+
+      engName: "",
+      cnName: "",
+      docSelected: null,
+      docAttachedName: "Choose File",
+
+      refNum: 0,
+
+      showDoc: false,
+
+      docSelectedLTU: "",
+
+      docPreview: null,
+      fileURL: "",
+      fileType: "",
 
       reqInfo: [
-        { id: "deptSelected", name: "Departement Selected", valid: false },
-        { id: "appTypeSelected", name: "Application Type Selected", valid: false },
-        { id: "contractNum", name: "Contract Number", valid: false },
-        { id: "chopTypeSelected", name: "Chop Type Selected", valid: false },
-        { id: "docName", name: "Document Name", valid: false },
-        { id: "purposeOfUse", name: "Purpose of Use", valid: false },
-        { id: "numOfPages", name: "Number of Pages", valid: false },
-        { id: "addressTo", name: "Address", valid: false },
-        { id: "pickUpBy", name: "Name to search", valid: false },
-        { id: "remarks", name: "Remarks", valid: false },
-        { id: "selectedFile", name: "Selected File", valid: false }]
+        { id: "deptSelected", valid: false },
+        { id: "appTypeSelected", valid: false },
+        { id: "contractNum", valid: false },
+        { id: "chopTypeSelected", valid: false },
+        { id: "docName", valid: false },
+        { id: "purposeOfUse", valid: false },
+        { id: "numOfPages", valid: false },
+        { id: "addressTo", valid: false },
+        { id: "pickUpBy", valid: false },
+        { id: "remarks", valid: false },
+        { id: "selectedFile", valid: false }]
     };
 
 
@@ -132,15 +128,18 @@ class Create extends Component {
     this.toggleModal = this.toggleModal.bind(this);
     this.agreeTerm = this.agreeTerm.bind(this);
     this.submitRequest = this.submitRequest.bind(this);
-    this.validate = this.validate.bind(this);    
+    this.validate = this.validate.bind(this);
+    this.addDocumentLTI = this.addDocumentLTI.bind(this);
+    this.modal = this.modal.bind(this);
+    this.addDocumentLTU = this.addDocumentLTU.bind(this);
 
   };
 
   componentDidMount() {
     //Get User Details
-    // this.getData("department", 'http://192.168.1.47:4444/api/v1/department');
-    // this.getData("applicationTypes", 'http://192.168.1.47:4444/api/v1/apptype');
-    // this.getData("chopTypes", 'http://192.168.1.47:4444/api/v1/choptype');
+    this.getData("department", 'http://192.168.1.47/echop/api/v1/departments');
+    this.getData("applicationTypes", 'http://192.168.1.47/echop/api/v1/apptypes');
+    this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes');
 
   }
 
@@ -184,10 +183,26 @@ class Create extends Component {
   }
 
   async submitRequest() {
-    // console.log(this.state.reqInfo.length)
+    const postReq = {
+      "userId": "otadmin@otds.admin",
+      "employeeNum": "12345",
+      "companyId": "mbafc@otds.admin",
+      "departmentId": this.state.deptSelected,
+      "applicationTypeId": this.state.appTypeSelected,
+      "chopTypeId": this.state.chopTypeSelected,
+      "inOffice": "y",
+      "departmentHead": this.state.deptHead,
+      "documentDescription": this.state.docName,
+      "addressTo": this.state.addressTo,
+      "contractNo": this.state.contractNum,
+      "contractName": "lorem ipsum dolor sit amet",
+      "purposeOfUse": this.state.purposeOfUse,
+      "remark": this.state.remarks,
+      "numOfPages": this.state.numOfPages
+    }
+
     await this.validate()
     for (let i = 0; i < this.state.reqInfo.length; i++) {
-      // console.log(this.state.reqInfo[i].valid)
       if (this.state.reqInfo[i].valid) {
         this.setState({ valid: true })
       }
@@ -195,24 +210,21 @@ class Create extends Component {
         this.setState({ valid: false })
 
         //function to scroll to specific posittion
-        // var el = this[this.state.reqInfo[i].id].current
-        // var elOffSetTop = document.getElementById(this.state.reqInfo[i].id).getBoundingClientRect().y
-        // var el = window.outerHeight + elOffSetTop
-        // var el = document.getElementById("contractNum").getBoundingClientRect()
-        // this.scrollToRef(el)
-        // console.log(window.outerHeight)
-        // console.log(elOffSetTop)
-        // console.log(this.state.reqInfo[i].id)
+        {
+          // var el = this[this.state.reqInfo[i].id].current
+          // var elOffSetTop = document.getElementById(this.state.reqInfo[i].id).getBoundingClientRect().y
+          // var el = window.outerHeight + elOffSetTop
+          // var el = document.getElementById("contractNum").getBoundingClientRect()
+          // this.scrollToRef(el)
+          // console.log(window.outerHeight)
+          // console.log(elOffSetTop)
+          // console.log(this.state.reqInfo[i].id)
+        }
         break;
       }
     }
-    console.log(this.state.valid)
     if (this.state.valid) {
-      Swal.fire(
-        'Good job!',
-        'You clicked the button!',
-        'success'
-      )
+      this.postData(postReq)
     }
 
   }
@@ -230,37 +242,57 @@ class Create extends Component {
     });
   }
 
-  //Axios
-  // async getData(state, url) {
-  //   try {
-  //     const response = await axios.get(url);
-  //     this.setState({
-  //       [state]: response.data
-  //     })
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // }
-
-
-
-
-  //handle ChopType
-  handleChopType = name => event => {
-    if (event.target.value === "Contract Chop") {
-      this.toggleModal();
+  Axios
+  async getData(state, url) {
+    try {
+      const response = await axios.get(url);
+      this.setState({
+        [state]: response.data
+      })
+    } catch (error) {
+      console.error(error);
     }
-    this.setState({
-      [name]: event.target.value
-    });
+  }
 
-  };
+  async postData(formData) {
+    try {
+      await axios.post('http://192.168.1.47/echop/api/v1/applications', formData, { headers: { 'Content-Type': '  application/json' } })
+        .then(res => {
+          console.log(res.data)
+          Swal.fire({
+            title: 'Requested',
+            text: 'Status Code: ' + res.data.statusCode + 'Reference Number: ' + res.data.referenceNum,
+            type: res.data.status
+          })
+        })
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   //handle value on change
   handleChange = name => event => {
-    if (event.target.value === "Contract Chop") {
+    if (event.target.value === "CONCHOP") {
       this.toggleModal();
     }
+    if (name === "appTypeSelected") {
+      if (event.target.value === "LTI") {
+        this.setState({ showDocAttach: true, showDocDropdown: false })
+      }
+      else if (event.target.value === "LTU") {
+        this.setState({ showDocDropdown: true, showDocAttach: false })
+      }
+      else {
+        this.setState({ showDocAttach: false, showDocDropdown: false })
+      }
+      if (event.target.value === "CNIPS") {
+        this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/apptypes/CNIPS/choptypes')
+      }
+      else {
+        this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes')
+      }
+    }
+
     this.setState({
       [name]: event.target.value
     });
@@ -273,13 +305,84 @@ class Create extends Component {
     }
   };
 
+  addDocumentLTI() {
+    var maxNumber = 45;
+    var rand = Math.floor((Math.random() * maxNumber) + 1);
+
+    const obj = {
+      id: rand,
+      engName: this.state.engName,
+      cnName: this.state.cnName,
+      docSelected: this.state.docSelected,
+      docName: this.state.docAttachedName
+    }
+    this.setState(state => {
+      const documentTableLTI = state.documentTableLTI.concat(obj)
+
+      return {
+        documentTableLTI
+      }
+    })
+  }
+
+  addDocumentLTU() {
+
+    let selectedId = parseInt(this.state.docSelectedLTU)
+    let tempDocLTI = this.state.documentTableLTI
+    let tempDocLTU = this.state.documentTableLTU
+    let exist = false
+    this.setState(state => {
+      if (tempDocLTU.length !== 0) {
+        for (let p = 0; p < tempDocLTU.length; p++) {
+          if (selectedId === tempDocLTU[p].id) {
+            exist = true
+            Swal.fire({
+              title: 'Error',
+              text: 'Document already exists',
+              type: 'error'
+            })
+            break;
+          }
+          else {
+            exist = false
+          }
+        }
+      }
+      if (!exist) {
+        for (let i = 0; i < tempDocLTI.length; i++) {
+          if (tempDocLTI[i].id === selectedId) {
+            const documentTableLTU = state.documentTableLTU.concat(tempDocLTI[i])
+            console.log("Added: " + tempDocLTI[i].id)
+            return {
+              documentTableLTU
+            }
+          }
+        }
+      }
+    })
+  }
+
+
+
 
   uploadFile = event => {
-    this.setState({
-      selectedFile: event.target.files[0],
-      fileName: event.target.files[0].name
+    if (event.target.files[0]) {
+      this.setState({
+        selectedFile: event.target.files[0],
+        fileName: event.target.files[0].name
 
-    })
+      })
+    }
+  }
+
+  uploadDocument = event => {
+    if (event.target.files[0]) {
+      this.setState({
+        docSelected: event.target.files[0],
+        docAttachedName: event.target.files[0].name
+
+      })
+    }
   }
 
   agreeTerm(event) {
@@ -295,11 +398,161 @@ class Create extends Component {
     }
   }
 
+  modal(doc) {
+    let dem = !this.state.showDoc
+    this.setState({ showDoc: dem, docPreview: doc })
+    let type = ""
+    if (dem) {
+      if (doc.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+        type = "docx"
+      }
+      else if (doc.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+        type = "xlsx"
+      }
+      else if (doc.type == "application/pdf") {
+        type = "pdf"
+      }
+      else if (doc.type == "application/vnd.ms-excel") {
+        type = "csv"
+      }
+      else if (doc.type == "image/jpeg") {
+        type = "jpeg"
+      }
+      else if (doc.type == "image/png") {
+        type = "png"
+      }
+      else if (doc.type == "image/gif") {
+        type = "gif"
+      }
+      else if (doc.type == "image/bmp") {
+        type = "bmp"
+      }
+      this.setState({ fileURL: URL.createObjectURL(doc), fileType: type })
+    }
+  }
+
 
   //scroll To Function
-  scrollToRef = (ref) => window.scrollTo(0, ref)
+  // scrollToRef = (ref) => window.scrollTo(0, ref)
 
   render() {
+    const DocTable = <Table bordered>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Document Name in English</th>
+          <th>Document Name in Chinese</th>
+          <th>Attached File</th>
+        </tr>
+      </thead>
+      <tbody>
+        {this.state.documentTableLTI.map((document, index) =>
+          <tr key={index}>
+            <th>{index + 1}</th>
+            <th>{document.engName}</th>
+            <th>{document.cnName}</th>
+            <th onClick={() => this.modal(document.docSelected)}>{document.docName}</th>
+          </tr>
+        )}
+      </tbody>
+    </Table>
+
+    const documentForLTI =
+      <div>
+        <Row form>
+          <Col md={4}>
+            <FormGroup>
+              {/* <Label>English Name</Label> */}
+              <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
+            </FormGroup>
+          </Col>
+          <Col md={4}>
+            <FormGroup>
+              {/* <Label>Chinese Name</Label> */}
+              <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
+            </FormGroup>
+          </Col>
+          <Col md={3}>
+            <FormGroup>
+              {/* <Label>File Name</Label> */}
+              <CustomInput id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
+            </FormGroup>
+          </Col>
+          <Col md={1}>
+            <FormGroup>
+              {/* <Label></Label> */}
+              <Button block onClick={this.addDocumentLTI}>Add</Button>
+            </FormGroup>
+          </Col>
+        </Row>
+        <br />
+        {this.state.documentTableLTI.length !== 0 ? DocTable : ""}
+      </div>
+
+    const documentForLTU =
+      <div>
+        {/* <Label>Document Name</Label> */}
+        <InputGroup style={{ display: "flex" }}>
+          <Input type="select" name="select" id="exampleSelect" onChange={this.handleChange("docSelectedLTU")} defaultValue={0}>
+            <option value={0} disabled>Please select the document</option>
+            {this.state.documentTableLTI.map((document, index) =>
+              <option key={index} value={document.id}>Document Name (English): {document.engName}, Document Name (Chinese): {document.cnName}</option>
+            )}
+          </Input>
+          <Button onClick={this.addDocumentLTU}>Add Document</Button>
+        </InputGroup>
+
+        {this.state.documentTableLTU.length !== 0 ?
+          <div>
+            <br />
+            <Table bordered>
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Document Name in English</th>
+                  <th>Document Name in Chinese</th>
+                  <th>Attached File</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.documentTableLTU.map((document, index) =>
+                  <tr key={index}>
+                    <th>{index + 1}</th>
+                    <th>{document.engName}</th>
+                    <th>{document.cnName}</th>
+                    <th onClick={() => this.modal(document.docSelected)}>{document.docName}</th>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </div> : ""}
+
+      </div>
+
+    const documentNormal =
+      <div>
+        {/* <Label>Document Name</Label> */}
+        <InputGroup>
+          <Input ref={this.docName} value={this.state.docName} onChange={this.handleChange("docName")} type="textarea" name="textarea-input" id="docName" rows="3" placeholder="please describe in English or Chinese" />
+        </InputGroup>
+      </div>
+
+    let file = this.state.fileURL
+    let type = this.state.fileType
+
+    const docModal =
+      < Modal size="lg" scrollable isOpen={this.state.showDoc} >
+        <ModalHeader>{this.state.showDoc ? "File: " + this.state.docPreview.name : ""}</ModalHeader>
+        <ModalBody>
+          <FileViewer
+            fileType={type}
+            filePath={file}></FileViewer>
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick={this.modal}>Close</Button>
+        </ModalFooter>
+      </Modal >
+
     return (
       <div>
         <h3>Create</h3>
@@ -335,9 +588,9 @@ class Create extends Component {
                 <Label>Dept</Label>
                 <Input ref={this.deptSelected} id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
                   <option disabled value="0">Please Select . . .</option>
-                  {this.state.department.map(option => (
-                    <option value={option.name} key={option.name}>
-                      {option.name}
+                  {this.state.department.map((option, index) => (
+                    <option value={option.deptId} key={option.deptId}>
+                      {option.deptName}
                     </option>
                   ))}
                 </Input>
@@ -348,7 +601,7 @@ class Create extends Component {
                 <Input ref={this.appTypeSelected} type="select" onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" defaultValue="0" name="select">
                   <option disabled value="0">Please Select . . .</option>
                   {this.state.applicationTypes.map((option, id) => (
-                    <option value={option} key={id}>{option}</option>
+                    <option value={option.appTypeId} key={option.appTypeId}>{option.appTypeName}</option>
                   ))}
                 </Input>
                 <FormFeedback>Invalid Application Type Selected </FormFeedback>
@@ -358,7 +611,7 @@ class Create extends Component {
                 <Label>Contract Number</Label>
                 <InputGroup>
                   <Input ref={this.contractNum} id="contractNum" size="16" type="text" onChange={this.handleChange("contractNum")} />
-                  <FormFeedback tooltip >Invalid Contract Number</FormFeedback>
+                  <FormFeedback >Invalid Contract Number</FormFeedback>
                 </InputGroup>
               </FormGroup>
               <FormGroup>
@@ -366,7 +619,7 @@ class Create extends Component {
                 <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected" onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
                   <option disabled value="0">Please Select ..</option>
                   {this.state.chopTypes.map((option, id) => (
-                    <option key={id} value={option}>{option}</option>
+                    <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
                   ))}
 
                 </Input>
@@ -374,10 +627,11 @@ class Create extends Component {
               </FormGroup>
               <FormGroup>
                 <Label>Document Name</Label>
-                <InputGroup>
-                  <Input ref={this.docName} value={this.state.docName} onChange={this.handleChange("docName")} type="textarea" name="textarea-input" id="docName" rows="3" placeholder="please describe in English or Chinese" />
-                  <FormFeedback>Invalid Input a valid Document Name</FormFeedback>
-                </InputGroup>
+                {!this.state.showDocAttach && !this.state.showDocDropdown ? documentNormal : ""}
+                {this.state.showDocDropdown ? documentForLTU : ""}
+                {this.state.showDocAttach ? documentForLTI : ""}
+                <FormFeedback>Invalid Input a valid Document Name</FormFeedback>
+
               </FormGroup>
               <FormGroup>
                 <Label>Purpose of Use</Label>
@@ -481,10 +735,13 @@ class Create extends Component {
             <Button color="secondary" size="md"> No </Button>
           </ModalFooter>
         </Modal>
+        {docModal}
       </div>
     );
 
   }
 }
+
+
 
 export default Create;
