@@ -5,7 +5,7 @@ import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import './App.scss';
 
 export const fakeAuth = {
-  isAuthenticated: false,
+  isAuthenticated: true,
   authenticate(cb) {
     
     this.isAuthenticated = true

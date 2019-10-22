@@ -52,12 +52,15 @@ class Create extends Component {
 
       //retrieve from DH table
       deptHead: [],
-      collapse: false,
+      teams: [],
+      collapse: true,
       fadeIn: true,
       modal: false,
       timeout: 300,
       valid: false,
       inOffice: false,
+
+      CNIPS: false,
 
       userId: "",
 
@@ -77,8 +80,13 @@ class Create extends Component {
       pickUpBy: "",
       remarks: "",
       deptHeadSelected: 0,
+      contractSignedBy: "",
+      contractSign1: "",
+      contractSign2: "",
+      effectivePeriod: "",
       selectedFile: null,
       fileName: "Choose File",
+      teamSelected: "",
 
       documentTableLTI: [],
 
@@ -87,6 +95,7 @@ class Create extends Component {
       agreeTerms: false,
       showDocAttach: false,
       showDocDropdown: false,
+      showTeams: false,
 
       engName: "",
       cnName: "",
@@ -139,12 +148,10 @@ class Create extends Component {
     this.getData("department", 'http://192.168.1.47/echop/api/v1/departments');
     this.getData("applicationTypes", 'http://192.168.1.47/echop/api/v1/apptypes');
     this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes');
-    console.log(this.state.telNumber)
-
   }
 
   validate() {
-    let currentDate = new Date().getDate() +"/"+ new Date().getMonth() +"/" + new Date().getFullYear();
+    let currentDate = new Date().getDate() + "/" + new Date().getMonth() + "/" + new Date().getFullYear();
     console.log(currentDate)
     console.log(this.state.returnDate)
     for (let i = 0; i < this.state.reqInfo.length; i++) {
@@ -202,19 +209,26 @@ class Create extends Component {
         document.getElementById("resPerson").className = "is-invalid form-control"
         resValid = false
       }
-      if(dateValid && resValid){
-        this.setState({inOffice: true})
+      if (dateValid && resValid) {
+        this.setState({ inOffice: true })
       }
       else {
-        this.setState({inOffice: false})
-      } 
+        this.setState({ inOffice: false })
+      }
     }
     else {
-      this.setState({inOffice: true})
+      this.setState({ inOffice: true })
     }
   }
 
   async submitRequest() {
+    let useInOffice = "Y"
+    if (this.state.collapse) {
+      useInOffice = "Y"
+    }
+    else {
+      useInOffice = "N"
+    }
     const postReq = {
       "userId": this.state.userId,
       "employeeNum": this.state.employeeId,
@@ -222,15 +236,25 @@ class Create extends Component {
       "departmentId": this.state.deptSelected,
       "applicationTypeId": this.state.appTypeSelected,
       "chopTypeId": this.state.chopTypeSelected,
-      "inOffice": this.state.collapse,
+      "documentName": this.state.docName,
+      "useInOffice": useInOffice,
       "departmentHead": this.state.deptHeadSelected,
-      "documentDescription": this.state.docName,
+      "documentDescription": "lorem ipsum dolor sit amet",
       "addressTo": this.state.addressTo,
       "contractNo": this.state.contractNum,
       "contractName": "lorem ipsum dolor sit amet",
       "purposeOfUse": this.state.purposeOfUse,
       "remark": this.state.remarks,
-      "numOfPages": this.state.numOfPages
+      "numOfPages": this.state.numOfPages,
+      "confirmed": this.state.agreeTerms,
+      // "returnDate": this.state.returnDate, //2019-10-22
+      "returnDate": "20191022",
+      "responsiblePerson": this.state.resPerson,
+      "contractSignedBy": this.state.contractSignedBy,
+      "contractSignedByFirstPerson": this.state.contractSign1,
+      "contractSignedBySecondPerson": this.state.contractSign2,
+      "effectivePeriod": "",
+
     }
 
     await this.validate()
@@ -295,7 +319,7 @@ class Create extends Component {
           console.log(res.data)
           Swal.fire({
             title: 'Requested',
-            text: 'Status Code: ' + res.data.statusCode + 'Reference Number: ' + res.data.referenceNum,
+            text: 'Reference Number: ' + res.data.referenceNum,
             type: res.data.status
           })
         })
@@ -310,16 +334,32 @@ class Create extends Component {
     let userId = localStorage.getItem('userId')
     await axios.get('http://192.168.1.47/echop/api/v1/users/' + userId, { headers: { 'ticket': ticket } })
       .then(res => {
-        console.log(res.data.employeeNum)
         this.setState({ employeeId: res.data.employeeNum, telNumber: res.data.telephoneNum, userId: userId })
       })
   }
 
-  async getDeptHead(companyId, deptId) {
-    await axios.get('http://192.168.1.47/echop/api/v1/deptheads?companyId=' + companyId + '&departmentId=' + deptId)
+  async getDeptHead(companyId, deptId, teamId) {
+    if(teamId === "") 
+    {
+      await axios.get('http://192.168.1.47/echop/api/v1/deptheads?companyId=' + companyId)
       .then(res => {
         this.setState({ deptHead: res.data })
       })
+    }
+    else {
+      await axios.get('http://192.168.1.47/echop/api/v1/deptheads?companyId=' + companyId +'&teamId=' +teamId)
+      .then(res => {
+        this.setState({ deptHead: res.data })
+      })
+    }
+    
+  }
+
+  async getTeams(deptId) {
+    let url = "http://192.168.1.47/echop/api/v1/teams?departmentId="
+    await axios.get(url + deptId).then(res => {
+      this.setState({ teams: res.data })
+    })
   }
 
   //handle value on changes
@@ -328,28 +368,45 @@ class Create extends Component {
       this.toggleModal();
     }
 
+    if(name === "returnDate")
+    {
+      console.log(event.target.value)
+    }
+
     if (name === "appTypeSelected") {
       if (event.target.value === "LTI") {
-        this.setState({ showDocAttach: true, showDocDropdown: false })
+        this.setState({ showDocAttach: true, showDocDropdown: false, showTeams: true })
+        if (this.state.deptSelected !== "") {
+          this.getTeams(this.state.deptSelected)
+        }
       }
       else if (event.target.value === "LTU") {
-        this.setState({ showDocDropdown: true, showDocAttach: false })
+        this.setState({ showDocDropdown: true, showDocAttach: false, showTeams: true })
+        if (this.state.deptSelected !== "") {
+          this.getTeams(this.state.deptSelected)
+        }
       }
       else {
-        this.setState({ showDocAttach: false, showDocDropdown: false })
+        this.setState({ showDocAttach: false, showDocDropdown: false, showTeams: false })
       }
       if (event.target.value === "CNIPS") {
         this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/apptypes/CNIPS/choptypes')
+        this.setState({ CNIPS: true })
       }
       else {
         this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes')
+        this.setState({ CNIPS: false })
       }
     }
     else if (name === "deptSelected") {
-      this.getDeptHead("MBAFC", event.target.value)
+      this.getDeptHead("MBAFC", event.target.value, "")
+      if (this.state.appTypeSelected === "LTU" || this.state.appTypeSelected === "LTI") {
+        this.getTeams(event.target.value)
+      }
     }
-
-
+    else if(name === "teamSelected") {
+      this.getDeptHead("MBAFC", this.state.deptSelected, event.target.value )
+    }
     this.setState({
       [name]: event.target.value
     });
@@ -713,7 +770,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Use in Office or Not</Label>
                 <Row />
-                <AppSwitch onChange={this.toggle} id="useOff" size="lg" className={'mx-1'} variant={'pill'} color={'success'} outline={'alt'} label />
+                <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" size="lg" className={'mx-1'} variant={'pill'} color={'success'} outline={'alt'} label />
               </FormGroup>
               <Collapse isOpen={!this.state.collapse}>
                 <FormGroup visibelity="false" >
@@ -746,18 +803,53 @@ class Create extends Component {
                   <FormFeedback>Please enter valid remarks</FormFeedback>
                 </InputGroup>
               </FormGroup>
-              <FormGroup>
-                <Label>Department Heads <i className="fa fa-user" /></Label>
-                <small> &ensp; If you apply for MBAFC Company Chop, then Department Head shall be from MBAFC entity</small>
-                <InputGroup>
-                  <Input onChange={this.handleChange("deptHeadSelected")} defaultValue="0" type="select">
-                    <option value="0" disabled> Please select a Department Head</option>
-                    {this.state.deptHead.map((head, index) =>
-                      <option value={head.employeeNum} key={index}>{head.displayName}</option>
-                    )}
-                  </Input>
-                </InputGroup>
-              </FormGroup>
+              {this.state.showTeams
+                ? <FormGroup>
+                  <Label>Team</Label>
+                  <InputGroup>
+                    <Input onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
+                      <option value="0" disabled>Please select a team</option>
+                      {this.state.teams.map((team, index) =>
+                        <option key={index} value={team.teamId}>{team.teamName}</option>
+                      )}
+                    </Input>
+                  </InputGroup>
+                </FormGroup>
+                : ""
+              }
+              {this.state.CNIPS
+                ? <FormGroup>
+                  <Label>Contract Signed By: <i className="fa fa-user" /></Label>
+                  <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
+                  <Row>
+                    <Col>
+                      <InputGroup>
+                        <Input typew="text" placeholder="Enter name of First Person" onChange={this.handleChange("contractSign1")}></Input>
+                      </InputGroup>
+                    </Col>
+                    <Col>
+                      <InputGroup>
+                        <Input type="text" placeholder="Enter name of Second Person" onChange={this.handleChange("contractSign2")} ></Input>
+                      </InputGroup>
+                    </Col>
+                  </Row>
+
+
+                </FormGroup>
+                : <FormGroup>
+                  <Label>Department Heads <i className="fa fa-user" /></Label>
+                  <small> &ensp; If you apply for MBAFC Company Chop, then Department Head shall be from MBAFC entity</small>
+                  <InputGroup>
+                    <Input onChange={this.handleChange("deptHeadSelected")} defaultValue="0" type="select">
+                      <option value="0" disabled> Please select a Department Head</option>
+                      {this.state.deptHead.map((head, index) =>
+                        <option value={head.employeeNum} key={index}>{head.displayName}</option>
+                      )}
+                    </Input>
+                  </InputGroup>
+                </FormGroup>
+              }
+
               <Col md="16">
                 <FormGroup check>
                   <FormGroup>
