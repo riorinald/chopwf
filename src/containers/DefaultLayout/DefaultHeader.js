@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Badge, UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem } from 'reactstrap';
 import PropTypes from 'prop-types';
 import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
+import { fakeAuth } from '../../App'
+import { withRouter } from 'react-router-dom'
 
 const propTypes = {
   children: PropTypes.node,
@@ -9,11 +11,20 @@ const propTypes = {
 
 const defaultProps = {};
 
+const AuthButton = withRouter(({ history }) => (
+
+  fakeAuth.isAuthenticated
+    // ? <Button onClick={() => { fakeAuth.signout(() => history.push('/')) }}>Sign out</Button>
+    ? <DropdownItem onClick={()=> {fakeAuth.signOut(()=> history.push('/'))}} ><i className="fa fa-lock" ></i> Logout</DropdownItem>
+    : ""
+)
+)
+
 class DefaultHeader extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
-    this.state={
-      modal:false
+    this.state = {
+      modal: false
     };
     this.toggle = this.toggle.bind(this);
   }
@@ -24,6 +35,16 @@ class DefaultHeader extends Component {
     });
   }
 
+
+
+  logout() {
+    console.log("logout")
+    fakeAuth.signOut()
+    // return <Redirect to='/login'/>
+  }
+
+  // logout = withRouter(({history}))
+
   render() {
 
     // eslint-disable-next-line
@@ -32,28 +53,30 @@ class DefaultHeader extends Component {
     return (
       <React.Fragment>
         <AppSidebarToggler className="d-lg-none" display="sm" mobile />
-          {/* <AppNavbarBrand
+        {/* <AppNavbarBrand
           full={{ src: logo, width: 89, height: 25, alt: 'CoreUI Logo' }}
           minimized={{ src: sygnet, width: 30, height: 30, alt: 'CoreUI Logo' }}>
          {//<AppSidebarToggler className="d-md-down-none" display="lg" />
           </AppNavbarBrand> */
-         }
+        }
         <AppSidebarMinimizer className="d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
         <p className="h5"><b>Chop Use WORKFLOW for MBAFC</b></p>
         <Nav className="ml-auto" navbar>
           <NavItem className="d-md-down-none">
-            <Button color="ghost-secondary" onClick={this.toggle} to="#" className="nav-link"><i className="fa fa-exchange"/> Another Workflow ? &nbsp;
-            </Button> 
+            <Button color="ghost-secondary" onClick={this.toggle} to="#" className="nav-link"><i className="fa fa-exchange" /> Another Workflow ? &nbsp;
+            </Button>
             <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
-                  <ModalHeader className="center" toggle={this.toggle}> Switch Workflow </ModalHeader>
-                  <ModalBody>
-                    <Button disabled color="secondary" size="lg" block> MBAFC </Button>
-                    <Button color="secondary" size="lg" block> MBLC </Button>
-                    <Button color="secondary" size="lg" block > MBIA </Button>
-                  </ModalBody>
-                  <ModalFooter>
-                  </ModalFooter>
+              <ModalHeader className="center" toggle={this.toggle}> Switch Workflow </ModalHeader>
+              <ModalBody>
+                <Button disabled color="secondary" size="lg" block> MBAFC </Button>
+                <Button color="secondary" size="lg" block> MBLC </Button>
+                <Button color="secondary" size="lg" block > MBIA </Button>
+              </ModalBody>
+              <ModalFooter>
+              </ModalFooter>
             </Modal>
+          </NavItem>
+          <NavItem>
           </NavItem>
           <UncontrolledDropdown nav direction="down" >
             <DropdownToggle nav>
@@ -72,7 +95,8 @@ class DefaultHeader extends Component {
               <DropdownItem><i className="fa fa-file"></i> Projects<Badge color="primary">42</Badge></DropdownItem>
               <DropdownItem divider />
               <DropdownItem><i className="fa fa-shield"></i> Lock Account</DropdownItem>
-              <DropdownItem onClick={e => this.props.onLogout(e)}><i className="fa fa-lock"></i> Logout</DropdownItem>
+              <AuthButton/>
+              {/* <DropdownItem onClick={this.logout}><i className="fa fa-lock" ></i> Logout</DropdownItem> */}
             </DropdownMenu>
           </UncontrolledDropdown>
         </Nav>
