@@ -40,6 +40,9 @@ class Create extends Component {
     super(props);
     this.state = {
 
+      //defaul for {MBAFC} this will be handle from react hooks / global state
+      legalEntity: "MBAFC",
+
       //retrieve from department Types Table
       department: [],
       //retrieve from application types table
@@ -126,6 +129,7 @@ class Create extends Component {
 
   componentDidMount() {
     //Get User Details
+
     this.getUserData();
     this.getData("department", 'http://192.168.1.47/echop/api/v1/departments');
     this.getData("applicationTypes", 'http://192.168.1.47/echop/api/v1/apptypes');
@@ -234,6 +238,7 @@ class Create extends Component {
     });
   }
 
+
   Axios
   async getData(state, url) {
     try {
@@ -285,6 +290,7 @@ class Create extends Component {
     if (event.target.value === "CONCHOP") {
       this.toggleModal();
     }
+
     if (name === "appTypeSelected") {
       if (event.target.value === "LTI") {
         this.setState({ showDocAttach: true, showDocDropdown: false })
@@ -603,9 +609,11 @@ class Create extends Component {
                 <Label>Dept</Label>
                 <Input ref={this.deptSelected} id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
                   <option disabled value="0">Please Select . . .</option>
+
                   {this.state.department.map((option, index) => (
                     <option value={option.deptId} key={option.deptId}>
                       {option.deptName}
+
                     </option>
                   ))}
                 </Input>
@@ -616,7 +624,9 @@ class Create extends Component {
                 <Input ref={this.appTypeSelected} type="select" onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" defaultValue="0" name="select">
                   <option disabled value="0">Please Select . . .</option>
                   {this.state.applicationTypes.map((option, id) => (
+
                     <option value={option.appTypeId} key={option.appTypeId}>{option.appTypeName}</option>
+
                   ))}
                 </Input>
                 <FormFeedback>Invalid Application Type Selected </FormFeedback>
@@ -634,7 +644,9 @@ class Create extends Component {
                 <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected" onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
                   <option disabled value="0">Please Select ..</option>
                   {this.state.chopTypes.map((option, id) => (
+
                     <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
+
                   ))}
 
                 </Input>
