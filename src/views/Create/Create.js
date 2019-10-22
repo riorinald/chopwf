@@ -38,20 +38,6 @@ const notes = <p>如您需申请人事相关的证明文件包括但不限于“
 class Create extends Component {
   constructor(props) {
     super(props);
-    // this.employeeId = React.createRef();
-    // this.telNumber = React.createRef();
-    // this.deptSelected = React.createRef();
-    // this.appTypeSelected = React.createRef();
-    // this.contractNum = React.createRef();
-    // this.chopTypeSelected = React.createRef();
-    // this.docName = React.createRef();
-    // this.purposeOfUse = React.createRef();
-    // this.numOfPages = React.createRef();
-    // this.addressTo = React.createRef();
-    // this.pickUpBy = React.createRef();
-    // this.remarks = React.createRef();
-    // this.selectedFile = React.createRef();
-
     this.state = {
 
       //retrieve from department Types Table
@@ -62,16 +48,18 @@ class Create extends Component {
       chopTypes: [],
 
       //retrieve from DH table
-      deptHead: "",
+      deptHead: [],
       collapse: false,
       fadeIn: true,
       modal: false,
       timeout: 300,
       valid: false,
 
+      userId: "",
+
       //data to be created inside Request Table
-      employeeId: 1234546,    //retrieved from user Info
-      telNumber: 123456,      //retrieved from user Info
+      employeeId: 0,    //retrieved from user Info
+      telNumber: 0,      //retrieved from user Info
       contractNum: 0,
       deptSelected: "",
       appTypeSelected: "",
@@ -82,6 +70,7 @@ class Create extends Component {
       addressTo: "",
       pickUpBy: "",
       remarks: "",
+      deptHeadSelected: 0,
       selectedFile: null,
       fileName: "Choose File",
 
@@ -137,9 +126,11 @@ class Create extends Component {
 
   componentDidMount() {
     //Get User Details
+    this.getUserData();
     this.getData("department", 'http://192.168.1.47/echop/api/v1/departments');
     this.getData("applicationTypes", 'http://192.168.1.47/echop/api/v1/apptypes');
     this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes');
+    console.log(this.state.telNumber)
 
   }
 
@@ -184,14 +175,14 @@ class Create extends Component {
 
   async submitRequest() {
     const postReq = {
-      "userId": "otadmin@otds.admin",
-      "employeeNum": "12345",
+      "userId": this.state.userId,
+      "employeeNum": this.state.employeeId,
       "companyId": "mbafc@otds.admin",
       "departmentId": this.state.deptSelected,
       "applicationTypeId": this.state.appTypeSelected,
       "chopTypeId": this.state.chopTypeSelected,
-      "inOffice": "y",
-      "departmentHead": this.state.deptHead,
+      "inOffice": this.state.collapse,
+      "departmentHead": this.state.deptHeadSelected,
       "documentDescription": this.state.docName,
       "addressTo": this.state.addressTo,
       "contractNo": this.state.contractNum,
@@ -234,6 +225,7 @@ class Create extends Component {
     this.setState({
       collapse: !this.state.collapse,
     });
+
   }
   //toggle Modal
   toggleModal() {
@@ -270,7 +262,25 @@ class Create extends Component {
     }
   }
 
-  //handle value on change
+  async getUserData() {
+    let token = localStorage.getItem('token')
+    let ticket = localStorage.getItem('ticket')
+    let userId = localStorage.getItem('userId')
+    await axios.get('http://192.168.1.47/echop/api/v1/users/' + userId, { headers: { 'ticket': ticket } })
+      .then(res => {
+        console.log(res.data.employeeNum)
+        this.setState({ employeeId: res.data.employeeNum, telNumber: res.data.telephoneNum, userId: userId })
+      })
+  }
+
+  async getDeptHead(companyId, deptId){
+    await axios.get('http://192.168.1.47/echop/api/v1/deptheads?companyId='+companyId+'&departmentId='+deptId)
+    .then(res => {
+      this.setState({deptHead: res.data})
+    })
+  }
+
+  //handle value on changes
   handleChange = name => event => {
     if (event.target.value === "CONCHOP") {
       this.toggleModal();
@@ -292,6 +302,11 @@ class Create extends Component {
         this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes')
       }
     }
+    else if(name === "deptSelected")
+    {
+      this.getDeptHead("MBAFC", event.target.value)
+    }
+
 
     this.setState({
       [name]: event.target.value
@@ -573,7 +588,7 @@ class Create extends Component {
                     <InputGroupAddon addonType="prepend">
                       <InputGroupText>ID</InputGroupText>
                     </InputGroupAddon>
-                    <Input ref={this.employeeId} onChange={this.handleChange("employeeId")} defaultValue={this.state.employeeId} id="prependedInput" size="16" type="text" />
+                    <Input disabled ref={this.employeeId} onChange={this.handleChange("employeeId")} value={this.state.employeeId} id="prependedInput" size="16" type="text" />
                   </InputGroup>
                   {/* <p className="help-block">Here's some help text</p> */}
                 </div>
@@ -581,7 +596,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Tel. </Label>
                 <InputGroup>
-                  <Input ref={this.telNumber} onChange={this.handleChange("telNumber")} id="appendedInput" size="16" type="text" />
+                  <Input ref={this.telNumber} value={this.state.telNumber} onChange={this.handleChange("telNumber")} id="appendedInput" size="16" type="text" />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
@@ -687,7 +702,12 @@ class Create extends Component {
                 <Label>Department Heads <i className="fa fa-user" /></Label>
                 <small> &ensp; If you apply for MBAFC Company Chop, then Department Head shall be from MBAFC entity</small>
                 <InputGroup>
-                  <Input id="deptHead" onChange={this.handleChange("deptHead")} size="16" type="text" placeholder="enter name to search ..." />
+                  <Input onChange={this.handleChange("deptHeadSelected")} defaultValue="0" type="select">
+                    <option value="0" disabled> Please select a Department Head</option>
+                    {this.state.deptHead.map((head, index)=>
+                      <option value={head.employeeNum} key={index}>{head.displayName}</option>
+                      )}
+                  </Input>
                 </InputGroup>
               </FormGroup>
               <Col md="16">
