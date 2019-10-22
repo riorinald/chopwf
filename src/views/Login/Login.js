@@ -49,7 +49,6 @@ class Login extends Component {
             await axios.post('http://192.168.1.47/echop/api/v1/login', loginCredentials
                 , { headers: { 'Content-Type': '  application/json' } })
                 .then(res => {
-                    console.log(res)
                     localStorage.setItem('ticket', res.data.ticket)
                     localStorage.setItem('userId', res.data.userId)
                     localStorage.setItem('token', res.data.token)

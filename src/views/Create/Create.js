@@ -54,6 +54,7 @@ class Create extends Component {
       modal: false,
       timeout: 300,
       valid: false,
+      inOffice: false,
 
       userId: "",
 
@@ -65,6 +66,8 @@ class Create extends Component {
       appTypeSelected: "",
       chopTypeSelected: "",
       docName: "",
+      returnDate: "",
+      resPerson: "",
       purposeOfUse: "",
       numOfPages: 0,
       addressTo: "",
@@ -103,6 +106,8 @@ class Create extends Component {
         { id: "contractNum", valid: false },
         { id: "chopTypeSelected", valid: false },
         { id: "docName", valid: false },
+        // { id: "returnDate", valid: false },
+        // { id: "resPerson", valid: false },
         { id: "purposeOfUse", valid: false },
         { id: "numOfPages", valid: false },
         { id: "addressTo", valid: false },
@@ -135,6 +140,9 @@ class Create extends Component {
   }
 
   validate() {
+    let currentDate = new Date().getDate() +"/"+ new Date().getMonth() +"/" + new Date().getFullYear();
+    console.log(currentDate)
+    console.log(this.state.returnDate)
     for (let i = 0; i < this.state.reqInfo.length; i++) {
       if (this.state[this.state.reqInfo[i].id]) {
         this.setState(state => {
@@ -142,7 +150,7 @@ class Create extends Component {
             if (j === i) {
               var valid = document.getElementById(this.state.reqInfo[i].id)
               valid.className = "form-control"
-              return { id: item.id, name: item.name, valid: true }
+              return { id: item.id, valid: true }
             }
             else {
               return item
@@ -170,6 +178,35 @@ class Create extends Component {
           }
         })
       }
+    }
+    if (!this.state.collapse) {
+      let dateValid = false;
+      let resValid = false;
+      if (this.state.returnDate) {
+        document.getElementById("returnDate").className = "form-control"
+        dateValid = true
+      }
+      else {
+        document.getElementById("returnDate").className = "is-invalid form-control"
+        dateValid = false
+      }
+      if (this.state.resPerson) {
+        document.getElementById("resPerson").className = "form-control"
+        resValid = true
+      }
+      else {
+        document.getElementById("resPerson").className = "is-invalid form-control"
+        resValid = false
+      }
+      if(dateValid && resValid){
+        this.setState({inOffice: true})
+      }
+      else {
+        this.setState({inOffice: false})
+      } 
+    }
+    else {
+      this.setState({inOffice: true})
     }
   }
 
@@ -214,7 +251,7 @@ class Create extends Component {
         break;
       }
     }
-    if (this.state.valid) {
+    if (this.state.valid && this.state.inOffice) {
       this.postData(postReq)
     }
 
@@ -273,11 +310,11 @@ class Create extends Component {
       })
   }
 
-  async getDeptHead(companyId, deptId){
-    await axios.get('http://192.168.1.47/echop/api/v1/deptheads?companyId='+companyId+'&departmentId='+deptId)
-    .then(res => {
-      this.setState({deptHead: res.data})
-    })
+  async getDeptHead(companyId, deptId) {
+    await axios.get('http://192.168.1.47/echop/api/v1/deptheads?companyId=' + companyId + '&departmentId=' + deptId)
+      .then(res => {
+        this.setState({ deptHead: res.data })
+      })
   }
 
   //handle value on changes
@@ -302,8 +339,7 @@ class Create extends Component {
         this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes')
       }
     }
-    else if(name === "deptSelected")
-    {
+    else if (name === "deptSelected") {
       this.getDeptHead("MBAFC", event.target.value)
     }
 
@@ -667,14 +703,14 @@ class Create extends Component {
                 <Row />
                 <AppSwitch onChange={this.toggle} id="useOff" size="lg" className={'mx-1'} variant={'pill'} color={'success'} outline={'alt'} label />
               </FormGroup>
-              <Collapse isOpen={this.state.collapse}>
+              <Collapse isOpen={!this.state.collapse}>
                 <FormGroup visibelity="false" >
                   <Label>Return Date</Label>
-                  <Input type="date" id="date-input" name="date-input" />
+                  <Input type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" />
                 </FormGroup>
                 <FormGroup>
                   <Label>Responsible Person <i className="fa fa-user" /></Label>
-                  <Input type="text" id="res-person" placeholder="responsible person" />
+                  <Input type="text" id="resPerson" onChange={this.handleChange("resPerson")} placeholder="responsible person" />
                 </FormGroup>
               </Collapse>
               <FormGroup>
@@ -704,9 +740,9 @@ class Create extends Component {
                 <InputGroup>
                   <Input onChange={this.handleChange("deptHeadSelected")} defaultValue="0" type="select">
                     <option value="0" disabled> Please select a Department Head</option>
-                    {this.state.deptHead.map((head, index)=>
+                    {this.state.deptHead.map((head, index) =>
                       <option value={head.employeeNum} key={index}>{head.displayName}</option>
-                      )}
+                    )}
                   </Input>
                 </InputGroup>
               </FormGroup>
