@@ -4,6 +4,8 @@ import { AppSwitch } from '@coreui/react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import FileViewer from 'react-file-viewer';
+import Autosuggest from 'react-autosuggest';
+import theme from './theme.css'
 
 import {
   Button,
@@ -27,7 +29,8 @@ import {
   ModalFooter,
   Row,
   FormFeedback,
-  Table
+  Table,
+  Dropdown, DropdownToggle, DropdownMenu, DropdownItem
 } from 'reactstrap';
 
 //notes can be updated by text only or editable in HTML editor
@@ -59,6 +62,10 @@ class Create extends Component {
       timeout: 300,
       valid: false,
       inOffice: false,
+      dropdownOpen: false,
+      setDropdownOpen: false,
+
+      users: [],
 
       CNIPS: false,
 
@@ -125,7 +132,13 @@ class Create extends Component {
         { id: "addressTo", valid: false },
         { id: "pickUpBy", valid: false },
         { id: "remarks", valid: false },
-        { id: "selectedFile", valid: false }]
+        // { id: "deptHeadSelected", valid: false },
+        // { id: "contractSign1", valid: false },
+        // { id: "contractSign2", valid: false },
+        // { id: "selectedFile", valid: false }
+      ],
+
+      suggestions: []
     };
 
 
@@ -138,6 +151,7 @@ class Create extends Component {
     this.addDocumentLTI = this.addDocumentLTI.bind(this);
     this.modal = this.modal.bind(this);
     this.addDocumentLTU = this.addDocumentLTU.bind(this);
+    this.saveRequest = this.saveRequest.bind(this);
 
   };
 
@@ -148,14 +162,17 @@ class Create extends Component {
     this.getData("department", 'http://192.168.1.47/echop/api/v1/departments');
     this.getData("applicationTypes", 'http://192.168.1.47/echop/api/v1/apptypes');
     this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes');
+    this.getData("users", 'http://192.168.1.47/echop/api/v1/users?displayName=');
   }
 
+  // toggle = () => setDropdownOpen(prevState => !prevState);
+
   validate() {
-    let currentDate = new Date().getDate() + "/" + new Date().getMonth() + "/" + new Date().getFullYear();
-    console.log(currentDate)
-    console.log(this.state.returnDate)
+    // let currentDate = new Date().getDate() + "/" + new Date().getMonth() + "/" + new Date().getFullYear();
+    // console.log(currentDate)
+    // console.log(this.state.returnDate)
     for (let i = 0; i < this.state.reqInfo.length; i++) {
-      if (this.state[this.state.reqInfo[i].id]) {
+      if (this.state[this.state.reqInfo[i].id].length !== 1 && this.state[this.state.reqInfo[i].id] !== "") {
         this.setState(state => {
           const reqInfo = state.reqInfo.map((item, j) => {
             if (j === i) {
@@ -193,7 +210,7 @@ class Create extends Component {
     if (!this.state.collapse) {
       let dateValid = false;
       let resValid = false;
-      if (this.state.returnDate) {
+      if (this.state.returnDate !== "") {
         document.getElementById("returnDate").className = "form-control"
         dateValid = true
       }
@@ -201,7 +218,7 @@ class Create extends Component {
         document.getElementById("returnDate").className = "is-invalid form-control"
         dateValid = false
       }
-      if (this.state.resPerson) {
+      if (this.state.resPerson !== "") {
         document.getElementById("resPerson").className = "form-control"
         resValid = true
       }
@@ -221,7 +238,8 @@ class Create extends Component {
     }
   }
 
-  async submitRequest() {
+  saveRequest() {
+    let isDraft = "Y"
     let useInOffice = "Y"
     if (this.state.collapse) {
       useInOffice = "Y"
@@ -254,6 +272,46 @@ class Create extends Component {
       "contractSignedByFirstPerson": this.state.contractSign1,
       "contractSignedBySecondPerson": this.state.contractSign2,
       "effectivePeriod": "",
+      "isDraft": isDraft
+    }
+    this.postData(postReq)
+  }
+
+  async submitRequest() {
+    let isDraft = "N"
+    let useInOffice = "Y"
+    if (this.state.collapse) {
+      useInOffice = "Y"
+    }
+    else {
+      useInOffice = "N"
+    }
+    const postReq = {
+      "userId": this.state.userId,
+      "employeeNum": this.state.employeeId,
+      "companyId": "mbafc@otds.admin",
+      "departmentId": this.state.deptSelected,
+      "applicationTypeId": this.state.appTypeSelected,
+      "chopTypeId": this.state.chopTypeSelected,
+      "documentName": this.state.docName,
+      "useInOffice": useInOffice,
+      "departmentHead": this.state.deptHeadSelected,
+      "documentDescription": "lorem ipsum dolor sit amet",
+      "addressTo": this.state.addressTo,
+      "contractNo": this.state.contractNum,
+      "contractName": "lorem ipsum dolor sit amet",
+      "purposeOfUse": this.state.purposeOfUse,
+      "remark": this.state.remarks,
+      "numOfPages": this.state.numOfPages,
+      "confirmed": this.state.agreeTerms,
+      // "returnDate": this.state.returnDate, //2019-10-22
+      "returnDate": "20191022",
+      "responsiblePerson": this.state.resPerson,
+      "contractSignedBy": this.state.contractSignedBy,
+      "contractSignedByFirstPerson": this.state.contractSign1,
+      "contractSignedBySecondPerson": this.state.contractSign2,
+      "effectivePeriod": "",
+      "isDraft": isDraft
 
     }
 
@@ -339,20 +397,26 @@ class Create extends Component {
   }
 
   async getDeptHead(companyId, deptId, teamId) {
-    if(teamId === "") 
-    {
+    if (teamId === "") {
       await axios.get('http://192.168.1.47/echop/api/v1/deptheads?companyId=' + companyId)
-      .then(res => {
-        this.setState({ deptHead: res.data })
-      })
+        .then(res => {
+          this.setState({ deptHead: res.data })
+        })
     }
     else {
-      await axios.get('http://192.168.1.47/echop/api/v1/deptheads?companyId=' + companyId +'&teamId=' +teamId)
-      .then(res => {
-        this.setState({ deptHead: res.data })
-      })
+      await axios.get('http://192.168.1.47/echop/api/v1/deptheads?companyId=' + companyId + '&teamId=' + teamId)
+        .then(res => {
+          this.setState({ deptHead: res.data })
+        })
     }
-    
+
+  }
+
+  async updateChopTypes(appTypeId, companyId) {
+    await axios.get('http://192.168.1.47/echop/api/v1/choptypes?companyId=' + companyId + '&appTypeId=' + appTypeId)
+      .then(res => {
+        this.setState({ chopTypes: res.data })
+      })
   }
 
   async getTeams(deptId) {
@@ -368,8 +432,7 @@ class Create extends Component {
       this.toggleModal();
     }
 
-    if(name === "returnDate")
-    {
+    if (name === "returnDate") {
       console.log(event.target.value)
     }
 
@@ -392,11 +455,13 @@ class Create extends Component {
       if (event.target.value === "CNIPS") {
         this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/apptypes/CNIPS/choptypes')
         this.setState({ CNIPS: true })
+
       }
       else {
         this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes')
         this.setState({ CNIPS: false })
       }
+      this.updateChopTypes(event.target.value, "MBAFC")
     }
     else if (name === "deptSelected") {
       this.getDeptHead("MBAFC", event.target.value, "")
@@ -404,8 +469,8 @@ class Create extends Component {
         this.getTeams(event.target.value)
       }
     }
-    else if(name === "teamSelected") {
-      this.getDeptHead("MBAFC", this.state.deptSelected, event.target.value )
+    else if (name === "teamSelected") {
+      this.getDeptHead("MBAFC", this.state.deptSelected, event.target.value)
     }
     this.setState({
       [name]: event.target.value
@@ -474,6 +539,60 @@ class Create extends Component {
         }
       }
     })
+  }
+  getSuggestions = value => {
+    const inputValue = value.trim().toLowerCase();
+    const inputLength = inputValue.length;
+
+    return inputLength === 0 ? [] : this.state.users.filter(user =>
+      user.displayName.toLowerCase().slice(0, inputLength) === inputValue
+    );
+  };
+
+  getSuggestionValue = suggestion => suggestion.displayName
+
+  renderSuggestion = suggestion => (
+    // <Dropdown isOpen={true}>
+    //   <DropdownToggle>Dropdown</DropdownToggle>
+    //   <DropdownMenu>
+    //     <DropdownItem>{suggestion.displayName}</DropdownItem>
+    //   </DropdownMenu>
+    // </Dropdown>
+    // <Input type="select">
+    //   <option>{suggestion.displayName}</option>
+    // </Input>
+    <Table hover>
+      <thead>
+
+      </thead>
+      <tbody>
+        <tr>
+          <td>{suggestion.displayName}</td>
+        </tr>
+      </tbody>
+    </Table>
+  )
+
+
+  suggestionChange = (event, { newValue }) => {
+    this.setState({ pickUpBy: newValue })
+  }
+  suggestionChangeRes = (event, { newValue }) => {
+    this.setState({ resPerson: newValue })
+  }
+  suggestionChangeContract1 = (event, { newValue }) => {
+    this.setState({ contractSign1: newValue })
+  }
+  suggestionChangeContract2 = (event, { newValue }) => {
+    this.setState({ contractSign2: newValue })
+  }
+
+  onSuggestionsFetchRequested = ({ value }) => {
+    this.setState({ suggestions: this.getSuggestions(value) })
+  }
+
+  onSuggestionsClearRequested = () => {
+    this.setState({ suggestion: [] })
   }
 
 
@@ -550,6 +669,42 @@ class Create extends Component {
   // scrollToRef = (ref) => window.scrollTo(0, ref)
 
   render() {
+    const { pickUpBy, suggestions, resPerson, contractSign1, contractSign2 } = this.state;
+
+    const inputProps = {
+      id: "pickUpBy",
+      className: "form-control",
+      placeholder: 'Enter person to pick up by',
+      value: pickUpBy,
+      onChange: this.suggestionChange,
+      type: 'search'
+    }
+
+    const inputResPerson = {
+      id: "resPerson",
+      className: "form-control",
+      placeholder: 'Enter person to pick up by',
+      value: resPerson,
+      onChange: this.suggestionChangeRes,
+      type: 'search'
+    }
+    const inputContract1 = {
+      id: "contractSign1",
+      className: "form-control",
+      placeholder: 'Enter name of First Person',
+      value: contractSign1,
+      onChange: this.suggestionChangeContract1,
+      type: 'search'
+    }
+    const inputContract2 = {
+      id: "contractSign2",
+      className: "form-control",
+      placeholder: 'Enter name of Second Person',
+      value: contractSign2,
+      onChange: this.suggestionChangeContract2,
+      type: 'search'
+    }
+
     const DocTable = <Table bordered>
       <thead>
         <tr>
@@ -647,7 +802,8 @@ class Create extends Component {
       <div>
         {/* <Label>Document Name</Label> */}
         <InputGroup>
-          <Input ref={this.docName} value={this.state.docName} onChange={this.handleChange("docName")} type="textarea" name="textarea-input" id="docName" rows="3" placeholder="please describe in English or Chinese" />
+          <Input ref={this.docName} onChange={this.handleChange("docName")} type="textarea" name="textarea-input" id="docName" rows="3" placeholder="please describe in English or Chinese" />
+          <FormFeedback>Invalid Document Name</FormFeedback>
         </InputGroup>
       </div>
 
@@ -756,14 +912,14 @@ class Create extends Component {
               <FormGroup>
                 <Label>Purpose of Use</Label>
                 <InputGroup>
-                  <Input ref={this.purposeOfUse} value={this.state.purposeOfUse} onChange={this.handleChange("purposeOfUse")} type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                  <Input ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                   <FormFeedback>Please input the purpose of use</FormFeedback>
                 </InputGroup>
               </FormGroup>
               <FormGroup>
                 <Label>Number of Pages to Be Chopped</Label>
                 <InputGroup>
-                  <Input ref={this.numOfPages} value={this.state.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="text" />
+                  <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="text" />
                   <FormFeedback>Invalid Number of pages </FormFeedback>
                 </InputGroup>
               </FormGroup>
@@ -779,20 +935,40 @@ class Create extends Component {
                 </FormGroup>
                 <FormGroup>
                   <Label>Responsible Person <i className="fa fa-user" /></Label>
-                  <Input type="text" id="resPerson" onChange={this.handleChange("resPerson")} placeholder="responsible person" />
+                  <Autosuggest
+                    id="resPerson"
+                    suggestions={suggestions}
+                    onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+                    onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+                    getSuggestionValue={this.getSuggestionValue}
+                    renderSuggestion={this.renderSuggestion}
+                    inputProps={inputResPerson}
+                  />
+                  {/* <Input type="text" id="resPerson" onChange={this.handleChange("resPerson")} placeholder="responsible person" /> */}
                 </FormGroup>
               </Collapse>
               <FormGroup>
                 <Label>Address to</Label>
                 <InputGroup>
-                  <Input ref={this.addressTo} value={this.state.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Docuemnts will be adressed to" />
+                  <Input ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
                   <FormFeedback>Invalid person to address to</FormFeedback>
                 </InputGroup>
               </FormGroup>
               <FormGroup>
                 <Label>Pick Up By <i className="fa fa-user" /></Label>
                 <InputGroup>
-                  <Input ref={this.pickUpBy} onChange={this.handleChange("pickUpBy")} id="pickUpBy" size="16" type="text" placeholder="enter name to search ..." />
+                  <Autosuggest
+                    id="pickUpBy"
+                    suggestions={suggestions}
+                    onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+                    onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+                    getSuggestionValue={this.getSuggestionValue}
+                    renderSuggestion={this.renderSuggestion}
+                    inputProps={inputProps}
+                  />
+                  {/* <FormFeedback>Please select a person  to pick up by</FormFeedback> */}
+
+                  {/* <Input ref={this.pickUpBy} onChange={this.handleChange("pickUpBy")} id="pickUpBy" size="16" type="text" placeholder="enter name to search ..." /> */}
                   <FormFeedback>Please enter a valid name to search</FormFeedback>
                 </InputGroup>
               </FormGroup>
@@ -824,12 +1000,30 @@ class Create extends Component {
                   <Row>
                     <Col>
                       <InputGroup>
-                        <Input typew="text" placeholder="Enter name of First Person" onChange={this.handleChange("contractSign1")}></Input>
+                        <Autosuggest
+                          id="contractSign1"
+                          suggestions={suggestions}
+                          onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+                          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+                          getSuggestionValue={this.getSuggestionValue}
+                          renderSuggestion={this.renderSuggestion}
+                          inputProps={inputContract1}
+                        />
+                        {/* <Input typew="text" placeholder="Enter name of First Person" onChange={this.handleChange("contractSign1")}></Input> */}
                       </InputGroup>
                     </Col>
                     <Col>
                       <InputGroup>
-                        <Input type="text" placeholder="Enter name of Second Person" onChange={this.handleChange("contractSign2")} ></Input>
+                        <Autosuggest
+                          id="contractSign2"
+                          suggestions={suggestions}
+                          onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+                          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+                          getSuggestionValue={this.getSuggestionValue}
+                          renderSuggestion={this.renderSuggestion}
+                          inputProps={inputContract2}
+                        />
+                        {/* <Input type="text" placeholder="Enter name of Second Person" onChange={this.handleChange("contractSign2")} ></Input> */}
                       </InputGroup>
                     </Col>
                   </Row>
@@ -840,12 +1034,13 @@ class Create extends Component {
                   <Label>Department Heads <i className="fa fa-user" /></Label>
                   <small> &ensp; If you apply for MBAFC Company Chop, then Department Head shall be from MBAFC entity</small>
                   <InputGroup>
-                    <Input onChange={this.handleChange("deptHeadSelected")} defaultValue="0" type="select">
+                    <Input id="deptHeadSelected" onChange={this.handleChange("deptHeadSelected")} defaultValue="0" type="select">
                       <option value="0" disabled> Please select a Department Head</option>
                       {this.state.deptHead.map((head, index) =>
                         <option value={head.employeeNum} key={index}>{head.displayName}</option>
                       )}
                     </Input>
+                    <FormFeedback>Please select a department head</FormFeedback>
                   </InputGroup>
                 </FormGroup>
               }
@@ -876,7 +1071,17 @@ class Create extends Component {
           </CardBody>
           <CardFooter>
             <div className="form-actions">
-              {this.state.agreeTerms ? <Button type="submit" color="success" onClick={this.submitRequest}>Submit</Button> : <Button disabled type="submit" color="success">Submit</Button>}
+              <Row>
+                <Col sm={1}>
+                  {this.state.agreeTerms ? <Button block type="submit" color="success" onClick={this.submitRequest}>Submit</Button> : <Button block disabled type="submit" color="success">Submit</Button>}
+                </Col>
+                <Col sm={1}>
+                  <Button type="submit" block color="primary" onClick={this.saveRequest}>Save</Button>
+                </Col>
+              </Row>
+
+              {/* </div>
+            <div className="form-actions"> */}
             </div>
           </CardFooter>
         </Card>
