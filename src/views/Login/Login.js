@@ -50,6 +50,7 @@ class Login extends Component {
                 , { headers: { 'Content-Type': '  application/json' } })
                 .then(res => {
                     console.log(res)
+                    localStorage.setItem('authenticate', true)
                     localStorage.setItem('ticket', res.data.ticket)
                     localStorage.setItem('userId', res.data.userId)
                     localStorage.setItem('token', res.data.token)
@@ -64,6 +65,7 @@ class Login extends Component {
         }
     }
 
+    
 
 
     render() {

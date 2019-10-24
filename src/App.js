@@ -5,7 +5,7 @@ import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import './App.scss';
 
 export const fakeAuth = {
-  isAuthenticated: false,
+  isAuthenticated: localStorage.getItem('authenticate')  === 'true' ? true : false,
   authenticate(cb) {
     
     this.isAuthenticated = true
@@ -14,6 +14,7 @@ export const fakeAuth = {
   },
   signOut(cb) {
     this.isAuthenticated = false
+    localStorage.clear();
     setTimeout(cb, 100)
   }
 }
