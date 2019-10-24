@@ -24,7 +24,9 @@ class DefaultHeader extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      modal: false
+      modal: false,
+      legalEntity: "MBAFC",
+      disabled: true
     };
     this.toggle = this.toggle.bind(this);
   }
@@ -35,6 +37,12 @@ class DefaultHeader extends Component {
     });
   }
 
+  changeEntity = event => {
+    this.setState({
+      legalEntity: event.target.value,
+      modal: !this.state.modal
+    }, localStorage.setItem("legalEntity", event.target.value) );
+   }
 
 
   logout() {
@@ -60,7 +68,7 @@ class DefaultHeader extends Component {
           </AppNavbarBrand> */
         }
         <AppSidebarMinimizer className="d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
-        <p className="h5"><b>Chop Use WORKFLOW for MBAFC</b></p>
+        <p className="h5"><b>Chop Use WORKFLOW for {this.state.legalEntity}</b></p>
         <Nav className="ml-auto" navbar>
           <NavItem className="d-md-down-none">
             <Button color="ghost-secondary" onClick={this.toggle} to="#" className="nav-link"><i className="fa fa-exchange" /> Another Workflow ? &nbsp;
@@ -68,9 +76,9 @@ class DefaultHeader extends Component {
             <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
               <ModalHeader className="center" toggle={this.toggle}> Switch Workflow </ModalHeader>
               <ModalBody>
-                <Button disabled color="secondary" size="lg" block> MBAFC </Button>
-                <Button color="secondary" size="lg" block> MBLC </Button>
-                <Button color="secondary" size="lg" block > MBIA </Button>
+                <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBAFC"? true : false} color="secondary" value="MBAFC" size="lg" block> MBAFC </Button>
+                <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBLC" ? true : false} color="secondary" value="MBLC" size="lg" block> MBLC </Button>
+                <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBIA" ? true : false} color="secondary" value="MBIA" size="lg" block > MBIA </Button>
               </ModalBody>
               <ModalFooter>
               </ModalFooter>
@@ -83,20 +91,20 @@ class DefaultHeader extends Component {
               <img src={'../../assets/img/avatars/6.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
             </DropdownToggle>
             <DropdownMenu right>
-              <DropdownItem header tag="div" className="text-center"><strong>Account</strong></DropdownItem>
+              {/* <DropdownItem header tag="div" className="text-center"><strong>Account</strong></DropdownItem>
               <DropdownItem><i className="fa fa-bell-o"></i> Updates<Badge color="info">42</Badge></DropdownItem>
               <DropdownItem><i className="fa fa-envelope-o"></i> Messages<Badge color="success">42</Badge></DropdownItem>
               <DropdownItem><i className="fa fa-tasks"></i> Tasks<Badge color="danger">42</Badge></DropdownItem>
               <DropdownItem><i className="fa fa-comments"></i> Comments<Badge color="warning">42</Badge></DropdownItem>
-              <DropdownItem header tag="div" className="text-center"><strong>Settings</strong></DropdownItem>
+              <DropdownItem header tag="div" className="text-center"><strong>Settings</strong></DropdownItem> */}
               <DropdownItem><i className="fa fa-user"></i> Profile</DropdownItem>
-              <DropdownItem><i className="fa fa-wrench"></i> Settings</DropdownItem>
+              {/* <DropdownItem><i className="fa fa-wrench"></i> Settings</DropdownItem>
               <DropdownItem><i className="fa fa-usd"></i> Payments<Badge color="secondary">42</Badge></DropdownItem>
-              <DropdownItem><i className="fa fa-file"></i> Projects<Badge color="primary">42</Badge></DropdownItem>
+              <DropdownItem><i className="fa fa-file"></i> Projects<Badge color="primary">42</Badge></DropdownItem> 
               <DropdownItem divider />
               <DropdownItem><i className="fa fa-shield"></i> Lock Account</DropdownItem>
+              <DropdownItem onClick={this.logout}><i className="fa fa-lock" ></i> Logout</DropdownItem>*/}
               <AuthButton/>
-              {/* <DropdownItem onClick={this.logout}><i className="fa fa-lock" ></i> Logout</DropdownItem> */}
             </DropdownMenu>
           </UncontrolledDropdown>
         </Nav>
