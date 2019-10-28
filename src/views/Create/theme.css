@@ -12,7 +12,7 @@
   font-family: Helvetica, sans-serif;
   font-weight: 300;
   font-size: 16px;
-  border: 1px solid #aaa;
+  border: 1px solid #20a8d8;
   border-radius: 4px;
 }
 
@@ -33,7 +33,6 @@
   display: block;
   position: absolute;
   width: 100%;
-  border: 0px solid #aaa;
   background-color: #fff;
   font-family: Helvetica, sans-serif;
   font-weight: 300;
@@ -56,7 +55,7 @@
 }
 
 .react-autosuggest__suggestion--highlighted {
-  background-color: #ddd;
+  background-color: #3187e0;
 }
 
 
