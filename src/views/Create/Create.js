@@ -30,6 +30,7 @@ import {
   Row,
   FormFeedback,
   Table,
+  Spinner,
   Dropdown, DropdownToggle, DropdownMenu, DropdownItem
 } from 'reactstrap';
 
@@ -554,17 +555,15 @@ class Create extends Component {
       isLoading: !this.isLoading
     });
     const thisReq = this.lastReq = 
-    fetch(`http://192.168.1.47/echop/api/v1/users?displayName=${value}`)
-      .then(res => res.json())
-      .then(res => {
+    axios.get(`http://192.168.1.47/echop/api/v1/users?displayName=${value}`)
+      .then(response => {
           if(thisReq !== this.lastReq) {
             return;
           }
         this.setState({ 
-          suggestions: res,
-          isLoading: !this.isLoading
+          suggestions: response.data,
+          isLoading: false
         });
-    console.log(value, this.state.suggestions);
       })
   }
 
@@ -686,7 +685,7 @@ class Create extends Component {
 
   render() {
     const { pickUpBy, suggestions, resPerson, contractSign1, contractSign2 } = this.state;
-
+    const status = (this.state.isLoading ? <Spinner size="sm" color="primary" /> : '');
     const inputProps = {
       id: "pickUpBy",
       className: "form-control",
@@ -975,7 +974,7 @@ class Create extends Component {
                 </InputGroup>
               </FormGroup>
               <FormGroup>
-                <Label>Pick Up By <i className="fa fa-user" /></Label>
+                <Label>Pick Up By <i className="fa fa-user" /> {status} </Label>
                 <InputGroup>
                   <Autosuggest
                     id="pickUpBy"
