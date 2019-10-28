@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Badge, UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem } from 'reactstrap';
 import PropTypes from 'prop-types';
-import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
+import { AppNavbarBrand, AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
 import { fakeAuth } from '../../App'
 import { withRouter } from 'react-router-dom'
 
@@ -67,8 +67,8 @@ class DefaultHeader extends Component {
          {//<AppSidebarToggler className="d-md-down-none" display="lg" />
           </AppNavbarBrand> */
         }
-        <AppSidebarMinimizer className="d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
-        <p className="h5"><b>Chop Use WORKFLOW for {this.state.legalEntity}</b></p>
+        <AppSidebarMinimizer class="d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
+        <h2 className="h5"><b>Chop Use WORKFLOW for {this.state.legalEntity}</b></h2>
         <Nav className="ml-auto" navbar>
           <NavItem className="d-md-down-none">
             <Button color="ghost-secondary" onClick={this.toggle} to="#" className="nav-link"><i className="fa fa-exchange" /> Another Workflow ? &nbsp;
@@ -79,6 +79,7 @@ class DefaultHeader extends Component {
                 <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBAFC"? true : false} color="secondary" value="MBAFC" size="lg" block> MBAFC </Button>
                 <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBLC" ? true : false} color="secondary" value="MBLC" size="lg" block> MBLC </Button>
                 <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBIA" ? true : false} color="secondary" value="MBIA" size="lg" block > MBIA </Button>
+                <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "CAR2GO" ? true : false} color="secondary" value="CAR2GO" size="lg" block > CAR2GO </Button>
               </ModalBody>
               <ModalFooter>
               </ModalFooter>

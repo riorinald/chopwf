@@ -44,7 +44,7 @@ class Create extends Component {
     this.state = {
 
       //defaul for {MBAFC} this will be handle from react hooks / global state
-      legalEntity: "MBAFC",
+      legalEntity: localStorage.getItem('legalEntity'),
 
       //retrieve from department Types Table
       department: [],
@@ -137,7 +137,6 @@ class Create extends Component {
         // { id: "contractSign2", valid: false },
         // { id: "selectedFile", valid: false }
       ],
-
       suggestions: []
     };
 
@@ -239,7 +238,7 @@ class Create extends Component {
   }
 
   saveRequest() {
-    let isDraft = "Y"
+    let Submitted = "N"
     let useInOffice = "Y"
     if (this.state.collapse) {
       useInOffice = "Y"
@@ -250,7 +249,7 @@ class Create extends Component {
     const postReq = {
       "userId": this.state.userId,
       "employeeNum": this.state.employeeId,
-      "companyId": "mbafc@otds.admin",
+      "companyId": this.state.legalEntity,
       "departmentId": this.state.deptSelected,
       "applicationTypeId": this.state.appTypeSelected,
       "chopTypeId": this.state.chopTypeSelected,
@@ -272,13 +271,13 @@ class Create extends Component {
       "contractSignedByFirstPerson": this.state.contractSign1,
       "contractSignedBySecondPerson": this.state.contractSign2,
       "effectivePeriod": "",
-      "isDraft": isDraft
+      "isSubmitted": Submitted
     }
     this.postData(postReq)
   }
 
   async submitRequest() {
-    let isDraft = "N"
+    let Submitted = "Y"
     let useInOffice = "Y"
     if (this.state.collapse) {
       useInOffice = "Y"
@@ -289,7 +288,7 @@ class Create extends Component {
     const postReq = {
       "userId": this.state.userId,
       "employeeNum": this.state.employeeId,
-      "companyId": "mbafc@otds.admin",
+      "companyId": this.state.legalEntity,
       "departmentId": this.state.deptSelected,
       "applicationTypeId": this.state.appTypeSelected,
       "chopTypeId": this.state.chopTypeSelected,
@@ -311,7 +310,7 @@ class Create extends Component {
       "contractSignedByFirstPerson": this.state.contractSign1,
       "contractSignedBySecondPerson": this.state.contractSign2,
       "effectivePeriod": "",
-      "isDraft": isDraft
+      "isSubmitted": Submitted
 
     }
 
@@ -324,7 +323,6 @@ class Create extends Component {
         this.setState({ valid: false })
 
         //function to scroll to specific posittion
-        {
           // var el = this[this.state.reqInfo[i].id].current
           // var elOffSetTop = document.getElementById(this.state.reqInfo[i].id).getBoundingClientRect().y
           // var el = window.outerHeight + elOffSetTop
@@ -333,7 +331,7 @@ class Create extends Component {
           // console.log(window.outerHeight)
           // console.log(elOffSetTop)
           // console.log(this.state.reqInfo[i].id)
-        }
+        
         break;
       }
     }
@@ -561,10 +559,7 @@ class Create extends Component {
     // <Input type="select">
     //   <option>{suggestion.displayName}</option>
     // </Input>
-    <Table hover>
-      <thead>
-
-      </thead>
+    <Table hover bordered>
       <tbody>
         <tr>
           <td>{suggestion.displayName}</td>
@@ -880,7 +875,9 @@ class Create extends Component {
                 </Input>
                 <FormFeedback>Invalid Application Type Selected </FormFeedback>
 
-              </FormGroup>
+                </FormGroup>
+              {this.state.CNIPS
+              ?
               <FormGroup>
                 <Label>Contract Number</Label>
                 <InputGroup>
@@ -888,6 +885,8 @@ class Create extends Component {
                   <FormFeedback >Invalid Contract Number</FormFeedback>
                 </InputGroup>
               </FormGroup>
+              : <span />
+              }
               <FormGroup>
                 <Label>Chop Type</Label>
                 <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected" onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
@@ -926,7 +925,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Use in Office or Not</Label>
                 <Row />
-                <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" size="lg" className={'mx-1'} variant={'pill'} color={'success'} outline={'alt'} label />
+                <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'}defaultChecked label dataOn={'yes'} dataOff={'no'} />
               </FormGroup>
               <Collapse isOpen={!this.state.collapse}>
                 <FormGroup visibelity="false" >
@@ -1072,12 +1071,9 @@ class Create extends Component {
           <CardFooter>
             <div className="form-actions">
               <Row>
-                <Col sm={1}>
-                  {this.state.agreeTerms ? <Button block type="submit" color="success" onClick={this.submitRequest}>Submit</Button> : <Button block disabled type="submit" color="success">Submit</Button>}
-                </Col>
-                <Col sm={1}>
-                  <Button type="submit" block color="primary" onClick={this.saveRequest}>Save</Button>
-                </Col>
+                  {this.state.agreeTerms ? <Button type="submit" color="success" onClick={this.submitRequest}>Submit</Button> : <Button disabled type="submit" color="success">Submit</Button>}
+                  <span>&nbsp;</span>
+                  <Button type="submit" color="primary" onClick={this.saveRequest}>Save</Button>
               </Row>
 
               {/* </div>
@@ -1096,8 +1092,8 @@ class Create extends Component {
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button color="success" size="md"> Yes </Button>
-            <Button color="secondary" size="md"> No </Button>
+            <Button color="success" onClick={this.toggleModal} size="md"> Yes </Button>
+            <Button color="secondary" onClick={this.toggleModal} size="md"> No </Button>
           </ModalFooter>
         </Modal>
         {docModal}
