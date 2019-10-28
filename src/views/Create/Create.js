@@ -137,7 +137,9 @@ class Create extends Component {
         // { id: "contractSign2", valid: false },
         // { id: "selectedFile", valid: false }
       ],
-      suggestions: []
+      suggestions: [],
+      isLoading: false,
+      lastReq: ""
     };
 
 
@@ -161,7 +163,7 @@ class Create extends Component {
     this.getData("department", 'http://192.168.1.47/echop/api/v1/departments');
     this.getData("applicationTypes", 'http://192.168.1.47/echop/api/v1/apptypes');
     this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes');
-    this.getData("users", 'http://192.168.1.47/echop/api/v1/users?displayName=');
+    // this.getData("users", 'http://192.168.1.47/echop/api/v1/users?displayName=');
   }
 
   // toggle = () => setDropdownOpen(prevState => !prevState);
@@ -538,14 +540,33 @@ class Create extends Component {
       }
     })
   }
-  getSuggestions = value => {
-    const inputValue = value.trim().toLowerCase();
-    const inputLength = inputValue.length;
+  // getSuggestions = value => {
+  //   const inputValue = value.trim().toLowerCase();
+  //   const inputLength = inputValue.length;
 
-    return inputLength === 0 ? [] : this.state.users.filter(user =>
-      user.displayName.toLowerCase().slice(0, inputLength) === inputValue
-    );
-  };
+  //   return inputLength === 0 ? [] : this.state.users.filter(user =>
+  //     user.displayName.toLowerCase().slice(0, inputLength) === inputValue
+  //   );
+  // };
+
+  getSuggestions(value) {
+    this.setState({
+      isLoading: !this.isLoading
+    });
+    const thisReq = this.lastReq = 
+    fetch(`http://192.168.1.47/echop/api/v1/users?displayName=${value}`)
+      .then(res => res.json())
+      .then(res => {
+          if(thisReq !== this.lastReq) {
+            return;
+          }
+        this.setState({ 
+          suggestions: res,
+          isLoading: !this.isLoading
+        });
+    console.log(value, this.state.suggestions);
+      })
+  }
 
   getSuggestionValue = suggestion => suggestion.displayName
 
@@ -583,7 +604,7 @@ class Create extends Component {
   }
 
   onSuggestionsFetchRequested = ({ value }) => {
-    this.setState({ suggestions: this.getSuggestions(value) })
+    this.setState(this.getSuggestions(value))
   }
 
   onSuggestionsClearRequested = () => {
