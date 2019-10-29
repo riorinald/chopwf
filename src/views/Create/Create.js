@@ -44,7 +44,6 @@ class Create extends Component {
     super(props);
     this.state = {
 
-      //defaul for {MBAFC} this will be handle from react hooks / global state
       legalEntity: localStorage.getItem('legalEntity'),
 
       //retrieve from department Types Table
@@ -377,8 +376,8 @@ class Create extends Component {
         .then(res => {
           console.log(res.data)
           Swal.fire({
-            title: 'Requested',
-            text: 'Reference Number: ' + res.data.referenceNum,
+            title: res.data.status,
+            html: 'Request Saved <br /> Reference Number: ' + res.data.referenceNum,
             type: res.data.status
           })
         })
@@ -555,7 +554,7 @@ class Create extends Component {
       isLoading: !this.isLoading
     });
     const thisReq = this.lastReq = 
-    axios.get(`http://192.168.1.47/echop/api/v1/users?displayName=${value}`)
+    axios.get(`http://192.168.1.47/echop/api/v1/users?displayName=%${value}`)
       .then(response => {
           if(thisReq !== this.lastReq) {
             return;
@@ -579,7 +578,7 @@ class Create extends Component {
     // <Input type="select">
     //   <option>{suggestion.displayName}</option>
     // </Input>
-    <Table hover bordered>
+    <Table className="suggestBox">
       <tbody>
         <tr>
           <td>{suggestion.displayName}</td>
@@ -654,25 +653,25 @@ class Create extends Component {
       if (doc.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
         type = "docx"
       }
-      else if (doc.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+      else if (doc.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
         type = "xlsx"
       }
-      else if (doc.type == "application/pdf") {
+      else if (doc.type === "application/pdf") {
         type = "pdf"
       }
-      else if (doc.type == "application/vnd.ms-excel") {
+      else if (doc.type === "application/vnd.ms-excel") {
         type = "csv"
       }
-      else if (doc.type == "image/jpeg") {
+      else if (doc.type === "image/jpeg") {
         type = "jpeg"
       }
-      else if (doc.type == "image/png") {
+      else if (doc.type === "image/png") {
         type = "png"
       }
-      else if (doc.type == "image/gif") {
+      else if (doc.type === "image/gif") {
         type = "gif"
       }
-      else if (doc.type == "image/bmp") {
+      else if (doc.type === "image/bmp") {
         type = "bmp"
       }
       this.setState({ fileURL: URL.createObjectURL(doc), fileType: type })
