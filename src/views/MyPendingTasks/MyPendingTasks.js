@@ -78,7 +78,24 @@ class MyPendingTasks extends Component {
             ],
 
             //data assigned on Row Selected 
-            taskDetail: {}
+            taskDetail: {
+                id: "",
+                employeeName: "",
+                employeeNum: "",
+                dept: "",
+                chopType: "",
+                docName: "",
+                useInOffice: "",
+                pickUpBy: "",
+                confirm: "",
+                telNumber: "",
+                applicationType: "",
+                purposeOfUse: "",
+                numOfPages: "",
+                addressTo: "",
+                remark: "",
+                departmentHead: "",
+            }
         }
     }
 

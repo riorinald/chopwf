@@ -51,6 +51,7 @@ class Login extends Component {
                 .then(res => {
               
                     localStorage.setItem('authenticate', true)
+                    localStorage.setItem('legalEntity', 'MBAFC')
                     localStorage.setItem('ticket', res.data.ticket)
                     localStorage.setItem('userId', res.data.userId)
                     localStorage.setItem('token', res.data.token)

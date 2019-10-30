@@ -30,6 +30,7 @@ import {
   Row,
   FormFeedback,
   Table,
+  Spinner,
   Dropdown, DropdownToggle, DropdownMenu, DropdownItem
 } from 'reactstrap';
 
@@ -44,7 +45,7 @@ class Create extends Component {
     this.state = {
 
       //defaul for {MBAFC} this will be handle from react hooks / global state
-      legalEntity: "MBAFC",
+      legalEntity: localStorage.getItem('legalEntity'),
 
       //retrieve from department Types Table
       department: [],
@@ -137,8 +138,9 @@ class Create extends Component {
         // { id: "contractSign2", valid: false },
         // { id: "selectedFile", valid: false }
       ],
-
-      suggestions: []
+      suggestions: [],
+      isLoading: false,
+      lastReq: ""
     };
 
 
@@ -162,7 +164,7 @@ class Create extends Component {
     this.getData("department", 'http://192.168.1.47/echop/api/v1/departments');
     this.getData("applicationTypes", 'http://192.168.1.47/echop/api/v1/apptypes');
     this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes');
-    this.getData("users", 'http://192.168.1.47/echop/api/v1/users?displayName=');
+    // this.getData("users", 'http://192.168.1.47/echop/api/v1/users?displayName=');
   }
 
   // toggle = () => setDropdownOpen(prevState => !prevState);
@@ -239,7 +241,7 @@ class Create extends Component {
   }
 
   saveRequest() {
-    let isDraft = "Y"
+    let Submitted = "N"
     let useInOffice = "Y"
     if (this.state.collapse) {
       useInOffice = "Y"
@@ -250,7 +252,7 @@ class Create extends Component {
     const postReq = {
       "userId": this.state.userId,
       "employeeNum": this.state.employeeId,
-      "companyId": "mbafc@otds.admin",
+      "companyId": this.state.legalEntity,
       "departmentId": this.state.deptSelected,
       "applicationTypeId": this.state.appTypeSelected,
       "chopTypeId": this.state.chopTypeSelected,
@@ -272,13 +274,13 @@ class Create extends Component {
       "contractSignedByFirstPerson": this.state.contractSign1,
       "contractSignedBySecondPerson": this.state.contractSign2,
       "effectivePeriod": "",
-      "isDraft": isDraft
+      "isSubmitted": Submitted
     }
     this.postData(postReq)
   }
 
   async submitRequest() {
-    let isDraft = "N"
+    let Submitted = "Y"
     let useInOffice = "Y"
     if (this.state.collapse) {
       useInOffice = "Y"
@@ -289,7 +291,7 @@ class Create extends Component {
     const postReq = {
       "userId": this.state.userId,
       "employeeNum": this.state.employeeId,
-      "companyId": "mbafc@otds.admin",
+      "companyId": this.state.legalEntity,
       "departmentId": this.state.deptSelected,
       "applicationTypeId": this.state.appTypeSelected,
       "chopTypeId": this.state.chopTypeSelected,
@@ -311,7 +313,7 @@ class Create extends Component {
       "contractSignedByFirstPerson": this.state.contractSign1,
       "contractSignedBySecondPerson": this.state.contractSign2,
       "effectivePeriod": "",
-      "isDraft": isDraft
+      "isSubmitted": Submitted
 
     }
 
@@ -324,7 +326,6 @@ class Create extends Component {
         this.setState({ valid: false })
 
         //function to scroll to specific posittion
-        {
           // var el = this[this.state.reqInfo[i].id].current
           // var elOffSetTop = document.getElementById(this.state.reqInfo[i].id).getBoundingClientRect().y
           // var el = window.outerHeight + elOffSetTop
@@ -333,7 +334,7 @@ class Create extends Component {
           // console.log(window.outerHeight)
           // console.log(elOffSetTop)
           // console.log(this.state.reqInfo[i].id)
-        }
+        
         break;
       }
     }
@@ -540,14 +541,31 @@ class Create extends Component {
       }
     })
   }
-  getSuggestions = value => {
-    const inputValue = value.trim().toLowerCase();
-    const inputLength = inputValue.length;
+  // getSuggestions = value => {
+  //   const inputValue = value.trim().toLowerCase();
+  //   const inputLength = inputValue.length;
 
-    return inputLength === 0 ? [] : this.state.users.filter(user =>
-      user.displayName.toLowerCase().slice(0, inputLength) === inputValue
-    );
-  };
+  //   return inputLength === 0 ? [] : this.state.users.filter(user =>
+  //     user.displayName.toLowerCase().slice(0, inputLength) === inputValue
+  //   );
+  // };
+
+  getSuggestions(value) {
+    this.setState({
+      isLoading: !this.isLoading
+    });
+    const thisReq = this.lastReq = 
+    axios.get(`http://192.168.1.47/echop/api/v1/users?displayName=${value}`)
+      .then(response => {
+          if(thisReq !== this.lastReq) {
+            return;
+          }
+        this.setState({ 
+          suggestions: response.data,
+          isLoading: false
+        });
+      })
+  }
 
   getSuggestionValue = suggestion => suggestion.displayName
 
@@ -561,10 +579,7 @@ class Create extends Component {
     // <Input type="select">
     //   <option>{suggestion.displayName}</option>
     // </Input>
-    <Table hover>
-      <thead>
-
-      </thead>
+    <Table hover bordered>
       <tbody>
         <tr>
           <td>{suggestion.displayName}</td>
@@ -588,7 +603,7 @@ class Create extends Component {
   }
 
   onSuggestionsFetchRequested = ({ value }) => {
-    this.setState({ suggestions: this.getSuggestions(value) })
+    this.setState(this.getSuggestions(value))
   }
 
   onSuggestionsClearRequested = () => {
@@ -670,7 +685,7 @@ class Create extends Component {
 
   render() {
     const { pickUpBy, suggestions, resPerson, contractSign1, contractSign2 } = this.state;
-
+    const status = (this.state.isLoading ? <Spinner size="sm" color="primary" /> : '');
     const inputProps = {
       id: "pickUpBy",
       className: "form-control",
@@ -880,7 +895,9 @@ class Create extends Component {
                 </Input>
                 <FormFeedback>Invalid Application Type Selected </FormFeedback>
 
-              </FormGroup>
+                </FormGroup>
+              {this.state.CNIPS
+              ?
               <FormGroup>
                 <Label>Contract Number</Label>
                 <InputGroup>
@@ -888,6 +905,8 @@ class Create extends Component {
                   <FormFeedback >Invalid Contract Number</FormFeedback>
                 </InputGroup>
               </FormGroup>
+              : <span />
+              }
               <FormGroup>
                 <Label>Chop Type</Label>
                 <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected" onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
@@ -926,7 +945,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Use in Office or Not</Label>
                 <Row />
-                <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" size="lg" className={'mx-1'} variant={'pill'} color={'success'} outline={'alt'} label />
+                <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'}defaultChecked label dataOn={'yes'} dataOff={'no'} />
               </FormGroup>
               <Collapse isOpen={!this.state.collapse}>
                 <FormGroup visibelity="false" >
@@ -955,7 +974,7 @@ class Create extends Component {
                 </InputGroup>
               </FormGroup>
               <FormGroup>
-                <Label>Pick Up By <i className="fa fa-user" /></Label>
+                <Label>Pick Up By <i className="fa fa-user" /> {status} </Label>
                 <InputGroup>
                   <Autosuggest
                     id="pickUpBy"
@@ -1072,12 +1091,9 @@ class Create extends Component {
           <CardFooter>
             <div className="form-actions">
               <Row>
-                <Col sm={1}>
-                  {this.state.agreeTerms ? <Button block type="submit" color="success" onClick={this.submitRequest}>Submit</Button> : <Button block disabled type="submit" color="success">Submit</Button>}
-                </Col>
-                <Col sm={1}>
-                  <Button type="submit" block color="primary" onClick={this.saveRequest}>Save</Button>
-                </Col>
+                  {this.state.agreeTerms ? <Button type="submit" color="success" onClick={this.submitRequest}>Submit</Button> : <Button disabled type="submit" color="success">Submit</Button>}
+                  <span>&nbsp;</span>
+                  <Button type="submit" color="primary" onClick={this.saveRequest}>Save</Button>
               </Row>
 
               {/* </div>
@@ -1096,8 +1112,8 @@ class Create extends Component {
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button color="success" size="md"> Yes </Button>
-            <Button color="secondary" size="md"> No </Button>
+            <Button color="success" onClick={this.toggleModal} size="md"> Yes </Button>
+            <Button color="secondary" onClick={this.toggleModal} size="md"> No </Button>
           </ModalFooter>
         </Modal>
         {docModal}
