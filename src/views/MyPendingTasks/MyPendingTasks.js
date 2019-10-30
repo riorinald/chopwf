@@ -5,8 +5,15 @@ import {
     Button,
     FormGroup,
     Label,
-    Progress, Badge
+    Progress, 
+    Badge, 
+    Modal, 
+    ModalBody, 
+    ModalHeader, 
+    ModalFooter
 } from 'reactstrap';
+import ReactTable from "react-table";
+import "react-table/react-table.css"
 
 
 class MyPendingTasks extends Component {
@@ -14,6 +21,12 @@ class MyPendingTasks extends Component {
         super(props)
         this.state = {
 
+            selectionChanged: false,
+            rowEdit: null,
+            value: "",
+            editableRows: {},
+            selectedRowIndex: [],
+        
             //data retrieved from database
             pendingTasks: [
                 {
@@ -65,44 +78,35 @@ class MyPendingTasks extends Component {
             ],
 
             //data assigned on Row Selected 
-            taskDetail: {
-                id: "",
-                employeeName: "",
-                employeeNum: "",
-                dept: "",
-                chopType: "",
-                docName: "",
-                useInOffice: "",
-                pickUpBy: "",
-                confirm: "",
-                telNumber: "",
-                applicationType: "",
-                purposeOfUse: "",
-                numOfPages: "",
-                addressTo: "",
-                remark: "",
-                departmentHead: "",
-            }
+            taskDetail: {}
         }
-        this.showDetails = this.showDetails.bind(this);
     }
 
     componentDidMount() {
         this.setState({ taskDetail: this.state.pendingTasks[0] })
     }
 
-    showDetails(index) {
-        //get User Details with Employee Number
-        //get Department Name using dept ID
-        //get Application Type using appTypeId
-        this.setState({ taskDetail: this.state.pendingTasks[index] })
-    }
+    renderEditable = cellInfo => {
+        const editable = this.state.editableRows[cellInfo.index];
+        return (
+            <div
+                style={{ backgroundColor: editable ? "#fafafa" : null }}
+                contentEditable={editable}
+                suppressContentEditableWarning
+                onBlur={e => {
+                    const pendingTasks = [...this.state.pendingTasks];
+                    pendingTasks[cellInfo.index][cellInfo.column.id] = e.target.innerText;
+                    this.setState({ pendingTasks });
+                }}
+                dangerouslySetInnerHTML={{
+                    __html: this.state.pendingTasks[cellInfo.index][cellInfo.column.id]
+                }}
+            />
+        );
+    };
 
     render() {
-        const  columns = [
-            {key: 'id', name: 'ID'}
-        ]
-        const rows = [{id: "0"},{id: "1"},{id: "2"},{id: "3"},{id: "4"},{id: "5"},{id: "6"},]
+        const { pendingTasks } = this.state;
         return (
             <div>
                 <h4>MY PENDING TASKS</h4>
@@ -111,25 +115,62 @@ class MyPendingTasks extends Component {
                         <Card>
                             <CardHeader>PENDING TASKS</CardHeader>
                             <CardBody>
-                                <div style={{ textAlign: "center" }} >Task Name</div>
-                                <Table hover style={{ textAlign: "center" }} size="sm">
-                                    <thead>
-                                        <tr>
+                                <ReactTable
+                                    sortable
+                                    filterable
+                                    
+                                    data={pendingTasks}
+                                    
+                                    columns={[
+                                        // {
+                                        // columns: [
+                                        {
+                                            Header: "Task Names",
+                                            accessor: "id",
+                                            Cell: this.renderEditable,                                       
+                                            style: { textAlign: "center" }
+                                        }
+                                        // ]
+                                        // }
+                                    ]}
+                                    defaultPageSize={10}
+                                    getTrProps={(state, rowInfo) => {
+                                        if (rowInfo && rowInfo.row) {
+                                            return {
+                                                onClick: e => {
+                                                    // console.log("inside");
+                                                    // console.log(this.state.rowEdit)
 
-                                            {/* <th>Task Name</th> */}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><Input type="text" placeholder="Search Task Name"></Input></td>
-                                        </tr>
-                                        {this.state.pendingTasks.map((task, index) =>
-                                            <tr key={index} onClick={() => this.showDetails(index)}>
-                                                <td>{task.id}</td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </Table>
+                                                    if (rowInfo.index !== this.state.rowEdit) {
+                                                        this.setState({
+                                                            rowEdit: rowInfo.index,
+                                                            selectedRowIndex: rowInfo.original,
+                                                            selectionChanged: this.state.selectionChanged
+                                                                ? false
+                                                                : true
+                                                        });
+                                                    } else {
+
+                                                        this.setState({
+                                                            rowEdit: null
+                                                        });
+                                                    }
+                                                    // console.log(rowInfo.original);
+                                                    this.setState({taskDetail: rowInfo.original})
+                                                    console.log(this.state.rowEdit);
+                                                },
+                                                style: {
+                                                    background:
+                                                        rowInfo.index === this.state.rowEdit ? "#00afec" : "white",
+                                                    color:
+                                                        rowInfo.index === this.state.rowEdit ? "white" : "black"
+                                                }
+                                            };
+                                        } else {
+                                            return {};
+                                        }
+                                    }}
+                                />
                             </CardBody>
                         </Card>
                     </Col>
@@ -202,7 +243,7 @@ class MyPendingTasks extends Component {
                                                 <Label htmlFor="text-input">Document Name</Label>
                                             </Col>
                                             <Col xs="12" md="8">
-                                                <Input  disabled type="text" id="text-input" value={this.state.taskDetail.docName} name="text-input" placeholder="Text" />
+                                                <Input disabled type="text" id="text-input" value={this.state.taskDetail.docName} name="text-input" placeholder="Text" />
                                             </Col>
                                         </FormGroup>
                                         <FormGroup row>
@@ -244,7 +285,7 @@ class MyPendingTasks extends Component {
                                                 <Label htmlFor="text-input">Application Type</Label>
                                             </Col>
                                             <Col xs="12" md="8">
-                                                <Input  disabled type="text" value={this.state.taskDetail.applicationType} id="text-input" name="text-input" placeholder="Text" />
+                                                <Input disabled type="text" value={this.state.taskDetail.applicationType} id="text-input" name="text-input" placeholder="Text" />
                                             </Col>
                                         </FormGroup>
                                         <FormGroup row>

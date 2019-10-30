@@ -37,6 +37,7 @@
     "react-file-viewer": "^1.1.0",
     "react-router-config": "^5.1.1",
     "react-router-dom": "^5.1.2",
+    "react-table": "^6.10.3",
     "react-test-renderer": "^16.10.2",
     "reactstrap": "^8.0.1",
     "simple-line-icons": "^2.4.1",
