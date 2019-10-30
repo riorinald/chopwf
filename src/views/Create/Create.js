@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-// import Autosuggest from 'react-autosuggest'
 import { AppSwitch } from '@coreui/react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -540,14 +539,6 @@ class Create extends Component {
       }
     })
   }
-  // getSuggestions = value => {
-  //   const inputValue = value.trim().toLowerCase();
-  //   const inputLength = inputValue.length;
-
-  //   return inputLength === 0 ? [] : this.state.users.filter(user =>
-  //     user.displayName.toLowerCase().slice(0, inputLength) === inputValue
-  //   );
-  // };
 
   getSuggestions(value) {
     this.setState({
@@ -569,15 +560,6 @@ class Create extends Component {
   getSuggestionValue = suggestion => suggestion.displayName
 
   renderSuggestion = suggestion => (
-    // <Dropdown isOpen={true}>
-    //   <DropdownToggle>Dropdown</DropdownToggle>
-    //   <DropdownMenu>
-    //     <DropdownItem>{suggestion.displayName}</DropdownItem>
-    //   </DropdownMenu>
-    // </Dropdown>
-    // <Input type="select">
-    //   <option>{suggestion.displayName}</option>
-    // </Input>
     <Table className="suggestBox">
       <tbody>
         <tr>
@@ -586,6 +568,13 @@ class Create extends Component {
       </tbody>
     </Table>
   )
+
+  renderInputComponent = inputProps => (
+    <div className="input-group-prepend">
+      {this.state.isLoading ? <Spinner className="input-group-text" color="primary" /> : <i className="input-group-text cui-magnifying-glass" />}
+      <input {...inputProps} />
+    </div>
+  );
 
 
   suggestionChange = (event, { newValue }) => {
@@ -973,7 +962,7 @@ class Create extends Component {
                 </InputGroup>
               </FormGroup>
               <FormGroup>
-                <Label>Pick Up By <i className="fa fa-user" /> {status} </Label>
+                <Label>Pick Up By <i className="fa fa-user" /> </Label>
                 <InputGroup>
                   <Autosuggest
                     id="pickUpBy"
@@ -983,6 +972,7 @@ class Create extends Component {
                     getSuggestionValue={this.getSuggestionValue}
                     renderSuggestion={this.renderSuggestion}
                     inputProps={inputProps}
+                    renderInputComponent={this.renderInputComponent}
                   />
                   {/* <FormFeedback>Please select a person  to pick up by</FormFeedback> */}
 
