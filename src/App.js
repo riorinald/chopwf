@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
+import {Spinner} from 'reactstrap';
 
 // import { renderRoutes } from 'react-router-config';
 import './App.scss';
@@ -21,7 +22,7 @@ export const fakeAuth = {
 
 const Login = React.lazy(() => import('./views/Login/Login'));
 
-const loading = () => <div className="animated fadeIn pt-3 text-center">Loading...</div>;
+const loading = () => <div className="animated fadeIn pt-3 text-center"><Spinner /> <br />Loading ...</div>;
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./containers/DefaultLayout'));

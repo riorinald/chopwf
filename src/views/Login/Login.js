@@ -54,6 +54,7 @@ class Login extends Component {
                     localStorage.setItem('legalEntity', 'MBAFC')
                     localStorage.setItem('ticket', res.data.ticket)
                     localStorage.setItem('userId', res.data.userId)
+                    localStorage.setItem('roleId', res.data.roleId)
                     localStorage.setItem('token', res.data.token)
                     if (res.data.status === "success") {
                         fakeAuth.authenticate(() => {
