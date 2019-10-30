@@ -57,7 +57,7 @@ class DefaultHeader extends Component {
 
     // eslint-disable-next-line
     const { children, ...attributes } = this.props;
-
+    const username = localStorage.getItem('userId');
     return (
       <React.Fragment>
         <AppSidebarToggler className="d-lg-none" display="sm" mobile />
@@ -68,9 +68,9 @@ class DefaultHeader extends Component {
           </AppNavbarBrand> */
         }
         <AppSidebarMinimizer class="d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
-        <h2 className="h5"><b>Chop Use WORKFLOW for {this.state.legalEntity}</b></h2>
+        <h2 className="h5 d-md-down-none"><b>Chop Use WORKFLOW for {this.state.legalEntity}</b></h2>
         <Nav className="ml-auto" navbar>
-          <NavItem className="d-md-down-none">
+          <NavItem >
             <Button color="ghost-secondary" onClick={this.toggle} to="#" className="nav-link"><i className="fa fa-exchange" /> Another Workflow ? &nbsp;
             </Button>
             <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
@@ -85,7 +85,8 @@ class DefaultHeader extends Component {
               </ModalFooter>
             </Modal>
           </NavItem>
-          <NavItem>
+          <NavItem className="d-md-down-none">
+            <h5>{username}</h5>
           </NavItem>
           <UncontrolledDropdown nav direction="down" >
             <DropdownToggle nav>
