@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
-import { fakeAuth } from '../../App'
+import { fakeAuth } from '../../App';
 
 import {
     Form,
@@ -29,6 +29,30 @@ class Login extends Component {
         this.loginCheck = this.loginCheck.bind(this);
     }
 
+    componentDidMount(){
+        this.windowsSSO();
+    }
+
+    windowsSSO() {
+        axios.get('http://192.168.1.47/echop/api/v1/authenticate',{withCredentials: true})
+        .then(res => {
+
+            localStorage.setItem('authenticate', res.data.isAuthenticated)
+            localStorage.setItem('userId', res.data.userId)
+            localStorage.setItem('username', res.data.userName)
+            localStorage.setItem('authType', res.data.authenticationType)
+            console.log(res);
+            if (res.data.windowsIdExist === true) {
+                fakeAuth.authenticate(() => {
+                    this.setState({ redirectToReferrer: true })
+                })
+            }
+        }) 
+        .catch(function (error) {
+            console.log(error);
+        })
+    }
+
     handleChange = event => {
         this.setState({
             [event.target.name]: event.target.value
@@ -47,7 +71,7 @@ class Login extends Component {
     async validate(loginCredentials) {
         try {
             await axios.post('http://192.168.1.47/echop/api/v1/login', loginCredentials
-                , { headers: { 'Content-Type': '  application/json' } })
+                , { withCredentials: true, headers: { 'Content-Type': '  application/json' } })
                 .then(res => {
               
                     localStorage.setItem('authenticate', true)
