@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { Badge, UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem } from 'reactstrap';
+import { UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem } from 'reactstrap';
 import PropTypes from 'prop-types';
-import { AppNavbarBrand, AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
+import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
 import { fakeAuth } from '../../App'
 import { withRouter } from 'react-router-dom'
 
@@ -29,6 +29,7 @@ class DefaultHeader extends Component {
       disabled: true
     };
     this.toggle = this.toggle.bind(this);
+    this.updateLegalEntity = this.updateLegalEntity.bind(this)
   }
 
   toggle() {
@@ -40,8 +41,13 @@ class DefaultHeader extends Component {
   changeEntity = event => {
     this.setState({
       legalEntity: event.target.value,
-      modal: !this.state.modal
-    }, localStorage.setItem("legalEntity", event.target.value) );
+      modal: !this.state.modal, 
+    }, this.updateLegalEntity, localStorage.setItem("legalEntity", event.target.value) );
+    
+   }
+
+   updateLegalEntity(){
+     this.props.handleLegalEntity(this.state)
    }
 
 
@@ -67,7 +73,7 @@ class DefaultHeader extends Component {
          {//<AppSidebarToggler className="d-md-down-none" display="lg" />
           </AppNavbarBrand> */
         }
-        <AppSidebarMinimizer class="d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
+        <AppSidebarMinimizer className="d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
         <h2 className="h5 d-md-down-none"><b>Chop Use WORKFLOW for {this.state.legalEntity}</b></h2>
         <Nav className="ml-auto" navbar>
           <NavItem >

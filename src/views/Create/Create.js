@@ -5,6 +5,9 @@ import Swal from 'sweetalert2';
 import FileViewer from 'react-file-viewer';
 import Autosuggest from 'react-autosuggest';
 import theme from './theme.css'
+import deleteBin from '../../assets/img/deletebin.png'
+import InputMask from "react-input-mask";
+import AsyncSelect from 'react-select/async';
 
 import {
   Button,
@@ -29,9 +32,10 @@ import {
   Row,
   FormFeedback,
   Table,
-  Spinner,
-  Dropdown, DropdownToggle, DropdownMenu, DropdownItem
+  Spinner
 } from 'reactstrap';
+import { file, thisExpression } from '@babel/types';
+import { string } from 'prop-types';
 
 //notes can be updated by text only or editable in HTML editor
 const notes = <p>如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。
@@ -55,6 +59,7 @@ class Create extends Component {
       //retrieve from DH table
       deptHead: [],
       teams: [],
+      branches: [],
       collapse: true,
       fadeIn: true,
       modal: false,
@@ -73,7 +78,7 @@ class Create extends Component {
       //data to be created inside Request Table
       employeeId: 0,    //retrieved from user Info
       telNumber: 0,      //retrieved from user Info
-      contractNum: 0,
+      contractNum: "",
       deptSelected: "",
       appTypeSelected: "",
       chopTypeSelected: "",
@@ -85,23 +90,26 @@ class Create extends Component {
       addressTo: "",
       pickUpBy: "",
       remarks: "",
-      deptHeadSelected: 0,
+      deptHeadSelected: [],
       contractSignedBy: "",
       contractSign1: "",
       contractSign2: "",
       effectivePeriod: "",
-      selectedFile: null,
+      selectedFiles: [],
       fileName: "Choose File",
       teamSelected: "",
+      connectingChop: false,
 
       documentTableLTI: [],
 
       documentTableLTU: [],
+      selectedDocs: [],
 
       agreeTerms: false,
       showDocAttach: false,
       showDocDropdown: false,
       showTeams: false,
+      showBranches: false,
 
       engName: "",
       cnName: "",
@@ -118,12 +126,14 @@ class Create extends Component {
       fileURL: "",
       fileType: "",
 
+      hover: false,
+
       reqInfo: [
         { id: "deptSelected", valid: false },
         { id: "appTypeSelected", valid: false },
-        { id: "contractNum", valid: false },
+        // { id: "contractNum", valid: false },
         { id: "chopTypeSelected", valid: false },
-        { id: "docName", valid: false },
+        // { id: "docName", valid: false },
         // { id: "returnDate", valid: false },
         // { id: "resPerson", valid: false },
         { id: "purposeOfUse", valid: false },
@@ -149,9 +159,12 @@ class Create extends Component {
     this.submitRequest = this.submitRequest.bind(this);
     this.validate = this.validate.bind(this);
     this.addDocumentLTI = this.addDocumentLTI.bind(this);
-    this.modal = this.modal.bind(this);
     this.addDocumentLTU = this.addDocumentLTU.bind(this);
     this.saveRequest = this.saveRequest.bind(this);
+    this.toggleHover = this.toggleHover.bind(this);
+    this.addDocCheck = this.addDocCheck.bind(this);
+    this.selectAll = this.selectAll.bind(this);
+    this.handleDeptHead = this.handleDeptHead.bind(this);
 
   };
 
@@ -159,10 +172,10 @@ class Create extends Component {
     //Get User Details
 
     this.getUserData();
-    this.getData("department", 'http://192.168.1.47/echop/api/v1/departments');
-    this.getData("applicationTypes", 'http://192.168.1.47/echop/api/v1/apptypes');
-    this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes');
-    // this.getData("users", 'http://192.168.1.47/echop/api/v1/users?displayName=');
+    this.getData("department", 'http://192.168.1.47/echopx/api/v1/departments');
+    this.getData("applicationTypes", 'http://192.168.1.47/echopx/api/v1/apptypes');
+    this.getData("chopTypes", 'http://192.168.1.47/echopx/api/v1/choptypes?companyid=' + this.state.legalEntity);
+    // this.getData("users", 'http://192.168.1.47/echopx/api/v1/users?displayName=');
   }
 
   // toggle = () => setDropdownOpen(prevState => !prevState);
@@ -286,33 +299,47 @@ class Create extends Component {
     else {
       useInOffice = "N"
     }
-    const postReq = {
-      "userId": this.state.userId,
-      "employeeNum": this.state.employeeId,
-      "companyId": this.state.legalEntity,
-      "departmentId": this.state.deptSelected,
-      "applicationTypeId": this.state.appTypeSelected,
-      "chopTypeId": this.state.chopTypeSelected,
-      "documentName": this.state.docName,
-      "useInOffice": useInOffice,
-      "departmentHead": this.state.deptHeadSelected,
-      "documentDescription": "lorem ipsum dolor sit amet",
-      "addressTo": this.state.addressTo,
-      "contractNo": this.state.contractNum,
-      "contractName": "lorem ipsum dolor sit amet",
-      "purposeOfUse": this.state.purposeOfUse,
-      "remark": this.state.remarks,
-      "numOfPages": this.state.numOfPages,
-      "confirmed": this.state.agreeTerms,
-      // "returnDate": this.state.returnDate, //2019-10-22
-      "returnDate": "20191022",
-      "responsiblePerson": this.state.resPerson,
-      "contractSignedBy": this.state.contractSignedBy,
-      "contractSignedByFirstPerson": this.state.contractSign1,
-      "contractSignedBySecondPerson": this.state.contractSign2,
-      "effectivePeriod": "",
-      "isSubmitted": Submitted
+    let postReq = new FormData();
+    postReq.append("UserId", this.state.userId);
+    postReq.append("CompanyId", this.state.legalEntity);
+    postReq.append("DepartmentId", this.state.deptSelected);
+    postReq.append("ApplicationTypeId", this.state.appTypeSelected);
+    postReq.append("ContractNum", "");
+    postReq.append("ChopTypeId", this.state.chopTypeSelected);
+    postReq.append("DocumentNameEnglish", "Renewal Document");
+    postReq.append("DocumentNameChinese", "续签文件");
+    postReq.append("PurposeOfUse", this.state.purposeOfUse);
+    postReq.append("NumOfPages", this.state.numOfPages);
+    postReq.append("UseInOffice", useInOffice);
+    postReq.append("DocumentDescription", "lorem ipsum");
+    postReq.append("AddressTo", this.state.addressTo);
+    postReq.append("PickUpBy", this.state.pickUpBy);
+    postReq.append("Remark", this.state.remarks);
+    postReq.append("IsConfirmed", "");
+    postReq.append("ReturnDate", "");
+    postReq.append("ResponsiblePerson", this.state.resPerson);
+    postReq.append("ContracySignedByFirstPerson", this.state.contractSign1);
+    postReq.append("ContractSignedBySecondPerson", this.state.contractSign2);
+    postReq.append("EffectivePeriod", "");
+    postReq.append("IsSubmitted", Submitted);
 
+    for (let i = 0; i < this.state.documentTableLTI.length; i++) {
+      postReq.append("Documents[" + i + "].Attachment.File", this.state.documentTableLTI[i].docSelected);
+      postReq.append("Documents[" + i + "].DocumentNameEnglish", this.state.documentTableLTI[i].engName);
+      postReq.append("Documents[" + i + "].DocumentNameChinese", this.state.documentTableLTI[i].cnName);
+
+    }
+    for (let i = 0; i < this.state.selectedFiles.length; i++) {
+      postReq.append("Attachments[" + i + "].Attachment.File", this.state.selectedFiles[i]);
+      postReq.append("Attachments[" + i + "].Remark", "Y");
+    }
+    for (let i = 0; i < this.state.deptHeadSelected.length; i++) {
+      postReq.append("DepartmentHeads[" + i + "]", this.state.deptHeadSelected[i].value);
+
+
+    }
+    for (var pair of postReq.entries()) {
+      console.log(pair[0] + ', ' + pair[1]);
     }
 
     await this.validate()
@@ -324,15 +351,15 @@ class Create extends Component {
         this.setState({ valid: false })
 
         //function to scroll to specific posittion
-          // var el = this[this.state.reqInfo[i].id].current
-          // var elOffSetTop = document.getElementById(this.state.reqInfo[i].id).getBoundingClientRect().y
-          // var el = window.outerHeight + elOffSetTop
-          // var el = document.getElementById("contractNum").getBoundingClientRect()
-          // this.scrollToRef(el)
-          // console.log(window.outerHeight)
-          // console.log(elOffSetTop)
-          // console.log(this.state.reqInfo[i].id)
-        
+        // var el = this[this.state.reqInfo[i].id].current
+        // var elOffSetTop = document.getElementById(this.state.reqInfo[i].id).getBoundingClientRect().y
+        // var el = window.outerHeight + elOffSetTop
+        // var el = document.getElementById("contractNum").getBoundingClientRect()
+        // this.scrollToRef(el)
+        // console.log(window.outerHeight)
+        // console.log(elOffSetTop)
+        // console.log(this.state.reqInfo[i].id)
+
         break;
       }
     }
@@ -356,6 +383,16 @@ class Create extends Component {
     });
   }
 
+  toggleHover() {
+    this.setState({ hover: !this.state.hover })
+  }
+
+  changeSelect() {
+    this.setState({
+      modal: !this.state.modal,
+    });
+    document.getElementById("chopTypeSelected").value = "0"
+  }
 
   Axios
   async getData(state, url) {
@@ -371,7 +408,7 @@ class Create extends Component {
 
   async postData(formData) {
     try {
-      await axios.post('http://192.168.1.47/echop/api/v1/applications', formData, { headers: { 'Content-Type': '  application/json' } })
+      await axios.post('http://192.168.1.47/echopx/api/v1/applications', formData, { headers: { 'Content-Type': '  application/json' } })
         .then(res => {
           console.log(res.data)
           Swal.fire({
@@ -389,7 +426,7 @@ class Create extends Component {
     let token = localStorage.getItem('token')
     let ticket = localStorage.getItem('ticket')
     let userId = localStorage.getItem('userId')
-    await axios.get('http://192.168.1.47/echop/api/v1/users/' + userId, { headers: { 'ticket': ticket } })
+    await axios.get('http://192.168.1.47/echopx/api/v1/users/' + userId, { headers: { 'ticket': ticket } })
       .then(res => {
         this.setState({ employeeId: res.data.employeeNum, telNumber: res.data.telephoneNum, userId: userId })
       })
@@ -397,13 +434,14 @@ class Create extends Component {
 
   async getDeptHead(companyId, deptId, teamId) {
     if (teamId === "") {
-      await axios.get('http://192.168.1.47/echop/api/v1/deptheads?companyId=' + companyId)
+
+      await axios.get('http://192.168.1.47/echopx/api/v1/users?roleid=dh&companyid=' + companyId)
         .then(res => {
           this.setState({ deptHead: res.data })
         })
     }
     else {
-      await axios.get('http://192.168.1.47/echop/api/v1/deptheads?companyId=' + companyId + '&teamId=' + teamId)
+      await axios.get('http://192.168.1.47/echopx/api/v1/deptheads?companyId=' + companyId + '&teamId=' + teamId)
         .then(res => {
           this.setState({ deptHead: res.data })
         })
@@ -411,18 +449,20 @@ class Create extends Component {
 
   }
 
-  async updateChopTypes(appTypeId, companyId) {
-    await axios.get('http://192.168.1.47/echop/api/v1/choptypes?companyId=' + companyId + '&appTypeId=' + appTypeId)
-      .then(res => {
-        this.setState({ chopTypes: res.data })
-      })
-  }
-
   async getTeams(deptId) {
-    let url = "http://192.168.1.47/echop/api/v1/teams?departmentId="
+    console.log(deptId)
+    let url = "http://192.168.1.47/echopx/api/v1/teams?departmentId="
     await axios.get(url + deptId).then(res => {
       this.setState({ teams: res.data })
     })
+  }
+
+  async getChopTypes(companyId, appTypeId) {
+    // console.log("COMPANY ID: "+ companyId + "  APP ID:", appTypeId)
+    await axios.get('http://192.168.1.47/echopx/api/v1/choptypes?companyid=' + companyId + '&apptypeid=' + appTypeId)
+      .then(res => {
+        this.setState({ chopTypes: res.data })
+      })
   }
 
   //handle value on changes
@@ -430,9 +470,21 @@ class Create extends Component {
     if (event.target.value === "CONCHOP") {
       this.toggleModal();
     }
+    // if (event.target.name === "deptHead") {
+    //   if (event.target.value === this.state.deptHeadSelected || event.target.value === this.state.deptHeadSelected2) {
+    //     event.target.value = ""
 
+    //   }
+    // }
     if (name === "returnDate") {
       console.log(event.target.value)
+    }
+    if (event.target.value === "BRCCHOP") {
+      this.setState({ showBranches: true })
+      this.getData("branches", 'http://192.168.1.47/echopx/api/v1/branches?companyid=mblc')
+    }
+    else {
+      this.setState({ showBranches: false })
     }
 
     if (name === "appTypeSelected") {
@@ -452,15 +504,15 @@ class Create extends Component {
         this.setState({ showDocAttach: false, showDocDropdown: false, showTeams: false })
       }
       if (event.target.value === "CNIPS") {
-        this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/apptypes/CNIPS/choptypes')
+        // this.getData("chopTypes", 'http://192.168.1.47/echopx/api/v1/apptypes/CNIPS/choptypes')
         this.setState({ CNIPS: true })
 
       }
       else {
-        this.getData("chopTypes", 'http://192.168.1.47/echop/api/v1/choptypes')
+        // this.getData("chopTypes", 'http://192.168.1.47/echopx/api/v1/choptypes')
         this.setState({ CNIPS: false })
       }
-      this.updateChopTypes(event.target.value, "MBAFC")
+      this.getChopTypes(this.state.legalEntity, event.target.value)
     }
     else if (name === "deptSelected") {
       this.getDeptHead("MBAFC", event.target.value, "")
@@ -483,6 +535,15 @@ class Create extends Component {
     }
   };
 
+  deleteDocument(i) {
+    this.setState(state => {
+      const selectedFiles = state.selectedFiles.filter((item, index) => i !== index);
+      return {
+        selectedFiles
+      }
+    })
+  }
+
   addDocumentLTI() {
     var maxNumber = 45;
     var rand = Math.floor((Math.random() * maxNumber) + 1);
@@ -492,8 +553,10 @@ class Create extends Component {
       engName: this.state.engName,
       cnName: this.state.cnName,
       docSelected: this.state.docSelected,
-      docName: this.state.docAttachedName
+      docName: this.state.docAttachedName,
+      docURL: URL.createObjectURL(this.state.docSelected),
     }
+
     this.setState(state => {
       const documentTableLTI = state.documentTableLTI.concat(obj)
 
@@ -504,57 +567,92 @@ class Create extends Component {
   }
 
   addDocumentLTU() {
-
-    let selectedId = parseInt(this.state.docSelectedLTU)
-    let tempDocLTI = this.state.documentTableLTI
-    let tempDocLTU = this.state.documentTableLTU
+    let ltuDoc = this.state.documentTableLTU
     let exist = false
-    this.setState(state => {
-      if (tempDocLTU.length !== 0) {
-        for (let p = 0; p < tempDocLTU.length; p++) {
-          if (selectedId === tempDocLTU[p].id) {
-            exist = true
-            Swal.fire({
-              title: 'Error',
-              text: 'Document already exists',
-              type: 'error'
-            })
-            break;
-          }
-          else {
+    for (let i = 0; i < this.state.selectedDocs.length; i++) {
+      if (this.state.documentTableLTU.length !== 0) {
+        for (let j = 0; j < ltuDoc.length; j++) {
+          if (ltuDoc[j].id !== this.state.selectedDocs[i]) {
             exist = false
           }
+          else {
+            // console.log("document exist")
+            exist = true
+            break
+          }
         }
-      }
-      if (!exist) {
-        for (let i = 0; i < tempDocLTI.length; i++) {
-          if (tempDocLTI[i].id === selectedId) {
-            const documentTableLTU = state.documentTableLTU.concat(tempDocLTI[i])
-            console.log("Added: " + tempDocLTI[i].id)
+        if (!exist) {
+          this.setState(state => {
+            const tempDocLTU = state.documentTableLTI.filter(doc => doc.id === state.selectedDocs[i])
+            const documentTableLTU = state.documentTableLTU.concat(tempDocLTU)
             return {
               documentTableLTU
             }
-          }
+          })
         }
       }
-    })
+      else {
+        this.setState(state => {
+          const tempDocLTU = state.documentTableLTI.filter(doc => doc.id === state.selectedDocs[i])
+          const documentTableLTU = state.documentTableLTU.concat(tempDocLTU)
+          return {
+            documentTableLTU
+          }
+        })
+
+      }
+    }
+
+    // let selectedId = parseInt(this.state.docSelectedLTU)
+    // let tempDocLTI = this.state.documentTableLTI
+    // let tempDocLTU = this.state.documentTableLTU
+    // let exist = false
+    // this.setState(state => {
+    //   if (tempDocLTU.length !== 0) {
+    //     for (let p = 0; p < tempDocLTU.length; p++) {
+    //       if (selectedId === tempDocLTU[p].id) {
+    //         exist = true
+    //         Swal.fire({
+    //           title: 'Error',
+    //           text: 'Document already exists',
+    //           type: 'error'
+    //         })
+    //         break;
+    //       }
+    //       else {
+    //         exist = false
+    //       }
+    //     }
+    //   }
+    //   if (!exist) {
+    //     for (let i = 0; i < tempDocLTI.length; i++) {
+    //       if (tempDocLTI[i].id === selectedId) {
+    //         const documentTableLTU = state.documentTableLTU.concat(tempDocLTI[i])
+    //         console.log("Added: " + tempDocLTI[i].id)
+    //         return {
+    //           documentTableLTU
+    //         }
+    //       }
+    //     }
+    //   }
+    // })
   }
 
   getSuggestions(value) {
     this.setState({
       isLoading: !this.isLoading
     });
-    const thisReq = this.lastReq = 
-    axios.get(`http://192.168.1.47/echop/api/v1/users?displayName=%${value}`)
-      .then(response => {
-          if(thisReq !== this.lastReq) {
+    const thisReq = this.lastReq =
+      axios.get(`http://192.168.1.47/echopx/api/v1/users?displayName=%${value}`)
+        .then(response => {
+          if (thisReq !== this.lastReq) {
             return;
           }
-        this.setState({ 
-          suggestions: response.data,
-          isLoading: false
-        });
-      })
+          this.setState({
+            suggestions: response.data,
+            isLoading: false
+          });
+        })
   }
 
   getSuggestionValue = suggestion => suggestion.displayName
@@ -602,13 +700,35 @@ class Create extends Component {
 
 
   uploadFile = event => {
-    if (event.target.files[0]) {
-      this.setState({
-        selectedFile: event.target.files[0],
-        fileName: event.target.files[0].name
+    if (event.target.files.length !== 0) {
+      if (event.target.files.length === 1) {
+        const obj = [
+          event.target.files[0]
+        ]
+        this.setState(state => {
+          const selectedFiles = state.selectedFiles.concat(obj)
 
-      })
+          return {
+            selectedFiles
+          }
+        })
+      }
+      else {
+
+        for (let i = 0; i < event.target.files.length; i++) {
+          const obj = []
+          obj.push(event.target.files[i])
+          this.setState(state => {
+            const selectedFiles = state.selectedFiles.concat(obj)
+
+            return {
+              selectedFiles
+            }
+          })
+        }
+      }
     }
+    console.log(this.state.selectedFiles)
   }
 
   uploadDocument = event => {
@@ -634,45 +754,90 @@ class Create extends Component {
     }
   }
 
-  modal(doc) {
-    let dem = !this.state.showDoc
-    this.setState({ showDoc: dem, docPreview: doc })
-    let type = ""
-    if (dem) {
-      if (doc.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-        type = "docx"
-      }
-      else if (doc.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
-        type = "xlsx"
-      }
-      else if (doc.type === "application/pdf") {
-        type = "pdf"
-      }
-      else if (doc.type === "application/vnd.ms-excel") {
-        type = "csv"
-      }
-      else if (doc.type === "image/jpeg") {
-        type = "jpeg"
-      }
-      else if (doc.type === "image/png") {
-        type = "png"
-      }
-      else if (doc.type === "image/gif") {
-        type = "gif"
-      }
-      else if (doc.type === "image/bmp") {
-        type = "bmp"
-      }
-      this.setState({ fileURL: URL.createObjectURL(doc), fileType: type })
+  handleDeptHead(newValue) {
+    this.setState({ deptHeadSelected: newValue })
+  }
+
+
+  selectAll(event) {
+    let checked = event.target.checked
+    for (let i = 0; i < this.state.documentTableLTI.length; i++) {
+      let uniqueDoc = document.getElementById(i + "addDoc").checked
+      let selectedId = this.state.documentTableLTI[i].id
+      this.setState(state => {
+        if (checked) {
+          if (!uniqueDoc) {
+            document.getElementById(i + "addDoc").checked = true
+            const selectedDocs = state.selectedDocs.concat(selectedId)
+            return {
+              selectedDocs
+            }
+          }
+        }
+        else {
+          if (uniqueDoc) {
+            document.getElementById(i + "addDoc").checked = false
+            const selectedDocs = state.selectedDocs.filter(item => item !== selectedId)
+            return {
+              selectedDocs
+            }
+          }
+        }
+      })
+
     }
   }
 
+  addDocCheck(event, selectedId) {
+    // console.log(event.currentTarget.checked)
+    let checked = event.currentTarget.checked
+    console.log(checked)
+    this.setState(state => {
+      if (checked) {
+        const selectedDocs = state.selectedDocs.concat(selectedId)
+        return {
+          selectedDocs
+        }
+      }
+      else {
+        const selectedDocs = state.selectedDocs.filter(item => item !== selectedId)
+        return {
+          selectedDocs
+        }
+      }
+    })
+  }
 
   //scroll To Function
   // scrollToRef = (ref) => window.scrollTo(0, ref)
 
   render() {
-    const { pickUpBy, suggestions, resPerson, contractSign1, contractSign2 } = this.state;
+    const deptHeads = []
+    var pointer;
+    const { pickUpBy, suggestions, resPerson, contractSign1, contractSign2, hover, CNIPS, deptHead } = this.state;
+    for (let i = 0; i < deptHead.length; i++) {
+      const obj = { value: deptHead[i].userId, label: deptHead[i].displayName }
+      deptHeads.push(obj)
+    }
+    if (hover) {
+      pointer = { cursor: 'pointer' }
+    }
+    else {
+      pointer = {}
+    }
+
+    const filterColors = (inputValue) => {
+      return deptHeads.filter(i =>
+        i.label.toLowerCase().includes(inputValue.toLowerCase())
+      );
+    };
+
+    const loadOptions = (inputValue, callback) => {
+        setTimeout(() => {
+          callback(filterColors(inputValue));
+        }, 100);
+    }
+
     const status = (this.state.isLoading ? <Spinner size="sm" color="primary" /> : '');
     const inputProps = {
       id: "pickUpBy",
@@ -708,43 +873,58 @@ class Create extends Component {
       type: 'search'
     }
 
-    const DocTable = <Table bordered>
-      <thead>
-        <tr>
-          <th>No.</th>
-          <th>Document Name in English</th>
-          <th>Document Name in Chinese</th>
-          <th>Attached File</th>
-        </tr>
-      </thead>
-      <tbody>
-        {this.state.documentTableLTI.map((document, index) =>
-          <tr key={index}>
-            <th>{index + 1}</th>
-            <th>{document.engName}</th>
-            <th>{document.cnName}</th>
-            <th onClick={() => this.modal(document.docSelected)}>{document.docName}</th>
+    const DocTable = <div>
+      <Table bordered>
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Document Name in English</th>
+            <th>Document Name in Chinese</th>
+            <th>Attached File</th>
+            <th></th>
           </tr>
-        )}
-      </tbody>
-    </Table>
+        </thead>
+        <tbody>
+          {this.state.documentTableLTI.map((document, index) =>
+            <tr key={index}>
+              <th>{index + 1}</th>
+              <th>{document.engName}</th>
+              <th>{document.cnName}</th>
+              <th id="viewDoc">
+                <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+              </th>
+              <th><img style={pointer} width="25px" onMouseOver={this.toggleHover} src={deleteBin} /></th>
+            </tr>
+          )}
+        </tbody>
+      </Table></div>
 
     const documentForLTI =
       <div>
         <Row form>
-          <Col md={4}>
+
+          {this.state.CNIPS
+            ? <Col ><FormGroup>
+              <InputMask mask="*-*-*-9999-9999" className="form-control" defaultValue={this.state.contractNum} onChange={this.handleChange("contractNum")}></InputMask>
+            </FormGroup></Col>
+            // <Col ><FormGroup>
+            //   <Input onChange={this.handleChange("contractNum")} placeholder="Please enter the contract Number"></Input>
+            // </FormGroup></Col>
+            : ""}
+
+          <Col >
             <FormGroup>
               {/* <Label>English Name</Label> */}
               <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
             </FormGroup>
           </Col>
-          <Col md={4}>
+          <Col >
             <FormGroup>
               {/* <Label>Chinese Name</Label> */}
               <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
             </FormGroup>
           </Col>
-          <Col md={3}>
+          <Col >
             <FormGroup>
               {/* <Label>File Name</Label> */}
               <CustomInput id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
@@ -757,14 +937,40 @@ class Create extends Component {
             </FormGroup>
           </Col>
         </Row>
-        <br />
-        {this.state.documentTableLTI.length !== 0 ? DocTable : ""}
+        <Collapse isOpen={this.state.documentTableLTI.length !== 0}>
+          {DocTable}
+        </Collapse>
       </div>
 
     const documentForLTU =
       <div>
+        <Button>Select Documents</Button>
+        <br />
         {/* <Label>Document Name</Label> */}
-        <InputGroup style={{ display: "flex" }}>
+        <Button onClick={this.addDocumentLTU} color="primary" block>Add</Button>
+        <Table>
+          <thead>
+            <tr>
+              <th><CustomInput id="selectAll" onChange={this.selectAll} type="checkbox"></CustomInput></th>
+              <th>Document Name (English)</th>
+              <th>Document Name (Chinese)</th>
+              <th>Expiry Date</th>
+              <th>DH Approved</th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.state.documentTableLTI.map((document, index) =>
+              <tr key={index}>
+                <th> <CustomInput id={index + "addDoc"} onChange={(e) => this.addDocCheck(e, document.id)} type="checkbox"></CustomInput></th>
+                <th>{document.engName}</th>
+                <th>{document.cnName}</th>
+                <th>DEMO</th>
+                <th>DEMO</th>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+        {/* <InputGroup style={{ display: "flex" }}>
           <Input type="select" name="select" id="exampleSelect" onChange={this.handleChange("docSelectedLTU")} defaultValue={0}>
             <option value={0} disabled>Please select the document</option>
             {this.state.documentTableLTI.map((document, index) =>
@@ -772,18 +978,20 @@ class Create extends Component {
             )}
           </Input>
           <Button onClick={this.addDocumentLTU}>Add Document</Button>
-        </InputGroup>
-
-        {this.state.documentTableLTU.length !== 0 ?
+        </InputGroup> */}
+        <Collapse isOpen={this.state.documentTableLTU.length !== 0}>
           <div>
             <br />
+            <Label>Documents</Label>
             <Table bordered>
               <thead>
                 <tr>
                   <th>No.</th>
-                  <th>Document Name in English</th>
-                  <th>Document Name in Chinese</th>
-                  <th>Attached File</th>
+                  <th>Document Name (English)</th>
+                  <th>Document Name (Chinese)</th>
+                  <th>Expiry Date</th>
+                  <th>DH Approved</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -792,13 +1000,19 @@ class Create extends Component {
                     <th>{index + 1}</th>
                     <th>{document.engName}</th>
                     <th>{document.cnName}</th>
-                    <th onClick={() => this.modal(document.docSelected)}>{document.docName}</th>
+                    <th id="viewDoc">
+                      <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+                    </th>
+                    <th id="viewDoc">
+                      <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+                    </th>
+                    <th><img style={pointer} width="25px" onMouseOver={this.toggleHover} src={deleteBin} /></th>
                   </tr>
                 )}
               </tbody>
             </Table>
-          </div> : ""}
-
+          </div>
+        </Collapse>
       </div>
 
     const documentNormal =
@@ -810,21 +1024,21 @@ class Create extends Component {
         </InputGroup>
       </div>
 
-    let file = this.state.fileURL
-    let type = this.state.fileType
+    // let file = this.state.fileURL
+    // let type = this.state.fileType
 
-    const docModal =
-      < Modal size="lg" scrollable isOpen={this.state.showDoc} >
-        <ModalHeader>{this.state.showDoc ? "File: " + this.state.docPreview.name : ""}</ModalHeader>
-        <ModalBody>
-          <FileViewer
-            fileType={type}
-            filePath={file}></FileViewer>
-        </ModalBody>
-        <ModalFooter>
-          <Button onClick={this.modal}>Close</Button>
-        </ModalFooter>
-      </Modal >
+    // const docModal =
+    //   < Modal size="lg" scrollable isOpen={this.state.showDoc} >
+    //     <ModalHeader>{this.state.showDoc ? "File: " + this.state.docPreview.name : ""}</ModalHeader>
+    //     <ModalBody>
+    //       <FileViewer
+    //         fileType={type}
+    //         filePath={file}></FileViewer>
+    //     </ModalBody>
+    //     <ModalFooter>
+    //       <Button onClick={this.modal}>Close</Button>
+    //     </ModalFooter>
+    //   </Modal >
 
     return (
       <div>
@@ -859,7 +1073,7 @@ class Create extends Component {
               </FormGroup>
               <FormGroup>
                 <Label>Dept</Label>
-                <Input ref={this.deptSelected} id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
+                <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
                   <option disabled value="0">Please Select . . .</option>
 
                   {this.state.department.map((option, index) => (
@@ -883,38 +1097,37 @@ class Create extends Component {
                 </Input>
                 <FormFeedback>Invalid Application Type Selected </FormFeedback>
 
-                </FormGroup>
-              {this.state.CNIPS
-              ?
-              <FormGroup>
-                <Label>Contract Number</Label>
-                <InputGroup>
-                  <Input ref={this.contractNum} id="contractNum" size="16" type="text" onChange={this.handleChange("contractNum")} />
-                  <FormFeedback >Invalid Contract Number</FormFeedback>
-                </InputGroup>
               </FormGroup>
-              : <span />
-              }
               <FormGroup>
                 <Label>Chop Type</Label>
                 <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected" onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
                   <option disabled value="0">Please Select ..</option>
                   {this.state.chopTypes.map((option, id) => (
-
                     <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
-
                   ))}
 
                 </Input>
                 <FormFeedback>Invalid Chop Type Selected</FormFeedback>
               </FormGroup>
+              {this.state.showBranches
+                ? <FormGroup>
+                  <Label>Branch Company Chop</Label>
+                  <Input type="select" defaultValue="0">
+                    <option value="0" disabled>Please specify your Brand Company Chop</option>
+                    {this.state.branches.map((branch, index) =>
+                      <option value={branch.branchId} key={index}>{branch.branchName}</option>
+                    )}
+                  </Input>
+                </FormGroup>
+                : ""
+              }
+
               <FormGroup>
                 <Label>Document Name</Label>
-                {!this.state.showDocAttach && !this.state.showDocDropdown ? documentNormal : ""}
+                {!this.state.showDocAttach && !this.state.showDocDropdown ? documentForLTI : ""}
                 {this.state.showDocDropdown ? documentForLTU : ""}
                 {this.state.showDocAttach ? documentForLTI : ""}
                 <FormFeedback>Invalid Input a valid Document Name</FormFeedback>
-
               </FormGroup>
               <FormGroup>
                 <Label>Purpose of Use</Label>
@@ -923,6 +1136,21 @@ class Create extends Component {
                   <FormFeedback>Please input the purpose of use</FormFeedback>
                 </InputGroup>
               </FormGroup>
+              {!this.state.showDocAttach
+                ? <FormGroup>
+                  {/* <Row> */}
+                  {/* <Col sm={2}> */}
+                  <Label>Connecting Chop (骑缝章) </Label>
+                  <Row />
+                  {/* </Col> */}
+                  {/* <Col> */}
+                  <AppSwitch dataOn={'yes'} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
+
+                  {/* </Col> */}
+                  {/* </Row> */}
+                </FormGroup>
+                : ""}
+
               <FormGroup>
                 <Label>Number of Pages to Be Chopped</Label>
                 <InputGroup>
@@ -933,7 +1161,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Use in Office or Not</Label>
                 <Row />
-                <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'}defaultChecked label dataOn={'yes'} dataOff={'no'} />
+                <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
               </FormGroup>
               <Collapse isOpen={!this.state.collapse}>
                 <FormGroup visibelity="false" >
@@ -983,7 +1211,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Remark (e.g. tel.) </Label>
                 <InputGroup>
-                  <Input ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="text" placeholder="pick up presons's phone number" />
+                  <Input ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="pick up presons's phone number" />
                   <FormFeedback>Please enter valid remarks</FormFeedback>
                 </InputGroup>
               </FormGroup>
@@ -1041,15 +1269,16 @@ class Create extends Component {
                 : <FormGroup>
                   <Label>Department Heads <i className="fa fa-user" /></Label>
                   <small> &ensp; If you apply for MBAFC Company Chop, then Department Head shall be from MBAFC entity</small>
-                  <InputGroup>
-                    <Input id="deptHeadSelected" onChange={this.handleChange("deptHeadSelected")} defaultValue="0" type="select">
-                      <option value="0" disabled> Please select a Department Head</option>
+                  {/* <InputGroup> */}
+                  <AsyncSelect loadOptions={loadOptions} isMulti onChange={this.handleDeptHead} />
+                  {/* <Input id="deptHeadSelected" onChange={this.handleChange("deptHeadSelected")} name="deptHead" defaultValue="0" type="select">
+                      <option value="0" disabled> Please select first Department Head</option>
                       {this.state.deptHead.map((head, index) =>
                         <option value={head.employeeNum} key={index}>{head.displayName}</option>
                       )}
                     </Input>
-                    <FormFeedback>Please select a department head</FormFeedback>
-                  </InputGroup>
+                    <FormFeedback>Please select a department head</FormFeedback> */}
+                  {/* </InputGroup> */}
                 </FormGroup>
               }
 
@@ -1062,8 +1291,8 @@ class Create extends Component {
                       onChange={this.agreeTerm}
                       id="confirm" value="option1">
                       <Label className="form-check-label" check >
-                        By Ticking the box, I confirm the hereby acknowledge that i must comply the internal policies &
-                       Guidelines regarding chop management and will not engage in any inappropriate chop usage or other inappropriate
+                        By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
+                        regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
                       </Label>
                     </CustomInput>
                   </FormGroup>
@@ -1071,8 +1300,44 @@ class Create extends Component {
               </Col>
               <FormGroup>
                 <Label >Attachments</Label>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <small>Please upload Sign-off Sheet and Contract</small>
                 <Row />
-                <CustomInput id="selectedFile" type="file" color="primary" label={this.state.fileName} onChange={this.uploadFile} />
+                <Collapse isOpen={this.state.selectedFiles.length !== 0}>
+                  {/* <Table hover>
+                    <thead>
+
+                    </thead>
+                    <tbody>
+                      {this.state.selectedFiles.map((file, index) =>
+                        <tr key={index}>
+                          <th> {file.name}</th>
+                          <th onClick={()=> this.deleteDocument(index)}>Delete</th>
+                        </tr>
+                      )}
+                    </tbody>
+                  </Table> */}
+                  <Card>
+                    <CardBody>
+
+                      {this.state.selectedFiles.map((file, index) =>
+                        <div key={index}>
+                          <Row>
+                            <Col lg={11}>{file.name}</Col>
+                            <Col> <img style={pointer} width="30px" onMouseOver={this.toggleHover} onClick={() => this.deleteDocument(index)} src={deleteBin} /> </Col>
+                            {/* <Col >Delete</Col> */}
+
+                          </Row>
+                          <hr />
+                        </div>
+                      )}
+                    </CardBody>
+                  </Card>
+
+
+                </Collapse>
+                <Row />
+                <CustomInput multiple id="selectedFile" type="file" color="primary" label={this.state.fileName} onChange={this.uploadFile} />
                 <FormFeedback>Please upload a file</FormFeedback>
               </FormGroup>
             </Form>
@@ -1080,9 +1345,9 @@ class Create extends Component {
           <CardFooter>
             <div className="form-actions">
               <Row>
-                  {this.state.agreeTerms ? <Button type="submit" color="success" onClick={this.submitRequest}>Submit</Button> : <Button disabled type="submit" color="success">Submit</Button>}
-                  <span>&nbsp;</span>
-                  <Button type="submit" color="primary" onClick={this.saveRequest}>Save</Button>
+                {this.state.agreeTerms ? <Button type="submit" color="success" onClick={this.submitRequest}>Submit</Button> : <Button disabled type="submit" color="success">Submit</Button>}
+                <span>&nbsp;</span>
+                <Button type="submit" color="primary" onClick={this.saveRequest}>Save</Button>
               </Row>
 
               {/* </div>
@@ -1091,7 +1356,7 @@ class Create extends Component {
           </CardFooter>
         </Card>
         <Modal color="info" isOpen={this.state.modal} toggle={this.toggleModal} className={'modal-info ' + this.props.className} >
-          <ModalHeader class="center" toggle={this.toggleModal}> Contract Chop </ModalHeader>
+          <ModalHeader className="center" toggle={this.toggleModal}> Contract Chop </ModalHeader>
           <ModalBody>
             <div><p>
               <b>MBAFC</b> Contract Chop is only used for <b>Mortgage Loan Contract</b> and <b>Mortgage Filling Business</b>.
@@ -1102,11 +1367,10 @@ class Create extends Component {
           </ModalBody>
           <ModalFooter>
             <Button color="success" onClick={this.toggleModal} size="md"> Yes </Button>
-            <Button color="secondary" onClick={this.toggleModal} size="md"> No </Button>
+            <Button color="secondary" onClick={() => this.changeSelect("No")} size="md"> No </Button>
           </ModalFooter>
         </Modal>
-        {docModal}
-      </div>
+      </div >
     );
 
   }

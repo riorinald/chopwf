@@ -13,7 +13,7 @@ import {
   AppSidebarHeader,
   AppSidebarMinimizer,
   AppSidebarNav2 as AppSidebarNav,
-// AppBreadcrumb2 as AppBreadcrumb,
+  // AppBreadcrumb2 as AppBreadcrumb,
 } from '@coreui/react';
 // sidebar nav config
 import navigation from '../../_nav';
@@ -34,12 +34,29 @@ class DefaultLayout extends Component {
     this.props.history.push('/login')
   }
 
+  constructor() {
+    super();
+    this.state = {
+      legalEntity: "MBAFC"
+    }
+    this.handleLegalEntity = this.handleLegalEntity.bind(this)
+  }
+
+  handleLegalEntity(_State) {
+    console.log(_State.legalEntity)
+    this.setState({
+      legalEntity: _State.legalEntity
+    })
+  }
+
+
+
   render() {
     return (
       <div className="app">
         <AppHeader fixed>
-          <Suspense  fallback={this.loading()}>
-            <DefaultHeader onLogout={e=>this.signOut(e)}/>
+          <Suspense fallback={this.loading()}>
+            <DefaultHeader handleLegalEntity={this.handleLegalEntity} onLogout={e => this.signOut(e)} />
           </Suspense>
         </AppHeader>
         <div className="app-body">
@@ -47,7 +64,7 @@ class DefaultLayout extends Component {
             <AppSidebarHeader />
             <AppSidebarForm />
             <Suspense>
-            <AppSidebarNav navConfig={localStorage.getItem('roleId') === 'REQUESTOR' ? reqNavigation: navigation} {...this.props} router={router}/>
+              <AppSidebarNav navConfig={localStorage.getItem('roleId') === 'REQUESTOR' ? reqNavigation : navigation} {...this.props} router={router} />
             </Suspense>
             <AppSidebarFooter />
             <AppSidebarMinimizer />
@@ -70,7 +87,7 @@ class DefaultLayout extends Component {
                         )} />
                     ) : (null);
                   })}
-                  <Redirect from="/" to="/create" />
+                  <Redirect from="/" to={{ pathname: "/create", state: { legalEntity: this.state.legalEntity } }} />
                 </Switch>
               </Suspense>
             </Container>

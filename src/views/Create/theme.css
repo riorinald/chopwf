@@ -57,6 +57,10 @@
   background-color: #3187e0;
 }
 
+.custom-file-input:lang(en) ~ .custom-file-label::after {
+    content: "Attach";
+}
+
 
   /* input:                    'react-autosuggest__input',
   inputOpen:                'react-autosuggest__input--open',
