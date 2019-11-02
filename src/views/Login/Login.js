@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
-import { fakeAuth } from '../../App'
+import { fakeAuth } from '../../App';
 
 import {
     Form,
     FormGroup,
     Input,
     Button,
-    Label, Col,
+    Label, Col, Alert, Fade,
     Navbar, NavbarBrand, Nav, NavItem,
     Modal, ModalHeader, ModalBody, ModalFooter
 } from 'reactstrap';
@@ -20,11 +20,95 @@ class Login extends Component {
         this.state = {
             redirectToReferrer: false,
             username: "",
-            password: ""
+            password: "",
+            info: "",
+            second: 5,
+            fade: false
         }
 
         this.handleChange = this.handleChange.bind(this);
         this.loginCheck = this.loginCheck.bind(this);
+        this.WindowsLogin = this.WindowsLogin.bind(this);
+        this.redirect = this.redirect.bind(this);
+
+
+    }
+
+    componentDidMount(){
+        // this.windowsSSO();
+    }
+
+    windowsSSO() {
+        axios.get('http://192.168.1.47/echop/api/v1/authenticate',{withCredentials: true})
+        .then(res => {
+
+            localStorage.setItem('authenticate', res.data.isAuthenticated)
+            localStorage.setItem('userId', res.data.userId)
+            localStorage.setItem('username', res.data.userName)
+            localStorage.setItem('authType', res.data.authenticationType)
+            console.log(res);
+        }) 
+        .catch(function (error) {
+            console.log(error);
+        })
+    }
+
+    WindowsLogin() {
+        axios.get('http://192.168.1.47/echop/api/v1/authenticate',{withCredentials: true})
+        .then(res => {
+            
+            localStorage.setItem('authenticate', res.data.isAuthenticated)
+            localStorage.setItem('userId', res.data.userId)
+            localStorage.setItem('username', res.data.userName)
+            localStorage.setItem('authType', res.data.authenticationType)
+            
+            if (res.data.windowsIdExist === true) {
+                this.setState({ 
+                fade: true,
+                info: "logged in as :" + res.data.userName})
+                setTimeout(this.redirect, 1000);
+            }
+            else {
+                this.setState({
+                fade: true,
+                info: "Windows Credential not Authenticated"
+                });
+                setTimeout(this.setState({fade: true}), 2500);
+            }
+        })
+        .catch(function (error) {
+            console.log(error);
+
+        })
+    }
+
+    async validate(loginCredentials) {
+        try {
+            await axios.post('http://192.168.1.47/echopx/api/v1/login', loginCredentials
+                , { headers: { 'Content-Type': '  application/json' } })
+                .then(res => {
+                    console.log(res);
+                    localStorage.setItem('authenticate', true)
+                    localStorage.setItem('legalEntity', 'MBAFC')
+                    localStorage.setItem('ticket', res.data.ticket)
+                    localStorage.setItem('userId', res.data.userId)
+                    localStorage.setItem('roleId', res.data.roleId)
+                    localStorage.setItem('token', res.data.token)
+                    if (res.data.status === "success") {
+                        this.setState({ fade: !this.state.fade,info: res.data.status})
+                        setTimeout(this.redirect, 5000);
+                    }
+                })
+        } catch (error) {
+            this.setState({ fade: !this.state.fade,info: error.status});
+            console.error(error);
+        }
+    }
+
+    redirect(){
+        fakeAuth.authenticate(() => {
+            this.setState({ redirectToReferrer: true })
+            });
     }
 
     handleChange = event => {
@@ -42,28 +126,6 @@ class Login extends Component {
         this.validate(loginCredentials);
     }
 
-    async validate(loginCredentials) {
-        try {
-            await axios.post('http://192.168.1.47/echopx/api/v1/login', loginCredentials
-                , { headers: { 'Content-Type': '  application/json' } })
-                .then(res => {
-              
-                    localStorage.setItem('authenticate', true)
-                    localStorage.setItem('legalEntity', 'MBAFC')
-                    localStorage.setItem('ticket', res.data.ticket)
-                    localStorage.setItem('userId', res.data.userId)
-                    localStorage.setItem('roleId', res.data.roleId)
-                    localStorage.setItem('token', res.data.token)
-                    if (res.data.status === "success") {
-                        fakeAuth.authenticate(() => {
-                            this.setState({ redirectToReferrer: true })
-                        })
-                    }
-                })
-        } catch (error) {
-            console.error(error);
-        }
-    }
 
     
 
@@ -117,11 +179,15 @@ class Login extends Component {
                         {/* </Card> */}
                     </ModalBody>
                     <ModalFooter>
-                        {/* <div style={{ textAlign: "center" }}> */}
                         <Button block color="primary" style={{ justifyContent: "center" }} onClick={this.loginCheck}>Login </Button>
-                        {/* </div> */}
+                        <br />
+                        <Button block color="success" style={{ justifyContent: "center" }} onClick={this.WindowsLogin}>Login With Windows </Button>
                     </ModalFooter>
+                <Fade in={this.state.fade}>
+                    <Alert color="info"><center>{this.state.info}</center></Alert>
+                </Fade>
                 </Modal>
+
             </div>
         )
     }
