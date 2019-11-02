@@ -20,6 +20,8 @@ import navigation from '../../_nav';
 import reqNavigation from '../../_Rnav';
 // routes config
 import routes from '../../routes';
+import LegalEntity from '../../context';
+import {label} from '../../context';
 
 const DefaultAside = React.lazy(() => import('./DefaultAside'));
 const DefaultFooter = React.lazy(() => import('./DefaultFooter'));
@@ -54,6 +56,7 @@ class DefaultLayout extends Component {
   render() {
     return (
       <div className="app">
+      <LegalEntity.Provider value={{ legalEntity: label[this.state.legalEntity]}}>
         <AppHeader fixed>
           <Suspense fallback={this.loading()}>
             <DefaultHeader handleLegalEntity={this.handleLegalEntity} onLogout={e => this.signOut(e)} />
@@ -70,9 +73,8 @@ class DefaultLayout extends Component {
             <AppSidebarMinimizer />
           </AppSidebar>
           <main className="main">
-            &nbsp;
             {/* <AppBreadcrumb appRoutes={routes} router={router}/> */}
-            <Container fluid>
+            <Container fluid >
               <Suspense fallback={this.loading()}>
                 <Switch>
                   {routes.map((route, idx) => {
@@ -83,14 +85,14 @@ class DefaultLayout extends Component {
                         exact={route.exact}
                         name={route.name}
                         render={props => (
-                          <route.component {...props} />
+                          <route.component legalName={this.state.legalEntity}{...props} />
                         )} />
                     ) : (null);
                   })}
-                  <Redirect from="/" to={{ pathname: "/create", state: { legalEntity: this.state.legalEntity } }} />
+                  <Redirect from="/" to={{ pathname: "/create" }} />
                 </Switch>
               </Suspense>
-            </Container>
+            </Container> 
           </main>
           <AppAside fixed>
             <Suspense fallback={this.loading()}>
@@ -103,6 +105,7 @@ class DefaultLayout extends Component {
             <DefaultFooter />
           </Suspense>
         </AppFooter>
+        </LegalEntity.Provider>
       </div>
     );
   }

@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem } from 'reactstrap';
 import PropTypes from 'prop-types';
 import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
-import { fakeAuth } from '../../App'
-import { withRouter } from 'react-router-dom'
+import { fakeAuth } from '../../App';
+import { withRouter } from 'react-router-dom';
+import LegalEntity from '../../context';
 
 const propTypes = {
   children: PropTypes.node,
@@ -65,6 +66,8 @@ class DefaultHeader extends Component {
     const { children, ...attributes } = this.props;
     const username = localStorage.getItem('userId');
     return (
+    <LegalEntity.Consumer>
+      {ContextValue => (
       <React.Fragment>
         <AppSidebarToggler className="d-lg-none" display="sm" mobile />
         {/* <AppNavbarBrand
@@ -74,7 +77,7 @@ class DefaultHeader extends Component {
           </AppNavbarBrand> */
         }
         <AppSidebarMinimizer className="d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
-        <h2 className="h5 d-md-down-none"><b>Chop Use WORKFLOW for {this.state.legalEntity}</b></h2>
+        <h2 className="h5 d-md-down-none"><b>Chop Use WORKFLOW for {ContextValue.legalEntity.name}</b></h2>
         <Nav className="ml-auto" navbar>
           <NavItem >
             <Button color="ghost-secondary" onClick={this.toggle} to="#" className="nav-link"><i className="fa fa-exchange" /> Another Workflow ? &nbsp;
@@ -119,6 +122,8 @@ class DefaultHeader extends Component {
         {/* <AppAsideToggler className="d-md-down-none" /> */}
         {/*<AppAsideToggler className="d-lg-none" mobile />*/}
       </React.Fragment>
+      )}
+    </LegalEntity.Consumer>
     );
   }
 }

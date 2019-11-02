@@ -95,8 +95,8 @@ class Login extends Component {
                     localStorage.setItem('roleId', res.data.roleId)
                     localStorage.setItem('token', res.data.token)
                     if (res.data.status === "success") {
-                        this.setState({ fade: !this.state.fade,info: res.data.status})
-                        setTimeout(this.redirect, 5000);
+                        this.setState({ fade: !this.state.fade,info: "login " + res.data.status})
+                        setTimeout(this.redirect, 1000);
                     }
                 })
         } catch (error) {

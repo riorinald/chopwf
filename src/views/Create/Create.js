@@ -174,7 +174,7 @@ class Create extends Component {
     this.getUserData();
     this.getData("department", 'http://192.168.1.47/echopx/api/v1/departments');
     this.getData("applicationTypes", 'http://192.168.1.47/echopx/api/v1/apptypes');
-    this.getData("chopTypes", 'http://192.168.1.47/echopx/api/v1/choptypes?companyid=' + this.state.legalEntity);
+    this.getData("chopTypes", 'http://192.168.1.47/echopx/api/v1/choptypes?companyid=' + this.props.legalName);
     // this.getData("users", 'http://192.168.1.47/echopx/api/v1/users?displayName=');
   }
 
@@ -263,7 +263,7 @@ class Create extends Component {
     const postReq = {
       "userId": this.state.userId,
       "employeeNum": this.state.employeeId,
-      "companyId": this.state.legalEntity,
+      "companyId": this.props.legalName,
       "departmentId": this.state.deptSelected,
       "applicationTypeId": this.state.appTypeSelected,
       "chopTypeId": this.state.chopTypeSelected,
@@ -301,7 +301,7 @@ class Create extends Component {
     }
     let postReq = new FormData();
     postReq.append("UserId", this.state.userId);
-    postReq.append("CompanyId", this.state.legalEntity);
+    postReq.append("CompanyId", this.props.legalName);
     postReq.append("DepartmentId", this.state.deptSelected);
     postReq.append("ApplicationTypeId", this.state.appTypeSelected);
     postReq.append("ContractNum", "");
@@ -512,7 +512,7 @@ class Create extends Component {
         // this.getData("chopTypes", 'http://192.168.1.47/echopx/api/v1/choptypes')
         this.setState({ CNIPS: false })
       }
-      this.getChopTypes(this.state.legalEntity, event.target.value)
+      this.getChopTypes(this.props.legalName, event.target.value)
     }
     else if (name === "deptSelected") {
       this.getDeptHead("MBAFC", event.target.value, "")
@@ -1270,7 +1270,9 @@ class Create extends Component {
                   <Label>Department Heads <i className="fa fa-user" /></Label>
                   <small> &ensp; If you apply for MBAFC Company Chop, then Department Head shall be from MBAFC entity</small>
                   {/* <InputGroup> */}
-                  <AsyncSelect loadOptions={loadOptions} isMulti onChange={this.handleDeptHead} />
+                  <AsyncSelect loadOptions={loadOptions} isMulti onChange={this.handleDeptHead} 
+                  menuPortalTarget={document.body} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                  />
                   {/* <Input id="deptHeadSelected" onChange={this.handleChange("deptHeadSelected")} name="deptHead" defaultValue="0" type="select">
                       <option value="0" disabled> Please select first Department Head</option>
                       {this.state.deptHead.map((head, index) =>
@@ -1300,9 +1302,11 @@ class Create extends Component {
               </Col>
               <FormGroup>
                 <Label >Attachments</Label>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &emsp;
                 <small>Please upload Sign-off Sheet and Contract</small>
                 <Row />
+                <CustomInput multiple id="selectedFile" type="file" color="primary" label={this.state.fileName} onChange={this.uploadFile} />
+                <FormFeedback>Please upload a file</FormFeedback>
                 <Collapse isOpen={this.state.selectedFiles.length !== 0}>
                   {/* <Table hover>
                     <thead>
@@ -1337,8 +1341,6 @@ class Create extends Component {
 
                 </Collapse>
                 <Row />
-                <CustomInput multiple id="selectedFile" type="file" color="primary" label={this.state.fileName} onChange={this.uploadFile} />
-                <FormFeedback>Please upload a file</FormFeedback>
               </FormGroup>
             </Form>
           </CardBody>
