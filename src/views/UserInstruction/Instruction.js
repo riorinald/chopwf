@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import carImg from "../../assets/img/carousel.png";
 import editIcon from "../../assets/img/edit.png";
-import deleteIcon from "../../assets/img/delete.png";
 import {
     Card,
     CardBody,

@@ -84,7 +84,7 @@ class Login extends Component {
 
     async validate(loginCredentials) {
         try {
-            await axios.post('http://192.168.1.47/echop/api/v1/login', loginCredentials
+            await axios.post('http://192.168.1.47/echopx/api/v1/login', loginCredentials
                 , { headers: { 'Content-Type': '  application/json' } })
                 .then(res => {
                     console.log(res);

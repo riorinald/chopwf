@@ -6,11 +6,7 @@ import {
     FormGroup,
     Label,
     Progress, 
-    Badge, 
-    Modal, 
-    ModalBody, 
-    ModalHeader, 
-    ModalFooter
+    Badge
 } from 'reactstrap';
 import ReactTable from "react-table";
 import "react-table/react-table.css"
