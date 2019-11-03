@@ -165,7 +165,6 @@ class Create extends Component {
     this.addDocCheck = this.addDocCheck.bind(this);
     this.selectAll = this.selectAll.bind(this);
     this.handleDeptHead = this.handleDeptHead.bind(this);
-
   };
 
   componentDidMount() {
@@ -1100,7 +1099,9 @@ class Create extends Component {
               </FormGroup>
               <FormGroup>
                 <Label>Chop Type</Label>
-                <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected" onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
+                <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected" 
+                onClick={()=>{this.getChopTypes(this.props.legalName, this.state.appTypeSelected)}}
+                onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
                   <option disabled value="0">Please Select ..</option>
                   {this.state.chopTypes.map((option, id) => (
                     <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
@@ -1219,7 +1220,7 @@ class Create extends Component {
                 ? <FormGroup>
                   <Label>Team</Label>
                   <InputGroup>
-                    <Input onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
+                    <Input onChange={this.handleChange("teamSelected")} onClick={()=>{this.getTeams(this.state.deptSelected)}} defaultValue="0" type="select">
                       <option value="0" disabled>Please select a team</option>
                       {this.state.teams.map((team, index) =>
                         <option key={index} value={team.teamId}>{team.teamName}</option>
