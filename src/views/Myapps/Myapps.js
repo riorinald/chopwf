@@ -44,7 +44,7 @@ class Myapps extends Component {
   }
 
   async getApplications() {
-    await Axios.get('http://192.168.1.47/echop/api/v1/applications').then(res => {
+    await Axios.get('http://192.168.1.47/echopx/api/v1/applications').then(res => {
       this.setState({ applications: res.data })
     })
     // console.log(this.state.applications)

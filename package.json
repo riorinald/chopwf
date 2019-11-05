@@ -33,6 +33,7 @@
     "react-autosuggest": "^9.4.3",
     "react-chartjs-2": "^2.8.0",
     "react-cookie": "^4.0.1",
+    "react-datepicker": "^2.9.6",
     "react-dom": "^16.10.2",
     "react-file-viewer": "^1.1.0",
     "react-input-mask": "^3.0.0-alpha.0",
@@ -43,6 +44,7 @@
     "react-test-renderer": "^16.10.2",
     "reactstrap": "^8.0.1",
     "simple-line-icons": "^2.4.1",
+    "simple-react-validator": "^1.2.4",
     "sweetalert2": "^8.18.3"
   },
   "devDependencies": {

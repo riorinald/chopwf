@@ -8,6 +8,9 @@ import theme from './theme.css'
 import deleteBin from '../../assets/img/deletebin.png'
 import InputMask from "react-input-mask";
 import AsyncSelect from 'react-select/async';
+import SimpleReactValidator from 'simple-react-validator';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 import {
   Button,
@@ -133,7 +136,7 @@ class Create extends Component {
         { id: "appTypeSelected", valid: false },
         // { id: "contractNum", valid: false },
         { id: "chopTypeSelected", valid: false },
-        // { id: "docName", valid: false },
+        { id: "docName", valid: false },
         // { id: "returnDate", valid: false },
         // { id: "resPerson", valid: false },
         { id: "purposeOfUse", valid: false },
@@ -165,6 +168,10 @@ class Create extends Component {
     this.addDocCheck = this.addDocCheck.bind(this);
     this.selectAll = this.selectAll.bind(this);
     this.handleDeptHead = this.handleDeptHead.bind(this);
+    this.isValid = this.isValid.bind(this);
+
+    this.validator = new SimpleReactValidator({autoForceUpdate: this});
+    this.formRef = React.createRef()
   };
 
   componentDidMount() {
@@ -250,6 +257,23 @@ class Create extends Component {
     }
   }
 
+
+  async isValid(){
+    await this.validate()
+    for (let i = 0; i < this.state.reqInfo.length; i++) {
+      if (this.state.reqInfo[i].valid) {
+        this.setState({ valid: true })
+      }
+      else {
+        this.setState({ valid: false, agreeTerms:false })
+        break;
+      }
+    }
+    if (this.state.valid && this.state.inOffice) {
+      this.setState({ agreeTerms:true })
+    }
+  }
+
   saveRequest() {
     let Submitted = "N"
     let useInOffice = "Y"
@@ -289,8 +313,8 @@ class Create extends Component {
     this.postData(postReq)
   }
 
-  async submitRequest() {
-    let Submitted = "Y"
+  async submitRequest(isSubmitted) {
+    let Submitted = isSubmitted
     let useInOffice = "Y"
     if (this.state.collapse) {
       useInOffice = "Y"
@@ -310,6 +334,7 @@ class Create extends Component {
     postReq.append("PurposeOfUse", this.state.purposeOfUse);
     postReq.append("NumOfPages", this.state.numOfPages);
     postReq.append("UseInOffice", useInOffice);
+    postReq.append("TeamId", "TEAMA");
     postReq.append("DocumentDescription", "lorem ipsum");
     postReq.append("AddressTo", this.state.addressTo);
     postReq.append("PickUpBy", this.state.pickUpBy);
@@ -340,8 +365,18 @@ class Create extends Component {
     for (var pair of postReq.entries()) {
       console.log(pair[0] + ', ' + pair[1]);
     }
-
-    await this.validate()
+    if(isSubmitted === 'N' && this.validator.allValid()){
+        this.postData(postReq, isSubmitted)
+    }else {
+      Swal.fire({
+        type: 'info',
+        title: 'required',
+        text:  'THe application type field is required'
+        // Object.values(JSON.parse(JSON.stringify(this.validator.getErrorMessages())))
+      })
+      this.validator.showMessages();
+    }
+    // await this.validate()
     for (let i = 0; i < this.state.reqInfo.length; i++) {
       if (this.state.reqInfo[i].valid) {
         this.setState({ valid: true })
@@ -363,7 +398,7 @@ class Create extends Component {
       }
     }
     if (this.state.valid && this.state.inOffice) {
-      this.postData(postReq)
+      this.postData(postReq, isSubmitted)
     }
 
   }
@@ -405,21 +440,35 @@ class Create extends Component {
     }
   }
 
-  async postData(formData) {
+  async postData(formData, isSubmitted) {
     try {
-      await axios.post('http://192.168.1.47/echopx/api/v1/applications', formData, { headers: { 'Content-Type': '  application/json' } })
+      await axios.post('http://192.168.1.47/echopx/api/v1/tasks', formData, { headers: { 'Content-Type': '  application/json' } })
         .then(res => {
           console.log(res.data)
+          if(isSubmitted === 'Y'){
           Swal.fire({
             title: res.data.status,
-            html: 'Request Saved <br /> Reference Number: ' + res.data.referenceNum,
+            html: 'Request Submitted <br /> Reference Number: ' + res.data.referenceNum,
             type: res.data.status
           })
+        }if(isSubmitted === 'N') {
+          Swal.fire({
+            title: res.data.status,
+            text: 'Request Saved ',
+            footer: 'youre request saved as draft',
+            type: 'info',
+            onClose: ()=> {this.formReset()}
+          })
+        }
         })
     } catch (error) {
       console.error(error);
     }
   }
+
+  formReset() {
+    this.formRef.current.reset()
+    }
 
   async getUserData() {
     let token = localStorage.getItem('token')
@@ -807,6 +856,12 @@ class Create extends Component {
     })
   }
 
+  dateChange = date => {
+    this.setState({
+      returnDate: date
+    });
+  };
+
   //scroll To Function
   // scrollToRef = (ref) => window.scrollTo(0, ref)
 
@@ -1049,7 +1104,7 @@ class Create extends Component {
               <h5>NOTES :</h5>
               {notes}
             </FormGroup>
-            <Form className="form-horizontal">
+            <Form className="form-horizontal" innerRef={this.formRef}>
               <FormGroup>
                 <Label>Employee Number
                         <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted</i> </span>
@@ -1086,7 +1141,9 @@ class Create extends Component {
               </FormGroup>
               <FormGroup>
                 <Label>Application Type</Label>
-                <Input ref={this.appTypeSelected} type="select" onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" defaultValue="0" name="select">
+                <Input ref={this.appTypeSelected} type="select" 
+                onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" defaultValue="0" name="select"
+                onBlur={() => this.validator.showMessageFor('aplicationType')}>
                   <option disabled value="0">Please Select . . .</option>
                   {this.state.applicationTypes.map((option, id) => (
 
@@ -1094,7 +1151,9 @@ class Create extends Component {
 
                   ))}
                 </Input>
-                <FormFeedback>Invalid Application Type Selected </FormFeedback>
+               
+                <FormFeedback valid={this.validator.fieldValid('aplicationType')}>
+                 {this.validator.message('aplicationType', this.state.appTypeSelected, 'required')}</FormFeedback>
 
               </FormGroup>
               <FormGroup>
@@ -1123,7 +1182,7 @@ class Create extends Component {
                 : ""
               }
 
-              <FormGroup>
+              <FormGroup check={false}>
                 <Label>Document Name</Label>
                 {!this.state.showDocAttach && !this.state.showDocDropdown ? documentForLTI : ""}
                 {this.state.showDocDropdown ? documentForLTU : ""}
@@ -1167,7 +1226,9 @@ class Create extends Component {
               <Collapse isOpen={!this.state.collapse}>
                 <FormGroup visibelity="false" >
                   <Label>Return Date</Label>
-                  <Input type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" />
+                  <Row />
+                  <DatePicker inline className="form-control" dateFormat="yyyy/MM/dd" selected={this.state.returnDate} onChange={this.dateChange} />
+                  {/* <Input onClickOutside type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" /> */}
                 </FormGroup>
                 <FormGroup>
                   <Label>Responsible Person <i className="fa fa-user" /></Label>
@@ -1291,7 +1352,9 @@ class Create extends Component {
                     <CustomInput
                       className="form-check-input"
                       type="checkbox"
-                      onChange={this.agreeTerm}
+                      checked={this.state.agreeTerms}
+                      onChange= {this.agreeTerm}
+                      onClick={this.isValid}
                       id="confirm" value="option1">
                       <Label className="form-check-label" check >
                         By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
@@ -1350,7 +1413,7 @@ class Create extends Component {
               <Row>
                 {this.state.agreeTerms ? <Button type="submit" color="success" onClick={this.submitRequest}>Submit</Button> : <Button disabled type="submit" color="success">Submit</Button>}
                 <span>&nbsp;</span>
-                <Button type="submit" color="primary" onClick={this.saveRequest}>Save</Button>
+                <Button type="submit" color="primary" onClick={() => {this.submitRequest('N')}}>Save</Button>
               </Row>
 
               {/* </div>
