@@ -5,6 +5,10 @@
 
 }
 
+.custom-modal{
+  width: 1200px;
+}
+
 .react-autosuggest__input {
   width: 240px;
   height: 100%;
