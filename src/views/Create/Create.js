@@ -1250,7 +1250,7 @@ class Create extends Component {
                   <Label>Return Date</Label>
                   <Row />
                   <InputGroup >
-                  <DatePicker placeholderText="Select the date"
+                  <DatePicker placeholderText="Select the date"  popperPlacement="auto-center"
                   className="form-control" dateFormat="yyyy/MM/dd" selected={this.state.returnDate} onChange={this.dateChange} />
                   </InputGroup>
                   {/* <Input onClickOutside type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" /> */}
