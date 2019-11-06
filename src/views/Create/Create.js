@@ -11,6 +11,8 @@ import AsyncSelect from 'react-select/async';
 import SimpleReactValidator from 'simple-react-validator';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import ReactDataGrid from 'react-data-grid';
+
 
 import {
   Button,
@@ -50,7 +52,7 @@ class Create extends Component {
     super(props);
     this.state = {
 
-      legalEntity: localStorage.getItem('legalEntity'),
+      // legalEntity: this.props.legalName,
 
       //retrieve from department Types Table
       department: [],
@@ -104,9 +106,9 @@ class Create extends Component {
       connectingChop: false,
 
       documentTableLTI: [],
-
       documentTableLTU: [],
       selectedDocs: [],
+      documents: [],
 
       agreeTerms: false,
       showDocAttach: false,
@@ -136,11 +138,11 @@ class Create extends Component {
         { id: "appTypeSelected", valid: false },
         // { id: "contractNum", valid: false },
         { id: "chopTypeSelected", valid: false },
-        { id: "docName", valid: false },
+        // { id: "docName", valid: false },
         // { id: "returnDate", valid: false },
         // { id: "resPerson", valid: false },
         { id: "purposeOfUse", valid: false },
-        { id: "numOfPages", valid: false },
+        // { id: "numOfPages", valid: false },
         { id: "addressTo", valid: false },
         { id: "pickUpBy", valid: false },
         { id: "remarks", valid: false },
@@ -166,13 +168,16 @@ class Create extends Component {
     this.saveRequest = this.saveRequest.bind(this);
     this.toggleHover = this.toggleHover.bind(this);
     this.addDocCheck = this.addDocCheck.bind(this);
-    this.selectAll = this.selectAll.bind(this);
+    // this.selectAll = this.selectAll.bind(this);
     this.handleDeptHead = this.handleDeptHead.bind(this);
     this.isValid = this.isValid.bind(this);
     this.checkDept = this.checkDept.bind(this);
 
     this.validator = new SimpleReactValidator({autoForceUpdate: this});
     this.formRef = React.createRef()
+    this.selectDocument = this.selectDocument.bind(this);
+    this.toggleConnection = this.toggleConnection.bind(this)
+    this.getDocuments = this.getDocuments.bind(this)
   };
 
   componentDidMount() {
@@ -182,7 +187,10 @@ class Create extends Component {
     this.getData("department", 'http://192.168.1.47/echopx/api/v1/departments');
     this.getData("applicationTypes", 'http://192.168.1.47/echopx/api/v1/apptypes');
     this.getData("chopTypes", 'http://192.168.1.47/echopx/api/v1/choptypes?companyid=' + this.props.legalName);
-    // this.getData("users", 'http://192.168.1.47/echopx/api/v1/users?displayName=');
+    this.getDeptHead(this.props.legalName)
+    this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, this.state.teamSelected)
+
+    
   }
 
   // toggle = () => setDropdownOpen(prevState => !prevState);
@@ -268,6 +276,22 @@ class Create extends Component {
     }
   }
 
+  async agreeTerm(event) {
+    await this.validate()
+    for (let i = 0; i < this.state.reqInfo.length; i++) {
+      if (this.state.reqInfo[i].valid) {
+        this.setState({ valid: true })
+      }
+      else {
+        this.setState({ valid: false })
+        break;
+      }
+    }
+    if (this.state.valid && this.state.inOffice) {
+      this.setState({ agreeTerms: true })
+    }
+  }
+
   async isValid(){
     await this.validate()
     for (let i = 0; i < this.state.reqInfo.length; i++) {
@@ -293,32 +317,56 @@ class Create extends Component {
     else {
       useInOffice = "N"
     }
-    const postReq = {
-      "userId": this.state.userId,
-      "employeeNum": this.state.employeeId,
-      "companyId": this.props.legalName,
-      "departmentId": this.state.deptSelected,
-      "applicationTypeId": this.state.appTypeSelected,
-      "chopTypeId": this.state.chopTypeSelected,
-      "documentName": this.state.docName,
-      "useInOffice": useInOffice,
-      "departmentHead": this.state.deptHeadSelected,
-      "documentDescription": "lorem ipsum dolor sit amet",
-      "addressTo": this.state.addressTo,
-      "contractNo": this.state.contractNum,
-      "contractName": "lorem ipsum dolor sit amet",
-      "purposeOfUse": this.state.purposeOfUse,
-      "remark": this.state.remarks,
-      "numOfPages": this.state.numOfPages,
-      "confirmed": this.state.agreeTerms,
-      // "returnDate": this.state.returnDate, //2019-10-22
-      "returnDate": "20191022",
-      "responsiblePerson": this.state.resPerson,
-      "contractSignedBy": this.state.contractSignedBy,
-      "contractSignedByFirstPerson": this.state.contractSign1,
-      "contractSignedBySecondPerson": this.state.contractSign2,
-      "effectivePeriod": "",
-      "isSubmitted": Submitted
+    let isConnectChop = "N"
+    if (this.state.connectingChop) {
+      isConnectChop = "Y"
+    }
+    else {
+      isConnectChop = "N"
+    }
+
+    let postReq = new FormData();
+    postReq.append("UserId", this.state.userId);
+    postReq.append("CompanyId", this.props.legalName);
+    postReq.append("DepartmentId", this.state.deptSelected);
+    postReq.append("ApplicationTypeId", this.state.appTypeSelected);
+    postReq.append("ContractNum", this.state.contractNum);
+    postReq.append("ChopTypeId", this.state.chopTypeSelected);
+    postReq.append("PurposeOfUse", this.state.purposeOfUse);
+    postReq.append("NumOfPages", this.state.numOfPages);
+    postReq.append("UseInOffice", useInOffice);
+    // postReq.append("DocumentDescription", "lorem ipsum");
+    postReq.append("AddressTo", this.state.addressTo);
+    postReq.append("PickUpBy", this.state.pickUpBy);
+    postReq.append("Remark", this.state.remarks);
+    postReq.append("IsConfirmed", "");
+    postReq.append("ReturnDate", "");
+    postReq.append("ResponsiblePerson", this.state.resPerson);
+    postReq.append("ContracySignedByFirstPerson", this.state.contractSign1);
+    postReq.append("ContractSignedBySecondPerson", this.state.contractSign2);
+    postReq.append("EffectivePeriod", this.state.effectivePeriod);
+    postReq.append("IsSubmitted", Submitted);
+    postReq.append("isConnectChop", isConnectChop);
+
+    for (let i = 0; i < this.state.documentTableLTI.length; i++) {
+      postReq.append("Documents[" + i + "].Attachment.File", this.state.documentTableLTI[i].docSelected);
+      postReq.append("Documents[" + i + "].DocumentNameEnglish", this.state.documentTableLTI[i].engName);
+      postReq.append("Documents[" + i + "].DocumentNameChinese", this.state.documentTableLTI[i].cnName);
+    }
+
+    for (let i = 0; i < this.state.documentTableLTU.length; i++) {
+      postReq.append("Documents[" + i + "].id", this.state.documentTableLTI[i].documentId);
+    }
+
+
+    for (let i = 0; i < this.state.selectedFiles.length; i++) {
+      postReq.append("Attachments[" + i + "].Attachment.File", this.state.selectedFiles[i]);
+      postReq.append("Attachments[" + i + "].Remark", "Y");
+    }
+    for (let i = 0; i < this.state.deptHeadSelected.length; i++) {
+      postReq.append("DepartmentHeads[" + i + "]", this.state.deptHeadSelected[i].value);
+
+
     }
     this.postData(postReq)
   }
@@ -332,15 +380,22 @@ class Create extends Component {
     else {
       useInOffice = "N"
     }
+
+    let isConnectChop = "N"
+    if (this.state.connectingChop) {
+      isConnectChop = "Y"
+    }
+    else {
+      isConnectChop = "N"
+    }
+
     let postReq = new FormData();
     postReq.append("UserId", this.state.userId);
     postReq.append("CompanyId", this.props.legalName);
     postReq.append("DepartmentId", this.state.deptSelected);
     postReq.append("ApplicationTypeId", this.state.appTypeSelected);
-    postReq.append("ContractNum", "");
+    postReq.append("ContractNum", this.state.contractNum);
     postReq.append("ChopTypeId", this.state.chopTypeSelected);
-    postReq.append("DocumentNameEnglish", "Renewal Document");
-    postReq.append("DocumentNameChinese", "续签文件");
     postReq.append("PurposeOfUse", this.state.purposeOfUse);
     postReq.append("NumOfPages", this.state.numOfPages);
     postReq.append("UseInOffice", useInOffice);
@@ -354,8 +409,9 @@ class Create extends Component {
     postReq.append("ResponsiblePerson", this.state.resPerson);
     postReq.append("ContracySignedByFirstPerson", this.state.contractSign1);
     postReq.append("ContractSignedBySecondPerson", this.state.contractSign2);
-    postReq.append("EffectivePeriod", "");
+    postReq.append("EffectivePeriod", this.state.effectivePeriod);
     postReq.append("IsSubmitted", Submitted);
+    postReq.append("isConnectChop", isConnectChop);
 
     for (let i = 0; i < this.state.documentTableLTI.length; i++) {
       postReq.append("Documents[" + i + "].Attachment.File", this.state.documentTableLTI[i].docSelected);
@@ -363,6 +419,11 @@ class Create extends Component {
       postReq.append("Documents[" + i + "].DocumentNameChinese", this.state.documentTableLTI[i].cnName);
 
     }
+
+    for (let i = 0; i < this.state.documentTableLTU.length; i++) {
+      postReq.append("Documents[" + i + "].id", this.state.documentTableLTI[i].documentId);
+    }
+
     for (let i = 0; i < this.state.selectedFiles.length; i++) {
       postReq.append("Attachments[" + i + "].Attachment.File", this.state.selectedFiles[i]);
       postReq.append("Attachments[" + i + "].Remark", "Y");
@@ -378,36 +439,25 @@ class Create extends Component {
     if(isSubmitted === 'N' && this.validator.allValid()){
         this.postData(postReq, isSubmitted)
     }
-      else {
+    if(this.validator.allValid() === false) {
         Swal.fire({
           type: 'info',
           title: 'required',
-          text:  'THe application type field is required'
+          text:  'The application type field is required'
         // Object.values(JSON.parse(JSON.stringify(this.validator.getErrorMessages())))
         })
         this.validator.showMessages();
     }
     // await this.validate()
-    for (let i = 0; i < this.state.reqInfo.length; i++) {
-      if (this.state.reqInfo[i].valid) {
-        this.setState({ valid: true })
-      }
-      else {
-        this.setState({ valid: false })
-
-        //function to scroll to specific posittion
-        // var el = this[this.state.reqInfo[i].id].current
-        // var elOffSetTop = document.getElementById(this.state.reqInfo[i].id).getBoundingClientRect().y
-        // var el = window.outerHeight + elOffSetTop
-        // var el = document.getElementById("contractNum").getBoundingClientRect()
-        // this.scrollToRef(el)
-        // console.log(window.outerHeight)
-        // console.log(elOffSetTop)
-        // console.log(this.state.reqInfo[i].id)
-
-        break;
-      }
-    }
+    // for (let i = 0; i < this.state.reqInfo.length; i++) {
+    //   if (this.state.reqInfo[i].valid) {
+    //     this.setState({ valid: true })
+    //   }
+    //   else {
+    //     this.setState({ valid: false })
+    //     break;
+    //   }
+    // }
     if (this.state.valid && this.state.inOffice) {
       this.postData(postReq, isSubmitted)
     }
@@ -420,6 +470,9 @@ class Create extends Component {
       collapse: !this.state.collapse,
     });
 
+  }
+  toggleConnection() {
+    this.setState({ connectingChop: !this.state.connectingChop })
   }
   //toggle Modal
   toggleModal() {
@@ -451,26 +504,78 @@ class Create extends Component {
     }
   }
 
+  async getDocuments(companyId, deptId, chopTypeId, teamId) {
+    let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=mbafc&departmentid=itafc&choptypeid=conchop&teamid=mbafcit'
+    let tempDocs = []
+
+    // let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=' + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
+    try {
+      await axios.get(url).then(res => {
+        tempDocs = res.data
+      })
+    } catch (error) {
+      console.error(error)
+    }
+    tempDocs.map((doc, index) => {
+      const keys = Object.keys(doc)
+      const obj = {}
+      obj.id = index
+      for (let i = 0; i < keys.length; i++) {
+        if (keys[i] === "departmentHeads") {
+          let dhApproved = ""
+          doc.departmentHeads.map(dh => {
+            dhApproved = dhApproved + dh.displayName + '; '
+          })
+          obj.dhApproved = dhApproved
+        }
+        else if (keys[i] === "expiryDate") {
+          let tempDate = doc[keys[i]]
+          let expiryDate = ""
+          for (let p = 0; p < tempDate.length; p++) {
+            if (p === 4 || p === 6) {
+              expiryDate = expiryDate + '/'
+            }
+            expiryDate = expiryDate + tempDate[p]
+
+          }
+          obj[keys[i]] = expiryDate
+        }
+        else {
+          obj[keys[i]] = doc[keys[i]]
+        }
+      }
+      this.setState(state => {
+        const documents = state.documents.concat(obj)
+
+        return {
+          documents
+        }
+      })
+    })
+  }
+
   async postData(formData, isSubmitted) {
     try {
       await axios.post('http://192.168.1.47/echopx/api/v1/tasks', formData, { headers: { 'Content-Type': '  application/json' } })
         .then(res => {
-          console.log(res.data)
-          if(isSubmitted === 'Y'){
-          Swal.fire({
-            title: res.data.status,
-            html: 'Request Submitted <br /> Reference Number: ' + res.data.referenceNum,
-            type: res.data.status
-          })
-        }if(isSubmitted === 'N') {
-          Swal.fire({
-            title: res.data.status,
-            text: 'Request Saved ',
-            footer: 'youre request saved as draft',
-            type: 'info',
-            onClose: ()=> {this.formReset()}
+          if(isSubmitted === 'N'){
+            Swal.fire({
+              title: res.data.status,
+              text: 'Request Saved ',
+              footer: 'youre request saved as draft',
+              type: 'info',
+              onClose: ()=> {this.formReset()}
           })
         }
+          if(isSubmitted === 'Y'){
+            Swal.fire({
+              title: res.data.status,
+              text: 'Request Submitted',
+              footer: 'your request is being processed and waiting for approval',
+              type: 'success',
+              onClose: ()=> {this.formReset()}
+          })
+          }
         })
     } catch (error) {
       console.error(error);
@@ -491,33 +596,22 @@ class Create extends Component {
       })
   }
 
-  async getDeptHead(companyId, deptId, teamId) {
-    if (teamId === "") {
+  async getDeptHead(companyId) {
 
-      await axios.get('http://192.168.1.47/echopx/api/v1/users?roleid=dh&companyid=' + companyId)
-        .then(res => {
-          this.setState({ deptHead: res.data })
-        })
-    }
-    else {
-      await axios.get('http://192.168.1.47/echopx/api/v1/deptheads?companyId=' + companyId + '&teamId=' + teamId)
-        .then(res => {
-          this.setState({ deptHead: res.data })
-        })
-    }
-
+    await axios.get('http://192.168.1.47/echopx/api/v1/users?roleid=dh&companyid=' + companyId)
+      .then(res => {
+        this.setState({ deptHead: res.data })
+      })
   }
 
   async getTeams(deptId) {
-    console.log(deptId)
-    let url = "http://192.168.1.47/echopx/api/v1/teams?departmentId="
-    await axios.get(url + deptId).then(res => {
+    let url = "http://192.168.1.47/echopx/api/v1/teams?companyid=" + this.props.legalName + "&departmentId=" + deptId
+    await axios.get(url).then(res => {
       this.setState({ teams: res.data })
     })
   }
 
   async getChopTypes(companyId, appTypeId) {
-    // console.log("COMPANY ID: "+ companyId + "  APP ID:", appTypeId)
     await axios.get('http://192.168.1.47/echopx/api/v1/choptypes?companyid=' + companyId + '&apptypeid=' + appTypeId)
       .then(res => {
         this.setState({ chopTypes: res.data })
@@ -535,6 +629,7 @@ class Create extends Component {
 
     //   }
     // }
+
     if (name === "returnDate") {
       console.log(event.target.value)
     }
@@ -557,6 +652,9 @@ class Create extends Component {
         this.setState({ showDocDropdown: true, showDocAttach: false, showTeams: true })
         if (this.state.deptSelected !== "") {
           this.getTeams(this.state.deptSelected)
+          if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.deptSelected !== "") {
+            this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, this.state.teamSelected)
+          }
         }
       }
       else {
@@ -568,19 +666,27 @@ class Create extends Component {
 
       }
       else {
-        // this.getData("chopTypes", 'http://192.168.1.47/echopx/api/v1/choptypes')
         this.setState({ CNIPS: false })
       }
       this.getChopTypes(this.props.legalName, event.target.value)
     }
+    else if (name === "chopTypeSelected") {
+      if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.appTypeSelected === "LTU") {
+        this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected)
+      }
+    }
     else if (name === "deptSelected") {
-      this.getDeptHead("MBAFC", event.target.value, "")
       if (this.state.appTypeSelected === "LTU" || this.state.appTypeSelected === "LTI") {
         this.getTeams(event.target.value)
       }
+      if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.appTypeSelected === "LTU") {
+        this.getDocuments(this.props.legalName, event.target.value, this.state.chopTypeSelected, this.state.teamSelected)
+      }
     }
     else if (name === "teamSelected") {
-      this.getDeptHead("MBAFC", this.state.deptSelected, event.target.value)
+      if (this.state.chopTypeSelected !== "" && this.state.appTypeSelected === "LTU") {
+        this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value)
+      }
     }
     this.setState({
       [name]: event.target.value
@@ -594,7 +700,7 @@ class Create extends Component {
     }
   };
 
-  deleteDocument(i) {
+  deleteAttachment(i) {
     this.setState(state => {
       const selectedFiles = state.selectedFiles.filter((item, index) => i !== index);
       return {
@@ -602,99 +708,51 @@ class Create extends Component {
       }
     })
   }
-
-  addDocumentLTI() {
-    var maxNumber = 45;
-    var rand = Math.floor((Math.random() * maxNumber) + 1);
-
-    const obj = {
-      id: rand,
-      engName: this.state.engName,
-      cnName: this.state.cnName,
-      docSelected: this.state.docSelected,
-      docName: this.state.docAttachedName,
-      docURL: URL.createObjectURL(this.state.docSelected),
-    }
-
+  deleteDocument(table, i) {
     this.setState(state => {
-      const documentTableLTI = state.documentTableLTI.concat(obj)
-
-      return {
-        documentTableLTI
+      if (table === "documentTableLTU") {
+        const documentTableLTU = state.documentTableLTU.filter((item, index) => i !== index)
+        return {
+          documentTableLTU
+        }
+      }
+      else if (table === "documentTableLTI") {
+        const documentTableLTI = state.documentTableLTI.filter((item, index) => i !== index)
+        return {
+          documentTableLTI
+        }
       }
     })
   }
 
-  addDocumentLTU() {
-    let ltuDoc = this.state.documentTableLTU
-    let exist = false
-    for (let i = 0; i < this.state.selectedDocs.length; i++) {
-      if (this.state.documentTableLTU.length !== 0) {
-        for (let j = 0; j < ltuDoc.length; j++) {
-          if (ltuDoc[j].id !== this.state.selectedDocs[i]) {
-            exist = false
-          }
-          else {
-            // console.log("document exist")
-            exist = true
-            break
-          }
-        }
-        if (!exist) {
-          this.setState(state => {
-            const tempDocLTU = state.documentTableLTI.filter(doc => doc.id === state.selectedDocs[i])
-            const documentTableLTU = state.documentTableLTU.concat(tempDocLTU)
-            return {
-              documentTableLTU
-            }
-          })
-        }
+  addDocumentLTI() {
+    var maxNumber = 45;
+    var rand = Math.floor((Math.random() * maxNumber) + 1);
+    console.log(this.state.docSelected)
+    if (this.state.docSelected !== null) {
+      const obj = {
+        id: rand,
+        engName: this.state.engName,
+        cnName: this.state.cnName,
+        docSelected: this.state.docSelected,
+        docName: this.state.docAttachedName,
+        docURL: URL.createObjectURL(this.state.docSelected),
       }
-      else {
-        this.setState(state => {
-          const tempDocLTU = state.documentTableLTI.filter(doc => doc.id === state.selectedDocs[i])
-          const documentTableLTU = state.documentTableLTU.concat(tempDocLTU)
-          return {
-            documentTableLTU
-          }
-        })
 
-      }
+      this.setState(state => {
+        const documentTableLTI = state.documentTableLTI.concat(obj)
+
+        return {
+          documentTableLTI
+        }
+      })
     }
+  }
 
-    // let selectedId = parseInt(this.state.docSelectedLTU)
-    // let tempDocLTI = this.state.documentTableLTI
-    // let tempDocLTU = this.state.documentTableLTU
-    // let exist = false
-    // this.setState(state => {
-    //   if (tempDocLTU.length !== 0) {
-    //     for (let p = 0; p < tempDocLTU.length; p++) {
-    //       if (selectedId === tempDocLTU[p].id) {
-    //         exist = true
-    //         Swal.fire({
-    //           title: 'Error',
-    //           text: 'Document already exists',
-    //           type: 'error'
-    //         })
-    //         break;
-    //       }
-    //       else {
-    //         exist = false
-    //       }
-    //     }
-    //   }
-    //   if (!exist) {
-    //     for (let i = 0; i < tempDocLTI.length; i++) {
-    //       if (tempDocLTI[i].id === selectedId) {
-    //         const documentTableLTU = state.documentTableLTU.concat(tempDocLTI[i])
-    //         console.log("Added: " + tempDocLTI[i].id)
-    //         return {
-    //           documentTableLTU
-    //         }
-    //       }
-    //     }
-    //   }
-    // })
+  addDocumentLTU() {
+    if (this.state.selectedDocs.length !== 0) {
+      this.setState({ documentTableLTU: this.state.selectedDocs })
+    }
   }
 
   getSuggestions(value) {
@@ -800,71 +858,26 @@ class Create extends Component {
     }
   }
 
-  agreeTerm(event) {
-    if (event.target.checked) {
-      this.setState({
-        agreeTerms: true
+  handleDeptHead(newValue) {
+    this.setState({ deptHeadSelected: newValue }, console.log(this.state.deptHeadSelected))
+  }
+
+  addDocCheck(row) {
+    this.setState({ selectedDocs: row })
+  }
+
+  selectDocument() {
+    if (this.state.documents.length === 0) {
+      Swal.fire({
+        title: "No Documents",
+        html: 'No documents to select from!',
+        type: "warning"
       })
     }
     else {
-      this.setState({
-        agreeTerms: false
-      })
-    }
-  }
-
-  handleDeptHead(newValue) {
-    this.setState({ deptHeadSelected: newValue })
-  }
-
-
-  selectAll(event) {
-    let checked = event.target.checked
-    for (let i = 0; i < this.state.documentTableLTI.length; i++) {
-      let uniqueDoc = document.getElementById(i + "addDoc").checked
-      let selectedId = this.state.documentTableLTI[i].id
-      this.setState(state => {
-        if (checked) {
-          if (!uniqueDoc) {
-            document.getElementById(i + "addDoc").checked = true
-            const selectedDocs = state.selectedDocs.concat(selectedId)
-            return {
-              selectedDocs
-            }
-          }
-        }
-        else {
-          if (uniqueDoc) {
-            document.getElementById(i + "addDoc").checked = false
-            const selectedDocs = state.selectedDocs.filter(item => item !== selectedId)
-            return {
-              selectedDocs
-            }
-          }
-        }
-      })
+      this.setState({ showDoc: !this.state.showDoc })
 
     }
-  }
-
-  addDocCheck(event, selectedId) {
-    // console.log(event.currentTarget.checked)
-    let checked = event.currentTarget.checked
-    console.log(checked)
-    this.setState(state => {
-      if (checked) {
-        const selectedDocs = state.selectedDocs.concat(selectedId)
-        return {
-          selectedDocs
-        }
-      }
-      else {
-        const selectedDocs = state.selectedDocs.filter(item => item !== selectedId)
-        return {
-          selectedDocs
-        }
-      }
-    })
   }
 
   dateChange = date => {
@@ -898,9 +911,9 @@ class Create extends Component {
     };
 
     const loadOptions = (inputValue, callback) => {
-        setTimeout(() => {
-          callback(filterColors(inputValue));
-        }, 100);
+      setTimeout(() => {
+        callback(filterColors(inputValue));
+      }, 100);
     }
 
     const status = (this.state.isLoading ? <Spinner size="sm" color="primary" /> : '');
@@ -938,6 +951,17 @@ class Create extends Component {
       type: 'search'
     }
 
+    const defaultColumnProperties = {
+      resizable: true
+    };
+
+    const docHeaders = [
+      { key: 'documentNameEnglish', name: 'Document Name (English)' },
+      { key: 'documentNameChinese', name: 'Document Name (Chinese)' },
+      { key: 'expiryDate', name: 'Expiry Date' },
+      { key: 'dhApproved', name: 'DH Approved' },
+    ].map(c => ({ ...c, ...defaultColumnProperties }))
+
     const DocTable = <div>
       <Table bordered>
         <thead>
@@ -958,7 +982,7 @@ class Create extends Component {
               <th id="viewDoc">
                 <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
               </th>
-              <th><img style={pointer} width="25px" onMouseOver={this.toggleHover} src={deleteBin} /></th>
+              <th><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></th>
             </tr>
           )}
         </tbody>
@@ -1007,43 +1031,33 @@ class Create extends Component {
         </Collapse>
       </div>
 
+
+
     const documentForLTU =
       <div>
-        <Button>Select Documents</Button>
-        <br />
-        {/* <Label>Document Name</Label> */}
-        <Button onClick={this.addDocumentLTU} color="primary" block>Add</Button>
-        <Table>
-          <thead>
-            <tr>
-              <th><CustomInput id="selectAll" onChange={this.selectAll} type="checkbox"></CustomInput></th>
-              <th>Document Name (English)</th>
-              <th>Document Name (Chinese)</th>
-              <th>Expiry Date</th>
-              <th>DH Approved</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.state.documentTableLTI.map((document, index) =>
-              <tr key={index}>
-                <th> <CustomInput id={index + "addDoc"} onChange={(e) => this.addDocCheck(e, document.id)} type="checkbox"></CustomInput></th>
-                <th>{document.engName}</th>
-                <th>{document.cnName}</th>
-                <th>DEMO</th>
-                <th>DEMO</th>
-              </tr>
-            )}
-          </tbody>
-        </Table>
-        {/* <InputGroup style={{ display: "flex" }}>
-          <Input type="select" name="select" id="exampleSelect" onChange={this.handleChange("docSelectedLTU")} defaultValue={0}>
-            <option value={0} disabled>Please select the document</option>
-            {this.state.documentTableLTI.map((document, index) =>
-              <option key={index} value={document.id}>Document Name (English): {document.engName}, Document Name (Chinese): {document.cnName}</option>
-            )}
-          </Input>
-          <Button onClick={this.addDocumentLTU}>Add Document</Button>
-        </InputGroup> */}
+        <Button onClick={this.selectDocument}>Select Documents</Button>
+        <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
+          <ModalHeader className="center"> Select Documents </ModalHeader>
+          <ModalBody>
+            <ReactDataGrid
+              columns={docHeaders}
+              rowGetter={i => this.state.documents[i]}
+              rowsCount={this.state.documents.length}
+              minWidth={1100}
+              enableRowSelect
+              onRowSelect={this.addDocCheck}
+              onColumnResize={(idx, width) =>
+                console.log('Column' + idx + ' has been resized to ' + width)}
+              minColumnWidth={100}
+
+
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button color="primary" block size="md" onClick={() => { this.addDocumentLTU(); this.selectDocument() }}>  Add </Button>
+          </ModalFooter>
+        </Modal>
+
         <Collapse isOpen={this.state.documentTableLTU.length !== 0}>
           <div>
             <br />
@@ -1063,15 +1077,15 @@ class Create extends Component {
                 {this.state.documentTableLTU.map((document, index) =>
                   <tr key={index}>
                     <th>{index + 1}</th>
-                    <th>{document.engName}</th>
-                    <th>{document.cnName}</th>
+                    <th>{document.documentNameEnglish}</th>
+                    <th>{document.documentNameChinese}</th>
                     <th id="viewDoc">
-                      <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+                      <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.expiryDate}</a>
                     </th>
                     <th id="viewDoc">
-                      <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+                      <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.dhApproved}</a>
                     </th>
-                    <th><img style={pointer} width="25px" onMouseOver={this.toggleHover} src={deleteBin} /></th>
+                    <th><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} onMouseOver={this.toggleHover} src={deleteBin} /></th>
                   </tr>
                 )}
               </tbody>
@@ -1079,31 +1093,6 @@ class Create extends Component {
           </div>
         </Collapse>
       </div>
-
-    const documentNormal =
-      <div>
-        {/* <Label>Document Name</Label> */}
-        <InputGroup>
-          <Input ref={this.docName} onChange={this.handleChange("docName")} type="textarea" name="textarea-input" id="docName" rows="3" placeholder="please describe in English or Chinese" />
-          <FormFeedback>Invalid Document Name</FormFeedback>
-        </InputGroup>
-      </div>
-
-    // let file = this.state.fileURL
-    // let type = this.state.fileType
-
-    // const docModal =
-    //   < Modal size="lg" scrollable isOpen={this.state.showDoc} >
-    //     <ModalHeader>{this.state.showDoc ? "File: " + this.state.docPreview.name : ""}</ModalHeader>
-    //     <ModalBody>
-    //       <FileViewer
-    //         fileType={type}
-    //         filePath={file}></FileViewer>
-    //     </ModalBody>
-    //     <ModalFooter>
-    //       <Button onClick={this.modal}>Close</Button>
-    //     </ModalFooter>
-    //   </Modal >
 
     return (
       <div>
@@ -1167,11 +1156,33 @@ class Create extends Component {
                  {this.validator.message('aplicationType', this.state.appTypeSelected, 'required')}</FormFeedback>
 
               </FormGroup>
+              {this.state.showDocAttach
+                ? <FormGroup>
+                  <Label>Effective Period</Label>
+                  <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input>
+                  <FormFeedback>Invalid Date Selected</FormFeedback>
+                </FormGroup>
+                : ""
+              }
+              {this.state.showTeams
+                ? <FormGroup>
+                  <Label>Entitled Team</Label>
+                  <InputGroup>
+                    <Input onChange={this.handleChange("teamSelected")} onClick={() => { this.getTeams(this.state.deptSelected) }} defaultValue="0" type="select">
+                      <option value="0" disabled>Please select a team</option>
+                      {this.state.teams.map((team, index) =>
+                        <option key={index} value={team.teamId}>{team.teamName}</option>
+                      )}
+                    </Input>
+                  </InputGroup>
+                </FormGroup>
+                : ""
+              }
               <FormGroup>
                 <Label>Chop Type</Label>
-                <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected" 
-                onClick={()=>{this.getChopTypes(this.props.legalName, this.state.appTypeSelected)}}
-                onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
+                <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected"
+                  onClick={() => { this.getChopTypes(this.props.legalName, this.state.appTypeSelected) }}
+                  onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
                   <option disabled value="0">Please Select ..</option>
                   {this.state.chopTypes.map((option, id) => (
                     <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
@@ -1215,7 +1226,7 @@ class Create extends Component {
                   <Row />
                   {/* </Col> */}
                   {/* <Col> */}
-                  <AppSwitch dataOn={'yes'} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
+                  <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
 
                   {/* </Col> */}
                   {/* </Row> */}
@@ -1225,7 +1236,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Number of Pages to Be Chopped</Label>
                 <InputGroup>
-                  <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="text" />
+                  <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" />
                   <FormFeedback>Invalid Number of pages </FormFeedback>
                 </InputGroup>
               </FormGroup>
@@ -1291,20 +1302,6 @@ class Create extends Component {
                   <FormFeedback>Please enter valid remarks</FormFeedback>
                 </InputGroup>
               </FormGroup>
-              {this.state.showTeams
-                ? <FormGroup>
-                  <Label>Team</Label>
-                  <InputGroup>
-                    <Input onChange={this.handleChange("teamSelected")} onClick={()=>{this.getTeams(this.state.deptSelected)}} defaultValue="0" type="select">
-                      <option value="0" disabled>Please select a team</option>
-                      {this.state.teams.map((team, index) =>
-                        <option key={index} value={team.teamId}>{team.teamName}</option>
-                      )}
-                    </Input>
-                  </InputGroup>
-                </FormGroup>
-                : ""
-              }
               {this.state.CNIPS
                 ? <FormGroup>
                   <Label>Contract Signed By: <i className="fa fa-user" /></Label>
@@ -1344,7 +1341,7 @@ class Create extends Component {
                 </FormGroup>
                 : <FormGroup>
                   <Label>Department Heads <i className="fa fa-user" /></Label>
-                  <small> &ensp; If you apply for MBAFC Company Chop, then Department Head shall be from MBAFC entity</small>
+                  <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity</small>
                   {/* <InputGroup> */}
                   <AsyncSelect loadOptions={loadOptions} isMulti onChange={this.handleDeptHead} 
                   menuPortalTarget={document.body} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -1369,7 +1366,7 @@ class Create extends Component {
                       type="checkbox"
                       checked={this.state.agreeTerms}
                       onChange= {this.agreeTerm}
-                      onClick={this.isValid}
+                      // onClick={this.isValid}
                       id="confirm" value="option1">
                       <Label className="form-check-label" check >
                         By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
@@ -1395,7 +1392,7 @@ class Create extends Component {
                       {this.state.selectedFiles.map((file, index) =>
                         <tr key={index}>
                           <th> {file.name}</th>
-                          <th onClick={()=> this.deleteDocument(index)}>Delete</th>
+                          <th onClick={()=> this.deleteAttachment(index)}>Delete</th>
                         </tr>
                       )}
                     </tbody>
@@ -1407,7 +1404,7 @@ class Create extends Component {
                         <div key={index}>
                           <Row>
                             <Col lg={11}>{file.name}</Col>
-                            <Col> <img style={pointer} width="30px" onMouseOver={this.toggleHover} onClick={() => this.deleteDocument(index)} src={deleteBin} /> </Col>
+                            <Col> <img style={pointer} width="30px" onMouseOver={this.toggleHover} onClick={() => this.deleteAttachment(index)} src={deleteBin} /> </Col>
                             {/* <Col >Delete</Col> */}
 
                           </Row>
@@ -1426,7 +1423,7 @@ class Create extends Component {
           <CardFooter>
             <div className="form-actions">
               <Row>
-                {this.state.agreeTerms ? <Button type="submit" color="success" onClick={this.submitRequest}>Submit</Button> : <Button disabled type="submit" color="success">Submit</Button>}
+                {this.state.agreeTerms ? <Button type="submit" color="success" onClick={()=> {this.submitRequest('Y')}}>Submit</Button> : <Button disabled type="submit" color="success">Submit</Button>}
                 <span>&nbsp;</span>
                 <Button type="submit" color="primary" onClick={() => {this.submitRequest('N')}}>Save</Button>
               </Row>
