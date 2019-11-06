@@ -169,6 +169,7 @@ class Create extends Component {
     this.selectAll = this.selectAll.bind(this);
     this.handleDeptHead = this.handleDeptHead.bind(this);
     this.isValid = this.isValid.bind(this);
+    this.checkDept = this.checkDept.bind(this);
 
     this.validator = new SimpleReactValidator({autoForceUpdate: this});
     this.formRef = React.createRef()
@@ -257,6 +258,15 @@ class Create extends Component {
     }
   }
 
+  checkDept() {
+    if(this.state.deptSelected === ""){
+      Swal.fire({
+        type:'info',
+        label:'required',
+        text:'department is required to show list of department Head'
+      })
+    }
+  }
 
   async isValid(){
     await this.validate()
@@ -367,14 +377,15 @@ class Create extends Component {
     }
     if(isSubmitted === 'N' && this.validator.allValid()){
         this.postData(postReq, isSubmitted)
-    }else {
-      Swal.fire({
-        type: 'info',
-        title: 'required',
-        text:  'THe application type field is required'
+    }
+      else {
+        Swal.fire({
+          type: 'info',
+          title: 'required',
+          text:  'THe application type field is required'
         // Object.values(JSON.parse(JSON.stringify(this.validator.getErrorMessages())))
-      })
-      this.validator.showMessages();
+        })
+        this.validator.showMessages();
     }
     // await this.validate()
     for (let i = 0; i < this.state.reqInfo.length; i++) {
@@ -1227,7 +1238,10 @@ class Create extends Component {
                 <FormGroup visibelity="false" >
                   <Label>Return Date</Label>
                   <Row />
-                  <DatePicker inline className="form-control" dateFormat="yyyy/MM/dd" selected={this.state.returnDate} onChange={this.dateChange} />
+                  <InputGroup >
+                  <DatePicker placeholderText="Select the date"
+                  className="form-control" dateFormat="yyyy/MM/dd" selected={this.state.returnDate} onChange={this.dateChange} />
+                  </InputGroup>
                   {/* <Input onClickOutside type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" /> */}
                 </FormGroup>
                 <FormGroup>
@@ -1334,6 +1348,7 @@ class Create extends Component {
                   {/* <InputGroup> */}
                   <AsyncSelect loadOptions={loadOptions} isMulti onChange={this.handleDeptHead} 
                   menuPortalTarget={document.body} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                  onBlur={this.checkDept}
                   />
                   {/* <Input id="deptHeadSelected" onChange={this.handleChange("deptHeadSelected")} name="deptHead" defaultValue="0" type="select">
                       <option value="0" disabled> Please select first Department Head</option>
