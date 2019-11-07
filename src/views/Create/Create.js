@@ -1044,6 +1044,7 @@ class Create extends Component {
               rowGetter={i => this.state.documents[i]}
               rowsCount={this.state.documents.length}
               minWidth={1100}
+              rowScrollTimeout={null} 
               enableRowSelect
               onRowSelect={this.addDocCheck}
               onColumnResize={(idx, width) =>
