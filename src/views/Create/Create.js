@@ -880,7 +880,7 @@ class Create extends Component {
     }
   }
 
-  dateChange = date => {
+  dateChange = name => date => {
     this.setState({
       returnDate: date
     });
@@ -1159,7 +1159,9 @@ class Create extends Component {
               {this.state.showDocAttach
                 ? <FormGroup>
                   <Label>Effective Period</Label>
-                  <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input>
+                  {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
+                  <DatePicker placeholderText="Select the date"  popperPlacement="auto-center" showPopperArrow={false}
+                  className="form-control" dateFormat="yyyy/MM/dd" selected={this.state.effectivePeriod} onChange={this.dateChange("effectivePeriod")} />
                   <FormFeedback>Invalid Date Selected</FormFeedback>
                 </FormGroup>
                 : ""
@@ -1250,8 +1252,8 @@ class Create extends Component {
                   <Label>Return Date</Label>
                   <Row />
                   <InputGroup >
-                  <DatePicker placeholderText="Select the date"  popperPlacement="auto-center"
-                  className="form-control" dateFormat="yyyy/MM/dd" selected={this.state.returnDate} onChange={this.dateChange} />
+                  <DatePicker placeholderText="Select the date"  popperPlacement="auto-center" showPopperArrow={false}
+                  className="form-control" dateFormat="yyyy/MM/dd" selected={this.state.returnDate} onChange={this.dateChange("returnDate")} />
                   </InputGroup>
                   {/* <Input onClickOutside type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" /> */}
                 </FormGroup>
