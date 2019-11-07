@@ -12,7 +12,7 @@ import SimpleReactValidator from 'simple-react-validator';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import ReactDataGrid from 'react-data-grid';
-
+import {LTI} from './AppType'
 
 import {
   Button,
@@ -172,6 +172,7 @@ class Create extends Component {
     this.handleDeptHead = this.handleDeptHead.bind(this);
     this.isValid = this.isValid.bind(this);
     this.checkDept = this.checkDept.bind(this);
+    this.deleteDocument = this.deleteDocument.bind(this);
 
     this.validator = new SimpleReactValidator({autoForceUpdate: this});
     this.formRef = React.createRef()
@@ -882,7 +883,7 @@ class Create extends Component {
 
   dateChange = date => {
     this.setState({
-      returnDate: date
+      [name]: date
     });
   };
 
