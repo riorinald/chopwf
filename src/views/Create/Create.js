@@ -340,19 +340,17 @@ class Create extends Component {
     postReq.append("BranchId", this.state.branchSelected)
     postReq.append("DocumentCheckBy", this.state.docCheckBySelected)
 
-    if (!this.state.isLTU) { // STU, LTI, CNIPS
-      for (let i = 0; i < this.state.documentTableLTI.length; i++) {
-        postReq.append("Documents[" + i + "].Attachment.File", this.state.documentTableLTI[i].docSelected);
-        postReq.append("Documents[" + i + "].DocumentNameEnglish", this.state.documentTableLTI[i].engName);
-        postReq.append("Documents[" + i + "].DocumentNameChinese", this.state.documentTableLTI[i].cnName);
+    for (let i = 0; i < this.state.documentTableLTI.length; i++) {
+      postReq.append("Documents[" + i + "].Attachment.File", this.state.documentTableLTI[i].docSelected);
+      postReq.append("Documents[" + i + "].DocumentNameEnglish", this.state.documentTableLTI[i].engName);
+      postReq.append("Documents[" + i + "].DocumentNameChinese", this.state.documentTableLTI[i].cnName);
 
-      }
     }
-    else {   //LTU
-      for (let i = 0; i < this.state.documentTableLTU.length; i++) {
-        postReq.append("DocumentIds[" + i + "]", this.state.documentTableLTI[i].documentId);
-      }
+
+    for (let i = 0; i < this.state.documentTableLTU.length; i++) {
+      postReq.append("DocumentIds[" + i + "]", this.state.documentTableLTU[i].documentId);
     }
+
 
     //multiple dept. Heads
     for (let i = 0; i < this.state.deptHeadSelected.length; i++) {
@@ -425,7 +423,7 @@ class Create extends Component {
   }
 
   async getDocuments(companyId, deptId, chopTypeId, teamId) {
-    // let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=mbafc&departmentid=itafc&choptypeid=conchop&teamid=mbafcit'
+    // let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=mbafc&departmentid=itafc&choptypeid=BCSCHOP&teamid=mbafcit'
     let tempDocs = []
 
     let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=' + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
@@ -550,6 +548,7 @@ class Create extends Component {
 
     //APPLICATION TYPE
     if (name === "appTypeSelected") {
+      this.setState({documentTableLTI: [], documentTableLTU: [] })
 
       //Update Chop Types
       this.getChopTypes(this.props.legalName, event.target.value)
@@ -867,6 +866,11 @@ class Create extends Component {
     }
     else {
       pointer = {}
+    }
+
+    const reactSelectControl = {
+      control: styles => ({ ...styles, borderColor: '#F86C6B', boxShadow: '0 0 0 0px #F86C6B', ':hover': { ...styles[':hover'], borderColor: '#F86C6B' } }),
+      menuPortal: base => ({ ...base, zIndex: 9999 })
     }
 
     const filterColors = (inputValue) => {
@@ -1311,7 +1315,7 @@ class Create extends Component {
                       onChange={this.handleSelectOption("deptHeadSelected")}
                       menuPortalTarget={document.body}
                       components={animatedComponents}
-                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
+                      styles={this.state.deptHeadSelected === null ? reactSelectControl : ""} />
                     {this.state.deptHeadSelected === null
                       ? <small style={{ color: '#F86C6B' }}>Please select a Department Head</small>
                       : ""
