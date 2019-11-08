@@ -11,6 +11,7 @@ import SimpleReactValidator from 'simple-react-validator';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import ReactDataGrid from 'react-data-grid';
+import { addDays } from 'date-fns';
 
 
 import {
@@ -123,6 +124,9 @@ class Create extends Component {
       isCNIPS: false,
 
 
+      dateView1:"",
+      dateView2:"",
+
       reqInfo: [
         { id: "deptSelected", valid: false },
         { id: "appTypeSelected", valid: false },
@@ -166,7 +170,6 @@ class Create extends Component {
     this.selectDocument = this.selectDocument.bind(this);
     this.toggleConnection = this.toggleConnection.bind(this)
     this.getDocuments = this.getDocuments.bind(this)
-    this.handleRemarks = this.handleRemarks.bind(this)
     this.handleDocCheckBy = this.handleDocCheckBy.bind(this)
   };
 
@@ -812,8 +815,9 @@ class Create extends Component {
     }
   }
 
-  handleDeptHead(newValue) {
-    this.setState({ deptHeadSelected: newValue }, console.log(this.state.deptHeadSelected))
+  handleDeptHead = sname => newValue => {
+    this.setState({ [sname]: newValue }, 
+    )
   }
 
   handleDocCheckBy(newValue) {
@@ -838,12 +842,16 @@ class Create extends Component {
     }
   }
 
-  dateChange = date => {
-    var tempDate = new Date();
-    // tempDate.toLocaleDateString();
+  dateChange = (name,view) => date => {
+    let year = date.getFullYear()
+    let month = date.getDate()
+    let day = date.getDay() 
+    let dates = ''+year+month+day
+    console.log(dates)
     this.setState({
-      returnDate: date
-    }, console.log(date));
+      [name]: dates,
+      [view]:date
+    });
   };
 
   //scroll To Function
@@ -1019,6 +1027,7 @@ class Create extends Component {
               rowGetter={i => this.state.documents[i]}
               rowsCount={this.state.documents.length}
               minWidth={1100}
+              rowScrollTimeout={null} 
               enableRowSelect
               onRowSelect={this.addDocCheck}
               onColumnResize={(idx, width) =>
@@ -1069,7 +1078,7 @@ class Create extends Component {
         </Collapse>
       </div>
 
-    return (
+return (
       <div>
         <h3>Create</h3>
         <Card>
@@ -1134,7 +1143,15 @@ class Create extends Component {
               {this.state.isLTI
                 ? <FormGroup>
                   <Label>Effective Period</Label>
-                  <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input>
+                  {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
+                  <DatePicker placeholderText="YYYY/MM/DD"  popperPlacement="auto-center" showPopperArrow={false} todayButton="Today" 
+                  className="form-control"  required dateFormat="yyyy/MM/dd" withPortal 
+                  peekNextMonth
+                  showMonthDropdown
+                  showYearDropdown
+                  selected={this.state.dateView1} 
+                  onChange={this.dateChange("effectivePeriod", "dateView1")} 
+                  minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                   <FormFeedback>Invalid Date Selected</FormFeedback>
                 </FormGroup>
                 : ""
@@ -1216,14 +1233,23 @@ class Create extends Component {
                   <Label>Return Date</Label>
                   <Row />
                   <InputGroup >
-                    <DatePicker placeholderText="Select the date" popperPlacement="auto-center"
-                      className="form-control" dateFormat="yyyy/MM/dd" selected={this.state.returnDate} onChange={this.dateChange} />
+                  <DatePicker placeholderText="YYYY/MM/DD"  popperPlacement="auto-center" showPopperArrow={false} todayButton="Today" 
+                  className="form-control"  required dateFormat="yyyy/MM/dd"
+                  selected={this.state.dateView2} 
+                  onChange={this.dateChange("returnDate","dateView2")} 
+                  minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                   </InputGroup>
                   {/* <Input onClickOutside type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" /> */}
                 </FormGroup>
                 <FormGroup>
                   <Label>Responsible Person <i className="fa fa-user" /></Label>
-                  <Autosuggest
+                  <AsyncSelect 
+                    loadOptions={loadOptions} 
+                    isMulti onChange={this.handleDeptHead("resPerson")} 
+                    menuPortalTarget={document.body} 
+                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                /> 
+                  {/* <Autosuggest
                     id="resPerson"
                     suggestions={suggestions}
                     onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
@@ -1231,7 +1257,7 @@ class Create extends Component {
                     getSuggestionValue={this.getSuggestionValue}
                     renderSuggestion={this.renderSuggestion}
                     inputProps={inputResPerson}
-                  />
+                  /> */}
                   {/* <Input type="text" id="resPerson" onChange={this.handleChange("resPerson")} placeholder="responsible person" /> */}
                 </FormGroup>
               </Collapse>
@@ -1244,8 +1270,14 @@ class Create extends Component {
               </FormGroup>
               <FormGroup>
                 <Label>Pick Up By <i className="fa fa-user" /> </Label>
+                <AsyncSelect 
+                    loadOptions={loadOptions} 
+                    isMulti onChange={this.handleDeptHead("PickUpBy")} 
+                    menuPortalTarget={document.body} 
+                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                />
                 <InputGroup>
-                  <Autosuggest
+                  {/* <Autosuggest
                     id="pickUpBy"
                     suggestions={suggestions}
                     onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
@@ -1254,7 +1286,7 @@ class Create extends Component {
                     renderSuggestion={this.renderSuggestion}
                     inputProps={inputProps}
                     renderInputComponent={this.renderInputComponent}
-                  />
+                  /> */}
                   {/* <FormFeedback>Please select a person  to pick up by</FormFeedback> */}
 
                   {/* <Input ref={this.pickUpBy} onChange={this.handleChange("pickUpBy")} id="pickUpBy" size="16" type="text" placeholder="enter name to search ..." /> */}
@@ -1275,8 +1307,14 @@ class Create extends Component {
                   <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
                   <Row>
                     <Col>
+                      <AsyncSelect 
+                          loadOptions={loadOptions} 
+                          isMulti onChange={this.handleDeptHead("contractSign1")} 
+                          menuPortalTarget={document.body} 
+                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                      /> 
                       <InputGroup>
-                        <Autosuggest
+                        {/* <Autosuggest
                           id="contractSign1"
                           suggestions={suggestions}
                           onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
@@ -1284,13 +1322,19 @@ class Create extends Component {
                           getSuggestionValue={this.getSuggestionValue}
                           renderSuggestion={this.renderSuggestion}
                           inputProps={inputContract1}
-                        />
+                        /> */}
                         {/* <Input typew="text" placeholder="Enter name of First Person" onChange={this.handleChange("contractSign1")}></Input> */}
                       </InputGroup>
                     </Col>
                     <Col>
+                      <AsyncSelect 
+                          loadOptions={loadOptions} 
+                          isMulti onChange={this.handleDeptHead("contractSign2")} 
+                          menuPortalTarget={document.body} 
+                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                      />
                       <InputGroup>
-                        <Autosuggest
+                        {/* <Autosuggest
                           id="contractSign2"
                           suggestions={suggestions}
                           onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
@@ -1298,7 +1342,7 @@ class Create extends Component {
                           getSuggestionValue={this.getSuggestionValue}
                           renderSuggestion={this.renderSuggestion}
                           inputProps={inputContract2}
-                        />
+                        /> */}
                         {/* <Input type="text" placeholder="Enter name of Second Person" onChange={this.handleChange("contractSign2")} ></Input> */}
                       </InputGroup>
                     </Col>
