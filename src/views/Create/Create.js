@@ -7,6 +7,7 @@ import theme from './theme.css'
 import deleteBin from '../../assets/img/deletebin.png'
 import InputMask from "react-input-mask";
 import AsyncSelect from 'react-select/async';
+import makeAnimated from 'react-select/animated';
 import SimpleReactValidator from 'simple-react-validator';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -46,6 +47,9 @@ import { string } from 'prop-types';
 const notes = <p>如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。
   For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly.
   If you have any questions regarding the application process, please feel free to contact HR. </p>;
+
+const animatedComponents = makeAnimated();
+
 
 class Create extends Component {
   constructor(props) {
@@ -124,8 +128,8 @@ class Create extends Component {
       isCNIPS: false,
 
 
-      dateView1:"",
-      dateView2:"",
+      dateView1: "",
+      dateView2: "",
 
       reqInfo: [
         { id: "deptSelected", valid: false },
@@ -138,7 +142,7 @@ class Create extends Component {
         { id: "purposeOfUse", valid: false },
         // { id: "numOfPages", valid: false },
         { id: "addressTo", valid: false },
-        { id: "pickUpBy", valid: false },
+        // { id: "pickUpBy", valid: false },
         { id: "remarks", valid: false },
         // { id: "deptHeadSelected", valid: false },
         // { id: "contractSign1", valid: false },
@@ -161,7 +165,7 @@ class Create extends Component {
     this.addDocumentLTU = this.addDocumentLTU.bind(this);
     this.toggleHover = this.toggleHover.bind(this);
     this.addDocCheck = this.addDocCheck.bind(this);
-    this.handleDeptHead = this.handleDeptHead.bind(this);
+    this.handleSelectOption = this.handleSelectOption.bind(this);
     this.isValid = this.isValid.bind(this);
     this.checkDept = this.checkDept.bind(this);
 
@@ -170,27 +174,20 @@ class Create extends Component {
     this.selectDocument = this.selectDocument.bind(this);
     this.toggleConnection = this.toggleConnection.bind(this)
     this.getDocuments = this.getDocuments.bind(this)
-    this.handleDocCheckBy = this.handleDocCheckBy.bind(this)
   };
 
   componentDidMount() {
-    //Get User Details
 
     this.getUserData();
     this.getData("department", 'http://192.168.1.47/echopx/api/v1/departments');
     this.getData("applicationTypes", 'http://192.168.1.47/echopx/api/v1/apptypes');
     this.getData("chopTypes", 'http://192.168.1.47/echopx/api/v1/choptypes?companyid=' + this.props.legalName);
-    // this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, this.state.teamSelected)
 
 
   }
 
-  // toggle = () => setDropdownOpen(prevState => !prevState);
 
   validate() {
-    // let currentDate = new Date().getDate() + "/" + new Date().getMonth() + "/" + new Date().getFullYear();
-    // console.log(currentDate)
-    // console.log(this.state.returnDate)
     for (let i = 0; i < this.state.reqInfo.length; i++) {
       if (this.state[this.state.reqInfo[i].id].length !== 1 && this.state[this.state.reqInfo[i].id] !== "") {
         this.setState(state => {
@@ -301,7 +298,6 @@ class Create extends Component {
   }
 
   async submitRequest(isSubmitted) {
-    let Submitted = isSubmitted
     let useInOffice = "Y"
     if (this.state.collapse) {
       useInOffice = "Y"
@@ -330,7 +326,6 @@ class Create extends Component {
     postReq.append("PurposeOfUse", this.state.purposeOfUse);
     postReq.append("NumOfPages", this.state.numOfPages);
     postReq.append("IsUseInOffice", useInOffice);
-    // postReq.append("DocumentDescription", "lorem ipsum");
     postReq.append("AddressTo", this.state.addressTo);
     postReq.append("PickUpBy", this.state.pickUpBy);
     postReq.append("Remark", this.state.remarks);
@@ -340,39 +335,35 @@ class Create extends Component {
     postReq.append("ContracySignedByFirstPerson", this.state.contractSign1);
     postReq.append("ContractSignedBySecondPerson", this.state.contractSign2);
     postReq.append("EffectivePeriod", this.state.effectivePeriod);
-    postReq.append("IsSubmitted", Submitted);
+    postReq.append("IsSubmitted", isSubmitted);
     postReq.append("isConnectChop", isConnectChop);
     postReq.append("BranchId", this.state.branchSelected)
     postReq.append("DocumentCheckBy", this.state.docCheckBySelected)
 
+    if (!this.state.isLTU) { // STU, LTI, CNIPS
+      for (let i = 0; i < this.state.documentTableLTI.length; i++) {
+        postReq.append("Documents[" + i + "].Attachment.File", this.state.documentTableLTI[i].docSelected);
+        postReq.append("Documents[" + i + "].DocumentNameEnglish", this.state.documentTableLTI[i].engName);
+        postReq.append("Documents[" + i + "].DocumentNameChinese", this.state.documentTableLTI[i].cnName);
 
-    // for STU, LIU, CNIPS
-    for (let i = 0; i < this.state.documentTableLTI.length; i++) {
-      postReq.append("Documents[" + i + "].Attachment.File", this.state.documentTableLTI[i].docSelected);
-      postReq.append("Documents[" + i + "].DocumentNameEnglish", this.state.documentTableLTI[i].engName);
-      postReq.append("Documents[" + i + "].DocumentNameChinese", this.state.documentTableLTI[i].cnName);
-
+      }
     }
-
-    //for LTU
-    for (let i = 0; i < this.state.documentTableLTU.length; i++) {
-      postReq.append("DocumentIds[" + i + "]", this.state.documentTableLTI[i].documentId);
+    else {   //LTU
+      for (let i = 0; i < this.state.documentTableLTU.length; i++) {
+        postReq.append("DocumentIds[" + i + "]", this.state.documentTableLTI[i].documentId);
+      }
     }
-
-    // for (let i = 0; i < this.state.selectedFiles.length; i++) {
-    //   postReq.append("Attachments[" + i + "].Attachment.File", this.state.selectedFiles[i]);
-    //   postReq.append("Attachments[" + i + "].Remark", "Y");
-    // }
 
     //multiple dept. Heads
     for (let i = 0; i < this.state.deptHeadSelected.length; i++) {
       postReq.append("DepartmentHeads[" + i + "]", this.state.deptHeadSelected[i].value);
+    }
 
 
-    }
-    for (var pair of postReq.entries()) {
-      console.log(pair[0] + ', ' + pair[1]);
-    }
+    // for (var pair of postReq.entries()) {
+    //   console.log(pair[0] + ', ' + pair[1]);
+    // }
+
 
     if (isSubmitted === 'N' && this.validator.allValid()) {
       this.postData(postReq, isSubmitted)
@@ -434,10 +425,10 @@ class Create extends Component {
   }
 
   async getDocuments(companyId, deptId, chopTypeId, teamId) {
-    let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=mbafc&departmentid=itafc&choptypeid=conchop&teamid=mbafcit'
+    // let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=mbafc&departmentid=itafc&choptypeid=conchop&teamid=mbafcit'
     let tempDocs = []
 
-    // let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=' + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
+    let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=' + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
     try {
       await axios.get(url).then(res => {
         tempDocs = res.data
@@ -624,7 +615,7 @@ class Create extends Component {
         this.setState({ showBranches: true })
         this.getData("branches", 'http://192.168.1.47/echopx/api/v1/branches?companyid=mblc')
       }
-  
+
       else {
         this.setState({ showBranches: false })
       }
@@ -632,7 +623,7 @@ class Create extends Component {
       if (event.target.value === "CONCHOP") {
         this.toggleModal();
       }
-  
+
 
     }
 
@@ -815,13 +806,13 @@ class Create extends Component {
     }
   }
 
-  handleDeptHead = sname => newValue => {
-    this.setState({ [sname]: newValue }, 
-    )
-  }
-
-  handleDocCheckBy(newValue) {
-    this.setState({ docCheckBySelected: newValue.value })
+  handleSelectOption = sname => newValue => {
+    if (sname === "deptHeadSelected") {
+      this.setState({ [sname]: newValue })
+    }
+    else {
+      this.setState({ [sname]: newValue.value})
+    }
   }
 
   addDocCheck(row) {
@@ -842,15 +833,15 @@ class Create extends Component {
     }
   }
 
-  dateChange = (name,view) => date => {
+  dateChange = (name, view) => date => {
     let year = date.getFullYear()
     let month = date.getDate()
-    let day = date.getDay() 
-    let dates = ''+year+month+day
+    let day = date.getDay()
+    let dates = '' + year + month + day
     console.log(dates)
     this.setState({
       [name]: dates,
-      [view]:date
+      [view]: date
     });
   };
 
@@ -1027,7 +1018,7 @@ class Create extends Component {
               rowGetter={i => this.state.documents[i]}
               rowsCount={this.state.documents.length}
               minWidth={1100}
-              rowScrollTimeout={null} 
+              rowScrollTimeout={null}
               enableRowSelect
               onRowSelect={this.addDocCheck}
               onColumnResize={(idx, width) =>
@@ -1078,7 +1069,7 @@ class Create extends Component {
         </Collapse>
       </div>
 
-return (
+    return (
       <div>
         <h3>Create</h3>
         <Card>
@@ -1144,14 +1135,14 @@ return (
                 ? <FormGroup>
                   <Label>Effective Period</Label>
                   {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
-                  <DatePicker placeholderText="YYYY/MM/DD"  popperPlacement="auto-center" showPopperArrow={false} todayButton="Today" 
-                  className="form-control"  required dateFormat="yyyy/MM/dd" withPortal 
-                  peekNextMonth
-                  showMonthDropdown
-                  showYearDropdown
-                  selected={this.state.dateView1} 
-                  onChange={this.dateChange("effectivePeriod", "dateView1")} 
-                  minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                  <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                    className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                    peekNextMonth
+                    showMonthDropdown
+                    showYearDropdown
+                    selected={this.state.dateView1}
+                    onChange={this.dateChange("effectivePeriod", "dateView1")}
+                    minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                   <FormFeedback>Invalid Date Selected</FormFeedback>
                 </FormGroup>
                 : ""
@@ -1233,32 +1224,22 @@ return (
                   <Label>Return Date</Label>
                   <Row />
                   <InputGroup >
-                  <DatePicker placeholderText="YYYY/MM/DD"  popperPlacement="auto-center" showPopperArrow={false} todayButton="Today" 
-                  className="form-control"  required dateFormat="yyyy/MM/dd"
-                  selected={this.state.dateView2} 
-                  onChange={this.dateChange("returnDate","dateView2")} 
-                  minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                    <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                      className="form-control" required dateFormat="yyyy/MM/dd"
+                      selected={this.state.dateView2}
+                      onChange={this.dateChange("returnDate", "dateView2")}
+                      minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                   </InputGroup>
                   {/* <Input onClickOutside type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" /> */}
                 </FormGroup>
                 <FormGroup>
                   <Label>Responsible Person <i className="fa fa-user" /></Label>
-                  <AsyncSelect 
-                    loadOptions={loadOptions} 
-                    isMulti onChange={this.handleDeptHead("resPerson")} 
-                    menuPortalTarget={document.body} 
+                  <AsyncSelect
+                    loadOptions={loadOptions}
+                    onChange={this.handleSelectOption("resPerson")}
+                    menuPortalTarget={document.body}
                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                /> 
-                  {/* <Autosuggest
-                    id="resPerson"
-                    suggestions={suggestions}
-                    onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-                    onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-                    getSuggestionValue={this.getSuggestionValue}
-                    renderSuggestion={this.renderSuggestion}
-                    inputProps={inputResPerson}
-                  /> */}
-                  {/* <Input type="text" id="resPerson" onChange={this.handleChange("resPerson")} placeholder="responsible person" /> */}
+                  />
                 </FormGroup>
               </Collapse>
               <FormGroup>
@@ -1270,26 +1251,13 @@ return (
               </FormGroup>
               <FormGroup>
                 <Label>Pick Up By <i className="fa fa-user" /> </Label>
-                <AsyncSelect 
-                    loadOptions={loadOptions} 
-                    isMulti onChange={this.handleDeptHead("PickUpBy")} 
-                    menuPortalTarget={document.body} 
-                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                <AsyncSelect
+                  loadOptions={loadOptions}
+                  onChange={this.handleSelectOption("PickUpBy")}
+                  menuPortalTarget={document.body}
+                  styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                 />
                 <InputGroup>
-                  {/* <Autosuggest
-                    id="pickUpBy"
-                    suggestions={suggestions}
-                    onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-                    onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-                    getSuggestionValue={this.getSuggestionValue}
-                    renderSuggestion={this.renderSuggestion}
-                    inputProps={inputProps}
-                    renderInputComponent={this.renderInputComponent}
-                  /> */}
-                  {/* <FormFeedback>Please select a person  to pick up by</FormFeedback> */}
-
-                  {/* <Input ref={this.pickUpBy} onChange={this.handleChange("pickUpBy")} id="pickUpBy" size="16" type="text" placeholder="enter name to search ..." /> */}
                   <FormFeedback>Please enter a valid name to search</FormFeedback>
                 </InputGroup>
               </FormGroup>
@@ -1297,8 +1265,7 @@ return (
                 <Label>Remark</Label>
                 <InputGroup>
                   <Input ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
-                  {/* <AppSwitch  className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} ></AppSwitch> */}
-                  {/* <FormFeedback>Please enter valid remarks</FormFeedback> */}
+                  <FormFeedback>Please add remarks</FormFeedback>
                 </InputGroup>
               </FormGroup>
               {this.state.isCNIPS
@@ -1307,43 +1274,23 @@ return (
                   <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
                   <Row>
                     <Col>
-                      <AsyncSelect 
-                          loadOptions={loadOptions} 
-                          isMulti onChange={this.handleDeptHead("contractSign1")} 
-                          menuPortalTarget={document.body} 
-                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                      /> 
+                      <AsyncSelect
+                        loadOptions={loadOptions}
+                        onChange={this.handleSelectOption("contractSign1")}
+                        menuPortalTarget={document.body}
+                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                      />
                       <InputGroup>
-                        {/* <Autosuggest
-                          id="contractSign1"
-                          suggestions={suggestions}
-                          onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-                          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-                          getSuggestionValue={this.getSuggestionValue}
-                          renderSuggestion={this.renderSuggestion}
-                          inputProps={inputContract1}
-                        /> */}
-                        {/* <Input typew="text" placeholder="Enter name of First Person" onChange={this.handleChange("contractSign1")}></Input> */}
                       </InputGroup>
                     </Col>
                     <Col>
-                      <AsyncSelect 
-                          loadOptions={loadOptions} 
-                          isMulti onChange={this.handleDeptHead("contractSign2")} 
-                          menuPortalTarget={document.body} 
-                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                      <AsyncSelect
+                        loadOptions={loadOptions}
+                        onChange={this.handleSelectOption("contractSign2")}
+                        menuPortalTarget={document.body}
+                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                       />
                       <InputGroup>
-                        {/* <Autosuggest
-                          id="contractSign2"
-                          suggestions={suggestions}
-                          onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-                          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-                          getSuggestionValue={this.getSuggestionValue}
-                          renderSuggestion={this.renderSuggestion}
-                          inputProps={inputContract2}
-                        /> */}
-                        {/* <Input type="text" placeholder="Enter name of Second Person" onChange={this.handleChange("contractSign2")} ></Input> */}
                       </InputGroup>
                     </Col>
                   </Row>
@@ -1352,15 +1299,23 @@ return (
                 : this.state.isLTU
                   ? <FormGroup>
                     <Label>Document Check By <i className="fa fa-user" /></Label>
-                    <AsyncSelect menuPortalTarget={document.body} onChange={this.handleDocCheckBy}
+                    <AsyncSelect menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
                       loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
                   </FormGroup>
                   : <FormGroup>
                     <Label>Department Heads <i className="fa fa-user" /></Label>
                     <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity</small>
-                    <AsyncSelect loadOptions={loadOptions} isMulti onChange={this.handleDeptHead}
-                      menuPortalTarget={document.body} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                      onBlur={this.checkDept} />
+                    <AsyncSelect
+                      loadOptions={loadOptions}
+                      isMulti
+                      onChange={this.handleSelectOption("deptHeadSelected")}
+                      menuPortalTarget={document.body}
+                      components={animatedComponents}
+                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
+                    {this.state.deptHeadSelected === null
+                      ? <small style={{ color: '#F86C6B' }}>Please select a Department Head</small>
+                      : ""
+                    }
                   </FormGroup>
               }
 
