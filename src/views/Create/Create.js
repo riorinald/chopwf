@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { AppSwitch } from '@coreui/react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import Autosuggest from 'react-autosuggest';
+// import Autosuggest from 'react-autosuggest';
 import theme from './theme.css'
 import deleteBin from '../../assets/img/deletebin.png'
 import InputMask from "react-input-mask";
@@ -13,7 +13,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import ReactDataGrid from 'react-data-grid';
 import { addDays } from 'date-fns';
-
+import config from '../../config';
 
 import {
   Button,
@@ -40,8 +40,8 @@ import {
   Table,
   Spinner
 } from 'reactstrap';
-import { file, thisExpression } from '@babel/types';
-import { string } from 'prop-types';
+// import { file, thisExpression } from '@babel/types';
+// import { string } from 'prop-types';
 
 //notes can be updated by text only or editable in HTML editor
 const notes = <p>如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。
@@ -169,7 +169,7 @@ class Create extends Component {
     this.isValid = this.isValid.bind(this);
     this.checkDept = this.checkDept.bind(this);
 
-    this.validator = new SimpleReactValidator({ autoForceUpdate: this });
+    this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
     this.toggleConnection = this.toggleConnection.bind(this)
@@ -179,9 +179,9 @@ class Create extends Component {
   componentDidMount() {
 
     this.getUserData();
-    this.getData("department", 'http://192.168.1.47/echopx/api/v1/departments');
-    this.getData("applicationTypes", 'http://192.168.1.47/echopx/api/v1/apptypes');
-    this.getData("chopTypes", 'http://192.168.1.47/echopx/api/v1/choptypes?companyid=' + this.props.legalName);
+    this.getData("department", `${config.url}/departments`);
+    this.getData("applicationTypes", `${config.url}/apptypes`);
+    this.getData("chopTypes", `${config.url}/choptypes?companyid=` + this.props.legalName);
 
 
   }
@@ -425,10 +425,10 @@ class Create extends Component {
   }
 
   async getDocuments(companyId, deptId, chopTypeId, teamId) {
-    // let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=mbafc&departmentid=itafc&choptypeid=conchop&teamid=mbafcit'
+    // let url = 'http://192.168.1.47/echopx/documents?companyid=mbafc&departmentid=itafc&choptypeid=conchop&teamid=mbafcit'
     let tempDocs = []
 
-    let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=' + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
+    let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
     try {
       await axios.get(url).then(res => {
         tempDocs = res.data
@@ -476,7 +476,7 @@ class Create extends Component {
 
   async postData(formData, isSubmitted) {
     try {
-      await axios.post('http://192.168.1.47/echopx/api/v1/tasks', formData, { headers: { 'Content-Type': '  application/json' } })
+      await axios.post(`${config.url}/tasks`, formData, { headers: { 'Content-Type': '  application/json' } })
         .then(res => {
           if (isSubmitted === 'N') {
             Swal.fire({
@@ -510,7 +510,7 @@ class Create extends Component {
     let token = localStorage.getItem('token')
     let ticket = localStorage.getItem('ticket')
     let userId = localStorage.getItem('userId')
-    await axios.get('http://192.168.1.47/echopx/api/v1/users/' + userId, { headers: { 'ticket': ticket } })
+    await axios.get(`${config.url}/users/` + userId, { headers: { 'ticket': ticket } })
       .then(res => {
         this.setState({ employeeId: res.data.employeeNum, telNumber: res.data.telephoneNum, userId: userId })
       })
@@ -518,28 +518,28 @@ class Create extends Component {
 
   async getDeptHead(companyId) {
 
-    await axios.get('http://192.168.1.47/echopx/api/v1/users?companyid=' + companyId + '&displayname=&excludeuserid=' + this.state.userId)
+    await axios.get(`${config.url}/users?companyid=` + companyId + '&displayname=&excludeuserid=' + this.state.userId)
       .then(res => {
         this.setState({ deptHead: res.data })
       })
   }
 
   async getDocCheckBy(displayName) {
-    await axios.get('http://192.168.1.47/echopx/api/v1/users?displayname=' + displayName + '&excludeuserid=' + this.state.userId)
+    await axios.get(`${config.url}/users?displayname=` + displayName + '&excludeuserid=' + this.state.userId)
       .then(res => {
         this.setState({ docCheckBy: res.data })
       })
   }
 
   async getTeams(deptId) {
-    let url = "http://192.168.1.47/echopx/api/v1/teams?companyid=" + this.props.legalName + "&departmentId=" + deptId
+    let url = `${config.url}/teams?companyid=` + this.props.legalName + "&departmentId=" + deptId
     await axios.get(url).then(res => {
       this.setState({ teams: res.data })
     })
   }
 
   async getChopTypes(companyId, appTypeId) {
-    await axios.get('http://192.168.1.47/echopx/api/v1/choptypes?companyid=' + companyId + '&apptypeid=' + appTypeId)
+    await axios.get(`${config.url}/choptypes?companyid=` + companyId + '&apptypeid=' + appTypeId)
       .then(res => {
         this.setState({ chopTypes: res.data })
       })
@@ -613,7 +613,7 @@ class Create extends Component {
 
       if (event.target.value === "BCSCHOP") {
         this.setState({ showBranches: true })
-        this.getData("branches", 'http://192.168.1.47/echopx/api/v1/branches?companyid=mblc')
+        this.getData("branches", `${config.url}/branches?companyid=mblc`)
       }
 
       else {
@@ -708,7 +708,7 @@ class Create extends Component {
       isLoading: !this.isLoading
     });
     const thisReq = this.lastReq =
-      axios.get(`http://192.168.1.47/echopx/api/v1/users?displayName=%${value}`)
+      axios.get(`${config.url}/users?displayName=%${value}`)
         .then(response => {
           if (thisReq !== this.lastReq) {
             return;
@@ -968,7 +968,7 @@ class Create extends Component {
 
           {this.state.isCNIPS
             ? <Col ><FormGroup>
-              <InputMask mask="*-*-*-9999-9999" className="form-control" defaultValue={this.state.contractNum} onChange={this.handleChange("contractNum")}></InputMask>
+              <InputMask placeholder="enter contract number" mask="*-*-*-9999-9999" className="form-control" defaultValue={this.state.contractNum} onChange={this.handleChange("contractNum")}></InputMask>
             </FormGroup></Col>
             // <Col ><FormGroup>
             //   <Input onChange={this.handleChange("contractNum")} placeholder="Please enter the contract Number"></Input>
@@ -1019,7 +1019,7 @@ class Create extends Component {
               rowsCount={this.state.documents.length}
               minWidth={1100}
               rowScrollTimeout={null}
-              enableRowSelect
+              enableRowSelect={null}
               onRowSelect={this.addDocCheck}
               onColumnResize={(idx, width) =>
                 console.log('Column' + idx + ' has been resized to ' + width)}
@@ -1223,13 +1223,11 @@ class Create extends Component {
                 <FormGroup visibelity="false" >
                   <Label>Return Date</Label>
                   <Row />
-                  <InputGroup >
                     <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                      className="form-control" required dateFormat="yyyy/MM/dd"
-                      selected={this.state.dateView2}
+                      className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                      selected={this.state.dateView2} 
                       onChange={this.dateChange("returnDate", "dateView2")}
                       minDate={new Date()} maxDate={addDays(new Date(), 365)} />
-                  </InputGroup>
                   {/* <Input onClickOutside type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" /> */}
                 </FormGroup>
                 <FormGroup>
