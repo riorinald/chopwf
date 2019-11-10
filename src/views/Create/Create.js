@@ -140,11 +140,12 @@ class Create extends Component {
         // { id: "returnDate", valid: false },
         // { id: "resPerson", valid: false },
         { id: "purposeOfUse", valid: false },
-        // { id: "numOfPages", valid: false },
+        { id: "numOfPages", valid: false },
         { id: "addressTo", valid: false },
-        // { id: "pickUpBy", valid: false },
+        { id: "pickUpBy", valid: false },
         { id: "remarks", valid: false },
-        // { id: "deptHeadSelected", valid: false },
+        { id: "deptHeadSelected", valid: false },
+        { id: "documentTableLTI", valid: false},
         // { id: "contractSign1", valid: false },
         // { id: "contractSign2", valid: false },
         // { id: "selectedFile", valid: false }
@@ -189,12 +190,27 @@ class Create extends Component {
 
   validate() {
     for (let i = 0; i < this.state.reqInfo.length; i++) {
-      if (this.state[this.state.reqInfo[i].id].length !== 1 && this.state[this.state.reqInfo[i].id] !== "") {
+      if (this.state[this.state.reqInfo[i].id].length >= 1 && this.state[this.state.reqInfo[i].id] !== "") {
         this.setState(state => {
           const reqInfo = state.reqInfo.map((item, j) => {
             if (j === i) {
+              if(item.id === "deptHeadSelected") {
+                var invalid = document.getElementById(item.id)
+                invalid.className = "isValid"
+                return { id: item.id, name: item.name, valid: true }
+                }
+              if(item.id === "pickUpBy") {
+                var invalid = document.getElementById(item.id)
+                invalid.className = "isValid"
+                return { id: item.id, name: item.name, valid: true }
+                }
+              if(item.id === "documentTableLTI") {
+                var invalid = document.getElementById(item.id)
+                invalid.className = ""
+                return { id: item.id, name: item.name, valid: true }
+                }
               var valid = document.getElementById(this.state.reqInfo[i].id)
-              valid.className = "form-control"
+              valid.className = "is-valid form-control"
               return { id: item.id, valid: true }
             }
             else {
@@ -210,9 +226,27 @@ class Create extends Component {
         this.setState(state => {
           const reqInfo = state.reqInfo.map((item, j) => {
             if (j === i) {
+              console.log(item, j)
+              if(item.id === "deptHeadSelected") {
+                var invalid = document.getElementById(item.id)
+                invalid.className = "notValid"
+                return { id: item.id, name: item.name, valid: false }
+              }
+              if(item.id === "pickUpBy") {
+                var invalid = document.getElementById(item.id)
+                invalid.className = "notValid"
+                return { id: item.id, name: item.name, valid: false }
+              }
+              if(item.id === "documentTableLTI") {
+                var invalid = document.getElementById(item.id)
+                invalid.className = "notValid"
+                return { id: item.id, name: item.name, valid: false }
+              }
+              else {
               var invalid = document.getElementById(item.id)
               invalid.className = "is-invalid form-control"
               return { id: item.id, name: item.name, valid: false }
+              }
             }
             else {
               return item
@@ -228,7 +262,7 @@ class Create extends Component {
       let dateValid = false;
       let resValid = false;
       if (this.state.returnDate !== "") {
-        document.getElementById("returnDate").className = "form-control"
+        document.getElementById("returnDate").className = "is-valid form-control"
         dateValid = true
       }
       else {
@@ -236,11 +270,11 @@ class Create extends Component {
         dateValid = false
       }
       if (this.state.resPerson !== "") {
-        document.getElementById("resPerson").className = "form-control"
+        document.getElementById("resPerson").className = "is-valid"
         resValid = true
       }
       else {
-        document.getElementById("resPerson").className = "is-invalid form-control"
+        document.getElementById("resPerson").className = "notValid"
         resValid = false
       }
       if (dateValid && resValid) {
@@ -316,6 +350,7 @@ class Create extends Component {
 
     let postReq = new FormData();
     postReq.append("UserId", this.state.userId);
+    postReq.append("employeeNum", this.state.employeeId);
     postReq.append("TelephoneNum", this.state.telNumber);
     postReq.append("CompanyId", this.props.legalName);
     postReq.append("DepartmentId", this.state.deptSelected);
@@ -330,7 +365,7 @@ class Create extends Component {
     postReq.append("PickUpBy", this.state.pickUpBy);
     postReq.append("Remark", this.state.remarks);
     postReq.append("IsConfirmed", this.state.agreeTerms);
-    postReq.append("ReturnDate", "");
+    postReq.append("ReturnDate", this.state.returnDate);
     postReq.append("ResponsiblePerson", this.state.resPerson);
     postReq.append("ContracySignedByFirstPerson", this.state.contractSign1);
     postReq.append("ContractSignedBySecondPerson", this.state.contractSign2);
@@ -833,13 +868,13 @@ class Create extends Component {
   }
 
   dateChange = (name, view) => date => {
-    let year = date.getFullYear()
-    let month = date.getDate()
-    let day = date.getDay()
-    let dates = '' + year + month + day
+    // let year = date.getFullYear()
+    // let month = date.getDate()
+    // let day = date.getDay()
+    let dates = date.toISOString().substr(0, 10);
     console.log(dates)
     this.setState({
-      [name]: dates,
+      [name]: dates.replace(/-/g, ""),
       [view]: date
     });
   };
@@ -967,7 +1002,7 @@ class Create extends Component {
       </Table></div>
 
     const documentForLTI =
-      <div>
+      <div id="documentTableLTI">
         <Row form>
 
           {this.state.isCNIPS
@@ -1139,7 +1174,7 @@ class Create extends Component {
                 ? <FormGroup>
                   <Label>Effective Period</Label>
                   {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
-                  <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                  <DatePicker id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                     className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                     peekNextMonth
                     showMonthDropdown
@@ -1214,7 +1249,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Number of Pages to Be Chopped</Label>
                 <InputGroup>
-                  <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" />
+                  <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number"  min="0" />
                   <FormFeedback>Invalid Number of pages </FormFeedback>
                 </InputGroup>
               </FormGroup>
@@ -1227,7 +1262,7 @@ class Create extends Component {
                 <FormGroup visibelity="false" >
                   <Label>Return Date</Label>
                   <Row />
-                    <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                    <DatePicker id="returnDate"  placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                       className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                       selected={this.state.dateView2} 
                       onChange={this.dateChange("returnDate", "dateView2")}
@@ -1236,7 +1271,9 @@ class Create extends Component {
                 </FormGroup>
                 <FormGroup>
                   <Label>Responsible Person <i className="fa fa-user" /></Label>
-                  <AsyncSelect
+                  <AsyncSelect id="resPerson"
+
+                    classNamePrefix="rs"
                     loadOptions={loadOptions}
                     onChange={this.handleSelectOption("resPerson")}
                     menuPortalTarget={document.body}
@@ -1254,8 +1291,9 @@ class Create extends Component {
               <FormGroup>
                 <Label>Pick Up By <i className="fa fa-user" /> </Label>
                 <AsyncSelect
+                  id="pickUpBy"
                   loadOptions={loadOptions}
-                  onChange={this.handleSelectOption("PickUpBy")}
+                  onChange={this.handleSelectOption("pickUpBy")}
                   menuPortalTarget={document.body}
                   styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                 />
@@ -1308,6 +1346,7 @@ class Create extends Component {
                     <Label>Department Heads <i className="fa fa-user" /></Label>
                     <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity</small>
                     <AsyncSelect
+                      id="deptHeadSelected"
                       loadOptions={loadOptions}
                       isMulti
                       onChange={this.handleSelectOption("deptHeadSelected")}
