@@ -14,6 +14,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import ReactDataGrid from 'react-data-grid';
 import { addDays } from 'date-fns';
 import config from '../../config';
+import {STU,LTU,LTI,CNIPS} from '../../config/validation';
 
 import {
   Button,
@@ -134,11 +135,7 @@ class Create extends Component {
       reqInfo: [
         { id: "deptSelected", valid: false },
         { id: "appTypeSelected", valid: false },
-        // { id: "contractNum", valid: false },
         { id: "chopTypeSelected", valid: false },
-        // { id: "docName", valid: false },
-        // { id: "returnDate", valid: false },
-        // { id: "resPerson", valid: false },
         { id: "purposeOfUse", valid: false },
         { id: "numOfPages", valid: false },
         { id: "addressTo", valid: false },
@@ -146,9 +143,6 @@ class Create extends Component {
         { id: "remarks", valid: false },
         { id: "deptHeadSelected", valid: false },
         { id: "documentTableLTI", valid: false},
-        // { id: "contractSign1", valid: false },
-        // { id: "contractSign2", valid: false },
-        // { id: "selectedFile", valid: false }
       ],
       suggestions: [],
       isLoading: false,
@@ -194,67 +188,30 @@ class Create extends Component {
         this.setState(state => {
           const reqInfo = state.reqInfo.map((item, j) => {
             if (j === i) {
-              if(item.id === "deptHeadSelected") {
-                var invalid = document.getElementById(item.id)
-                invalid.className = "isValid"
-                return { id: item.id, name: item.name, valid: true }
-                }
-              if(item.id === "pickUpBy") {
-                var invalid = document.getElementById(item.id)
-                invalid.className = "isValid"
-                return { id: item.id, name: item.name, valid: true }
-                }
-              if(item.id === "documentTableLTI") {
-                var invalid = document.getElementById(item.id)
-                invalid.className = ""
-                return { id: item.id, name: item.name, valid: true }
-                }
-              var valid = document.getElementById(this.state.reqInfo[i].id)
-              valid.className = "is-valid form-control"
+              var element = document.getElementById(this.state.reqInfo[i].id)
+              element.classList.contains("form-control")
+              ? element.className = "is-valid form-control"
+              : element.className = "isValid"
               return { id: item.id, valid: true }
-            }
-            else {
-              return item
-            }
+              }
+              else { return item }
+            })
+            return { reqInfo }
           })
-          return {
-            reqInfo
-          }
-        })
-      }
+        }
       else {
         this.setState(state => {
           const reqInfo = state.reqInfo.map((item, j) => {
             if (j === i) {
-              console.log(item, j)
-              if(item.id === "deptHeadSelected") {
-                var invalid = document.getElementById(item.id)
-                invalid.className = "notValid"
-                return { id: item.id, name: item.name, valid: false }
-              }
-              if(item.id === "pickUpBy") {
-                var invalid = document.getElementById(item.id)
-                invalid.className = "notValid"
-                return { id: item.id, name: item.name, valid: false }
-              }
-              if(item.id === "documentTableLTI") {
-                var invalid = document.getElementById(item.id)
-                invalid.className = "notValid"
-                return { id: item.id, name: item.name, valid: false }
-              }
-              else {
-              var invalid = document.getElementById(item.id)
-              invalid.className = "is-invalid form-control"
+              var element = document.getElementById(item.id)
+              element.classList.contains("form-control")
+              ? element.className = "is-invalid form-control"
+              : element.className = "notValid"
               return { id: item.id, name: item.name, valid: false }
-              }
             }
-            else {
-              return item
-            }
+            else { return item }
           })
-          return {
-            reqInfo
-          }
+          return { reqInfo }
         })
       }
     }
@@ -595,6 +552,7 @@ class Create extends Component {
           isLTU: false,
           isLTI: true,
           isCNIPS: false,
+          reqInfo: LTI
         })
         if (this.state.deptSelected !== "") {
           this.getTeams(this.state.deptSelected)
@@ -608,6 +566,7 @@ class Create extends Component {
           isLTU: true,
           isLTI: false,
           isCNIPS: false,
+          reqInfo: LTU
         })
         this.getDocCheckBy("")
         if (this.state.deptSelected !== "") {
@@ -625,6 +584,7 @@ class Create extends Component {
           isLTU: false,
           isLTI: false,
           isCNIPS: false,
+          reqInfo: STU
         })
       }
 
@@ -635,6 +595,7 @@ class Create extends Component {
           isLTU: false,
           isLTI: false,
           isCNIPS: true,
+          reqInfo: CNIPS
         })
       }
     }
@@ -1048,7 +1009,12 @@ class Create extends Component {
 
     const documentForLTU =
       <div>
-        <Button onClick={this.selectDocument}>Select Documents</Button>
+        <InputGroup >
+        <InputGroupAddon addonType="prepend">
+          <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
+        </InputGroupAddon>
+        <Input id="documentTableLTU" disabled />
+      </InputGroup>
         <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
           <ModalHeader className="center"> Select Documents </ModalHeader>
           <ModalBody>
@@ -1190,7 +1156,7 @@ class Create extends Component {
                 ? <FormGroup>
                   <Label>Entitled Team</Label>
                   <InputGroup>
-                    <Input onChange={this.handleChange("teamSelected")} onClick={() => { this.getTeams(this.state.deptSelected) }} defaultValue="0" type="select">
+                    <Input id="teamSelected" onChange={this.handleChange("teamSelected")} onClick={() => { this.getTeams(this.state.deptSelected) }} defaultValue="0" type="select">
                       <option value="0" disabled>Please select a team</option>
                       {this.state.teams.map((team, index) =>
                         <option key={index} value={team.teamId}>{team.teamName}</option>
@@ -1315,6 +1281,7 @@ class Create extends Component {
                   <Row>
                     <Col>
                       <AsyncSelect
+                        id="contractSign1"
                         loadOptions={loadOptions}
                         onChange={this.handleSelectOption("contractSign1")}
                         menuPortalTarget={document.body}
@@ -1325,6 +1292,7 @@ class Create extends Component {
                     </Col>
                     <Col>
                       <AsyncSelect
+                        id="contractSign2"
                         loadOptions={loadOptions}
                         onChange={this.handleSelectOption("contractSign2")}
                         menuPortalTarget={document.body}
@@ -1339,7 +1307,7 @@ class Create extends Component {
                 : this.state.isLTU
                   ? <FormGroup>
                     <Label>Document Check By <i className="fa fa-user" /></Label>
-                    <AsyncSelect menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
+                    <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
                       loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
                   </FormGroup>
                   : <FormGroup>
