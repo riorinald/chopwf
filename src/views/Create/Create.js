@@ -39,6 +39,7 @@ import {
   Row,
   FormFeedback,
   Table,
+  Tooltip,
   Spinner
 } from 'reactstrap';
 // import { file, thisExpression } from '@babel/types';
@@ -128,6 +129,7 @@ class Create extends Component {
       isLTI: false,
       isCNIPS: false,
 
+      tooltipOpen: false,
 
       dateView1: "",
       dateView2: "",
@@ -153,7 +155,7 @@ class Create extends Component {
     //binding method for button
     this.toggle = this.toggle.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
-    this.agreeTerm = this.agreeTerm.bind(this);
+    this.handleAgreeTerm = this.handleAgreeTerm.bind(this);
     this.submitRequest = this.submitRequest.bind(this);
     this.validate = this.validate.bind(this);
     this.addDocumentLTI = this.addDocumentLTI.bind(this);
@@ -227,7 +229,7 @@ class Create extends Component {
         dateValid = false
       }
       if (this.state.resPerson !== "") {
-        document.getElementById("resPerson").className = "is-valid"
+        document.getElementById("resPerson").className = "isValid"
         resValid = true
       }
       else {
@@ -256,7 +258,7 @@ class Create extends Component {
     }
   }
 
-  async agreeTerm(event) {
+  async handleAgreeTerm(event) {
     await this.validate()
     for (let i = 0; i < this.state.reqInfo.length; i++) {
       if (this.state.reqInfo[i].valid) {
@@ -494,6 +496,7 @@ class Create extends Component {
 
   formReset() {
     this.formRef.current.reset()
+    window.location.reload();
   }
 
   async getUserData() {
@@ -540,7 +543,9 @@ class Create extends Component {
 
     //APPLICATION TYPE
     if (name === "appTypeSelected") {
-      this.setState({documentTableLTI: [], documentTableLTU: [] })
+      
+      //Clear Doc Table and agreeTerms
+      this.setState({documentTableLTI: [], documentTableLTU: [], agreeTerms: false })
 
       //Update Chop Types
       this.getChopTypes(this.props.legalName, event.target.value)
@@ -829,9 +834,6 @@ class Create extends Component {
   }
 
   dateChange = (name, view) => date => {
-    // let year = date.getFullYear()
-    // let month = date.getDate()
-    // let day = date.getDay()
     let dates = date.toISOString().substr(0, 10);
     console.log(dates)
     this.setState({
@@ -1014,6 +1016,7 @@ class Create extends Component {
           <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
         </InputGroupAddon>
         <Input id="documentTableLTU" disabled />
+      <FormFeedback>Invalid Input a valid Document Name</FormFeedback>
       </InputGroup>
         <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
           <ModalHeader className="center"> Select Documents </ModalHeader>
@@ -1077,7 +1080,7 @@ class Create extends Component {
     return (
       <div>
         <h3>Create</h3>
-        <Card>
+        <Card className="transparentBg">
           <CardHeader>CREATE NEW REQUEST</CardHeader>
           <CardBody>
             <FormGroup>
@@ -1131,7 +1134,7 @@ class Create extends Component {
 
                   ))}
                 </Input>
-
+                <FormFeedback>Invalid Application Type Selected</FormFeedback>
                 <FormFeedback valid={this.validator.fieldValid('aplicationType')}>
                   {this.validator.message('aplicationType', this.state.appTypeSelected, 'required')}</FormFeedback>
 
@@ -1162,6 +1165,7 @@ class Create extends Component {
                         <option key={index} value={team.teamId}>{team.teamName}</option>
                       )}
                     </Input>
+                    <FormFeedback>Invalid Entitled Team Selected</FormFeedback>
                   </InputGroup>
                 </FormGroup>
                 : ""
@@ -1195,7 +1199,6 @@ class Create extends Component {
               <FormGroup check={false}>
                 <Label>Document Name</Label>
                 {this.state.isLTU ? documentForLTU : documentForLTI}
-                <FormFeedback>Invalid Input a valid Document Name</FormFeedback>
               </FormGroup>
               <FormGroup>
                 <Label>Purpose of Use</Label>
@@ -1335,7 +1338,7 @@ class Create extends Component {
                       className="form-check-input"
                       type="checkbox"
                       checked={this.state.agreeTerms}
-                      onChange={this.agreeTerm}
+                      onChange={this.handleAgreeTerm}
                       // onClick={this.isValid}
                       id="confirm" value="option1">
                       <Label className="form-check-label" check >
@@ -1351,7 +1354,13 @@ class Create extends Component {
           <CardFooter>
             <div className="form-actions">
               <Row>
-                {this.state.agreeTerms ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button> : <Button disabled type="submit" color="success">Submit</Button>}
+                {this.state.agreeTerms
+                 ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
+                 : <Button type="submit" color="success" 
+                    onMouseEnter={() => this.setState({tooltipOpen: !this.state.tooltipOpen})}
+                    id="disabledSubmit" disabled >Submit</Button>}
+                 <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit">
+                   please confirm the agree terms </Tooltip>
                 <span>&nbsp;</span>
                 <Button type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
               </Row>

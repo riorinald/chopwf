@@ -76,12 +76,11 @@ class DefaultHeader extends Component {
          {//<AppSidebarToggler className="d-md-down-none" display="lg" />
           </AppNavbarBrand> */
         }
-        <AppSidebarMinimizer className="d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
-        <h2 className="h5 d-md-down-none"><b>Chop Use WORKFLOW for {this.state.legalEntity}</b></h2>
+        <AppSidebarMinimizer className="customMT d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
+        <h2 className="h5 d-sm-down-none"><b>Chop Use WORKFLOW for {this.state.legalEntity}</b></h2>
         <Nav className="ml-auto" navbar>
           <NavItem >
-            <Button color="ghost-secondary" onClick={this.toggle} to="#" className="nav-link"><i className="fa fa-exchange" /> Another Workflow ? &nbsp;
-            </Button>
+            <Button color="ghost" onClick={this.toggle} to="#"><i className="fa fa-exchange" /> Another Workflow ? </Button>
             <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
               <ModalHeader className="center" toggle={this.toggle}> Switch Workflow </ModalHeader>
               <ModalBody>
@@ -95,7 +94,7 @@ class DefaultHeader extends Component {
             </Modal>
           </NavItem>
           <NavItem className="d-md-down-none">
-            <h5>{username}</h5>
+            {username}
           </NavItem>
           <UncontrolledDropdown nav direction="down" >
             <DropdownToggle nav>
