@@ -1080,7 +1080,7 @@ class Create extends Component {
     return (
       <div>
         <h3>Create</h3>
-        <Card className="transparentBg">
+        <Card>
           <CardHeader>CREATE NEW REQUEST</CardHeader>
           <CardBody>
             <FormGroup>
