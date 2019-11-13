@@ -977,25 +977,25 @@ class Create extends Component {
             // </FormGroup></Col>
             : ""}
 
-          <Col >
+          <Col md>
             <FormGroup>
               {/* <Label>English Name</Label> */}
               <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
             </FormGroup>
           </Col>
-          <Col >
+          <Col md>
             <FormGroup>
               {/* <Label>Chinese Name</Label> */}
               <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
             </FormGroup>
           </Col>
-          <Col >
+          <Col md>
             <FormGroup>
               {/* <Label>File Name</Label> */}
               <CustomInput id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
             </FormGroup>
           </Col>
-          <Col md={1}>
+          <Col xl={1}>
             <FormGroup>
               {/* <Label></Label> */}
               <Button block onClick={this.addDocumentLTI}>Add</Button>
