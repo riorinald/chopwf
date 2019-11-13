@@ -14,8 +14,12 @@ import "react-table/react-table.css"
 import Axios from 'axios';
 import config from '../../config';
 import { access } from 'fs';
-import DetailSTU from './Details/DetailSTU'; 
-import DetailLTU from './Details/DetailLTU'; 
+import {
+    DetailSTU,
+    DetailLTU,
+    DetailLTI,
+    DetailCNIPS
+} from './Details';
 
 
 
@@ -173,12 +177,24 @@ class MyPendingTasks extends Component {
     checkAppType(appType) {
         switch(appType){
             case 'Short-term use' :  
-                return <DetailSTU taskDetail={this.state.taskDetail}
-                    collapse={this.togglCollapse}/>
+                return <DetailSTU 
+                        taskDetail={this.state.taskDetail}
+                        collapse={this.togglCollapse}/>
                 ;
             case 'Long-term use':
-                return <DetailLTU taskDetail={this.state.taskDetail}
-                    collapse={this.togglCollapse}/>
+                return <DetailLTU
+                        taskDetail={this.state.taskDetail}
+                        collapse={this.togglCollapse}/>
+                ;
+            case 'Long-term initiation':
+                return <DetailLTI
+                        taskDetail={this.state.taskDetail}
+                        collapse={this.togglCollapse}/>
+                ;
+            case 'Contract non-IPS':
+                return <DetailCNIPS
+                        taskDetail={this.state.taskDetail}
+                        collapse={this.togglCollapse}/>
                 ;
         }
     }
@@ -227,8 +243,6 @@ class MyPendingTasks extends Component {
     render() {
         const { pendingTasks } = this.state;
 
-
-    console.log(this.checkAppType)
         return (
             <div>
                 <h4>MY PENDING TASKS</h4>

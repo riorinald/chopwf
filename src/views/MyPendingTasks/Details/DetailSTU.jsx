@@ -10,7 +10,7 @@ import {
     Collapse
 } from 'reactstrap';
 
-const DetailSTU = props => 
+const DetailSTU = (props) => ( 
                 <div>
                     <Card >
                         <CardHeader> <Button onClick={props.collapse} > Back </Button>  {props.taskDetail.requestNum} </CardHeader>
@@ -211,6 +211,6 @@ const DetailSTU = props =>
                             </Row>
                         </CardBody>
                     </Card>
-                </div>
+                </div>)
 
 export default DetailSTU;
