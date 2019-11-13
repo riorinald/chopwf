@@ -14,6 +14,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import ReactDataGrid from 'react-data-grid';
 import { addDays } from 'date-fns';
 import config from '../../config';
+import {STU,LTU,LTI,CNIPS} from '../../config/validation';
 
 import {
   Button,
@@ -38,6 +39,7 @@ import {
   Row,
   FormFeedback,
   Table,
+  Tooltip,
   Spinner
 } from 'reactstrap';
 // import { file, thisExpression } from '@babel/types';
@@ -127,6 +129,7 @@ class Create extends Component {
       isLTI: false,
       isCNIPS: false,
 
+      tooltipOpen: false,
 
       dateView1: "",
       dateView2: "",
@@ -134,11 +137,7 @@ class Create extends Component {
       reqInfo: [
         { id: "deptSelected", valid: false },
         { id: "appTypeSelected", valid: false },
-        // { id: "contractNum", valid: false },
         { id: "chopTypeSelected", valid: false },
-        // { id: "docName", valid: false },
-        // { id: "returnDate", valid: false },
-        // { id: "resPerson", valid: false },
         { id: "purposeOfUse", valid: false },
         { id: "numOfPages", valid: false },
         { id: "addressTo", valid: false },
@@ -146,9 +145,6 @@ class Create extends Component {
         { id: "remarks", valid: false },
         { id: "deptHeadSelected", valid: false },
         { id: "documentTableLTI", valid: false},
-        // { id: "contractSign1", valid: false },
-        // { id: "contractSign2", valid: false },
-        // { id: "selectedFile", valid: false }
       ],
       suggestions: [],
       isLoading: false,
@@ -159,7 +155,7 @@ class Create extends Component {
     //binding method for button
     this.toggle = this.toggle.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
-    this.agreeTerm = this.agreeTerm.bind(this);
+    this.handleAgreeTerm = this.handleAgreeTerm.bind(this);
     this.submitRequest = this.submitRequest.bind(this);
     this.validate = this.validate.bind(this);
     this.addDocumentLTI = this.addDocumentLTI.bind(this);
@@ -194,67 +190,30 @@ class Create extends Component {
         this.setState(state => {
           const reqInfo = state.reqInfo.map((item, j) => {
             if (j === i) {
-              if(item.id === "deptHeadSelected") {
-                var invalid = document.getElementById(item.id)
-                invalid.className = "isValid"
-                return { id: item.id, name: item.name, valid: true }
-                }
-              if(item.id === "pickUpBy") {
-                var invalid = document.getElementById(item.id)
-                invalid.className = "isValid"
-                return { id: item.id, name: item.name, valid: true }
-                }
-              if(item.id === "documentTableLTI") {
-                var invalid = document.getElementById(item.id)
-                invalid.className = ""
-                return { id: item.id, name: item.name, valid: true }
-                }
-              var valid = document.getElementById(this.state.reqInfo[i].id)
-              valid.className = "is-valid form-control"
+              var element = document.getElementById(this.state.reqInfo[i].id)
+              element.classList.contains("form-control")
+              ? element.className = "is-valid form-control"
+              : element.className = "isValid"
               return { id: item.id, valid: true }
-            }
-            else {
-              return item
-            }
+              }
+              else { return item }
+            })
+            return { reqInfo }
           })
-          return {
-            reqInfo
-          }
-        })
-      }
+        }
       else {
         this.setState(state => {
           const reqInfo = state.reqInfo.map((item, j) => {
             if (j === i) {
-              console.log(item, j)
-              if(item.id === "deptHeadSelected") {
-                var invalid = document.getElementById(item.id)
-                invalid.className = "notValid"
-                return { id: item.id, name: item.name, valid: false }
-              }
-              if(item.id === "pickUpBy") {
-                var invalid = document.getElementById(item.id)
-                invalid.className = "notValid"
-                return { id: item.id, name: item.name, valid: false }
-              }
-              if(item.id === "documentTableLTI") {
-                var invalid = document.getElementById(item.id)
-                invalid.className = "notValid"
-                return { id: item.id, name: item.name, valid: false }
-              }
-              else {
-              var invalid = document.getElementById(item.id)
-              invalid.className = "is-invalid form-control"
+              var element = document.getElementById(item.id)
+              element.classList.contains("form-control")
+              ? element.className = "is-invalid form-control"
+              : element.className = "notValid"
               return { id: item.id, name: item.name, valid: false }
-              }
             }
-            else {
-              return item
-            }
+            else { return item }
           })
-          return {
-            reqInfo
-          }
+          return { reqInfo }
         })
       }
     }
@@ -270,7 +229,7 @@ class Create extends Component {
         dateValid = false
       }
       if (this.state.resPerson !== "") {
-        document.getElementById("resPerson").className = "is-valid"
+        document.getElementById("resPerson").className = "isValid"
         resValid = true
       }
       else {
@@ -299,7 +258,7 @@ class Create extends Component {
     }
   }
 
-  async agreeTerm(event) {
+  async handleAgreeTerm(event) {
     await this.validate()
     for (let i = 0; i < this.state.reqInfo.length; i++) {
       if (this.state.reqInfo[i].valid) {
@@ -537,6 +496,7 @@ class Create extends Component {
 
   formReset() {
     this.formRef.current.reset()
+    window.location.reload();
   }
 
   async getUserData() {
@@ -583,7 +543,9 @@ class Create extends Component {
 
     //APPLICATION TYPE
     if (name === "appTypeSelected") {
-      this.setState({documentTableLTI: [], documentTableLTU: [] })
+      
+      //Clear Doc Table and agreeTerms
+      this.setState({documentTableLTI: [], documentTableLTU: [], agreeTerms: false })
 
       //Update Chop Types
       this.getChopTypes(this.props.legalName, event.target.value)
@@ -595,6 +557,7 @@ class Create extends Component {
           isLTU: false,
           isLTI: true,
           isCNIPS: false,
+          reqInfo: LTI
         })
         if (this.state.deptSelected !== "") {
           this.getTeams(this.state.deptSelected)
@@ -608,6 +571,7 @@ class Create extends Component {
           isLTU: true,
           isLTI: false,
           isCNIPS: false,
+          reqInfo: LTU
         })
         this.getDocCheckBy("")
         if (this.state.deptSelected !== "") {
@@ -625,6 +589,7 @@ class Create extends Component {
           isLTU: false,
           isLTI: false,
           isCNIPS: false,
+          reqInfo: STU
         })
       }
 
@@ -635,6 +600,7 @@ class Create extends Component {
           isLTU: false,
           isLTI: false,
           isCNIPS: true,
+          reqInfo: CNIPS
         })
       }
     }
@@ -868,9 +834,6 @@ class Create extends Component {
   }
 
   dateChange = (name, view) => date => {
-    // let year = date.getFullYear()
-    // let month = date.getDate()
-    // let day = date.getDay()
     let dates = date.toISOString().substr(0, 10);
     console.log(dates)
     this.setState({
@@ -1048,7 +1011,13 @@ class Create extends Component {
 
     const documentForLTU =
       <div>
-        <Button onClick={this.selectDocument}>Select Documents</Button>
+        <InputGroup >
+        <InputGroupAddon addonType="prepend">
+          <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
+        </InputGroupAddon>
+        <Input id="documentTableLTU" disabled />
+      <FormFeedback>Invalid Input a valid Document Name</FormFeedback>
+      </InputGroup>
         <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
           <ModalHeader className="center"> Select Documents </ModalHeader>
           <ModalBody>
@@ -1165,7 +1134,7 @@ class Create extends Component {
 
                   ))}
                 </Input>
-
+                <FormFeedback>Invalid Application Type Selected</FormFeedback>
                 <FormFeedback valid={this.validator.fieldValid('aplicationType')}>
                   {this.validator.message('aplicationType', this.state.appTypeSelected, 'required')}</FormFeedback>
 
@@ -1196,6 +1165,7 @@ class Create extends Component {
                         <option key={index} value={team.teamId}>{team.teamName}</option>
                       )}
                     </Input>
+                    <FormFeedback>Invalid Entitled Team Selected</FormFeedback>
                   </InputGroup>
                 </FormGroup>
                 : ""
@@ -1229,7 +1199,6 @@ class Create extends Component {
               <FormGroup check={false}>
                 <Label>Document Name</Label>
                 {this.state.isLTU ? documentForLTU : documentForLTI}
-                <FormFeedback>Invalid Input a valid Document Name</FormFeedback>
               </FormGroup>
               <FormGroup>
                 <Label>Purpose of Use</Label>
@@ -1315,6 +1284,7 @@ class Create extends Component {
                   <Row>
                     <Col>
                       <AsyncSelect
+                        id="contractSign1"
                         loadOptions={loadOptions}
                         onChange={this.handleSelectOption("contractSign1")}
                         menuPortalTarget={document.body}
@@ -1325,6 +1295,7 @@ class Create extends Component {
                     </Col>
                     <Col>
                       <AsyncSelect
+                        id="contractSign2"
                         loadOptions={loadOptions}
                         onChange={this.handleSelectOption("contractSign2")}
                         menuPortalTarget={document.body}
@@ -1339,7 +1310,7 @@ class Create extends Component {
                 : this.state.isLTU
                   ? <FormGroup>
                     <Label>Document Check By <i className="fa fa-user" /></Label>
-                    <AsyncSelect menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
+                    <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
                       loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
                   </FormGroup>
                   : <FormGroup>
@@ -1367,7 +1338,7 @@ class Create extends Component {
                       className="form-check-input"
                       type="checkbox"
                       checked={this.state.agreeTerms}
-                      onChange={this.agreeTerm}
+                      onChange={this.handleAgreeTerm}
                       // onClick={this.isValid}
                       id="confirm" value="option1">
                       <Label className="form-check-label" check >
@@ -1383,7 +1354,13 @@ class Create extends Component {
           <CardFooter>
             <div className="form-actions">
               <Row>
-                {this.state.agreeTerms ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button> : <Button disabled type="submit" color="success">Submit</Button>}
+                {this.state.agreeTerms
+                 ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
+                 : <Button type="submit" color="success" 
+                    onMouseEnter={() => this.setState({tooltipOpen: !this.state.tooltipOpen})}
+                    id="disabledSubmit" disabled >Submit</Button>}
+                 <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit">
+                   please confirm the agree terms </Tooltip>
                 <span>&nbsp;</span>
                 <Button type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
               </Row>

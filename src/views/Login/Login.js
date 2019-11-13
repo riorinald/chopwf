@@ -163,13 +163,18 @@ class Login extends Component {
                             <FormGroup row>
                                 <Label for="exampleEmail" sm={3}>Username</Label>
                                 <Col sm={9}>
-                                    <Input onChange={this.handleChange} value={this.state.username} type="text" name="username" id="username" placeholder="Please enter Username" />
+                                    <Input onChange={this.handleChange} 
+                                    value={this.state.username} type="text" name="username" 
+                                    id="username" placeholder="Please enter Username" />
                                 </Col>
                             </FormGroup>
                             <FormGroup row>
                                 <Label for="password" sm={3}>Password</Label>
                                 <Col sm={9}>
-                                    <Input onChange={this.handleChange} name="password" value={this.state.password} type="password" name="password" id="password" placeholder="Please enter your Password" />
+                                    <Input onChange={this.handleChange} 
+                                    value={this.state.password} type="password" name="password"
+                                    id="password" placeholder="Please enter your Password" 
+                                    onKeyPress={(e) => {if (e.key === 'Enter'){this.loginCheck()}}}/>
                                 </Col>
                             </FormGroup>
                         </Form>
