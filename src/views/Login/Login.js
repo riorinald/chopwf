@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import { fakeAuth } from '../../App';
+import config from '../../config';
 
 import {
     Form,
@@ -84,7 +85,7 @@ class Login extends Component {
 
     async validate(loginCredentials) {
         try {
-            await axios.post('http://192.168.1.47/echopx/api/v1/login', loginCredentials
+            await axios.post(`${config.url}/login`, loginCredentials
                 , { headers: { 'Content-Type': '  application/json' } })
                 .then(res => {
                     console.log(res);

@@ -16,6 +16,7 @@ import {
 import ReactTable from "react-table";
 import "react-table/react-table.css"
 import Axios from 'axios';
+import config from '../../config';
 
 class Myapps extends Component {
   constructor(props) {
@@ -44,7 +45,7 @@ class Myapps extends Component {
   }
 
   async getApplications() {
-    await Axios.get('http://192.168.1.47/echopx/api/v1/applications').then(res => {
+    await Axios.get(`${config.url}/applications`).then(res => {
       this.setState({ applications: res.data })
     })
     // console.log(this.state.applications)
