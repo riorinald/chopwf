@@ -13,6 +13,7 @@ import ReactTable from "react-table";
 import "react-table/react-table.css"
 import Axios from 'axios';
 import config from '../../config';
+import { access } from 'fs';
 
 
 
@@ -79,12 +80,17 @@ class MyPendingTasks extends Component {
         let url = `${config.url}/tasks?userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`
         await Axios.get(url)
             .then(res => {
-                res.data.map(task => {
-                    let docName = ""
+                let result = res.data
+                result.map(task => {
+                    let docNameEng = ""
+                    let docNameCn = ""
                     let dh = ""
                     let date = ""
-                    task.documentName.map(doc => {
-                        docName = docName + doc + '; '
+                    task.documentNameEnglish.map(doc => {
+                        docNameEng = docNameEng + doc + '; '
+                    })
+                    task.documentNameChinese.map(doc => {
+                        docNameCn = docNameCn + doc + '; '
                     })
                     task.departmentHeadName.map(head => {
                         dh = dh + head + '; '
@@ -96,7 +102,8 @@ class MyPendingTasks extends Component {
                         date = date + task.createdDate[i]
                     }
                     const obj = task
-                    obj.documentName = docName
+                    obj.documentNameEnglish = docNameEng
+                    obj.documentNameChinese = docNameCn
                     obj.departmentHeadName = dh
                     obj.createdDate = date
                     this.setState(state => {
@@ -107,6 +114,7 @@ class MyPendingTasks extends Component {
                     })
 
                 })
+
 
             })
     }
@@ -173,13 +181,32 @@ class MyPendingTasks extends Component {
         );
     };
 
+    getColumnWidth = (accessor, headerText) => {
+        let { pendingTasks } = this.state
+        let max = 0
+        const maxWidth = 260;
+        const magicSpacing = 10;
+
+        for (var i = 0; i < pendingTasks.length; i++) {
+            if (pendingTasks[i] !== undefined && pendingTasks[i][accessor] !== null) {
+                if (JSON.stringify(pendingTasks[i][accessor] || 'null').length > max) {
+                    max = JSON.stringify(pendingTasks[i][accessor] || 'null').length;
+                }
+            }
+        }
+
+        return Math.min(maxWidth, Math.max(max, headerText.length) * magicSpacing);
+    }
+
     search() {
-        console.log(this.state.searchOption)
         this.getPendingTasks()
     }
 
     render() {
         const { pendingTasks } = this.state;
+
+
+
         return (
             <div>
                 <h4>MY PENDING TASKS</h4>
@@ -217,18 +244,20 @@ class MyPendingTasks extends Component {
                                         Header: "Request Number",
                                         accessor: "requestNum",
                                         Cell: this.renderEditable,
-                                        style: { textAlign: "center" }
+                                        style: { textAlign: "center" },
+                                        width: this.getColumnWidth('requestNum', "Request Number")
                                     },
                                     {
                                         Header: "Application Type",
                                         accessor: "applicationTypeName",
                                         Cell: this.renderEditable,
+                                        width: this.getColumnWidth('applicationTypeName', "Application Type"),
                                         filterMethod: (filter, row) => {
                                             return row[filter.id] === filter.value;
                                         },
                                         Filter: ({ filter, onChange }) => {
                                             return (
-                                                <Input type="select" value={this.state.searchOption.applicationTypeName} onChange={this.handleSearch('applicationTypeName')} defaultValue={""} >
+                                                <Input type="select" value={this.state.searchOption.applicationTypeName} onChange={this.handleSearch('applicationTypeName')} >
                                                     <option value="">Please Select an application Type</option>
                                                     {this.state.applicationTypes.map(type =>
                                                         <option key={type.appTypeId} value={type.appTypeName} >{type.appTypeName}</option>
@@ -244,12 +273,13 @@ class MyPendingTasks extends Component {
                                         accessor: "chopTypeName",
                                         Cell: this.renderEditable,
                                         style: { textAlign: "center" },
+                                        width: this.getColumnWidth('chopTypeName', "Chop Type"),
                                         filterMethod: (filter, row) => {
                                             return row[filter.id] === filter.value;
                                         },
                                         Filter: ({ filter, onChange }) => {
                                             return (
-                                                <Input type="select" value={this.state.searchOption.chopTypeName} onChange={this.handleSearch('chopTypeName')} defaultValue={""} >
+                                                <Input type="select" value={this.state.searchOption.chopTypeName} onChange={this.handleSearch('chopTypeName')} >
                                                     <option value="">Please Select a Chop Type</option>
                                                     {this.state.chopTypes.map(type =>
                                                         <option key={type.chopTypeId} value={type.chopTypeName} >{type.chopTypeName}</option>
@@ -261,8 +291,18 @@ class MyPendingTasks extends Component {
                                     },
                                     {
 
-                                        Header: "Document Name",
-                                        accessor: "documentName",
+                                        Header: "Document Name English",
+                                        accessor: "documentNameEnglish",
+                                        width: this.getColumnWidth('documentNameEnglish', "Document Name English"),
+                                        Cell: this.renderEditable,
+                                        style: { textAlign: "center" },
+                                        filterable: false
+                                    },
+                                    {
+
+                                        Header: "Document Name Chinese",
+                                        accessor: "documentNameChinese",
+                                        width: this.getColumnWidth('documentNameChinese', "Document Name Chinese"),
                                         Cell: this.renderEditable,
                                         style: { textAlign: "center" },
                                         filterable: false
@@ -270,45 +310,55 @@ class MyPendingTasks extends Component {
                                     {
                                         Header: "Document Check By",
                                         accessor: "documentCheckByName",
+                                        width: this.getColumnWidth('documentCheckByName', "Document Check By"),
                                         Cell: this.renderEditable,
                                         style: { textAlign: "center" }
                                     },
                                     {
                                         Header: "Department Head",
                                         accessor: "departmentHeadName",
+                                        width: this.getColumnWidth('departmentHeadName', "Department Head"),
                                         Cell: this.renderEditable,
                                         style: { textAlign: "center" }
                                     },
                                     {
                                         Header: "Entitled Team",
                                         accessor: "teamName",
+                                        width: this.getColumnWidth('teamName', "Entitled Team"),
                                         Cell: this.renderEditable,
                                         style: { textAlign: "center" }
                                     },
                                     {
                                         Header: "Status",
                                         accessor: "statusName",
+                                        width: this.getColumnWidth('statusName', "Status"),
                                         Cell: this.renderEditable,
                                         style: { textAlign: "center" }
                                     },
                                     {
                                         Header: "Date of Creation",
                                         accessor: "createdDate",
+                                        width: this.getColumnWidth('createdDate', "Date of Creation"),
                                         Cell: this.renderEditable,
                                         style: { textAlign: "center" }
                                     },
                                     {
                                         Header: "Created By",
                                         accessor: "createdByName",
+                                        width: this.getColumnWidth('createdByName', "Created By"),
                                         Cell: this.renderEditable,
                                         style: { textAlign: "center" }
                                     },
-
-
-                                    // ]
-                                    // }
+                                    {
+                                        Header: "New Return Date",
+                                        accessor: "newReturnDate",
+                                        filterable: false,
+                                        width: this.getColumnWidth('newReturnDate', "New Return Date"),
+                                        Cell: this.renderEditable,
+                                        style: { textAlign: "center" }
+                                    },
                                 ]}
-                                defaultPageSize={20}
+                                defaultPageSize={10}
                                 getTrProps={(state, rowInfo) => {
                                     if (rowInfo && rowInfo.row) {
                                         return {
@@ -357,7 +407,7 @@ class MyPendingTasks extends Component {
                                 <Col md="6"><span className="display-5"> {this.state.taskDetail.requestNum}</span></Col>
                                 <Col md="6">
                                     <Progress multi>
-                                        <Progress bar color="green" value="50">Department Head Reviewing</Progress>
+                                        <Progress bar color="green" value="50">{this.state.taskDetail.statusName}</Progress>
                                         <Progress bar animated striped color="warning" value="50">Bring Original Document to EG for Chop</Progress>
                                     </Progress>
                                 </Col>
@@ -369,7 +419,7 @@ class MyPendingTasks extends Component {
                                 </Col>
                                 <Col>
                                     <Row>
-                                        <Col md="5"><h5> Liu, ChenChen (685) </h5></Col>
+                                        <Col md="5"><h5> {this.state.taskDetail.createdByName} </h5></Col>
                                         <Col md="5"><h5><i className="fa fa-tablet" />&nbsp; +86 10 12345678 </h5></Col>
                                     </Row>
                                     <Row >
@@ -415,10 +465,18 @@ class MyPendingTasks extends Component {
                                     </FormGroup>
                                     <FormGroup row>
                                         <Col md="4">
-                                            <Label htmlFor="text-input">Document Name</Label>
+                                            <Label htmlFor="text-input">Document Name (English)</Label>
                                         </Col>
                                         <Col xs="12" md="8">
-                                            <Input disabled type="text" id="text-input" value={this.state.taskDetail.documentName} name="text-input" placeholder="Text" />
+                                            <Input disabled type="text" id="text-input" value={this.state.taskDetail.documentNameEnglish} name="text-input" placeholder="Text" />
+                                        </Col>
+                                    </FormGroup>
+                                    <FormGroup row>
+                                        <Col md="4">
+                                            <Label htmlFor="text-input">Document Name (Chinese)</Label>
+                                        </Col>
+                                        <Col xs="12" md="8">
+                                            <Input disabled type="text" id="text-input" value={this.state.taskDetail.documentNameChinese} name="text-input" placeholder="Text" />
                                         </Col>
                                     </FormGroup>
                                     <FormGroup row>
