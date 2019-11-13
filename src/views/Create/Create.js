@@ -1190,7 +1190,7 @@ class Create extends Component {
                 ? <FormGroup>
                   <Label>Entitled Team</Label>
                   <InputGroup>
-                    <Input onChange={this.handleChange("teamSelected")} onClick={() => { this.getTeams(this.state.deptSelected) }} defaultValue="0" type="select">
+                    <Input onChange={this.handleChange("teamSelected")}  defaultValue="0" type="select">
                       <option value="0" disabled>Please select a team</option>
                       {this.state.teams.map((team, index) =>
                         <option key={index} value={team.teamId}>{team.teamName}</option>
