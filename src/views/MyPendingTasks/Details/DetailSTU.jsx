@@ -187,9 +187,9 @@ const DetailSTU = (props) => (
                             <br />
                             <Row>
                                 <Col  >
-                                    <Button color="success" onClick={() => this.approve("approve")} >Approve</Button>&nbsp;
-                                    <Button color="danger" onClick={() => this.approve("sendBack")} >Send Back</Button>&nbsp;
-                                    <Button color="danger" onClick={() => this.approve("reject")}>Reject</Button>&nbsp;
+                                    <Button color="success" onClick={() => props.approve("approve")} >Approve</Button>&nbsp;
+                                    <Button color="danger" onClick={() => props.approve("sendBack")} >Send Back</Button>&nbsp;
+                                    <Button color="danger" onClick={() => props.approve("reject")}>Reject</Button>&nbsp;
                                     </Col>
 
                             </Row>

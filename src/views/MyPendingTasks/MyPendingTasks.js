@@ -18,8 +18,12 @@ import {
     DetailSTU,
     DetailLTU,
     DetailLTI,
-    DetailCNIPS
+    DetailCNIPS,
+    EditDetails
+
 } from './Details';
+import Swal from 'sweetalert2';
+
 
 
 
@@ -35,10 +39,46 @@ class MyPendingTasks extends Component {
             selectedRowIndex: [],
             collapse: false,
 
+            departments: [],
             applicationTypes: [],
             chopTypes: [],
+            documents: [],
+            deptHeads: [],
 
             filtered: [],
+
+            showDoc: false,
+
+            requestForm: {
+                telNumber: "",
+                contractNum: "",
+                deptSelected: "",
+                appTypeSelected: "",
+                chopTypeSelected: "",
+                documentTableLTU: [],
+                documentTableLTI: [],
+                engName: "",
+                cnName: "",
+                docSelected: null,
+                docAttachedName: "",
+                collapseUIO: true,
+                returnDate: "",
+                resPerson: "",
+                purposeOfUse: "",
+                numOfPages: 0,
+                addressTo: "",
+                pickUpBy: "",
+                remarks: "",
+                deptHeadSelected: [],
+                contractSign1: "",
+                contractSign2: "",
+                effectivePeriod: "",
+                fileName: "Choose File",
+                teamSelected: "",
+                connectingChop: false,
+                docCheckBySelected: "",
+                branchSelected: "",
+            },
 
             searchOption: {
                 requestNum: "",
@@ -63,10 +103,24 @@ class MyPendingTasks extends Component {
         this.search = this.search.bind(this)
         this.onFilteredChangeCustom = this.onFilteredChangeCustom.bind(this)
         this.togglCollapse = this.togglCollapse.bind(this);
+        this.approve = this.approve.bind(this)
+        this.addDocumentLTI = this.addDocumentLTI.bind(this);
+        this.deleteDocument = this.deleteDocument.bind(this);
+        this.handleSelectOption = this.handleSelectOption.bind(this);
+        this.toggleUIO = this.toggleUIO.bind(this);
+        this.getDeptHeads = this.getDeptHeads.bind(this);
     }
     togglCollapse() {
         this.setState({
-            collapse : !this.state.collapse
+            collapse: !this.state.collapse
+        })
+    }
+
+    toggleUIO() {
+        this.setState(state => {
+            let requestForm = this.state.requestForm
+            requestForm.collapseUIO = !requestForm.collapseUIO
+            return { requestForm }
         })
     }
 
@@ -74,6 +128,24 @@ class MyPendingTasks extends Component {
         await this.getData("applicationTypes", `${config.url}/apptypes`);
         await this.getData("chopTypes", `${config.url}/choptypes`);
         this.getPendingTasks();
+        this.getDeptHeads();
+
+    }
+
+    async getDeptHeads() {
+        this.setState({ deptHeads: [] })
+        await Axios.get(`${config.url}/users?companyid=${this.props.legalName}&excludeuserid=${localStorage.getItem('userId')}`)
+            .then(res => {
+                for (let i = 0; i < res.data.length; i++) {
+                    const obj = { value: res.data[i].userId, label: res.data[i].displayName }
+                    this.setState(state => {
+                        const deptHeads = this.state.deptHeads.concat(obj)
+                        return {
+                            deptHeads
+                        }
+                    })
+                }
+            })
     }
 
     async getData(state, url) {
@@ -86,6 +158,8 @@ class MyPendingTasks extends Component {
             console.error(error);
         }
     }
+
+
 
     async getPendingTasks() {
         this.setState({ pendingTasks: [] })
@@ -131,6 +205,20 @@ class MyPendingTasks extends Component {
             })
     }
 
+    selectDocument() {
+        if (this.state.documents.length === 0) {
+            Swal.fire({
+                title: "No Documents",
+                html: 'No documents to select from!',
+                type: "warning"
+            })
+        }
+        else {
+            this.setState({ showDoc: !this.state.showDoc })
+
+        }
+    }
+
     handleSearch = name => event => {
         const options = this.state.searchOption
         options[name] = event.target.value
@@ -174,32 +262,179 @@ class MyPendingTasks extends Component {
         this.setState({ filtered: filtered });
     };
 
-    checkAppType(appType) {
-        switch(appType){
-            case 'Short-term use' :  
-                return <DetailSTU 
-                        taskDetail={this.state.taskDetail}
-                        collapse={this.togglCollapse}/>
-                ;
-            case 'Long-term use':
-                return <DetailLTU
-                        taskDetail={this.state.taskDetail}
-                        collapse={this.togglCollapse}/>
-                ;
-            case 'Long-term initiation':
-                return <DetailLTI
-                        taskDetail={this.state.taskDetail}
-                        collapse={this.togglCollapse}/>
-                ;
-            case 'Contract non-IPS':
-                return <DetailCNIPS
-                        taskDetail={this.state.taskDetail}
-                        collapse={this.togglCollapse}/>
-                ;
+    handleChange = name => event => {
+        console.log(name + " + " + event.target.value)
+        let value = event.target.value
+        this.setState(state => {
+            let requestForm = this.state.requestForm
+            requestForm[name] = value
+            return { requestForm };
+
+        })
+    }
+
+    uploadDocument = event => {
+        if (event.target.files[0]) {
+            let file = event.target.files[0]
+            let fileName = event.target.files[0].name
+            this.setState(state => {
+                let requestForm = this.state.requestForm
+                requestForm.docSelected = file
+                requestForm.docAttachedName = fileName
+                return { requestForm }
+            })
         }
     }
 
-    
+    addDocumentLTI() {
+        var maxNumber = 45;
+        var rand = Math.floor((Math.random() * maxNumber) + 1);
+        if (this.state.requestForm.docSelected !== null) {
+            const obj = {
+                id: rand,
+                engName: this.state.requestForm.engName,
+                cnName: this.state.requestForm.cnName,
+                docSelected: this.state.requestForm.docSelected,
+                docName: this.state.requestForm.docAttachedName,
+                docURL: URL.createObjectURL(this.state.requestForm.docSelected),
+            }
+
+            this.setState(state => {
+                let requestForm = this.state.requestForm
+                requestForm.documentTableLTI.push(obj)
+                return { requestForm }
+            }, console.log(this.state.requestForm))
+        }
+    }
+
+    deleteDocument(table, i) {
+        this.setState(state => {
+            if (table === "documentTableLTU") {
+                let requestForm = this.state.requestForm
+                requestForm.documentTableLTU = requestForm.documentTableLTU.filter((item, index) => i !== index)
+                return { requestForm }
+            }
+            else if (table === "documentTableLTI") {
+                let requestForm = this.state.requestForm
+                requestForm.documentTableLTI = requestForm.documentTableLTI.filter((item, index) => i !== index)
+                return { requestForm }
+            }
+        })
+    }
+
+    toggleConnection() {
+        this.setState(state => {
+            let requestForm = this.state.requestForm
+            requestForm.connectingChop = !requestForm.connectingChop
+            return { requestForm }
+        })
+    }
+
+    filterColors = (inputValue) => {
+        return this.state.deptHeads.filter(i =>
+            i.label.toLowerCase().includes(inputValue.toLowerCase())
+        );
+    };
+
+    loadOptions = (inputValue, callback) => {
+        callback(this.filterColors(inputValue));
+
+    }
+
+    handleSelectOption = sname => newValue => {
+        if (sname === "deptHeadSelected") {
+            this.setState(state => {
+                let requestForm = this.state.requestForm
+                requestForm[sname] = newValue
+                return { requestForm }
+            })
+        }
+        else {
+            this.setState(state => {
+                let requestForm = this.state.requestForm
+                requestForm[sname] = newValue.value
+                return { requestForm }
+            })
+        }
+    }
+
+    async handleAgreeTerm(event) {
+        // await this.validate()
+        // for (let i = 0; i < this.state.reqInfo.length; i++) {
+        //     if (this.state.reqInfo[i].valid) {
+        //         this.setState({ valid: true })
+        //     }
+        //     else {
+        //         this.setState({ valid: false })
+        //         break;
+        //     }
+        // }
+        // if (this.state.valid && this.state.inOffice) {
+        //     this.setState({ agreeTerms: true })
+        // }
+    }
+
+    submitRequest(isSubmitted) {
+
+    }
+
+
+    checkAppType(appType, status) {
+        if (status === "Pending for Department Head Approval") {
+            this.getData("departments", `${config.url}/departments`);
+            return <EditDetails
+                legalName={this.props.legalName}
+                taskDetail={this.state.taskDetail}
+                departments={this.state.departments}
+                appTypes={this.state.applicationTypes}
+                chopTypes={this.state.chopTypes}
+                collapse={this.togglCollapse}
+                requestForm={this.state.requestForm}
+                handleChange={this.handleChange}
+                selectDocument={this.selectDocument}
+                showDoc={this.state.showDoc}
+                uploadDocument={this.uploadDocument}
+                addDocumentLTI={this.addDocumentLTI}
+                deleteDocument={this.deleteDocument}
+                toggleConnection={this.toggleConnection}
+                toggleUIO={this.toggleUIO}
+                loadOptions={this.loadOptions}
+                deptHeads={this.state.deptHeads}
+                handleSelectOption={this.handleSelectOption}
+                handleAgreeTerm={this.handleAgreeTerm}
+                submitRequest={this.submitRequest} />
+        }
+        else {
+            switch (appType) {
+                case 'Short-term use':
+                    return <DetailSTU
+                        taskDetail={this.state.taskDetail}
+                        collapse={this.togglCollapse}
+                        approve={this.approve} />
+                        ;
+                case 'Long-term use':
+                    return <DetailLTU
+                        taskDetail={this.state.taskDetail}
+                        collapse={this.togglCollapse}
+                        approve={this.approve} />
+                        ;
+                case 'Long-term initiation':
+                    return <DetailLTI
+                        taskDetail={this.state.taskDetail}
+                        collapse={this.togglCollapse}
+                        approve={this.approve} />
+                        ;
+                case 'Contract non-IPS':
+                    return <DetailCNIPS
+                        taskDetail={this.state.taskDetail}
+                        collapse={this.togglCollapse}
+                        approve={this.approve} />
+                        ;
+            }
+        }
+    }
+
+
     renderEditable = cellInfo => {
         const editable = this.state.editableRows[cellInfo.index];
         return (
@@ -436,7 +671,7 @@ class MyPendingTasks extends Component {
                     </Card>
                 </Collapse>
                 <Collapse isOpen={this.state.collapse}>
-                    {this.checkAppType(this.state.taskDetail.applicationTypeName)}
+                    {this.checkAppType(this.state.taskDetail.applicationTypeName, this.state.taskDetail.statusName)}
                 </Collapse>
                 {/* </Col> */}
 
