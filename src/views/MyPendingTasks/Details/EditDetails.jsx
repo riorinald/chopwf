@@ -24,6 +24,9 @@ import deleteBin from '../../../assets/img/deletebin.png'
 import { AppSwitch } from '@coreui/react';
 import AsyncSelect from 'react-select/async';
 import makeAnimated from 'react-select/animated';
+import config from '../../../config';
+import { loadOptions } from '@babel/core';
+
 
 
 const notes = <p>如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。
@@ -48,17 +51,53 @@ const docHeaders = [
     { key: 'dhApproved', name: 'DH Approved' },
 ].map(c => ({ ...c, ...defaultColumnProperties }))
 
-const EditDetails = props =>
-    <div>
+
+
+const EditDetails = props => {
+
+    let deptHeadsTemp = props.deptHeads
+
+    const filterColors = (inputValue) => {
+        return deptHeadsTemp.filter(i =>
+            i.label.toLowerCase().includes(inputValue.toLowerCase())
+        );
+    };
+
+    const loadOptionsDept = (inputValue, callback) => {
+        callback(filterColors(inputValue));
+
+    }
+
+    let selected = props.requestForm.departmentHeads
+    let selectedDeptHeads = []
+    selected.map(select => {
+        let temp = ""
+        for (let i = 0; i < deptHeadsTemp.length; i++) {
+            if (select === deptHeadsTemp[i].value) {
+                temp = deptHeadsTemp[i]
+                selectedDeptHeads.push(temp)
+                break;
+            }
+        }
+    })
+
+
+
+    return <div>
         <Card >
-            <CardHeader> <Button onClick={props.collapse} > Back </Button> &nbsp; CREATE NEW REQUEST - {props.taskDetail.requestNum} </CardHeader>
+            <CardHeader> <Button onClick={props.collapse} > Back </Button> &nbsp; EDIT REQUEST - {props.requestForm.requestNum} </CardHeader>
             <CardBody color="dark">
                 <FormGroup>
                     <h5>NOTES :</h5>
                     {notes}
                 </FormGroup>
                 <Form className="form-horizontal">
-                    <FormGroup></FormGroup>
+                    <FormGroup>
+                        <Label>Request Number</Label>
+                        <InputGroup>
+                            <Input disabled value={props.requestForm.requestNum}></Input>
+                        </InputGroup>
+                    </FormGroup>
                     <FormGroup>
                         <Label>Employee Number
                         <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted</i> </span>
@@ -68,7 +107,7 @@ const EditDetails = props =>
                                 <InputGroupAddon addonType="prepend">
                                     <InputGroupText>ID</InputGroupText>
                                 </InputGroupAddon>
-                                <Input disabled id="prependedInput" size="16" type="text" />
+                                <Input disabled id="prependedInput" value={props.requestForm.employeeNum} size="16" type="text" />
                             </InputGroup>
                             {/* <p className="help-block">Here's some help text</p> */}
                         </div>
@@ -76,12 +115,12 @@ const EditDetails = props =>
                     <FormGroup>
                         <Label>Tel. </Label>
                         <InputGroup>
-                            <Input onChange={props.handleChange("telNumber")} id="appendedInput" size="16" type="text" />
+                            <Input onChange={props.handleChange("telNumber")} value={props.requestForm.telephoneNum} id="appendedInput" size="16" type="text" />
                         </InputGroup>
                     </FormGroup>
                     <FormGroup>
                         <Label>Dept</Label>
-                        <Input id="deptSelected" type="select" onChange={props.handleChange("deptSelected")} name="dept">
+                        <Input id="deptSelected" type="select" value={props.requestForm.departmentId} onChange={props.handleChange("departmentId")} name="dept">
                             {props.departments.map((option, index) => (
                                 <option value={option.deptId} key={option.deptId}>
                                     {option.deptName}
@@ -94,11 +133,11 @@ const EditDetails = props =>
                     <FormGroup>
                         <Label>Application Type</Label>
                         <Input disabled type="text"
-                            id="appTypeSelected" value={props.taskDetail.applicationTypeName} name="appType">
+                            id="appTypeSelected" value={props.requestForm.applicationTypeName} name="appType">
                         </Input>
                     </FormGroup>
 
-                    {props.applicationTypeName === "Long-term Initiation"
+                    {props.requestForm.applicationTypeId === "LTU"
                         ? <FormGroup>
                             <Label>Effective Period</Label>
                             {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
@@ -107,19 +146,19 @@ const EditDetails = props =>
                                 peekNextMonth
                                 showMonthDropdown
                                 showYearDropdown
-                                // selected={this.state.dateView1}
-                                // onChange={this.dateChange("effectivePeriod", "dateView1")}
+                                selected={props.dateView1}
+                                onChange={props.dateChange("effectivePeriod", "dateView1")}
                                 minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                             <FormFeedback>Invalid Date Selected</FormFeedback>
                         </FormGroup>
                         : ""
                     }
-                    {props.applicationTypeName === "Long-term use"
+                    {/* {props.requestForm.applicationTypeId === "LTU"
                         ? <FormGroup>
                             <Label>Entitled Team</Label>
                             <InputGroup>
-                                <Input onChange={props.handleChange("teamSelected")} defaultValue={props.taskDetail.teamName} type="select">
-                                    {this.state.teams.map((team, index) =>
+                                <Input onChange={props.handleChange("teamId")} defaultValue={props.taskDetail.teamName} type="select">
+                                    {props.teams.map((team, index) =>
                                         <option key={index} value={team.teamId}>{team.teamName}</option>
                                     )}
                                 </Input>
@@ -127,13 +166,12 @@ const EditDetails = props =>
                             </InputGroup>
                         </FormGroup>
                         : ""
-                    }
+                    } */}
                     <FormGroup>
                         <Label>Chop Type</Label>
                         <Input type="select" id="chopTypeSelected"
                             // onClick={() => { props.getChopTypes(props.legalName, props.taskDetail.appTypeSelected) }}
-                            onChange={props.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
-                            <option disabled value="0">Please Select ..</option>
+                            onChange={props.handleChange("chopTypeId")} defaultValue={props.requestForm.chopTypeId} name="chopType" >
                             {props.chopTypes.map((option, id) => (
                                 <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
                             ))}
@@ -145,7 +183,7 @@ const EditDetails = props =>
 
                     <FormGroup check={false}>
                         <Label>Document Name</Label>
-                        {props.applicationTypeName === "Long-term use"
+                        {props.requestForm.applicationTypeId === "LTU"
                             ? <div>
                                 <InputGroup >
                                     <InputGroupAddon addonType="prepend">
@@ -159,12 +197,12 @@ const EditDetails = props =>
                                     <ModalBody>
                                         <ReactDataGrid
                                             columns={docHeaders}
-                                            rowGetter={i => this.state.documents[i]}
-                                            rowsCount={this.state.documents.length}
+                                            rowGetter={i => props.documents[i]}
+                                            rowsCount={props.documents.length}
                                             minWidth={1100}
                                             rowScrollTimeout={null}
                                             enableRowSelect={null}
-                                            onRowSelect={this.addDocCheck}
+                                            onRowSelect={props.addDocCheck}
                                             onColumnResize={(idx, width) =>
                                                 console.log('Column' + idx + ' has been resized to ' + width)}
                                             minColumnWidth={100}
@@ -177,7 +215,7 @@ const EditDetails = props =>
                                     </ModalFooter>
                                 </Modal>
 
-                                <Collapse isOpen={props.requestForm.documentTableLTU.length !== 0}>
+                                <Collapse isOpen={props.requestForm.documentNames.length !== 0}>
                                     <div>
                                         <br />
                                         <Label>Documents</Label>
@@ -193,7 +231,7 @@ const EditDetails = props =>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {props.requestForm.documentTableLTU.map((document, index) =>
+                                                {props.requestForm.documentNames.map((document, index) =>
                                                     <tr key={index}>
                                                         <th>{index + 1}</th>
                                                         <th>{document.documentNameEnglish}</th>
@@ -204,7 +242,7 @@ const EditDetails = props =>
                                                         <th id="viewDoc">
                                                             <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.dhApproved}</a>
                                                         </th>
-                                                        <th><img width="25px" onClick={() => props.deleteDocument("documentTableLTU", index)} onMouseOver={this.toggleHover} src={deleteBin} /></th>
+                                                        <th><img width="25px" onClick={() => props.deleteDocument("documentTableLTU", index)} src={deleteBin} /></th>
                                                     </tr>
                                                 )}
                                             </tbody>
@@ -215,7 +253,7 @@ const EditDetails = props =>
                             : <div id="documentTableLTI">
                                 <Row form>
 
-                                    {props.taskDetail.applicationTypeName === "Contract (non-IPS)"
+                                    {props.requestForm.applicationTypeId === "CNIPS"
                                         ? <Col ><FormGroup>
                                             <InputMask placeholder="enter contract number" mask="*-*-*-9999-9999" className="form-control" defaultValue={props.requestForm.contractNum} onChange={props.handleChange("contractNum")}></InputMask>
                                         </FormGroup></Col>
@@ -224,19 +262,19 @@ const EditDetails = props =>
                                     <Col md>
                                         <FormGroup>
                                             {/* <Label>English Name</Label> */}
-                                            <Input value={props.requestForm.engName} onChange={props.handleChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
+                                            <Input value={props.editRequestForm.engName} onChange={props.handleDocumentChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
                                         </FormGroup>
                                     </Col>
                                     <Col md>
                                         <FormGroup>
                                             {/* <Label>Chinese Name</Label> */}
-                                            <Input value={props.requestForm.cnName} onChange={props.handleChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
+                                            <Input value={props.editRequestForm.cnName} onChange={props.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
                                         </FormGroup>
                                     </Col>
                                     <Col md>
                                         <FormGroup>
                                             {/* <Label>File Name</Label> */}
-                                            <CustomInput id="docFileName" onChange={props.uploadDocument} type="file" bsSize="lg" color="primary" label={props.requestForm.docAttachedName} />
+                                            <CustomInput id="docFileName" onChange={props.uploadDocument} type="file" bsSize="lg" color="primary" label={props.editRequestForm.docAttachedName} />
                                         </FormGroup>
                                     </Col>
                                     <Col xl={1}>
@@ -246,7 +284,7 @@ const EditDetails = props =>
                                         </FormGroup>
                                     </Col>
                                 </Row>
-                                <Collapse isOpen={props.requestForm.documentTableLTI.length !== 0}>
+                                <Collapse isOpen={props.requestForm.documentNames.length !== 0}>
                                     <div>
                                         <Table bordered>
                                             <thead>
@@ -259,13 +297,13 @@ const EditDetails = props =>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {props.requestForm.documentTableLTI.map((document, index) =>
+                                                {props.requestForm.documentNames.map((document, index) =>
                                                     <tr key={index}>
                                                         <th>{index + 1}</th>
-                                                        <th>{document.engName}</th>
-                                                        <th>{document.cnName}</th>
+                                                        <th>{document.documentNameEnglish}</th>
+                                                        <th>{document.documentNameChinese}</th>
                                                         <th id="viewDoc">
-                                                            <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+                                                            <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentName}</a>
                                                         </th>
                                                         <th><img width="25px" onClick={() => props.deleteDocument("documentTableLTI", index)} src={deleteBin} /></th>
                                                     </tr>
@@ -278,22 +316,22 @@ const EditDetails = props =>
                     <FormGroup>
                         <Label>Purpose of Use</Label>
                         <InputGroup>
-                            <Input onChange={props.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                            <Input onChange={props.handleChange("purposeOfUse")} value={props.requestForm.purposeOfUse} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                             <FormFeedback>Please input the purpose of use</FormFeedback>
                         </InputGroup>
                     </FormGroup>
 
-                    {!props.taskDetail.applicationTypeName === "Long-term Initiation"
+                    {!props.requestForm.applicationTypeId === "LTI"
                         ? <FormGroup>
                             <Label>Connecting Chop (骑缝章) </Label>
                             <Row />
-                            <AppSwitch dataOn={'yes'} onChange={props.toggleConnection} checked={props.requestForm.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
+                            <AppSwitch dataOn={'yes'} onChange={props.toggleConnection} checked={props.requestForm.connectChop === "Y"} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
                         </FormGroup>
                         : ""}
                     <FormGroup>
                         <Label>Number of Pages to Be Chopped</Label>
                         <InputGroup>
-                            <Input onChange={props.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min="0" />
+                            <Input onChange={props.handleChange("numOfPages")} value={props.requestForm.numOfPages} id="numOfPages" size="16" type="number" min="0" />
                             <FormFeedback>Invalid Number of pages </FormFeedback>
                         </InputGroup>
                     </FormGroup>
@@ -301,25 +339,25 @@ const EditDetails = props =>
                     <FormGroup>
                         <Label>Use in Office or Not</Label>
                         <Row />
-                        <AppSwitch onChange={props.toggleUIO} checked={props.requestForm.collapseUIO} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
+                        <AppSwitch onChange={props.toggleUIO} checked={props.requestForm.isUseInOffice === "Y"} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label dataOn={'yes'} dataOff={'no'} />
                     </FormGroup>
-                    <Collapse isOpen={!props.requestForm.collapseUIO}>
+                    <Collapse isOpen={!props.editRequestForm.collapseUIO}>
                         <FormGroup visibelity="false" >
                             <Label>Return Date</Label>
                             <Row />
                             <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                                 className="form-control" required dateFormat="yyyy/MM/dd" withPortal
-                                // selected={this.state.dateView2}
-                                // onChange={this.dateChange("returnDate", "dateView2")}
+                                selected={props.dateView2}
+                                onChange={props.dateChange("returnDate", "dateView2")}
                                 minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                         </FormGroup>
                         <FormGroup>
                             <Label>Responsible Person <i className="fa fa-user" /></Label>
                             <AsyncSelect id="resPerson"
-
                                 classNamePrefix="rs"
-                                loadOptions={props.loadOptions}
-                                onChange={props.handleSelectOption("resPerson")}
+                                loadOptions={loadOptionsDept}
+                                value={deptHeadsTemp[props.requestForm.responsiblePersonOption]}
+                                onChange={props.handleSelectOption("responsiblePerson")}
                                 menuPortalTarget={document.body}
                                 styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                             />
@@ -328,7 +366,7 @@ const EditDetails = props =>
                     <FormGroup>
                         <Label>Address to</Label>
                         <InputGroup>
-                            <Input onChange={props.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
+                            <Input onChange={props.handleChange("addressTo")} value={props.requestForm.addressTo} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
                             <FormFeedback>Invalid person to address to</FormFeedback>
                         </InputGroup>
                     </FormGroup>
@@ -336,7 +374,8 @@ const EditDetails = props =>
                         <Label>Pick Up By <i className="fa fa-user" /> </Label>
                         <AsyncSelect
                             id="pickUpBy"
-                            loadOptions={props.loadOptions}
+                            loadOptions={loadOptionsDept}
+                            value={deptHeadsTemp[props.requestForm.pickUpByOption]}
                             onChange={props.handleSelectOption("pickUpBy")}
                             menuPortalTarget={document.body}
                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -348,12 +387,12 @@ const EditDetails = props =>
                     <FormGroup>
                         <Label>Remark</Label>
                         <InputGroup>
-                            <Input onChange={props.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
+                            <Input onChange={props.handleChange("remark")} value={props.requestForm.remark} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
                             <FormFeedback>Please add remarks</FormFeedback>
                         </InputGroup>
                     </FormGroup>
 
-                    {props.taskDetail.applicationTypeName === "Contract (non-IPS)"
+                    {props.requestForm.applicationTypeId === "CNIPS"
                         ? <FormGroup>
                             <Label>Contract Signed By: <i className="fa fa-user" /></Label>
                             <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
@@ -361,8 +400,9 @@ const EditDetails = props =>
                                 <Col>
                                     <AsyncSelect
                                         id="contractSign1"
-                                        loadOptions={props.loadOptions}
-                                        onChange={props.handleSelectOption("contractSign1")}
+                                        loadOptions={loadOptionsDept}
+                                        value={deptHeadsTemp[props.requestForm.contractSignedByFirstPersonOption]}
+                                        onChange={props.handleSelectOption("contractSignedByFirstPerson")}
                                         menuPortalTarget={document.body}
                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                     />
@@ -372,8 +412,9 @@ const EditDetails = props =>
                                 <Col>
                                     <AsyncSelect
                                         id="contractSign2"
-                                        loadOptions={props.loadOptions}
-                                        onChange={props.handleSelectOption("contractSign2")}
+                                        loadOptions={loadOptionsDept}
+                                        value={deptHeadsTemp[props.requestForm.contractSignedBySecondPersonOption]}
+                                        onChange={props.handleSelectOption("contractSignedBySecondPerson")}
                                         menuPortalTarget={document.body}
                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                     />
@@ -383,20 +424,26 @@ const EditDetails = props =>
                             </Row>
                         </FormGroup>
 
-                        : props.taskDetail.applicationTypeName === "Long-term use"
+                        : props.requestForm.applicationTypeId === "LTU"
                             ? <FormGroup>
                                 <Label>Document Check By <i className="fa fa-user" /></Label>
-                                <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={props.handleSelectOption("docCheckBySelected")}
-                                    loadOptions={props.loadOptions} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
+                                <AsyncSelect
+                                    id="docCheckBySelected"
+                                    menuPortalTarget={document.body}
+                                    onChange={props.handleSelectOption("documentCheckBy")}
+                                    loadOptions={loadOptionsDept}
+                                    value={deptHeadsTemp[props.requestForm.documentCheckByOption]}
+                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
                             </FormGroup>
                             : <FormGroup>
                                 <Label>Department Heads <i className="fa fa-user" /></Label>
                                 <small> &ensp; If you apply for {props.legalName} Company Chop, then Department Head shall be from {props.legalName} entity</small>
                                 <AsyncSelect
                                     id="deptHeadSelected"
-                                    loadOptions={props.loadOptions}
+                                    loadOptions={loadOptionsDept}
                                     isMulti
-                                    onChange={props.handleSelectOption("deptHeadSelected")}
+                                    value={selectedDeptHeads}
+                                    onChange={props.handleSelectOption("departmentHeads")}
                                     menuPortalTarget={document.body}
                                     components={animatedComponents}
                                     styles={props.requestForm.deptHeadSelected === null ? reactSelectControl : ""} />
@@ -436,7 +483,7 @@ const EditDetails = props =>
                                 // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })}
                                 id="disabledSubmit" disabled >Submit</Button>}
                         {/* <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit"> */}
-                            {/* please confirm the agree terms </Tooltip> */}
+                        {/* please confirm the agree terms </Tooltip> */}
                         <span>&nbsp;</span>
                         <Button type="submit" color="primary" onClick={() => { props.submitRequest('N') }}>Save</Button>
                     </Row>
@@ -447,5 +494,6 @@ const EditDetails = props =>
             </CardFooter>
         </Card>
     </div>
+}
 
 export default EditDetails;
