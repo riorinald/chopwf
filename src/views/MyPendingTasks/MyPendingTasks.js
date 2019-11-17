@@ -140,6 +140,11 @@ class MyPendingTasks extends Component {
             })
     }
 
+    convertDate(dateValue){
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
+        return new Date(regEx);
+    }
+
     async getData(state, url) {
         try {
             const response = await Axios.get(url);
