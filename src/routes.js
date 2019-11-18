@@ -14,8 +14,17 @@ const Detail = React.lazy(() => import('./views/MyPendingTasks/Details/Detail'))
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/', exact: true, name: 'Home' },
-  { path: '/create',exact: true, name: 'Create', component: Create},
-  { path: '/create/:apptype',exact: true, name: 'Create', component: Create},
+  // { path: '/MBAFC', name: 'MBAFC',},
+  // { path: '/MBAFC/myapps', name: 'Myapps', component: Myapps },
+  // { path: '/MBAFC/mypendingtask', exact: true, name: 'MyPendingTasks', component: MyPendingTasks},
+  // { path: '/MBAFC/instruction', name: 'Insctructions', component: Instructions },
+  // { path: '/MBAFC/help', name: 'Help', component: Help },
+  
+  { path: '/MBAFC/create', name: 'Create', component: Create},
+  { path: '/MBLC/create', name: 'Create', component: Create},
+  { path: '/MBIA/create', name: 'Create', component: Create},
+  { path: '/CAR2GO/create', name: 'Create', component: Create},
+
   { path: '/myapps', name: 'Myapps', component: Myapps },
   { path: '/mypendingtask', exact: true, name: 'MyPendingTasks', component: MyPendingTasks},
   { path: '/mypendingtask/:id', exact: true, name: 'DetailTaskSTU', component: Detail},

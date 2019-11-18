@@ -67,7 +67,7 @@ class Myapps extends Component {
 
     return (
       <div>
-        <h3>My Applications</h3>
+        <h4>My Applications</h4>
         <Collapse isOpen={!collapse}>
           <Card>
             <CardHeader>

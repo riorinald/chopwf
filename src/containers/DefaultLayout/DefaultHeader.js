@@ -40,11 +40,13 @@ class DefaultHeader extends Component {
   }
 
   changeEntity = event => {
+    this.props.history.push(`/${event.target.value}/create`)
     this.setState({
       legalEntity: event.target.value,
       modal: !this.state.modal, 
-    }, this.updateLegalEntity, localStorage.setItem("legalEntity", event.target.value) );
-    
+    }, 
+    this.updateLegalEntity,
+    localStorage.setItem("legalEntity", event.target.value) );
    }
 
    updateLegalEntity(){
@@ -130,4 +132,4 @@ class DefaultHeader extends Component {
 DefaultHeader.propTypes = propTypes;
 DefaultHeader.defaultProps = defaultProps;
 
-export default DefaultHeader;
+export default withRouter(DefaultHeader);

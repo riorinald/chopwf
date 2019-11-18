@@ -11,7 +11,7 @@ export default {
     },
     {
       name: 'My Application',
-      url: '/Myapps',
+      url: '/myapps',
       icon: 'icon-layers'
     },
     {
