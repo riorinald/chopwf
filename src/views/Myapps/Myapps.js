@@ -192,21 +192,11 @@ class Myapps extends Component {
 
           <Card >
             <CardHeader >
-              <Row className="align-items-left">
-                <Col xs="auto">
-
-                  <Button color="primary" onClick={this.goBack}><i className="fa fa-angle-left" /> Back </Button>
-                </Col>
-                <Col xs={{ size: 'auto' }}>
-                  <Button color="danger"><i className="icon-loop" /> Recall </Button>
-                </Col>
-                <Col xs="auto" >
-                  <Button color="warning"><i className="icon-bell" />Remind Task Owner </Button>
-                </Col>
-                <Col xs>
-                  <Button color="success"><i className="icon-plus" /> Extend </Button>
-                </Col>
-
+              <Row className=" align-items-left">
+                  <Button className="mr-1" color="primary" onClick={this.goBack}><i className="fa fa-angle-left" /> Back </Button>
+                  <Button className="mr-1" color="danger" ><i className="icon-loop" /> Recall </Button>
+                  <Button className="mr-1" color="warning"><i className="icon-bell" />Remind Task Owner </Button>
+                  <Button className="mr-1" color="success"><i className="icon-plus" /> Extend </Button>
               </Row>
             </CardHeader>
             <CardBody color="dark">

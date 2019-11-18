@@ -49,6 +49,7 @@ class DefaultLayout extends Component {
     this.setState({
       legalEntity: _State.legalEntity
     })
+    // this.props.history.push(`./create/${_State.legalEntity}`)
   }
 
 
