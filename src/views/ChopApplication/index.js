@@ -18,7 +18,7 @@ import "react-table/react-table.css"
 import Axios from 'axios';
 import config from '../../config';
 
-class Myapps extends Component {
+class ChopApplication extends Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -71,8 +71,7 @@ class Myapps extends Component {
         <Collapse isOpen={!collapse}>
           <Card>
             <CardHeader>
-          <Col> Applications </Col>
-          <Col style={{ display: "flex" }}><Button onClick={this.search} >Search</Button></Col>
+              Applications
           </CardHeader>
             <CardBody>
               <ReactTable
@@ -198,13 +197,10 @@ class Myapps extends Component {
                   <Button color="primary" onClick={this.goBack}><i className="fa fa-angle-left" /> Back </Button>
                 </Col>
                 <Col xs={{ size: 'auto' }}>
-                  <Button color="danger"><i className="icon-loop" /> Recall </Button>
+                  <Button color="danger"><i className="icon-loop" /> Reacall </Button>
                 </Col>
                 <Col xs="auto" >
-                  <Button color="warning"><i className="icon-bell" />Remind Task Owner </Button>
-                </Col>
-                <Col xs>
-                  <Button color="success"><i className="icon-plus" /> Extend </Button>
+                  <Button color="warning"><i className="icon-bell" />Rremind Task Owner </Button>
                 </Col>
 
               </Row>
@@ -394,4 +390,4 @@ class Myapps extends Component {
   }
 }
 
-export default Myapps;
+export default ChopApplication;
