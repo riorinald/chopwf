@@ -74,6 +74,7 @@ class DefaultLayout extends Component {
           </AppSidebar>
           <main className="main">
             {/* <AppBreadcrumb appRoutes={routes} router={router}/> */}
+            <div className="mt-3"></div>
             <Container fluid >
               <Suspense fallback={this.loading()}>
                 <Switch>
@@ -85,11 +86,11 @@ class DefaultLayout extends Component {
                         exact={route.exact}
                         name={route.name}
                         render={props => (
-                          <route.component legalName={this.state.legalEntity}{...props} />
+                          <route.component legalName={this.state.legalEntity}{...props} routes={route.routes}/>
                         )} />
                     ) : (null);
                   })}
-                  <Redirect from="/" to={{ pathname: "/create" }} />
+                  <Redirect from="/" to={{ pathname: "/" }} />
                 </Switch>
               </Suspense>
             </Container> 
