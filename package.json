@@ -1,11 +1,11 @@
 {
-  "name": "@coreui/coreui-free-react-admin-template",
-  "version": "2.6.0",
-  "description": "CoreUI React Open Source Bootstrap 4 Admin Template",
-  "author": "Łukasz Holeczek",
-  "homepage": "https://coreui.io",
-  "copyright": "Copyright 2017-2019 creativeLabs Łukasz Holeczek",
-  "license": "MIT",
+  "name": "chop-workflow",
+  "version": "0.0.0",
+  "description": "Workflow system for request chop",
+  "author": "",
+  "homepage": "",
+  "copyright": "",
+  "license": "",
   "private": true,
   "repository": {
     "type": "git",
@@ -60,7 +60,7 @@
     "eject": "react-scripts eject"
   },
   "bugs": {
-    "url": "https://github.com/coreui/coreui-free-react-admin-template/issues"
+    "url": "https://github.com/riorinald/chopwf"
   },
   "eslintConfig": {
     "extends": "react-app"
