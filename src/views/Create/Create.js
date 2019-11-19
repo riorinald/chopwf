@@ -739,31 +739,6 @@ class Create extends Component {
     </div>
   );
 
-
-  suggestionChange = (event, { newValue }) => {
-    this.setState({ pickUpBy: newValue })
-  }
-  suggestionChangeRes = (event, { newValue }) => {
-    this.setState({ resPerson: newValue })
-  }
-  suggestionChangeContract1 = (event, { newValue }) => {
-    this.setState({ contractSign1: newValue })
-  }
-  suggestionChangeContract2 = (event, { newValue }) => {
-    this.setState({ contractSign2: newValue })
-  }
-
-  onSuggestionsFetchRequested = ({ value }) => {
-    this.setState(this.getSuggestions(value))
-  }
-
-  onSuggestionsClearRequested = () => {
-    this.setState({ suggestion: [] })
-  }
-
-
-
-
   uploadFile = event => {
     if (event.target.files.length !== 0) {
       if (event.target.files.length === 1) {
@@ -891,40 +866,6 @@ class Create extends Component {
 
     const loadDocCheckBy = (inputValue, callback) => {
       callback(filterDocCheck(inputValue));
-    }
-
-    const inputProps = {
-      id: "pickUpBy",
-      className: "form-control",
-      placeholder: 'Enter person to pick up by',
-      value: pickUpBy,
-      onChange: this.suggestionChange,
-      type: 'search'
-    }
-
-    const inputResPerson = {
-      id: "resPerson",
-      className: "form-control",
-      placeholder: 'Enter person to pick up by',
-      value: resPerson,
-      onChange: this.suggestionChangeRes,
-      type: 'search'
-    }
-    const inputContract1 = {
-      id: "contractSign1",
-      className: "form-control",
-      placeholder: 'Enter name of First Person',
-      value: contractSign1,
-      onChange: this.suggestionChangeContract1,
-      type: 'search'
-    }
-    const inputContract2 = {
-      id: "contractSign2",
-      className: "form-control",
-      placeholder: 'Enter name of Second Person',
-      value: contractSign2,
-      onChange: this.suggestionChangeContract2,
-      type: 'search'
     }
 
     const defaultColumnProperties = {
@@ -1078,8 +1019,8 @@ class Create extends Component {
       </div>
 
     return (
-      <div>
-        <h3>Create</h3>
+      <div className="animated fadeIn">
+        <h4>Create</h4>
         <Card>
           <CardHeader>CREATE NEW REQUEST</CardHeader>
           <CardBody>
