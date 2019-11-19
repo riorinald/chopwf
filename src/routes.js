@@ -9,6 +9,7 @@ const Instructions = React.lazy(() => import('./views/UserInstruction'));
 const Help = React.lazy(() => import('./views/Help'));
 const Login = React.lazy(() => import('./views/Login'));
 const Detail = React.lazy(() => import('./views/MyPendingTasks/Details/Detail'));
+const EditRequest = React.lazy(() => import('./views/EditRequest/EditRequest'));
 
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
@@ -32,7 +33,8 @@ const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/instruction', name: 'Insctructions', component: Instructions },
   { path: '/help', name: 'Help', component: Help },
-  { path: '/login', name: 'Login', component: Login }
+  { path: '/login', name: 'Login', component: Login },
+  { path: '/editrequest', name: 'EditRequest', component: EditRequest }
 ];
 
 export default routes;
