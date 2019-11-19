@@ -1,19 +1,15 @@
 import React, { Component } from 'react';
 import {
-    Card, CardBody, CardHeader, Table, Col, Row,
+    Card, CardBody, CardHeader, Col, Row,
     Input,
     Button,
-    FormGroup,
-    Label,
-    Progress,
-    Badge,
-    Collapse
+    Collapse,
+
 } from 'reactstrap';
 import ReactTable from "react-table";
 import "react-table/react-table.css"
 import Axios from 'axios';
 import config from '../../config';
-import { access } from 'fs';
 import {
     DetailSTU,
     DetailLTU,
@@ -23,7 +19,7 @@ import {
 
 } from './Details';
 import Swal from 'sweetalert2';
-
+import { array } from 'prop-types';
 
 
 
@@ -94,6 +90,8 @@ class MyPendingTasks extends Component {
         this.getDeptHeads = this.getDeptHeads.bind(this);
         this.getData = this.getData.bind(this);
         this.selectDocument = this.selectDocument.bind(this);
+        this.addDocCheck = this.addDocCheck.bind(this);
+        this.addDocumentLTU = this.addDocumentLTU.bind(this)
 
     }
     togglCollapse() {
@@ -140,12 +138,13 @@ class MyPendingTasks extends Component {
             })
     }
 
-    convertDate(dateValue){
+    convertDate(dateValue) {
         let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
         return new Date(regEx);
     }
 
     async getData(state, url) {
+
         try {
             const response = await Axios.get(url);
             this.setState({
@@ -157,50 +156,143 @@ class MyPendingTasks extends Component {
     }
 
     async getTaskDetails(id) {
-        await this.getData("departments", `${config.url}/departments`)
-        await this.getDeptHeads()
+        let temporary = ""
         await Axios.get(`${config.url}/tasks/${id}`)
             .then(res => {
-                let temporary = res.data
-                // temporary.departmentHeads = ["anthony@otds.admin", "aaron@otds.admin", "josh@otds.admin"]
-                // temporary.applicationTypeId = "STU"
-                // temporary.applicationTypeName = "Short-term Use"
-                // temporary.effectivePeriod = "20131011"
-                // this.setState({dateView2: temporary.returnDate, dateView1: temporary.effectivePeriod})
-                if (temporary.applicationTypeId === "LTU") {
-                    if (temporary.departmentId !== "" && temporary.chopTypeId !== "" && temporary.teamId !== "") {
-                        this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
-                    }
-                }
-
-                this.state.deptHeads.map((head, index) => {
-
-                    if (head.value === temporary.responsiblePerson) {
-                        temporary.responsiblePersonOption = index
-                    }
-                    if (head.value === temporary.pickUpBy) {
-                        temporary.pickUpByOption = index
-                    }
-                    if (head.value === temporary.contractSignedByFirstPerson) {
-                        temporary.contractSignedByFirstPersonOption = index
-                    }
-                    if (head.value === temporary.contractSignedBySecondPerson) {
-                        temporary.contractSignedBySecondPersonOption = index
-                    }
-                    if (head.value === temporary.documentCheckBy) {
-                        temporary.documentCheckByOption = index
-                    }
-                })
-                this.setState({ requestForm: temporary })
-                this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
+                temporary = res.data
             })
-        this.setState({ collapse: true })
+        temporary.applicationTypeId = "LTU"
+        // temporary.applicationTypeName = "Short-term Use"
+        temporary.documentNames = [
+            {
+                documentId: "cdedbf46-c53c-4c6f-99a5-fedcd1255410",
+                requestId: "5aee8978-053f-48b7-bd9d-008a506ed11d",
+                documentName: "CHOP WF Functional Specifications_v0.6_03NOV2019.docx",
+                documentCode: "",
+                description: "",
+                created: "15/11/2019 6:40:30 am",
+                updated: "15/11/2019 6:40:30 am",
+                documentType: "DOCUMENT",
+                documentNameEnglish: "asdasd",
+                documentNameChinese: "asdsd",
+                documentUrl: "",
+                expiryDate: "",
+                departmentHeads: []
+            },
+            {
+                documentId: "38ef4fc4-1de3-44a3-bcbe-0ccfb4642563",
+                requestId: "5aee8978-053f-48b7-bd9d-008a506ed11d",
+                documentName: "database_schema.vsdx",
+                documentCode: "",
+                description: "",
+                created: "15/11/2019 6:40:30 am",
+                updated: "15/11/2019 6:40:30 am",
+                documentType: "DOCUMENT",
+                documentNameEnglish: "ghj",
+                documentNameChinese: "kjh",
+                documentUrl: "",
+                expiryDate: "",
+                departmentHeads: []
+            },
+            {
+                documentId: "b356a27c-0953-42b0-916c-3432ba65de7e",
+                requestId: "5aee8978-053f-48b7-bd9d-008a506ed11d",
+                documentName: "CHOP WF Functional Specifications_v0.6_03NOV2019.docx",
+                documentCode: "",
+                description: "",
+                created: "15/11/2019 6:40:31 am",
+                updated: "15/11/2019 6:40:31 am",
+                documentType: "DOCUMENT",
+                documentNameEnglish: "asdasd",
+                documentNameChinese: "",
+                documentUrl: "",
+                expiryDate: "",
+                departmentHeads: []
+            },
+            {
+                documentId: "1ee2b52b-63cb-426e-992d-8aa8be1aee62",
+                requestId: "5aee8978-053f-48b7-bd9d-008a506ed11d",
+                documentName: "CHOP WF Functional Specifications_v0.6_03NOV2019.docx",
+                documentCode: "",
+                description: "",
+                created: "15/11/2019 6:40:31 am",
+                updated: "15/11/2019 6:40:31 am",
+                documentType: "DOCUMENT",
+                documentNameEnglish: "asdasd",
+                documentNameChinese: "",
+                documentUrl: "",
+                expiryDate: "",
+                departmentHeads: []
+            }
+        ]
 
+        if (temporary.currentStatusId === "") {
+            await this.getData("departments", `${config.url}/departments`)
+            await this.getDeptHeads()
+            await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
+            if (temporary.applicationTypeId === "LTU") {
+                this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
+
+                if (temporary.departmentId !== "" && temporary.chopTypeId !== "" && temporary.teamId !== "") {
+                    this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
+                }
+            }
+            this.state.deptHeads.map((head, index) => {
+
+                if (head.value === temporary.responsiblePerson) {
+                    temporary.responsiblePersonOption = index
+                }
+                if (head.value === temporary.pickUpBy) {
+                    temporary.pickUpByOption = index
+                }
+                if (head.value === temporary.contractSignedByFirstPerson) {
+                    temporary.contractSignedByFirstPersonOption = index
+                }
+                if (head.value === temporary.contractSignedBySecondPerson) {
+                    temporary.contractSignedBySecondPersonOption = index
+                }
+                if (head.value === temporary.documentCheckBy) {
+                    temporary.documentCheckByOption = index
+                }
+            })
+
+            this.setState({ requestForm: temporary, collapse: true })
+        }
+        else {
+            let rDate = ""
+            let nrDate = ""
+            let ePeriod = ""
+            for (let i = 0; i < temporary.returnDate.length; i++) {
+                if (i === 4 || i === 6) {
+                    rDate = rDate + '/'
+                }
+                rDate = rDate + temporary.returnDate[i]
+            }
+            for (let i = 0; i < temporary.newReturnDate.length; i++) {
+                if (i === 4 || i === 6) {
+                    nrDate = nrDate + '/'
+                }
+                nrDate = nrDate + temporary.newReturnDate[i]
+            }
+            for (let i = 0; i < temporary.effectivePeriod.length; i++) {
+                if (i === 4 || i === 6) {
+                    ePeriod = ePeriod + '/'
+                }
+                ePeriod = ePeriod + temporary.effectivePeriod[i]
+            }
+
+            temporary.returnDate = rDate
+            temporary.newReturnDate = nrDate
+            temporary.effectivePeriod = ePeriod
+
+            this.setState({ requestForm: temporary, collapse: true })
+        }
     }
 
 
 
     async getPendingTasks() {
+
         this.setState({ pendingTasks: [] })
         let url = `${config.url}/tasks?userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`
         await Axios.get(url)
@@ -208,12 +300,11 @@ class MyPendingTasks extends Component {
                 let result = res.data
                 result.map(task => {
                     const obj = task
-                    obj.docNameEngArray = task.documentNameEnglish
-                    obj.docNameCnArray = task.documentNameChinese
                     let docNameEng = ""
                     let docNameCn = ""
                     let dh = ""
                     let date = ""
+                    let newRDate = ""
 
                     task.documentNameEnglish.map(doc => {
                         docNameEng = docNameEng + doc + '; '
@@ -230,10 +321,17 @@ class MyPendingTasks extends Component {
                         }
                         date = date + task.createdDate[i]
                     }
+                    for (let i = 0; i < task.newReturnDate.length; i++) {
+                        if (i === 4 || i === 6) {
+                            newRDate = newRDate + '/'
+                        }
+                        newRDate = newRDate + task.createdDate[i]
+                    }
                     obj.documentNameEnglish = docNameEng
                     obj.documentNameChinese = docNameCn
                     obj.departmentHeadName = dh
                     obj.createdDate = date
+                    obj.newReturnDate = newRDate
 
                     this.setState(state => {
                         const pendingTasks = this.state.pendingTasks.concat(obj)
@@ -246,12 +344,15 @@ class MyPendingTasks extends Component {
 
 
             })
+
+
     }
 
     async getDocuments(companyId, deptId, chopTypeId, teamId) {
         let tempDocs = []
 
-        let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
+        let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit'
+        // let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
         try {
             await Axios.get(url).then(res => {
                 tempDocs = res.data
@@ -295,6 +396,7 @@ class MyPendingTasks extends Component {
                 }
             })
         })
+
     }
 
     selectDocument() {
@@ -395,7 +497,7 @@ class MyPendingTasks extends Component {
         if (this.state.editRequestForm.docSelected !== null) {
             const obj = {
                 // documentId: "dd66ea7c-773e-4312-827a-8fd3437472be",
-                requestId: "2efa8500-636a-495a-aaed-8140761df10a",
+                taskId: "2efa8500-636a-495a-aaed-8140761df10a",
                 documentName: this.state.editRequestForm.docAttachedName,
                 documentCode: "",
                 description: "",
@@ -417,6 +519,15 @@ class MyPendingTasks extends Component {
                 return { requestForm }
             }, console.log(this.state.requestForm))
         }
+    }
+    addDocumentLTU() {
+        this.state.selectedDocs.map(doc => {
+            this.setState(state =>{
+                let requestForm = this.state.requestForm
+                requestForm.documentNames = requestForm.documentNames.concat(doc)
+                return requestForm
+            })
+        })
     }
 
     addDocCheck(row) {
@@ -516,10 +627,13 @@ class MyPendingTasks extends Component {
     };
 
 
+
+
     checkAppType() {
         let appType = this.state.requestForm.applicationTypeId
         let status = this.state.requestForm.currentStatusId
-        if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
+        // if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
+        if (status === "") {
 
             return <EditDetails
                 legalName={this.props.legalName}
@@ -546,7 +660,8 @@ class MyPendingTasks extends Component {
                 addDocCheck={this.addDocCheck}
                 dateView1={this.state.dateView1}
                 dateView2={this.state.dateView2}
-                dateChange={this.dateChange} />
+                dateChange={this.dateChange}
+                addDocumentLTU={this.addDocumentLTU} />
         }
         else {
             switch (appType) {
@@ -620,6 +735,12 @@ class MyPendingTasks extends Component {
         this.getPendingTasks()
     }
 
+    handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            this.getPendingTasks()
+        }
+    }
+
     render() {
         const { pendingTasks } = this.state;
 
@@ -628,6 +749,7 @@ class MyPendingTasks extends Component {
                 <h4>MY PENDING TASKS</h4>
                 {/* <Row> */}
                 {/* <Col sm={3}> */}
+                {}
                 <Collapse isOpen={!this.state.collapse}>
                     <Card>
                         <CardHeader >
@@ -639,7 +761,7 @@ class MyPendingTasks extends Component {
                             </Row>
 
                         </CardHeader>
-                        <CardBody>
+                        <CardBody onKeyDown={this.handleKeyDown} >
                             <ReactTable
                                 data={pendingTasks}
                                 sortable
@@ -797,7 +919,7 @@ class MyPendingTasks extends Component {
                                                     });
                                                 }
 
-                                                this.getTaskDetails(rowInfo.original.requestId)
+                                                this.getTaskDetails(rowInfo.original.taskId)
                                             },
                                             style: {
                                                 background:

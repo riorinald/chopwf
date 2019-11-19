@@ -6,49 +6,10 @@ import {
     FormGroup,
     Label,
     Progress,
-    Badge,
-    Collapse
+    Badge
 } from 'reactstrap';
 
 const DetailSTU = (props) => {
-    
-    //     const obj = props.taskDetail
-    //     obj.docNameEngArray = props.taskDetail.documentNameEnglish
-    //     obj.docNameCnArray = props.taskDetail.documentNameChinese
-    //     let docNameEng = ""
-    //     let docNameCn = ""
-    //     let dh = ""
-    //     let date = ""
-
-    //     props.taskDetail.documentNameEnglish.map(doc => {
-    //         docNameEng = docNameEng + doc + '; '
-    //     })
-    //     props.taskDetail.documentNameChinese.map(doc => {
-    //         docNameCn = docNameCn + doc + '; '
-    //     })
-    //     props.taskDetail.departmentHeadName.map(head => {
-    //         dh = dh + head + '; '
-    //     })
-    //     for (let i = 0; i < props.taskDetail.createdDate.length; i++) {
-    //         if (i === 4 || i === 6) {
-    //             date = date + '/'
-    //         }
-    //         date = date + props.taskDetail.createdDate[i]
-    //     }
-    //     obj.documentNameEnglish = docNameEng
-    //     obj.documentNameChinese = docNameCn
-    //     obj.departmentHeadName = dh
-    //     obj.createdDate = date
-
-    //     this.setState(state => {
-    //         const pendingTasks = this.state.pendingTasks.concat(obj)
-    //         return {
-    //             pendingTasks
-    //         }
-    //     })
-
-    // })
-
     return <div>
         <Card >
             <CardHeader> <Button onClick={props.collapse} > Back &nbsp; </Button>  {props.taskDetail.requestNum} </CardHeader>
@@ -70,7 +31,7 @@ const DetailSTU = (props) => {
                     <Col>
                         <Row>
                             <Col md="5"><h5> {props.taskDetail.employeeName} </h5></Col>
-                            <Col md="5"><h5><i className="fa fa-tablet" />&nbsp; +86 10 12345678 </h5></Col>
+                            <Col md="5"><h5><i className="fa fa-tablet" />&nbsp; {props.taskDetail.telephoneNum} </h5></Col>
                         </Row>
                         <Row >
                             <Col md="4"><h6> DFS/CN, {props.legalName} </h6></Col>
@@ -113,22 +74,18 @@ const DetailSTU = (props) => {
                                 <Input disabled type="text" id="text-input" value={props.taskDetail.chopTypeName} name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
-                        <FormGroup row>
-                            <Col md="4">
-                                <Label htmlFor="text-input">Document Name (English)</Label>
-                            </Col>
-                            <Col xs="12" md="8">
-                                <Input disabled type="text" id="text-input" value={props.taskDetail.documentNameEnglish} name="text-input" placeholder="Text" />
-                            </Col>
-                        </FormGroup>
-                        <FormGroup row>
-                            <Col md="4">
-                                <Label htmlFor="text-input">Document Name (Chinese)</Label>
-                            </Col>
-                            <Col xs="12" md="8">
-                                <Input disabled type="text" id="text-input" value={props.taskDetail.documentNameChinese} name="text-input" placeholder="Text" />
-                            </Col>
-                        </FormGroup>
+                        {props.taskDetail.branchName !== ""
+                            ? <FormGroup row>
+                                <Col md="4">
+                                    <Label htmlFor="text-input">Branch Company Chop</Label>
+                                </Col>
+                                <Col xs="12" md="8">
+                                    <Input disabled type="text" id="text-input" value={props.taskDetail.branchName} name="text-input" placeholder="Text" />
+                                </Col>
+                            </FormGroup>
+                            : ""
+                        }
+
                         <FormGroup row>
                             <Col md="4">
                                 <Label htmlFor="text-input">Use in Office or not</Label>
@@ -137,6 +94,29 @@ const DetailSTU = (props) => {
                                 <Input disabled type="text" id="text-input" value={props.taskDetail.isUseInOffice === "Y" ? "Yes" : "No"} name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
+                        {props.taskDetail.isUseInOffice === "N"
+                            ? <FormGroup row>
+                                <Col md="4">
+                                    <Label htmlFor="text-input">Return Date</Label>
+                                </Col>
+                                <Col xs="12" md="8">
+                                    <Input disabled type="text" id="text-input" value={props.taskDetail.returnDate} name="text-input" placeholder="Text" />
+                                </Col>
+                            </FormGroup>
+
+                            : ""}
+                        {props.taskDetail.isUseInOffice === "N"
+                            ? <FormGroup row>
+                                <Col md="4">
+                                    <Label htmlFor="text-input">Responsible Person</Label>
+                                </Col>
+                                <Col xs="12" md="8">
+                                    <Input disabled type="text" id="text-input" value={props.taskDetail.responsiblePerson} name="text-input" placeholder="Text" />
+                                </Col>
+                            </FormGroup>
+
+                            : ""}
+
                         <FormGroup row>
                             <Col md="4">
                                 <Label htmlFor="text-input">Pick Up By</Label>
@@ -153,8 +133,6 @@ const DetailSTU = (props) => {
                                 <Input disabled type="text" id="text-input" value={props.taskDetail.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
-                    </Col>
-                    <Col>
                         <FormGroup row>
                             <Col md="4">
                                 <Label htmlFor="text-input">Tel</Label>
@@ -163,12 +141,23 @@ const DetailSTU = (props) => {
                                 <Input disabled type="text" value={props.taskDetail.telephoneNum} id="text-input" name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
+                    </Col>
+                    <Col>
+
                         <FormGroup row>
                             <Col md="4">
                                 <Label htmlFor="text-input">Application Type</Label>
                             </Col>
                             <Col xs="12" md="8">
                                 <Input disabled type="text" value={props.taskDetail.applicationTypeName} id="text-input" name="text-input" placeholder="Text" />
+                            </Col>
+                        </FormGroup>
+                        <FormGroup row>
+                            <Col md="4">
+                                <Label htmlFor="text-input">Connecting Chop</Label>
+                            </Col>
+                            <Col xs="12" md="8">
+                                <Input disabled type="text" value={props.taskDetail.connectChop === "Y" ? "Yes" : "No"} id="text-input" name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
                         <FormGroup row>
@@ -213,6 +202,38 @@ const DetailSTU = (props) => {
                         </FormGroup>
 
                     </Col>
+                </Row>
+                <Row>
+                    <FormGroup>
+                        <Col>
+                            <Label htmlFor="text-input">Documents</Label>
+                        </Col>
+                        <Col>
+                            <Table size="sm" style={{ tableLayout: "fixed" }} >
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: "70px" }} ></th>
+                                        <th style={{ width: "290px" }}>Document Name (English)</th>
+                                        <th style={{ width: "290px" }}>Document Name (Chinese)</th>
+                                        <th>Attached Document</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {props.taskDetail.documentNames.map((doc, index) =>
+                                        <tr key={index} >
+                                            <th> {index + 1} </th>
+                                            <th> {doc.documentNameEnglish} </th>
+                                            <th> {doc.documentNameChinese}  </th>
+                                            <th>
+                                                <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a>
+                                            </th>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </Table>
+                            {/* <Input disabled type="text" id="text-input" value={props.taskDetail.documentNameEnglish} name="text-input" placeholder="Text" /> */}
+                        </Col>
+                    </FormGroup>
                 </Row>
                 <Row>
                     <Col> <h4>Comments</h4></Col>

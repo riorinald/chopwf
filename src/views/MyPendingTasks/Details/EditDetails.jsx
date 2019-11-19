@@ -24,8 +24,6 @@ import deleteBin from '../../../assets/img/deletebin.png'
 import { AppSwitch } from '@coreui/react';
 import AsyncSelect from 'react-select/async';
 import makeAnimated from 'react-select/animated';
-import config from '../../../config';
-import { loadOptions } from '@babel/core';
 
 
 
@@ -201,7 +199,7 @@ const EditDetails = props => {
                                             rowsCount={props.documents.length}
                                             minWidth={1100}
                                             rowScrollTimeout={null}
-                                            enableRowSelect={null}
+                                            enableRowSelect={true}
                                             onRowSelect={props.addDocCheck}
                                             onColumnResize={(idx, width) =>
                                                 console.log('Column' + idx + ' has been resized to ' + width)}
@@ -211,7 +209,7 @@ const EditDetails = props => {
                                         />
                                     </ModalBody>
                                     <ModalFooter>
-                                        <Button color="primary" block size="md" onClick={() => { this.addDocumentLTU(); this.selectDocument() }}>  Add </Button>
+                                        <Button color="primary" block size="md" onClick={() => { props.addDocumentLTU(); props.selectDocument() }}>  Add </Button>
                                     </ModalFooter>
                                 </Modal>
 
@@ -460,7 +458,7 @@ const EditDetails = props => {
                                 <CustomInput
                                     className="form-check-input"
                                     type="checkbox"
-                                    checked={props.requestForm.agreeTerms}
+                                    checked={props.requestForm.isConfirm}
                                     onChange={props.handleAgreeTerm}
                                     // onClick={this.isValid}
                                     id="confirm" value="option1">
@@ -477,7 +475,7 @@ const EditDetails = props => {
             <CardFooter>
                 <div className="form-actions">
                     <Row>
-                        {props.requestForm.agreeTerms
+                        {props.requestForm.isConfirm
                             ? <Button type="submit" color="success" onClick={() => { props.submitRequest('Y') }}>Submit</Button>
                             : <Button type="submit" color="success"
                                 // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })}
