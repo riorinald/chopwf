@@ -24,6 +24,7 @@ import deleteBin from '../../../assets/img/deletebin.png'
 import { AppSwitch } from '@coreui/react';
 import AsyncSelect from 'react-select/async';
 import makeAnimated from 'react-select/animated';
+import config from '../../../config';
 
 
 
@@ -49,7 +50,7 @@ const docHeaders = [
     { key: 'dhApproved', name: 'DH Approved' },
 ].map(c => ({ ...c, ...defaultColumnProperties }))
 
-
+let rendered = 0
 
 const EditDetails = props => {
 
@@ -79,6 +80,20 @@ const EditDetails = props => {
         }
     })
 
+    // console.log(rendered)
+    if (rendered === 0) {
+        props.getData("departments", `${config.url}/departments`)
+        props.getDeptHeads()
+        props.getData("chopTypes", `${config.url}/choptypes?companyid=${props.legalName}&apptypeid=${props.requestForm.applicationTypeId}`);
+        if (props.requestForm.applicationTypeId === "LTU") {
+            this.getDocuments(props.legalName, props.requestForm.departmentId, props.requestForm.chopTypeId, props.requestForm.teamId)
+
+            if (props.requestForm.departmentId !== "" && props.requestForm.chopTypeId !== "" && props.requestForm.teamId !== "") {
+                this.getDocuments(props.legalName, props.requestForm.departmentId, props.requestForm.chopTypeId, props.requestForm.teamId)
+            }
+        }
+    }
+    rendered = rendered + 1
 
 
     return <div>

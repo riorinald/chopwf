@@ -15,11 +15,10 @@ import {
     DetailLTU,
     DetailLTI,
     DetailCNIPS,
-    EditDetails
 
 } from './Details';
 import Swal from 'sweetalert2';
-import { array } from 'prop-types';
+import { Redirect } from 'react-router-dom'
 
 
 
@@ -47,6 +46,7 @@ class MyPendingTasks extends Component {
             selectedDocs: [],
             dateView1: "",
             dateView2: "",
+            showModal: false,
 
             editRequestForm: {
                 engName: "",
@@ -56,6 +56,8 @@ class MyPendingTasks extends Component {
                 collapseUIO: true,
                 isConnect: false,
             },
+
+            hide: false,
 
             requestForm: {},
 
@@ -76,6 +78,8 @@ class MyPendingTasks extends Component {
 
             //data assigned on Row Selected 
             taskDetailId: "",
+            taskId: "",
+            taskAppId: "",
         }
 
         this.getPendingTasks = this.getPendingTasks.bind(this);
@@ -92,7 +96,8 @@ class MyPendingTasks extends Component {
         this.selectDocument = this.selectDocument.bind(this);
         this.addDocCheck = this.addDocCheck.bind(this);
         this.addDocumentLTU = this.addDocumentLTU.bind(this)
-
+        this.toggleView = this.toggleView.bind(this);
+        this.getTaskDetails = this.getTaskDetails.bind(this);
     }
     togglCollapse() {
         this.setState({
@@ -157,86 +162,13 @@ class MyPendingTasks extends Component {
 
     async getTaskDetails(id) {
         let temporary = ""
-        await Axios.get(`${config.url}/tasks/${id}`)
+        await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`)
             .then(res => {
                 temporary = res.data
             })
-        temporary.applicationTypeId = "LTU"
+        // temporary.applicationTypeId = "LTU"
         // temporary.applicationTypeName = "Short-term Use"
-        temporary.documentNames = [
-            {
-                documentId: "cdedbf46-c53c-4c6f-99a5-fedcd1255410",
-                requestId: "5aee8978-053f-48b7-bd9d-008a506ed11d",
-                documentName: "CHOP WF Functional Specifications_v0.6_03NOV2019.docx",
-                documentCode: "",
-                description: "",
-                created: "15/11/2019 6:40:30 am",
-                updated: "15/11/2019 6:40:30 am",
-                documentType: "DOCUMENT",
-                documentNameEnglish: "asdasd",
-                documentNameChinese: "asdsd",
-                documentUrl: "",
-                expiryDate: "",
-                departmentHeads: []
-            },
-            {
-                documentId: "38ef4fc4-1de3-44a3-bcbe-0ccfb4642563",
-                requestId: "5aee8978-053f-48b7-bd9d-008a506ed11d",
-                documentName: "database_schema.vsdx",
-                documentCode: "",
-                description: "",
-                created: "15/11/2019 6:40:30 am",
-                updated: "15/11/2019 6:40:30 am",
-                documentType: "DOCUMENT",
-                documentNameEnglish: "ghj",
-                documentNameChinese: "kjh",
-                documentUrl: "",
-                expiryDate: "",
-                departmentHeads: []
-            },
-            {
-                documentId: "b356a27c-0953-42b0-916c-3432ba65de7e",
-                requestId: "5aee8978-053f-48b7-bd9d-008a506ed11d",
-                documentName: "CHOP WF Functional Specifications_v0.6_03NOV2019.docx",
-                documentCode: "",
-                description: "",
-                created: "15/11/2019 6:40:31 am",
-                updated: "15/11/2019 6:40:31 am",
-                documentType: "DOCUMENT",
-                documentNameEnglish: "asdasd",
-                documentNameChinese: "",
-                documentUrl: "",
-                expiryDate: "",
-                departmentHeads: []
-            },
-            {
-                documentId: "1ee2b52b-63cb-426e-992d-8aa8be1aee62",
-                requestId: "5aee8978-053f-48b7-bd9d-008a506ed11d",
-                documentName: "CHOP WF Functional Specifications_v0.6_03NOV2019.docx",
-                documentCode: "",
-                description: "",
-                created: "15/11/2019 6:40:31 am",
-                updated: "15/11/2019 6:40:31 am",
-                documentType: "DOCUMENT",
-                documentNameEnglish: "asdasd",
-                documentNameChinese: "",
-                documentUrl: "",
-                expiryDate: "",
-                departmentHeads: []
-            }
-        ]
-
-        if (temporary.currentStatusId === "") {
-            await this.getData("departments", `${config.url}/departments`)
-            await this.getDeptHeads()
-            await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
-            if (temporary.applicationTypeId === "LTU") {
-                this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
-
-                if (temporary.departmentId !== "" && temporary.chopTypeId !== "" && temporary.teamId !== "") {
-                    this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
-                }
-            }
+        if (temporary.currentStatusId === "DRAFT") {
             this.state.deptHeads.map((head, index) => {
 
                 if (head.value === temporary.responsiblePerson) {
@@ -285,7 +217,7 @@ class MyPendingTasks extends Component {
             temporary.newReturnDate = nrDate
             temporary.effectivePeriod = ePeriod
 
-            this.setState({ requestForm: temporary, collapse: true })
+            this.setState({ requestForm: temporary })
         }
     }
 
@@ -306,12 +238,11 @@ class MyPendingTasks extends Component {
                     let date = ""
                     let newRDate = ""
 
-                    task.documentNameEnglish.map(doc => {
+                    task.documentNameEnglish.map((doc, index) => {
                         docNameEng = docNameEng + doc + '; '
+                        docNameCn = docNameCn + task.documentNameChinese[index] + '; '
                     })
-                    task.documentNameChinese.map(doc => {
-                        docNameCn = docNameCn + doc + '; '
-                    })
+
                     task.departmentHeadName.map(head => {
                         dh = dh + head + '; '
                     })
@@ -333,6 +264,7 @@ class MyPendingTasks extends Component {
                     obj.createdDate = date
                     obj.newReturnDate = newRDate
 
+                    // console.log(obj)
                     this.setState(state => {
                         const pendingTasks = this.state.pendingTasks.concat(obj)
                         return {
@@ -351,8 +283,8 @@ class MyPendingTasks extends Component {
     async getDocuments(companyId, deptId, chopTypeId, teamId) {
         let tempDocs = []
 
-        let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit'
-        // let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
+        // let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit'
+        let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
         try {
             await Axios.get(url).then(res => {
                 tempDocs = res.data
@@ -397,6 +329,10 @@ class MyPendingTasks extends Component {
             })
         })
 
+    }
+
+    toggleView() {
+        this.setState({ showModal: !this.state.showModal })
     }
 
     selectDocument() {
@@ -456,27 +392,7 @@ class MyPendingTasks extends Component {
         this.setState({ filtered: filtered });
     };
 
-    handleChange = name => event => {
-        console.log(name + " + " + event.target.value)
-        let value = event.target.value
-        this.setState(state => {
-            let requestForm = this.state.requestForm
-            requestForm[name] = value
-            return { requestForm };
 
-        })
-    }
-
-    handleDocumentChange = name => event => {
-        console.log(name + " + " + event.target.value)
-        let value = event.target.value
-        this.setState(state => {
-            let editRequestForm = this.state.editRequestForm
-            editRequestForm[name] = value
-            return { editRequestForm };
-
-        })
-    }
 
     uploadDocument = event => {
         if (event.target.files[0]) {
@@ -522,7 +438,7 @@ class MyPendingTasks extends Component {
     }
     addDocumentLTU() {
         this.state.selectedDocs.map(doc => {
-            this.setState(state =>{
+            this.setState(state => {
                 let requestForm = this.state.requestForm
                 requestForm.documentNames = requestForm.documentNames.concat(doc)
                 return requestForm
@@ -630,67 +546,39 @@ class MyPendingTasks extends Component {
 
 
     checkAppType() {
-        let appType = this.state.requestForm.applicationTypeId
-        let status = this.state.requestForm.currentStatusId
-        // if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
-        if (status === "") {
-
-            return <EditDetails
-                legalName={this.props.legalName}
-                departments={this.state.departments}
-                appTypes={this.state.applicationTypes}
-                chopTypes={this.state.chopTypes}
-                collapse={this.togglCollapse}
-                requestForm={this.state.requestForm}
-                documents={this.state.documents}
-                editRequestForm={this.state.editRequestForm}
-                handleChange={this.handleChange}
-                handleDocumentChange={this.handleDocumentChange}
-                selectDocument={this.selectDocument}
-                showDoc={this.state.showDoc}
-                uploadDocument={this.uploadDocument}
-                addDocumentLTI={this.addDocumentLTI}
-                deleteDocument={this.deleteDocument}
-                toggleConnection={this.toggleConnection}
-                toggleUIO={this.toggleUIO}
-                deptHeads={this.state.deptHeads}
-                handleSelectOption={this.handleSelectOption}
-                handleAgreeTerm={this.handleAgreeTerm}
-                submitRequest={this.submitRequest}
-                addDocCheck={this.addDocCheck}
-                dateView1={this.state.dateView1}
-                dateView2={this.state.dateView2}
-                dateChange={this.dateChange}
-                addDocumentLTU={this.addDocumentLTU} />
-        }
-        else {
-            switch (appType) {
-                case 'STU':
-                    return <DetailSTU
-                        legalName={this.props.legalName}
-                        taskDetail={this.state.requestForm}
-                        collapse={this.togglCollapse}
-                        approve={this.approve} />
-                        ;
-                case 'LTU':
-                    return <DetailLTU
-                        taskDetail={this.state.requestForm}
-                        collapse={this.togglCollapse}
-                        approve={this.approve} />
-                        ;
-                case 'LTI':
-                    return <DetailLTI
-                        taskDetail={this.state.requestForm}
-                        collapse={this.togglCollapse}
-                        approve={this.approve} />
-                        ;
-                case 'CNIPS':
-                    return <DetailCNIPS
-                        taskDetail={this.state.requestForm}
-                        collapse={this.togglCollapse}
-                        approve={this.approve} />
-                        ;
-            }
+        let appType = this.state.taskAppId
+        switch (appType) {
+            case 'Short-term use':
+                return <DetailSTU
+                    legalName={this.props.legalName}
+                    taskDetail={this.state.requestForm}
+                    collapse={this.togglCollapse}
+                    approve={this.approve}
+                    showModal={this.state.showModal}
+                    toggleView={this.toggleView} 
+                    taskId={this.state.taskId}
+                    getTaskDetails={this.getTaskDetails}
+                    hide={this.state.hide}
+                    />
+                    ;
+            case 'LTU':
+                return <DetailLTU
+                    taskDetail={this.state.requestForm}
+                    collapse={this.togglCollapse}
+                    approve={this.approve} />
+                    ;
+            case 'LTI':
+                return <DetailLTI
+                    taskDetail={this.state.requestForm}
+                    collapse={this.togglCollapse}
+                    approve={this.approve} />
+                    ;
+            case 'CNIPS':
+                return <DetailCNIPS
+                    taskDetail={this.state.requestForm}
+                    collapse={this.togglCollapse}
+                    approve={this.approve} />
+                    ;
         }
     }
 
@@ -750,7 +638,7 @@ class MyPendingTasks extends Component {
                 {/* <Row> */}
                 {/* <Col sm={3}> */}
                 {}
-                <Collapse isOpen={!this.state.collapse}>
+                <Collapse isOpen={!this.state.hide}>
                     <Card>
                         <CardHeader >
                             <Row>
@@ -918,8 +806,17 @@ class MyPendingTasks extends Component {
                                                         rowEdit: null
                                                     });
                                                 }
+                                                let show = false
+                                                if (rowInfo.original.statusName === "DRAFT") {
+                                                    show = true
+                                                }
+                                                else {
+                                                    show = false
+                                                }
+                                                // console.log( rowInfo.original.applicationTypeName )
+                                                this.setState({ taskId: rowInfo.original.taskId, taskAppId: rowInfo.original.applicationTypeName, collapse: show })
 
-                                                this.getTaskDetails(rowInfo.original.taskId)
+                                                // this.getTaskDetails(rowInfo.original.taskId)
                                             },
                                             style: {
                                                 background:
@@ -936,9 +833,19 @@ class MyPendingTasks extends Component {
                         </CardBody>
                     </Card>
                 </Collapse>
-                <Collapse isOpen={this.state.collapse}>
-                    {this.checkAppType()}
-                </Collapse>
+
+                {this.state.collapse
+                    ? <Redirect to={{
+                        pathname: 'editrequest',
+                        state: { id: this.state.taskId }
+                    }} />
+                    : ""}
+                    {/* this.state.taskId!=="" ? this.checkAppType() this.setState({hide: true}) : ""} */}
+
+                   
+
+
+
                 {/* </Col> */}
 
                 {/* </Row> */}

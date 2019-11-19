@@ -7,7 +7,11 @@ import {
     Label,
     Progress,
     Badge,
+    Modal, ModalBody, ModalFooter, ModalHeader
+
 } from 'reactstrap';
+import ReactTable from "react-table";
+import "react-table/react-table.css"
 
 const DetailLTI = props =>
     <div>
@@ -180,7 +184,7 @@ const DetailLTI = props =>
                                     <Label htmlFor="text-input">Responsible Person</Label>
                                 </Col>
                                 <Col xs="12" md="8">
-                                    <Input disabled type="text" id="text-input" value={props.taskDetail.responsiblePersonName} name="text-input" placeholder="Text" />
+                                    <Input disabled type="text" id="text-input" value={props.taskDetail.responsiblePersonNameName} name="text-input" placeholder="Text" />
                                 </Col>
                             </FormGroup>
 
@@ -230,29 +234,50 @@ const DetailLTI = props =>
                             <Label htmlFor="text-input">Documents</Label>
                         </Col>
                         <Col>
-                            <Table size="sm" style={{ tableLayout: "fixed" }} >
-                                <thead>
-                                    <tr>
-                                        <th style={{ width: "70px" }} ></th>
-                                        <th style={{ width: "290px" }}>Document Name (English)</th>
-                                        <th style={{ width: "290px" }}>Document Name (Chinese)</th>
-                                        <th>Attached Document</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {props.taskDetail.documentNames.map((doc, index) =>
-                                        <tr key={index} >
-                                            <th> {index + 1} </th>
-                                            <th> {doc.documentNameEnglish} </th>
-                                            <th> {doc.documentNameChinese}  </th>
-                                            <th>
-                                                <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a>
-                                            </th>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </Table>
-                            {/* <Input disabled type="text" id="text-input" value={props.taskDetail.documentNameEnglish} name="text-input" placeholder="Text" /> */}
+                            <Button color="primary" onClick={props.toggleView}>View Documents</Button>
+
+                            <Modal color="info" size="xl" toggle={props.toggleView} isOpen={props.showModal} >
+                                <ModalHeader className="center"> Documents </ModalHeader>
+                                <ModalBody>
+                                    <ReactTable
+                                        data={props.taskDetail.documentNames}
+                                        sortable
+                                        columns={[
+                                            {
+                                                Header: "#",
+                                                Cell: row => (
+                                                    <div>{row.index + 1}</div>
+                                                ),
+                                                width: 40,
+                                                style: { textAlign: "center" }
+                                            },
+                                            {
+                                                Header: "Document Name (English)",
+                                                accessor: "documentNameEnglish",
+                                                width: 250,
+                                                style: { textAlign: "center" },
+                                            },
+                                            {
+                                                Header: "Document Name (Chinese)",
+                                                accessor: "documentNameChinese",
+                                                width: 250,
+                                                style: { textAlign: "center" },
+                                            },
+                                            {
+                                                Header: "Attached Document",
+                                                accessor: "documentName",
+                                                Cell: row => (
+                                                    <a href={row.original.documentUrl} target='_blank' rel="noopener noreferrer">{row.original.documentName}</a>
+                                                ),
+                                                style: { textAlign: "center" },
+                                            },
+                                        ]}
+                                        defaultPageSize={5}
+                                    />
+                                </ModalBody>
+                                <ModalFooter>
+                                </ModalFooter>
+                            </Modal>
                         </Col>
                     </FormGroup>
                 </Row>
