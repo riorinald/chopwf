@@ -9,6 +9,7 @@ const Instructions = React.lazy(() => import('./views/UserInstruction'));
 const Help = React.lazy(() => import('./views/Help'));
 const Login = React.lazy(() => import('./views/Login'));
 const Detail = React.lazy(() => import('./views/MyPendingTasks/Details/Detail'));
+const Redirect = React.lazy(()=> import('./views/Create/Redirecting'))
 
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
@@ -19,7 +20,8 @@ const routes = [
   // { path: '/MBAFC/mypendingtask', exact: true, name: 'MyPendingTasks', component: MyPendingTasks},
   // { path: '/MBAFC/instruction', name: 'Insctructions', component: Instructions },
   // { path: '/MBAFC/help', name: 'Help', component: Help },
-  
+
+  { path: '/create', name: 'Create', component: Redirect},
   { path: '/MBAFC/create', name: 'Create', component: Create},
   { path: '/MBLC/create', name: 'Create', component: Create},
   { path: '/MBIA/create', name: 'Create', component: Create},

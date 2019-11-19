@@ -33,7 +33,7 @@ class Myapps extends Component {
       page:1,
       limit:10,
 
-      collapse: false,
+      collapse: true,
 
       applications: [],
       selectedApplication: []
@@ -50,7 +50,7 @@ class Myapps extends Component {
   async getApplications() {
     this.setState({loading:!this.state.loading})
     // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application?page=${this.state.page}&limit=${this.state.limit}`).then(res => {    
-    await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application?page=`).then(res => {
+    await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
       this.setState({ applications: res.data, loading: !this.state.loading })
     })
     // console.log(this.state.applications)
@@ -58,7 +58,7 @@ class Myapps extends Component {
   }
 
   goBack() {
-    this.setState({collapse: false})
+    this.setState({collapse: !this.state.collapse})
   }
 
   render() {
@@ -68,11 +68,9 @@ class Myapps extends Component {
     return (
       <div>
         <h4>My Applications</h4>
-        <Collapse isOpen={!collapse}>
-          <Card>
-            <CardHeader>
-          <Col> Applications </Col>
-          <Col style={{ display: "flex" }}><Button onClick={this.search} >Search</Button></Col>
+        {this.state.collapse ?
+          <Card >
+            <CardHeader>MY APPLICATIONS <Button className="float-right" onClick={this.search} >Search</Button>
           </CardHeader>
             <CardBody>
               <ReactTable
@@ -96,19 +94,20 @@ class Myapps extends Component {
                     accessor: "chopTypeId",
                     Cell: this.renderEditable,
                     style: { textAlign: "center" }
-                  }, {
-                    Header: "Company Name",
-                    accessor: "companyId",
-                    Cell: this.renderEditable,
-                    style: { textAlign: "center" }
                   },
-                  {
-                    Header: "Document Description",
-                    accessor: "documentDescription",
-                    Cell: this.renderEditable,
-                    style: { textAlign: "center" },
-                    filterable: false
-                  },
+                  // {
+                  //   Header: "Company Name",
+                  //   accessor: "companyId",
+                  //   Cell: this.renderEditable,
+                  //   style: { textAlign: "center" }
+                  // },
+                  // {
+                  //   Header: "Document Description",
+                  //   accessor: "documentDescription",
+                  //   Cell: this.renderEditable,
+                  //   style: { textAlign: "center" },
+                  //   filterable: false
+                  // },
                   {
                     Header: "Document Check By",
                     accessor: "docCheckBy",
@@ -169,7 +168,7 @@ class Myapps extends Component {
                           });
                         }
                         // console.log(rowInfo.original);
-                        this.setState({ selectedApplication: rowInfo.original, collapse: true })
+                        this.setState({ selectedApplication: rowInfo.original, collapse: !this.state.collapse })
                         // console.log(this.state.rowEdit);
 
                       },
@@ -187,10 +186,8 @@ class Myapps extends Component {
               />
             </CardBody>
           </Card>
-        </Collapse>
-        <Collapse isOpen={collapse}>
-
-          <Card >
+        :
+          <Card className="animated fadeIn">
             <CardHeader >
               <Row className=" align-items-left">
                   <Button className="mr-1" color="primary" onClick={this.goBack}><i className="fa fa-angle-left" /> Back </Button>
@@ -249,7 +246,7 @@ class Myapps extends Component {
                       <Label htmlFor="text-input">Dept</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.deptId} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.deptId} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -257,7 +254,7 @@ class Myapps extends Component {
                       <Label htmlFor="text-input">Chop Type</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.chopTypeId} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.chopTypeId} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -265,7 +262,7 @@ class Myapps extends Component {
                       <Label htmlFor="text-input">Document Name</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.documentName} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.documentName} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -273,7 +270,7 @@ class Myapps extends Component {
                       <Label htmlFor="text-input">Use in Office or not</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.useInOffice === "N" ? "No" : "Yes"} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.useInOffice === "N" ? "No" : "Yes"} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -281,7 +278,7 @@ class Myapps extends Component {
                       <Label htmlFor="text-input">Pick Up By</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.pickUpBy} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.pickUpBy} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -289,7 +286,7 @@ class Myapps extends Component {
                       <Label htmlFor="text-input">Department Heads</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.deptHead} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.deptHead} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                 </Col>
@@ -307,7 +304,7 @@ class Myapps extends Component {
                       <Label htmlFor="text-input">Application Type</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.appTypeId} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.appTypeId} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -315,7 +312,7 @@ class Myapps extends Component {
                       <Label htmlFor="text-input">Purpose of Use</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.purposeOfUse} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.purposeOfUse} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -323,7 +320,7 @@ class Myapps extends Component {
                       <Label htmlFor="text-input">Number of Pages to Be Chopped </Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.noOfPages} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.noOfPages} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -331,7 +328,7 @@ class Myapps extends Component {
                       <Label htmlFor="text-input">Address to</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.addressTo} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.addressTo} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -339,7 +336,7 @@ class Myapps extends Component {
                       <Label htmlFor="text-input">Remark (e.g. tel.)</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.remark} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.remark} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -376,9 +373,7 @@ class Myapps extends Component {
               </Row>
             </CardBody>
           </Card>
-
-        </Collapse>
-
+        }
       </div>
     );
   }

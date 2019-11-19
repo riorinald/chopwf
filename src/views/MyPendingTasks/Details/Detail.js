@@ -1,13 +1,5 @@
 import React, { Component } from 'react';
 import { Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
-import {
-    DetailSTU,
-    DetailLTU,
-    DetailLTI,
-    DetailCNIPS,
-    EditDetails
-} from './index';
-import Swal from 'sweetalert2';
 
 class Detail extends Component {
 checkDetail(){

@@ -210,8 +210,8 @@ class ChopApplication extends Component {
                 <Col md="6"><span className="display-5">{selectedApplication.requestNo}</span></Col>
                 <Col md="6">
                   <Progress multi>
-                    <Progress bar animated striped color="warning" value="50">Department Head Reviewing</Progress>
-                    <Progress bar color="secondary" value="50">Bring Original Document to EG for Chop</Progress>
+                    <Progress bar animated striped color="warning" defaultValue="50">Department Head Reviewing</Progress>
+                    <Progress bar color="secondary" defaultValue="50">Bring Original Document to EG for Chop</Progress>
                   </Progress>
                 </Col>
               </Row>
@@ -255,7 +255,7 @@ class ChopApplication extends Component {
                       <Label htmlFor="text-input">Dept</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.deptId} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.deptId} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -263,7 +263,7 @@ class ChopApplication extends Component {
                       <Label htmlFor="text-input">Chop Type</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.chopTypeId} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.chopTypeId} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -271,7 +271,7 @@ class ChopApplication extends Component {
                       <Label htmlFor="text-input">Document Name</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.documentName} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.documentName} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -279,7 +279,7 @@ class ChopApplication extends Component {
                       <Label htmlFor="text-input">Use in Office or not</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.useInOffice === "N" ? "No" : "Yes"} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.useInOffice === "N" ? "No" : "Yes"} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -287,7 +287,7 @@ class ChopApplication extends Component {
                       <Label htmlFor="text-input">Pick Up By</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.pickUpBy} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.pickUpBy} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -295,7 +295,7 @@ class ChopApplication extends Component {
                       <Label htmlFor="text-input">Department Heads</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.deptHead} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.deptHead} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                 </Col>
@@ -313,7 +313,7 @@ class ChopApplication extends Component {
                       <Label htmlFor="text-input">Application Type</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.appTypeId} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.appTypeId} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -321,7 +321,7 @@ class ChopApplication extends Component {
                       <Label htmlFor="text-input">Purpose of Use</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.purposeOfUse} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.purposeOfUse} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -329,7 +329,7 @@ class ChopApplication extends Component {
                       <Label htmlFor="text-input">Number of Pages to Be Chopped </Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.noOfPages} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.noOfPages} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -337,7 +337,7 @@ class ChopApplication extends Component {
                       <Label htmlFor="text-input">Address to</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.addressTo} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.addressTo} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
@@ -345,7 +345,7 @@ class ChopApplication extends Component {
                       <Label htmlFor="text-input">Remark (e.g. tel.)</Label>
                     </Col>
                     <Col xs="12" md="8">
-                      <Input type="text" id="text-input" value={selectedApplication.remark} name="text-input" placeholder="Text" />
+                      <Input type="text" id="text-input" defaultValue={selectedApplication.remark} name="text-input" placeholder="Text" />
                     </Col>
                   </FormGroup>
                   <FormGroup row>
