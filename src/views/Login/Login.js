@@ -96,13 +96,12 @@ class Login extends Component {
                     localStorage.setItem('roleId', res.data.roleId)
                     localStorage.setItem('token', res.data.token)
                     if (res.data.status === "success") {
-                        this.setState({ fade: !this.state.fade,info: "login " + res.data.status})
+                        this.setState({ info: "login " + res.data.status})
                         setTimeout(this.redirect, 1000);
                     }
                 })
         } catch (error) {
-            this.setState({ fade: !this.state.fade,info: error.status});
-            console.error(error);
+            this.setState({ info: error.response.statusText});
         }
     }
 
@@ -123,7 +122,7 @@ class Login extends Component {
             username: this.state.username,
             password: this.state.password
         }
-
+        this.setState({ fade: true,info: "Loding ... " })
         this.validate(loginCredentials);
     }
 

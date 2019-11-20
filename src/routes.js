@@ -11,6 +11,7 @@ const Login = React.lazy(() => import('./views/Login'));
 const Detail = React.lazy(() => import('./views/MyPendingTasks/Details/Detail'));
 const Redirect = React.lazy(()=> import('./views/Create/Redirecting'))
 const EditRequest = React.lazy(() => import('./views/EditRequest/EditRequest'));
+const ApplictionDetail = React.lazy(() =>import('./views/Myapps/ApplicationDetail'));
 
 
 
@@ -29,7 +30,9 @@ const routes = [
   { path: '/MBIA/create', name: 'Create', component: Create},
   { path: '/CAR2GO/create', name: 'Create', component: Create},
 
-  { path: '/myapps', name: 'Myapps', component: Myapps },
+  { path: '/myapps',exact: true, name: 'Myapps', component: Myapps },
+  { path: '/myapps/:id',exact: true, name: 'Myapps', component: ApplictionDetail },
+
   { path: '/mypendingtask', exact: true, name: 'MyPendingTasks', component: MyPendingTasks},
   { path: '/mypendingtask/:id', exact: true, name: 'DetailTaskSTU', component: Detail},
   { path: '/chopapps', name: 'ChopApplication', component: ChopApps},
