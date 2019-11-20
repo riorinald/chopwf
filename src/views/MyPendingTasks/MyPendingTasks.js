@@ -392,9 +392,9 @@ class MyPendingTasks extends Component {
                                             this.setState({ taskId: rowInfo.original.taskId, redirectToUrl: `mypendingtask/${rowInfo.original.applicationTypeId}` })
 
                                             let status = rowInfo.original.statusId
-                                            // if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
-                                            if (status === "CREATED") {
-                                                this.setState({ toggleDetails: true, show: false })
+                                            if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
+                                            // if (status === "CREATED") {
+                                            //     this.setState({ toggleDetails: true, show: false })
                                             }
                                             else {
                                                 this.setState({ toggleDetails: false, show: false })
