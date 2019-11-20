@@ -28,6 +28,15 @@ import { AppSwitch } from '@coreui/react';
 import AsyncSelect from 'react-select/async';
 import makeAnimated from 'react-select/animated';
 import Swal from 'sweetalert2';
+import ReactTable from "react-table";
+import "react-table/react-table.css"
+import selectTableHOC from "react-table/lib/hoc/selectTable";
+import PropTypes from "prop-types";
+
+
+
+const SelectTable = selectTableHOC(ReactTable);
+
 
 
 const notes = <p>如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。
@@ -51,6 +60,104 @@ const docHeaders = [
     { key: 'expiryDate', name: 'Expiry Date' },
     { key: 'dhApproved', name: 'DH Approved' },
 ].map(c => ({ ...c, ...defaultColumnProperties }))
+
+class MyTable extends Component {
+    static defaultProps = {
+        keyField: "documentId"
+    };
+
+    static propTypes = {
+        keyField: PropTypes.string
+    };
+
+    /**
+     * Toggle a single checkbox for select table
+     */
+    toggleSelection = (key, shift, row) => {
+        // start off with the existing state
+        let selection = [...this.state.selection];
+        const keyIndex = selection.indexOf(key);
+
+        // check to see if the key exists
+        if (keyIndex >= 0) {
+            // it does exist so we will remove it using destructing
+            selection = [
+                ...selection.slice(0, keyIndex),
+                ...selection.slice(keyIndex + 1)
+            ];
+        } else {
+            // it does not exist so add it
+            selection.push(key);
+        }
+        // update the state
+        this.setState({ selection }, console.log(this.state.selection));
+    };
+
+    /**
+     * Toggle all checkboxes for select table
+     */
+    toggleAll = () => {
+        const { keyField } = this.props;
+        const selectAll = !this.state.selectAll;
+        const selection = [];
+
+        if (selectAll) {
+            // we need to get at the internals of ReactTable
+            const wrappedInstance = this.checkboxTable.getWrappedInstance();
+            // the 'sortedData' property contains the currently accessible records based on the filter and sort
+            const currentRecords = wrappedInstance.getResolvedState().sortedData;
+            // we just push all the IDs onto the selection array
+            currentRecords.forEach(item => {
+                selection.push(`select-${item._original[keyField]}`);
+            });
+        }
+        this.setState({ selectAll, selection });
+    };
+
+    /**
+     * Whether or not a row is selected for select table
+     */
+    isSelected = key => {
+        return this.state.selection.includes(`select-${key}`);
+    };
+
+    rowFn = (state, rowInfo, column, instance) => {
+        const { selection } = this.state;
+
+        return {
+            onClick: (e) => {
+                console.log("It was in this row:", rowInfo);
+            },
+            style: {
+                background:
+                    rowInfo &&
+                    selection.includes(`select-${rowInfo.original.documentId}`)
+            }
+        };
+    };
+
+    state = {
+        selectAll: false,
+        selection: []
+    };
+
+    render() {
+        return (
+            <SelectTable
+                {...this.props}
+                ref={r => (this.checkboxTable = r)}
+                toggleSelection={this.toggleSelection}
+                selectAll={this.state.selectAll}
+                // selectType="checkbox"
+                toggleAll={this.toggleAll}
+                isSelected={this.isSelected}
+                getTrProps={this.rowFn}
+                defaultPageSize={5}
+                
+            />
+        );
+    }
+}
 
 
 class EditRequest extends Component {
@@ -111,7 +218,7 @@ class EditRequest extends Component {
                 isConnect: false,
             },
 
-            editData: {documentNames: []},
+            editData: { documentNames: [] },
 
             showDoc: false,
             selectedDocs: [],
@@ -145,6 +252,7 @@ class EditRequest extends Component {
         }
     }
 
+
     async getDeptHeads() {
         this.setState({ deptHeads: [] })
         await Axios.get(`${config.url}/users?companyid=${this.props.legalName}&excludeuserid=${localStorage.getItem('userId')}`)
@@ -173,6 +281,26 @@ class EditRequest extends Component {
         }
     }
 
+    convertExpDate(dateValue) {
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        return regEx;
+    }
+
+    convertDate(dateValue, view) {
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
+        this.setState({ [view]: new Date(regEx) })
+        // return new Date(regEx);
+    }
+
+    getOption(person) {
+        this.state.deptHeads.map((head, index) => {
+            if (head.value === person) {
+                return index
+            }
+        })
+    }
+
+
     async getTaskDetails(id) {
         let temporary = ""
         await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`)
@@ -180,32 +308,25 @@ class EditRequest extends Component {
                 temporary = res.data
             })
         temporary.applicationTypeId = "LTU"
-        // temporary.applicationTypeName = "Short-term Use"
-        temporary.effectivePeriod = "20191120"
+        temporary.effectivePeriod = "20191130"
 
-        this.state.deptHeads.map((head, index) => {
+        this.convertDate(temporary.effectivePeriod, 'dateView1')
+        this.convertDate(temporary.returnDate, 'dateView2')
 
-            if (head.value === temporary.responsiblePerson) {
-                temporary.responsiblePersonOption = index
-            }
-            if (head.value === temporary.pickUpBy) {
-                temporary.pickUpByOption = index
-            }
-            if (head.value === temporary.contractSignedByFirstPerson) {
-                temporary.contractSignedByFirstPersonOption = index
-            }
-            if (head.value === temporary.contractSignedBySecondPerson) {
-                temporary.contractSignedBySecondPersonOption = index
-            }
-            if (head.value === temporary.documentCheckBy) {
-                temporary.documentCheckByOption = index
-            }
-        })
+        temporary.responsiblePersonOption = this.getOption(temporary.responsiblePerson)
+        temporary.pickUpByOption = this.getOption(temporary.pickUpBy)
+        temporary.contractSignedByFirstPersonOption = this.getOption(temporary.contractSignedByFirstPerson)
+        temporary.contractSignedBySecondPersonOption = this.getOption(temporary.contractSignedBySecondPerson)
+        temporary.documentCheckByOption = this.getOption(temporary.documentCheckBy)
         this.setSelectedDeptHead(temporary.departmentHeads)
+
         await this.getData("departments", `${config.url}/departments`)
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
         if (temporary.applicationTypeId === "LTU") {
+
+            //remove this - only for dev
             this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
+            //
 
             if (temporary.departmentId !== "" && temporary.chopTypeId !== "" && temporary.teamId !== "") {
                 this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
@@ -214,56 +335,29 @@ class EditRequest extends Component {
         this.setState({ taskDetails: temporary })
     }
 
+    changeDeptHeads(heads) {
+        let dh = ""
+        heads.map(head => {
+            dh = dh + head + "; "
+        })
+        return dh
+    }
+
 
     async getDocuments(companyId, deptId, chopTypeId, teamId) {
-        let tempDocs = []
 
-        let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit'
+        //change to 2nd URL -  1st URL for dev
+        let url = `${config.url}/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit`
+        //
+
         // let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
         try {
             await Axios.get(url).then(res => {
-                tempDocs = res.data
+                this.setState({ documents: res.data })
             })
         } catch (error) {
             console.error(error)
         }
-        tempDocs.map((doc, index) => {
-            const keys = Object.keys(doc)
-            const obj = {}
-            obj.id = index
-            for (let i = 0; i < keys.length; i++) {
-                if (keys[i] === "departmentHeads") {
-                    let dhApproved = ""
-                    doc.departmentHeads.map(dh => {
-                        dhApproved = dhApproved + dh.displayName + '; '
-                    })
-                    obj.dhApproved = dhApproved
-                }
-                else if (keys[i] === "expiryDate") {
-                    let tempDate = doc[keys[i]]
-                    let expiryDate = ""
-                    for (let p = 0; p < tempDate.length; p++) {
-                        if (p === 4 || p === 6) {
-                            expiryDate = expiryDate + '/'
-                        }
-                        expiryDate = expiryDate + tempDate[p]
-
-                    }
-                    obj[keys[i]] = expiryDate
-                }
-                else {
-                    obj[keys[i]] = doc[keys[i]]
-                }
-            }
-            this.setState(state => {
-                const documents = state.documents.concat(obj)
-
-                return {
-                    documents
-                }
-            })
-        })
-
     }
 
     redirectToPendingTasks() {
@@ -290,7 +384,9 @@ class EditRequest extends Component {
                     temp = this.state.deptHeads[i]
                     this.setState(state => {
                         const selectedDeptHeads = this.state.selectedDeptHeads.concat(temp)
-                        return selectedDeptHeads
+                        return {
+                            selectedDeptHeads
+                        }
                     })
                     break;
                 }
@@ -404,6 +500,30 @@ class EditRequest extends Component {
 
     addDocCheck(row) {
         this.setState({ selectedDocs: row })
+        // console.log(row)
+        // console.log(index)
+        // let checked = false
+        // this.setState(state => {
+        //     // const documents = state.documents.map(doc=>{
+
+        //     // })
+        //     let documents = state.documents
+        //     documents[index].isChecked = !state.documents[index].isChecked
+        //     if (documents[index].isChecked) {
+        //         checked = true
+        //     }
+        //     else {
+        //         checked = false
+        //     }
+        //     return documents
+        // })
+        // if (checked) {
+        //     this.setState({ selectedDocs: row }, console.log(this.state.selectedDocs))
+        // }
+        // else {
+        //     this.setState({ selectedDocs: [] }, console.log(this.state.selectedDocs))
+        // }
+
     }
 
     deleteDocument(table, i) {
@@ -513,6 +633,10 @@ class EditRequest extends Component {
 
     }
 
+    async submitRequest(isSubmitted) {
+        console.log(this.state.editData)
+    }
+
 
 
 
@@ -530,7 +654,7 @@ class EditRequest extends Component {
                     ? <Redirect to={{
                         pathname: 'mypendingtask'
                     }} />
-                    : <Card>
+                    : <Card className="animated fadeIn">
                         <CardHeader>
                             <Button onClick={this.redirectToPendingTasks}>Back</Button> &nbsp;
                              EDIT REQUEST - {taskDetails.requestNum}
@@ -630,7 +754,38 @@ class EditRequest extends Component {
                                             <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
                                                 <ModalHeader className="center"> Select Documents </ModalHeader>
                                                 <ModalBody>
-                                                    <ReactDataGrid
+                                                    <MyTable data={this.state.documents}
+                                                        columns={[
+                                                            {
+                                                                Header: 'Document Name (English)',
+                                                                accessor: 'documentNameEnglish',
+                                                                style: { textAlign: "center" },
+                                                            },
+                                                            {
+                                                                Header: 'Document Name (Chinese)',
+                                                                accessor: 'documentNameChinese',
+                                                                style: { textAlign: "center" },
+                                                            },
+                                                            {
+                                                                Header: 'Expiry Date',
+                                                                accessor: 'expiryDate',
+                                                                Cell: row => (
+                                                                    <div> {this.convertExpDate(row.original.expiryDate)} </div>
+                                                                ),
+                                                                style: { textAlign: "center" },
+                                                            },
+                                                            {
+                                                                Header: 'DH Approved',
+                                                                accessor: 'departmentHeads',
+                                                                Cell: row => (
+                                                                    <div> {this.changeDeptHeads(row.original.departmentHeads)} </div>
+                                                                ),
+                                                                style: { textAlign: "center" },
+                                                            },
+                                                        ]}
+                                                        keyField="documentId"
+                                                    />
+                                                    {/* <ReactDataGrid
                                                         columns={docHeaders}
                                                         rowGetter={i => this.state.documents[i]}
                                                         rowsCount={this.state.documents.length}
@@ -643,7 +798,7 @@ class EditRequest extends Component {
                                                         minColumnWidth={100}
 
 
-                                                    />
+                                                    /> */}
                                                 </ModalBody>
                                                 <ModalFooter>
                                                     <Button color="primary" block size="md" onClick={() => { this.addDocumentLTU(); this.selectDocument() }}>  Add </Button>
@@ -899,7 +1054,7 @@ class EditRequest extends Component {
                                                 type="checkbox"
                                                 checked={taskDetails.isConfirm}
                                                 onChange={this.handleAgreeTerm}
-                                                // onClick={this.isValid}
+                                                onClick={this.isValid}
                                                 id="confirm" value="option1">
                                                 <Label className="form-check-label" check >
                                                     By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
@@ -911,13 +1066,27 @@ class EditRequest extends Component {
                                 </Col>
                             </Form>
                         </CardBody>
-                        <CardFooter></CardFooter>
+                        <CardFooter>
+                            <div className="form-actions">
+                                <Row>
+                                    {taskDetails.isConfirm
+                                        ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
+                                        : <Button type="submit" color="success"
+                                            // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })}
+                                            id="disabledSubmit" disabled >Submit</Button>}
+                                    {/* <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit"> */}
+                                    {/* please confirm the agree terms </Tooltip> */}
+                                    <span>&nbsp;</span>
+                                    <Button type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
+                                </Row>
+
+
+                            </div>
+                        </CardFooter>
                     </Card>
                 }
 
                 {redirectToPendingTasks ? <Redirect to='/mypendingtask' /> : ""}
-
-                <Button onClick={() => { console.log(this.state.editData) }} >Check</Button>
 
             </div>
         )

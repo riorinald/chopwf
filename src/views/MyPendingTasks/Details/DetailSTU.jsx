@@ -12,18 +12,12 @@ import {
 import ReactTable from "react-table";
 import "react-table/react-table.css"
 
-let rendered = 0
 
 const DetailSTU = (props) => {
 
-    if (rendered === 0) {
-       props.getTaskDetails(props.taskId)
-    }
-    rendered = rendered + 1
-
     return <div>
         <Card >
-            <CardHeader> <Button onClick={props.collapse} > Back &nbsp; </Button>  {props.taskDetail.requestNum} </CardHeader>
+            <CardHeader> <Button onClick={props.redirect} > Back &nbsp; </Button>  {props.taskDetail.requestNum} </CardHeader>
             <CardBody color="dark">
                 <Row noGutters={true}>
                     <Col md="6"><span className="display-5"> {props.taskDetail.requestNum}</span></Col>
@@ -254,7 +248,7 @@ const DetailSTU = (props) => {
                                                 Header: "Attached Document",
                                                 accessor: "documentName",
                                                 Cell: row => (
-                                                <a href={row.original.documentUrl} target='_blank' rel="noopener noreferrer">{row.original.documentName}</a>
+                                                    <a href={row.original.documentUrl} target='_blank' rel="noopener noreferrer">{row.original.documentName}</a>
                                                 ),
                                                 style: { textAlign: "center" },
                                             },
@@ -278,16 +272,15 @@ const DetailSTU = (props) => {
                 </Row>
                 <br />
                 <Row>
-                    <Col  >
-                        <Button color="success" onClick={() => props.approve("approve")} >Approve</Button>&nbsp;
-                                    <Button color="danger" onClick={() => props.approve("sendBack")} >Send Back</Button>&nbsp;
-                                    <Button color="danger" onClick={() => props.approve("reject")}>Reject</Button>&nbsp;
-                                    </Col>
-
+                    {props.taskDetail.actions.map((action, index) =>
+                        <Col key={index} sm={1}>
+                            <Button color={action.action === "approve" ? "success" : "danger"} onClick={() => props.approve(action.action)} > {props.capitalize(action.action)}</Button>
+                        </Col>
+                    )}
                 </Row>
-                <Row><Col>
-                    &nbsp;
-         </Col></Row>
+                <Row>
+                    <Col>&nbsp;</Col>
+                </Row>
                 <Row>
                     <Col> <h4>Approval Histories</h4></Col>
                 </Row>

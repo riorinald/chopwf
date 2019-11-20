@@ -16,7 +16,7 @@ import "react-table/react-table.css"
 const DetailLTI = props =>
     <div>
         <Card >
-            <CardHeader> <Button onClick={props.collapse} > Back </Button>  {props.taskDetail.requestNum} </CardHeader>
+            <CardHeader> <Button onClick={props.redirect} > Back </Button>  {props.taskDetail.requestNum} </CardHeader>
             <CardBody color="dark">
                 <Row noGutters={true}>
                     <Col md="6"><span className="display-5"> {props.taskDetail.requestNum}</span></Col>
@@ -291,12 +291,11 @@ const DetailLTI = props =>
                 </Row>
                 <br />
                 <Row>
-                    <Col>
-                        <Button color="success" onClick={() => this.approve("approve")} >Approve</Button>&nbsp;
-                        <Button color="danger" onClick={() => this.approve("sendBack")} >Send Back</Button>&nbsp;
-                        <Button color="danger" onClick={() => this.approve("reject")}>Reject</Button>&nbsp;
+                    {props.taskDetail.actions.map((action, index) =>
+                        <Col key={index} sm={1}>
+                            <Button color={action.action === "approve" ? "success" : "danger"} onClick={() => props.approve(action.action)} > {props.capitalize(action.action)}</Button>
                         </Col>
-
+                    )}
                 </Row>
                 <Row>
                     <Col>
