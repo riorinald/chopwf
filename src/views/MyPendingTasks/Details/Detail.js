@@ -31,7 +31,7 @@ class Detail extends Component {
   componentDidMount() {
     if (this.props.location.state !== undefined) {
       this.getTaskDetails(this.props.location.state.id)
-      console.log(this.props.location.state.id)
+      // console.log(this.props.location.state.id)
     }
     else {
       this.setState({ redirectToTasks: true })
@@ -40,7 +40,7 @@ class Detail extends Component {
 
   async getTaskDetails(id) {
     const res = await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`)
-    await this.setState({ taskDetails: res.data }, console.log(this.state.taskDetails))
+    await this.setState({ taskDetails: res.data })
   }
 
   convertDate(dateValue) {
