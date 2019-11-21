@@ -66,9 +66,8 @@ class Detail extends Component {
   }
 
   checkDetail() {
-    let appType = this.props.match.params.id
     if (this.state.taskDetails) {
-      switch (appType) {
+      switch (this.props.location.state.appTypeId) {
         case 'STU':
           return <DetailSTU
             legalName={this.props.legalName}

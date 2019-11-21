@@ -58,6 +58,7 @@ class MyPendingTasks extends Component {
 
             //data assigned on Row Selected 
             taskId: "",
+            appTypeId:"",
             redirectToUrl: "",
             loading: false,
         }
@@ -394,7 +395,7 @@ class MyPendingTasks extends Component {
                                                     rowEdit: null
                                                 });
                                             }
-                                            this.setState({ taskId: rowInfo.original.taskId, redirectToUrl: `mypendingtask/${rowInfo.original.applicationTypeId}` })
+                                            this.setState({ taskId: rowInfo.original.taskId, appTypeId:rowInfo.original.applicationTypeId,  redirectToUrl: `mypendingtask/details` })
 
                                             let status = rowInfo.original.statusId
                                             // if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
@@ -427,7 +428,7 @@ class MyPendingTasks extends Component {
                     : !this.state.show
                         ? <Redirect to={{
                             pathname: this.state.redirectToUrl,
-                            state: { id: this.state.taskId }
+                            state: { id: this.state.taskId, appTypeId: this.state.appTypeId }
                         }} />
                         : null
                 }

@@ -151,7 +151,7 @@ class Myapps extends Component {
                     accessor: "docCheckBy",
                     Cell: this.renderEditable,
                     width: this.getColumnWidth('docCheckBy', "Document Check By"),
-                    style: { textAlign: "center" }
+                    style: { textAlign: "center", 'whiteSpace': 'unset' }
                   },
                   // {
                   //   Header: "Department Heads",
