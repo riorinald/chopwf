@@ -15,6 +15,7 @@ import ReactDataGrid from 'react-data-grid';
 import { addDays } from 'date-fns';
 import config from '../../config';
 import {STU,LTU,LTI,CNIPS} from '../../config/validation';
+import {resetMounted} from '../MyPendingTasks/MyPendingTasks'
 
 import {
   Button,
@@ -179,6 +180,7 @@ class Create extends Component {
     this.getData("department", `${config.url}/departments`);
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=` + this.props.legalName);
+    resetMounted.setMounted()
 
 
   }

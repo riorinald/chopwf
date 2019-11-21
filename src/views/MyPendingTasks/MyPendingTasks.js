@@ -3,24 +3,22 @@ import {
     Card, CardBody, CardHeader, Col, Row,
     Input,
     Button,
-    Collapse,
 
 } from 'reactstrap';
 import ReactTable from "react-table";
 import "react-table/react-table.css"
 import Axios from 'axios';
 import config from '../../config';
-import {
-    DetailSTU,
-    DetailLTU,
-    DetailLTI,
-    DetailCNIPS,
-
-} from './Details';
-import Swal from 'sweetalert2';
 import { Redirect } from 'react-router-dom'
 
+let mounted = 0
+let array = []
 
+export const resetMounted = {
+    setMounted(){
+        mounted = 0
+    }
+}
 
 class MyPendingTasks extends Component {
     constructor(props) {
@@ -73,7 +71,14 @@ class MyPendingTasks extends Component {
     async componentDidMount() {
         await this.getData("applicationTypes", `${config.url}/apptypes`);
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
-        await this.getPendingTasks();
+        console.log(mounted)
+        if (mounted === 0) {
+            this.getPendingTasks();
+        }
+        else {
+            this.setState({pendingTasks: array})
+        }
+        mounted = mounted + 1
     }
 
     convertDate(dateValue) {
@@ -109,6 +114,7 @@ class MyPendingTasks extends Component {
         let url = `${config.url}/tasks?userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`
         const response = await Axios.get(url)
         this.setState({ pendingTasks: response.data, loading: !this.state.loading })
+        array = response.data
     }
 
     handleSearch = name => event => {
@@ -200,7 +206,6 @@ class MyPendingTasks extends Component {
 
     render() {
         const { pendingTasks } = this.state;
-
         return (
             <div>
                 <h4>MY PENDING TASKS</h4>
@@ -392,9 +397,9 @@ class MyPendingTasks extends Component {
                                             this.setState({ taskId: rowInfo.original.taskId, redirectToUrl: `mypendingtask/${rowInfo.original.applicationTypeId}` })
 
                                             let status = rowInfo.original.statusId
-                                            if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
-                                            // if (status === "CREATED") {
-                                            //     this.setState({ toggleDetails: true, show: false })
+                                            // if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
+                                            if (status === "PENDINGDEPTHEAD") {
+                                                this.setState({ toggleDetails: true, show: false })
                                             }
                                             else {
                                                 this.setState({ toggleDetails: false, show: false })

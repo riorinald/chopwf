@@ -50,18 +50,7 @@ const reactSelectControl = {
 
 const animatedComponents = makeAnimated();
 
-const defaultColumnProperties = {
-    resizable: true
-};
-
-const docHeaders = [
-    { key: 'documentNameEnglish', name: 'Document Name (English)' },
-    { key: 'documentNameChinese', name: 'Document Name (Chinese)' },
-    { key: 'expiryDate', name: 'Expiry Date' },
-    { key: 'dhApproved', name: 'DH Approved' },
-].map(c => ({ ...c, ...defaultColumnProperties }))
-
-class MyTable extends Component {
+class EditRequest extends Component {
     static defaultProps = {
         keyField: "documentId"
     };
@@ -69,101 +58,11 @@ class MyTable extends Component {
     static propTypes = {
         keyField: PropTypes.string
     };
-
-    /**
-     * Toggle a single checkbox for select table
-     */
-    toggleSelection = (key, shift, row) => {
-        // start off with the existing state
-        let selection = [...this.state.selection];
-        const keyIndex = selection.indexOf(key);
-
-        // check to see if the key exists
-        if (keyIndex >= 0) {
-            // it does exist so we will remove it using destructing
-            selection = [
-                ...selection.slice(0, keyIndex),
-                ...selection.slice(keyIndex + 1)
-            ];
-        } else {
-            // it does not exist so add it
-            selection.push(key);
-        }
-        // update the state
-        this.setState({ selection }, console.log(this.state.selection));
-    };
-
-    /**
-     * Toggle all checkboxes for select table
-     */
-    toggleAll = () => {
-        const { keyField } = this.props;
-        const selectAll = !this.state.selectAll;
-        const selection = [];
-
-        if (selectAll) {
-            // we need to get at the internals of ReactTable
-            const wrappedInstance = this.checkboxTable.getWrappedInstance();
-            // the 'sortedData' property contains the currently accessible records based on the filter and sort
-            const currentRecords = wrappedInstance.getResolvedState().sortedData;
-            // we just push all the IDs onto the selection array
-            currentRecords.forEach(item => {
-                selection.push(`select-${item._original[keyField]}`);
-            });
-        }
-        this.setState({ selectAll, selection });
-    };
-
-    /**
-     * Whether or not a row is selected for select table
-     */
-    isSelected = key => {
-        return this.state.selection.includes(`select-${key}`);
-    };
-
-    rowFn = (state, rowInfo, column, instance) => {
-        const { selection } = this.state;
-
-        return {
-            onClick: (e) => {
-                console.log("It was in this row:", rowInfo);
-            },
-            style: {
-                background:
-                    rowInfo &&
-                    selection.includes(`select-${rowInfo.original.documentId}`)
-            }
-        };
-    };
-
-    state = {
-        selectAll: false,
-        selection: []
-    };
-
-    render() {
-        return (
-            <SelectTable
-                {...this.props}
-                ref={r => (this.checkboxTable = r)}
-                toggleSelection={this.toggleSelection}
-                selectAll={this.state.selectAll}
-                // selectType="checkbox"
-                toggleAll={this.toggleAll}
-                isSelected={this.isSelected}
-                getTrProps={this.rowFn}
-                defaultPageSize={5}
-                
-            />
-        );
-    }
-}
-
-
-class EditRequest extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            selectAll: false,
+            selection: [],
 
             taskDetails: {
                 taskId: "",
@@ -250,6 +149,7 @@ class EditRequest extends Component {
         if (this.props.location.state !== undefined) {
             this.getTaskDetails(this.props.location.state.id)
         }
+        console.log(this.state.taskDetails.applicationTypeId)
     }
 
 
@@ -629,6 +529,77 @@ class EditRequest extends Component {
         }
     }
 
+    toggleSelection = (key, shift, row) => {
+        // start off with the existing state
+        let selection = [...this.state.selection];
+        let selectedDocs = [...this.state.selectedDocs];
+        const keyIndex = selection.indexOf(key);
+
+        // check to see if the key exists
+        if (keyIndex >= 0) {
+            // it does exist so we will remove it using destructing
+            selection = [
+                ...selection.slice(0, keyIndex),
+                ...selection.slice(keyIndex + 1)
+            ];
+            selectedDocs = [
+                ...selectedDocs.slice(0, keyIndex),
+                ...selectedDocs.slice(keyIndex + 1)
+            ];
+        } else {
+            // it does not exist so add it
+            selectedDocs.push(row)
+            selection.push(key);
+        }
+        // update the state
+        this.setState({ selection, selectedDocs });
+    };
+
+    /**
+     * Toggle all checkboxes for select table
+     */
+    toggleAll = () => {
+        const { keyField } = this.props;
+        const selectAll = !this.state.selectAll;
+        const selection = [];
+        const selectedDocs = [];
+
+        if (selectAll) {
+            // we need to get at the internals of ReactTable
+            const wrappedInstance = this.checkboxTable.getWrappedInstance();
+            // the 'sortedData' property contains the currently accessible records based on the filter and sort
+            const currentRecords = wrappedInstance.getResolvedState().sortedData;
+            // we just push all the IDs onto the selection array
+            currentRecords.forEach(item => {
+                selection.push(`select-${item._original[keyField]}`);
+                selectedDocs.push(item._original)
+            });
+        }
+        this.setState({ selectAll, selection, selectedDocs }, console.log(this.state.selectedDocs));
+    };
+
+    /**
+     * Whether or not a row is selected for select table
+     */
+    isSelected = key => {
+        return this.state.selection.includes(`select-${key}`);
+    };
+
+    rowFn = (state, rowInfo, column, instance) => {
+        const { selection } = this.state;
+
+        return {
+            onClick: (e) => {
+                console.log("It was in this row:", rowInfo);
+            },
+            style: {
+                background:
+                    rowInfo &&
+                    selection.includes(`select-${rowInfo.original.documentId}`)
+            }
+        };
+    };
+
     async handleAgreeTerm(event) {
 
     }
@@ -754,7 +725,17 @@ class EditRequest extends Component {
                                             <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
                                                 <ModalHeader className="center"> Select Documents </ModalHeader>
                                                 <ModalBody>
-                                                    <MyTable data={this.state.documents}
+                                                    <SelectTable
+                                                        {...this.props}
+                                                        data={this.state.documents}
+                                                        ref={r => (this.checkboxTable = r)}
+                                                        toggleSelection={this.toggleSelection}
+                                                        selectAll={this.state.selectAll}
+                                                        // selectType="checkbox"
+                                                        toggleAll={this.toggleAll}
+                                                        isSelected={this.isSelected}
+                                                        getTrProps={this.rowFn}
+                                                        defaultPageSize={5}
                                                         columns={[
                                                             {
                                                                 Header: 'Document Name (English)',
@@ -784,21 +765,8 @@ class EditRequest extends Component {
                                                             },
                                                         ]}
                                                         keyField="documentId"
+
                                                     />
-                                                    {/* <ReactDataGrid
-                                                        columns={docHeaders}
-                                                        rowGetter={i => this.state.documents[i]}
-                                                        rowsCount={this.state.documents.length}
-                                                        minWidth={1100}
-                                                        rowScrollTimeout={null}
-                                                        enableRowSelect={true}
-                                                        onRowSelect={this.addDocCheck}
-                                                        onColumnResize={(idx, width) =>
-                                                            console.log('Column' + idx + ' has been resized to ' + width)}
-                                                        minColumnWidth={100}
-
-
-                                                    /> */}
                                                 </ModalBody>
                                                 <ModalFooter>
                                                     <Button color="primary" block size="md" onClick={() => { this.addDocumentLTU(); this.selectDocument() }}>  Add </Button>
@@ -827,10 +795,10 @@ class EditRequest extends Component {
                                                                     <th>{document.documentNameEnglish}</th>
                                                                     <th>{document.documentNameChinese}</th>
                                                                     <th id="viewDoc">
-                                                                        <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.expiryDate}</a>
+                                                                        <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a>
                                                                     </th>
                                                                     <th id="viewDoc">
-                                                                        <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.dhApproved}</a>
+                                                                        <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a>
                                                                     </th>
                                                                     <th><img width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} src={deleteBin} /></th>
                                                                 </tr>

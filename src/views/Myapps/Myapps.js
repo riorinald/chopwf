@@ -18,7 +18,9 @@ import "react-table/react-table.css"
 import Axios from 'axios';
 import config from '../../config';
 import ApplicationDetail from './ApplicationDetail';
-import {Redirect} from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
+
 
 class Myapps extends Component {
   constructor(props) {
@@ -30,10 +32,10 @@ class Myapps extends Component {
       value: "",
       editableRows: {},
       selectedRowIndex: [],
-     
-      loading:false,
-      page:1,
-      limit:10,
+
+      loading: false,
+      page: 1,
+      limit: 10,
 
       collapse: true,
 
@@ -47,29 +49,33 @@ class Myapps extends Component {
   }
   componentDidMount() {
     this.getApplications();
+    resetMounted.setMounted();
 
   }
 
   async getApplications() {
-    this.setState({loading:!this.state.loading})
-    await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {    
-    // await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks?userid=rio@otds.admin`).then(res => {
+    this.setState({ loading: !this.state.loading })
+    await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
+      // await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks?userid=rio@otds.admin`).then(res => {
       this.setState({ applications: res.data, loading: !this.state.loading })
     })
     // console.log(this.state.applications)
     // console.log(Object.keys(this.state.applications[0]))
   }
 
-  async getAppDetails(id){
-    this.setState({loading:!this.state.loading})
+  async getAppDetails(id) {
+    this.setState({ loading: !this.state.loading })
     // let id = this.state.selectedApplication.taskId
     await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application/${id}`)
-               .then(res => { this.setState({ 
-                 applicationDetail: res.data, collapse: !this.state.collapse})})
-      }
+      .then(res => {
+        this.setState({
+          applicationDetail: res.data, collapse: !this.state.collapse
+        })
+      })
+  }
 
   goBack() {
-    this.setState({loading:!this.state.loading, collapse: !this.state.collapse})
+    this.setState({ loading: !this.state.loading, collapse: !this.state.collapse })
   }
 
   getColumnWidth = (accessor, headerText) => {
@@ -98,7 +104,7 @@ class Myapps extends Component {
         {this.state.collapse ?
           <Card >
             <CardHeader>MY APPLICATIONS <Button className="float-right" onClick={this.search} >Search</Button>
-          </CardHeader>
+            </CardHeader>
             <CardBody>
               <ReactTable
                 data={applications}
@@ -207,7 +213,7 @@ class Myapps extends Component {
                         // console.log(rowInfo.original);
                         this.getAppDetails(rowInfo.original.taskId)
                         this.setState({ selectedApplication: rowInfo.original })
-                        
+
                         // this.setState({ collapse: !this.state.collapse })
                         // console.log(this.state.rowEdit);
                         // this.props.history.push(`/${selectedApplication.taskId}`, {id: selectedApplication.id})
@@ -226,14 +232,14 @@ class Myapps extends Component {
               />
             </CardBody>
           </Card>
-         : 
-        //  this.props.history.push({pathname:`myapps/${this.state.selectedApplication.requestNum}`, state :{data: this.state.applicationDetail, goBack:this.goBack}})
-         <ApplicationDetail 
+          :
+          //  this.props.history.push({pathname:`myapps/${this.state.selectedApplication.requestNum}`, state :{data: this.state.applicationDetail, goBack:this.goBack}})
+          <ApplicationDetail
             wait={1000}
             applications={this.state.applicationDetail}
             id={selectedApplication.taskId}
             goBack={this.goBack} />
-          }
+        }
       </div>
     );
   }
