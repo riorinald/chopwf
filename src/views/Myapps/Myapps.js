@@ -72,6 +72,23 @@ class Myapps extends Component {
     this.setState({loading:!this.state.loading, collapse: !this.state.collapse})
   }
 
+  getColumnWidth = (accessor, headerText) => {
+    let { applications } = this.state
+    let max = 0
+    const maxWidth = 260;
+    const magicSpacing = 10;
+
+    for (var i = 0; i < applications.length; i++) {
+        if (applications[i] !== undefined && applications[i][accessor] !== null) {
+            if (JSON.stringify(applications[i][accessor] || 'null').length > max) {
+                max = JSON.stringify(applications[i][accessor] || 'null').length;
+            }
+        }
+    }
+
+    return Math.min(maxWidth, Math.max(max, headerText.length) * magicSpacing);
+}
+
   render() {
     const { applications, collapse, selectedApplication } = this.state
     // let columnData = Object.keys(applications[0])
@@ -91,30 +108,35 @@ class Myapps extends Component {
                     Header: "Request Number",
                     accessor: "requestNum",
                     Cell: this.renderEditable,
+                    width: this.getColumnWidth('requestNum', "Request Number"),
                     style: { textAlign: "center" }
                   },
                   {
                     Header: "Application Type",
                     accessor: "apptypeId",
                     Cell: this.renderEditable,
+                    width: this.getColumnWidth('apptypeId', "Application Type"),
                     style: { textAlign: "center" }
                   },
                   {
                     Header: "Chop Type",
                     accessor: "chopTypeId",
                     Cell: this.renderEditable,
+                    width: this.getColumnWidth('chopTypeId', "Chop Type"),
                     style: { textAlign: "center" }
                   },
-                  // {
-                  //   Header: "Company Name",
-                  //   accessor: "companyId",
-                  //   Cell: this.renderEditable,
-                  //   style: { textAlign: "center" }
-                  // },
+                  {
+                    Header: "Company Name",
+                    accessor: "companyId",
+                    Cell: this.renderEditable,
+                    width: this.getColumnWidth('companyId', "Company Name"),
+                    style: { textAlign: "center" }
+                  },
                   // {
                   //   Header: "Document Description",
                   //   accessor: "documentDescription",
                   //   Cell: this.renderEditable,
+                  // width: this.getColumnWidth('applicationTypeName', "Application Type"),
                   //   style: { textAlign: "center" },
                   //   filterable: false
                   // },
@@ -122,31 +144,36 @@ class Myapps extends Component {
                     Header: "Document Check By",
                     accessor: "docCheckBy",
                     Cell: this.renderEditable,
+                    width: this.getColumnWidth('docCheckBy', "Document Check By"),
+                    style: { textAlign: "center" }
+                  },
+                  // {
+                  //   Header: "Department Heads",
+                  //   accessor: "deptHead",
+                  //   Cell: this.renderEditable,
+                  // width: this.getColumnWidth('applicationTypeName', "Application Type"),
+                  //   style: { textAlign: "center" },
+                  //   filterable: false
+                  // },
+                  {
+                    Header: "Team",
+                    accessor: "teamId",
+                    Cell: this.renderEditable,
+                    width: this.getColumnWidth('teamId', "Team"),
                     style: { textAlign: "center" }
                   },
                   {
-                    Header: "Department Heads",
-                    accessor: "deptHead",
+                    Header: "Pick Up By",
+                    accessor: "pickUpBy",
                     Cell: this.renderEditable,
-                    style: { textAlign: "center" },
-                    filterable: false
-                  },
-                  {
-                    Header: "Status",
-                    accessor: "status",
-                    Cell: this.renderEditable,
-                    style: { textAlign: "center" }
-                  },
-                  {
-                    Header: "Created",
-                    accessor: "createdBy",
-                    Cell: this.renderEditable,
+                    width: this.getColumnWidth('pickUpBy', "Pick Up By"),
                     style: { textAlign: "center" }
                   },
                   {
                     Header: "Created By",
                     accessor: "createdBy",
                     Cell: this.renderEditable,
+                    width: this.getColumnWidth('createdBy', "Application Type"),
                     style: { textAlign: "center" }
                   },
                 ]}

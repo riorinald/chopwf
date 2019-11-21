@@ -3,10 +3,12 @@ import {
     Col,
     Row,
     Badge,
+    Spinner
 } from 'reactstrap';
 
 
-const AapprovalHistory = props => <div>
+const AapprovalHistory = props => 
+  <div>
     <Row className="bottom-border"></Row>
     <Row>
       <Col md="1">
@@ -15,8 +17,8 @@ const AapprovalHistory = props => <div>
       <Col md="8">
         <h5>{props.appHistory.name} (000)<span> <Badge color="success">{props.appHistory.status}</Badge></span></h5>
         <small>{props.appHistory.notes}</small>
-      </Col>
-      </Row>
-    </div>
+    </Col>
+    </Row>
+  </div>
 
 export default AapprovalHistory;
