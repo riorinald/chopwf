@@ -56,7 +56,7 @@ class Myapps extends Component {
   async getApplications() {
     this.setState({ loading: !this.state.loading })
     await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
-      // await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks?userid=rio@otds.admin`).then(res => {
+      // await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks?all=y&userid=rio@otds.admin`).then(res => {
       this.setState({ applications: res.data, loading: !this.state.loading })
     })
     // console.log(this.state.applications)
