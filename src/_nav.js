@@ -2,7 +2,7 @@ export default {
   items: [
     {
       name: 'Create',
-      url: '/create',
+      url: './create',
       icon: 'icon-note',
       // badge: {
       //   variant: 'info',

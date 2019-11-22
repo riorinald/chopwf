@@ -46,6 +46,7 @@ class Myapps extends Component {
     }
     this.getApplications = this.getApplications.bind(this);
     this.goBack = this.goBack.bind(this);
+    this.recall = this.recall.bind(this);
   }
   componentDidMount() {
     this.getApplications();
@@ -77,6 +78,9 @@ class Myapps extends Component {
   goBack() {
     this.setState({ loading: !this.state.loading, collapse: !this.state.collapse })
   }
+  recall(){
+    console.log("recall")
+ }
 
   getColumnWidth = (accessor, headerText) => {
     let { applications } = this.state
@@ -131,13 +135,6 @@ class Myapps extends Component {
                     width: this.getColumnWidth('chopTypeId', "Chop Type"),
                     style: { textAlign: "center" }
                   },
-                  {
-                    Header: "Company Name",
-                    accessor: "companyId",
-                    Cell: this.renderEditable,
-                    width: this.getColumnWidth('companyId', "Company Name"),
-                    style: { textAlign: "center" }
-                  },
                   // {
                   //   Header: "Document Description",
                   //   accessor: "documentDescription",
@@ -153,14 +150,14 @@ class Myapps extends Component {
                     width: this.getColumnWidth('docCheckBy', "Document Check By"),
                     style: { textAlign: "center", 'whiteSpace': 'unset' }
                   },
-                  // {
-                  //   Header: "Department Heads",
-                  //   accessor: "deptHead",
-                  //   Cell: this.renderEditable,
-                  // width: this.getColumnWidth('applicationTypeName', "Application Type"),
-                  //   style: { textAlign: "center" },
-                  //   filterable: false
-                  // },
+                  {
+                    Header: "Department Heads",
+                    accessor: "deptHead",
+                    Cell: this.renderEditable,
+                  width: this.getColumnWidth('applicationTypeName', "Application Type"),
+                    style: { textAlign: "center" },
+                    filterable: false
+                  },
                   {
                     Header: "Team",
                     accessor: "teamId",
@@ -238,7 +235,8 @@ class Myapps extends Component {
             wait={1000}
             applications={this.state.applicationDetail}
             id={selectedApplication.taskId}
-            goBack={this.goBack} />
+            goBack={this.goBack}
+            recall={this.recall} />
         }
       </div>
     );

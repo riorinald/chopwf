@@ -45,7 +45,7 @@ componentDidMount(){
             <CardHeader>
                 <Row className=" align-items-left">
                   <Button className="mr-1" color="primary" onClick={this.props.goBack}><i className="fa fa-angle-left" /> Back </Button>
-                  <Button className="mr-1" color="danger" ><i className="icon-loop" /> Recall </Button>
+                  <Button className="mr-1" color="danger"  onClick={this.props.recall}><i className="icon-loop" /> Recall </Button>
                   <Button className="mr-1" color="warning"><i className="icon-bell" />Remind Task Owner </Button>
                   <Button className="mr-1" color="success"><i className="icon-plus" /> Extend </Button>
               </Row></CardHeader>

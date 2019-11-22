@@ -39,7 +39,8 @@ class DefaultLayout extends Component {
   constructor() {
     super();
     this.state = {
-      legalEntity: "MBAFC"
+      legalEntity: "MBAFC",
+      roleId: localStorage.getItem("roleId")
     }
     this.handleLegalEntity = this.handleLegalEntity.bind(this)
   }
@@ -86,11 +87,14 @@ class DefaultLayout extends Component {
                         exact={route.exact}
                         name={route.name}
                         render={props => (
-                          <route.component legalName={this.state.legalEntity}{...props} routes={route.routes}/>
+                          <route.component 
+                          legalName={this.state.legalEntity}
+                          roleId={this.state.roleId}
+                          {...props} routes={route.routes}/>
                         )} />
                     ) : (null);
                   })}
-                  {/* <Redirect from="/" to={{ pathname: "/create" }} /> */}
+                  <Redirect from="/" to={{ pathname: "/404" }} />
                 </Switch>
               </Suspense>
             </Container> 
