@@ -6,7 +6,7 @@ import {
     FormGroup,
     Label,
     Progress,
-    Badge,
+    Spinner,
     Modal, ModalBody, ModalFooter, ModalHeader
 } from 'reactstrap';
 import ReactTable from "react-table";
@@ -19,7 +19,8 @@ constructor(props){
 super(props)
 this.state ={
     applications: [],
-    appHistory: []
+    appHistory: [],
+    loading: false
     }
 }
 componentDidMount(){
@@ -31,9 +32,10 @@ componentDidMount(){
     //     .then(res => {
     //         this.setState({ applications : res.data})
     //     })
+    this.setState({loading: true})
     Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application/${this.props.id}/approval`)
         .then(res => {
-            this.setState({ appHistory : res.data})
+            this.setState({ appHistory : res.data, loading: false})
         })
 }
     render(){
@@ -324,7 +326,9 @@ componentDidMount(){
                     </FormGroup>
                 </Row>
                 <Row><Col><h4>Approval History</h4></Col></Row>
-                {this.state.appHistory.map(id => <ApprovalHistory appHistory={id} key={id.id}/> )}
+                {this.state.loading
+                    ? <div><Spinner type="grow" /><Spinner type="grow" /><Spinner type="grow" /></div>
+                    : this.state.appHistory.map(id => <ApprovalHistory appHistory={id} key={id.id}/>)}
             </CardBody>
         </Card>
         )

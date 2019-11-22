@@ -2,7 +2,7 @@ export default {
   items: [
     {
       name: 'Create',
-      url: 'MBAFC/create',
+      url: '/create',
       icon: 'icon-note',
       // badge: {
       //   variant: 'info',
