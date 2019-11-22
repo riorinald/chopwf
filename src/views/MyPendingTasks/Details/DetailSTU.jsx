@@ -186,7 +186,7 @@ const DetailSTU = (props) => {
                                 <Label htmlFor="text-input">Address to</Label>
                             </Col>
                             <Col xs="12" md="8">
-                                <Input disabled type="text" value={props.taskDetail.addressTo} id="text-input" name="text-input" placeholder="Text" />
+                                <Input disabled type="textarea" value={props.taskDetail.addressTo} id="text-input" name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
                         <FormGroup row>

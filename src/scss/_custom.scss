@@ -101,3 +101,20 @@
 .ReactTable .rt-tr:hover .rt-td {
     background: skyblue 
 }
+
+
+table {
+    border: 1px solid black;
+    table-layout: auto; 
+    width: 100% !important
+}
+
+th, td {
+    border: 1px solid black;
+    min-width: 1px;
+    max-width: 50px;
+}
+
+.smallTd{
+    width: 1px;
+}

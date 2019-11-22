@@ -137,11 +137,12 @@ class EditRequest extends Component {
         this.handleDocumentChange = this.handleDocumentChange.bind(this);
         this.toggleConnection = this.toggleConnection.bind(this);
         this.toggleUIO = this.toggleUIO.bind(this);
-        this.addDocCheck = this.addDocCheck.bind(this);
+        // this.addDocCheck = this.addDocCheck.bind(this);
         this.addDocumentLTI = this.addDocumentLTI.bind(this);
         this.addDocumentLTU = this.addDocumentLTU.bind(this);
         this.getDocuments = this.getDocuments.bind(this);
         this.selectDocument = this.selectDocument.bind(this);
+        this.handleAgreeTerm = this.handleAgreeTerm.bind(this);
     }
 
     async componentDidMount() {
@@ -207,31 +208,37 @@ class EditRequest extends Component {
             .then(res => {
                 temporary = res.data
             })
-        temporary.applicationTypeId = "LTU"
-        temporary.effectivePeriod = "20191130"
+        // temporary.applicationTypeId = "LTU"
+        // temporary.effectivePeriod = "20191130"
+        // console.log(temporary.effectivePeriod)
 
-        this.convertDate(temporary.effectivePeriod, 'dateView1')
-        this.convertDate(temporary.returnDate, 'dateView2')
+        temporary.returnDate = temporary.returnDate !== "" ? this.convertDate(temporary.returnDate, 'dateView2') : ""
 
         temporary.responsiblePersonOption = this.getOption(temporary.responsiblePerson)
         temporary.pickUpByOption = this.getOption(temporary.pickUpBy)
-        temporary.contractSignedByFirstPersonOption = this.getOption(temporary.contractSignedByFirstPerson)
-        temporary.contractSignedBySecondPersonOption = this.getOption(temporary.contractSignedBySecondPerson)
-        temporary.documentCheckByOption = this.getOption(temporary.documentCheckBy)
+        if (temporary.applicationTypeId === "CNIPS") {
+            temporary.contractSignedByFirstPersonOption = this.getOption(temporary.contractSignedByFirstPerson)
+            temporary.contractSignedBySecondPersonOption = this.getOption(temporary.contractSignedBySecondPerson)
+        }
+        else if (temporary.applicationTypeId === "LTU") {
+            temporary.effectivePeriod = temporary.effectivePeriod !== "" ? this.convertDate(temporary.effectivePeriod, 'dateView1') : null
+            temporary.documentCheckByOption = this.getOption(temporary.documentCheckBy)
+        }
+
         this.setSelectedDeptHead(temporary.departmentHeads)
 
         await this.getData("departments", `${config.url}/departments`)
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
-        if (temporary.applicationTypeId === "LTU") {
+        // if (temporary.applicationTypeId === "LTU") {
 
-            //remove this - only for dev
-            this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
-            //
+        //     //remove this - only for dev
+        //     this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
+        //     //
 
-            if (temporary.departmentId !== "" && temporary.chopTypeId !== "" && temporary.teamId !== "") {
-                this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
-            }
-        }
+        //     if (temporary.departmentId !== "" && temporary.chopTypeId !== "" && temporary.teamId !== "") {
+        //         this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
+        //     }
+        // }
         this.setState({ taskDetails: temporary })
     }
 
@@ -398,33 +405,33 @@ class EditRequest extends Component {
         })
     }
 
-    addDocCheck(row) {
-        this.setState({ selectedDocs: row })
-        // console.log(row)
-        // console.log(index)
-        // let checked = false
-        // this.setState(state => {
-        //     // const documents = state.documents.map(doc=>{
+    // addDocCheck(row) {
+    //     this.setState({ selectedDocs: row })
+    // console.log(row)
+    // console.log(index)
+    // let checked = false
+    // this.setState(state => {
+    //     // const documents = state.documents.map(doc=>{
 
-        //     // })
-        //     let documents = state.documents
-        //     documents[index].isChecked = !state.documents[index].isChecked
-        //     if (documents[index].isChecked) {
-        //         checked = true
-        //     }
-        //     else {
-        //         checked = false
-        //     }
-        //     return documents
-        // })
-        // if (checked) {
-        //     this.setState({ selectedDocs: row }, console.log(this.state.selectedDocs))
-        // }
-        // else {
-        //     this.setState({ selectedDocs: [] }, console.log(this.state.selectedDocs))
-        // }
+    //     // })
+    //     let documents = state.documents
+    //     documents[index].isChecked = !state.documents[index].isChecked
+    //     if (documents[index].isChecked) {
+    //         checked = true
+    //     }
+    //     else {
+    //         checked = false
+    //     }
+    //     return documents
+    // })
+    // if (checked) {
+    //     this.setState({ selectedDocs: row }, console.log(this.state.selectedDocs))
+    // }
+    // else {
+    //     this.setState({ selectedDocs: [] }, console.log(this.state.selectedDocs))
+    // }
 
-    }
+    // }
 
     deleteDocument(table, i) {
         this.setState(state => {
@@ -515,7 +522,8 @@ class EditRequest extends Component {
         })
     };
 
-    selectDocument() {
+    async selectDocument() {
+        await this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId)
         if (this.state.documents.length === 0) {
             Swal.fire({
                 title: "No Documents",
@@ -600,12 +608,91 @@ class EditRequest extends Component {
         };
     };
 
+    async postData(formData, isSubmitted) {
+        try {
+
+            let url = `${config.url}/v1/tasks/${this.props.location.state.id}`
+            await Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(res => {
+                console.log(res.data)
+            })
+            // await axios.post(`${config.url}/tasks`, formData, { headers: { 'Content-Type': '  application/json' } })
+            //     .then(res => {
+            //         if (isSubmitted === 'N') {
+            //             Swal.fire({
+            //                 title: res.data.status,
+            //                 text: 'Request Saved ',
+            //                 footer: 'Your request is saved as a draft',
+            //                 type: 'info',
+            //                 onClose: () => { this.formReset() }
+            //             })
+            //         }
+            //         if (isSubmitted === 'Y') {
+            //             Swal.fire({
+            //                 title: res.data.status,
+            //                 text: 'Request Submitted',
+            //                 footer: 'Your request is being processed and is waiting for the approval',
+            //                 type: 'success',
+            //                 onClose: () => { this.formReset() }
+            //             })
+            //         }
+            //     })
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     async handleAgreeTerm(event) {
+
+        console.log(this.state.editData)
 
     }
 
     async submitRequest(isSubmitted) {
-        console.log(this.state.editData)
+
+
+
+
+
+
+
+        let postReq = new FormData();
+
+        let edited = Object.keys(this.state.editData)
+        for (let i = 0; i < edited.length; i++) {
+            if (edited[i] === "documentNames") {
+                if (this.state.taskDetails.applicationTypeId === "LTU") {
+                    for (let i = 0; i < this.state.editData.documentNames.length; i++) {
+                        postReq.append(`DocumentIds[${i}]`, this.state.editData.documentNames[i].documentId);
+                    }
+                }
+                else {
+                    for (let i = 0; i < this.state.editData.documentNames.length; i++) {
+                        postReq.append(`Documents[${i}].Attachment.File`, this.state.editData.documentNames[i].docSelected);
+                        postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.editData.documentNames[i].documentNameEnglish);
+                        postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.editData.documentNames[i].documentNameChinese);
+
+                    }
+                }
+            }
+            else if (edited[i] === "departmentHeads") {
+                for (let i = 0; i < this.state.editData.departmentHeads.length; i++) {
+                    postReq.append(`DepartmentHeads[${i}]`, this.state.editData.departmentHeads[i]);
+                }
+            }
+            else {
+                postReq.append(edited[i], this.state.editData[edited[i]])
+            }
+        }
+        postReq.append('IsSubmitted', isSubmitted)
+
+        for (var pair of postReq.entries()) {
+            console.log(pair[0] + ', ' + pair[1]);
+        }
+
+
+        if (isSubmitted === "N") {
+            this.postData(postReq, isSubmitted)
+        }
     }
 
 

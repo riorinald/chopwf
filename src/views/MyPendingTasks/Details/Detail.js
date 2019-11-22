@@ -10,6 +10,8 @@ import {
   DetailCNIPS,
 
 } from '../Details';
+import Swal from 'sweetalert2';
+import { resetMounted } from '../MyPendingTasks'
 
 
 
@@ -39,7 +41,9 @@ class Detail extends Component {
   }
 
   async getTaskDetails(id) {
-    const res = await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`)
+    let userId = localStorage.getItem('userId')
+    // let userId = "josh@otds.admin"
+    const res = await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`)
     await this.setState({ taskDetails: res.data })
   }
 
@@ -49,8 +53,26 @@ class Detail extends Component {
   }
 
   approve(action) {
+    let userId = localStorage.getItem('userId')
+    // let userId = "josh@otds.admin"
+    try {
+      Axios.post(`${config.url}/tasks/${this.props.location.state.id}/?action=${action}&userid=${userId}`)
+        .then(res => {
+          Swal.fire({
+            title: res.data.message === "The task successfully approved." ? "APPROVED" : "REJECTED",
+            html: res.data.message,
+            type: "success"
+          }).then((result) => {
+            if (result.value) {
+              this.setState({ redirectToTasks: true })
+              resetMounted.setMounted()
+            }
+          })
+        })
+    } catch (error) {
+      console.log(error)
+    }
 
-    console.log(`${config.url}/tasks/${this.props.location.state.id}?userid=${localStorage.getItem('userId')}&action=${action}`)
   }
 
   toggleView() {
@@ -61,8 +83,8 @@ class Detail extends Component {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  redirect(){
-    this.setState({redirectToTasks: true})
+  redirect() {
+    this.setState({ redirectToTasks: true })
   }
 
   checkDetail() {
@@ -76,7 +98,7 @@ class Detail extends Component {
             showModal={this.state.showModal}
             toggleView={this.toggleView}
             capitalize={this.capitalize}
-            redirect={this.redirect}/>
+            redirect={this.redirect} />
             ;
         case 'LTU':
           return <DetailLTU

@@ -112,7 +112,9 @@ class MyPendingTasks extends Component {
 
     async getPendingTasks() {
         this.setState({ loading: !this.state.loading })
-        let url = `${config.url}/tasks?userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`
+        let userId = localStorage.getItem('userId')
+        // let userId = "josh@otds.admin"
+        let url = `${config.url}/tasks?userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`
         const response = await Axios.get(url)
         this.setState({ pendingTasks: response.data, loading: !this.state.loading })
         array = response.data
@@ -400,7 +402,7 @@ class MyPendingTasks extends Component {
                                             let status = rowInfo.original.statusId
                                             if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
                                             // if (status === "PENDINGDEPTHEAD") {
-                                            //     this.setState({ toggleDetails: true, show: false })
+                                                this.setState({ toggleDetails: true, show: false })
                                             }
                                             else {
                                                 this.setState({ toggleDetails: false, show: false })

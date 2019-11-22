@@ -11,11 +11,14 @@ import makeAnimated from 'react-select/animated';
 import SimpleReactValidator from 'simple-react-validator';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import ReactDataGrid from 'react-data-grid';
 import { addDays } from 'date-fns';
 import config from '../../config';
-import {STU,LTU,LTI,CNIPS} from '../../config/validation';
-import {resetMounted} from '../MyPendingTasks/MyPendingTasks'
+import { STU, LTU, LTI, CNIPS } from '../../config/validation';
+import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
+import ReactTable from "react-table";
+import "react-table/react-table.css"
+import selectTableHOC from "react-table/lib/hoc/selectTable";
+import PropTypes from "prop-types";
 
 import {
   Button,
@@ -43,8 +46,10 @@ import {
   Tooltip,
   Spinner
 } from 'reactstrap';
-// import { file, thisExpression } from '@babel/types';
-// import { string } from 'prop-types';
+
+
+const SelectTable = selectTableHOC(ReactTable);
+
 
 //notes can be updated by text only or editable in HTML editor
 const notes = <p>如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。
@@ -55,9 +60,21 @@ const animatedComponents = makeAnimated();
 
 
 class Create extends Component {
+
+  static defaultProps = {
+    keyField: "documentId"
+  };
+
+  static propTypes = {
+    keyField: PropTypes.string
+  };
+
   constructor(props) {
     super(props);
     this.state = {
+
+      selectAll: false,
+      selection: [],
 
       // legalEntity: this.props.legalName,
 
@@ -145,9 +162,8 @@ class Create extends Component {
         { id: "pickUpBy", valid: false },
         { id: "remarks", valid: false },
         { id: "deptHeadSelected", valid: false },
-        { id: "documentTableLTI", valid: false},
+        { id: "documentTableLTI", valid: false },
       ],
-      suggestions: [],
       isLoading: false,
       lastReq: ""
     };
@@ -162,7 +178,7 @@ class Create extends Component {
     this.addDocumentLTI = this.addDocumentLTI.bind(this);
     this.addDocumentLTU = this.addDocumentLTU.bind(this);
     this.toggleHover = this.toggleHover.bind(this);
-    this.addDocCheck = this.addDocCheck.bind(this);
+    // this.addDocCheck = this.addDocCheck.bind(this);
     this.handleSelectOption = this.handleSelectOption.bind(this);
     this.isValid = this.isValid.bind(this);
     this.checkDept = this.checkDept.bind(this);
@@ -194,23 +210,23 @@ class Create extends Component {
             if (j === i) {
               var element = document.getElementById(this.state.reqInfo[i].id)
               element.classList.contains("form-control")
-              ? element.className = "is-valid form-control"
-              : element.className = "isValid"
+                ? element.className = "is-valid form-control"
+                : element.className = "isValid"
               return { id: item.id, valid: true }
-              }
-              else { return item }
-            })
-            return { reqInfo }
+            }
+            else { return item }
           })
-        }
+          return { reqInfo }
+        })
+      }
       else {
         this.setState(state => {
           const reqInfo = state.reqInfo.map((item, j) => {
             if (j === i) {
               var element = document.getElementById(item.id)
               element.classList.contains("form-control")
-              ? element.className = "is-invalid form-control"
-              : element.className = "notValid"
+                ? element.className = "is-invalid form-control"
+                : element.className = "notValid"
               return { id: item.id, name: item.name, valid: false }
             }
             else { return item }
@@ -294,24 +310,16 @@ class Create extends Component {
 
   async submitRequest(isSubmitted) {
     let useInOffice = "Y"
-    if (this.state.collapse) {
-      useInOffice = "Y"
-    }
-    else {
-      useInOffice = "N"
-    }
-
     let isConnectChop = "N"
-    if (this.state.connectingChop) {
-      isConnectChop = "Y"
-    }
-    else {
-      isConnectChop = "N"
-    }
+    let IsConfirmed = "N"
+
+    useInOffice = this.state.collapse ? "Y" : "N"
+    isConnectChop = this.state.connectingChop ? "Y" : "N"
+    IsConfirmed = this.state.agreeTerms ? "Y" : "N"
 
     let postReq = new FormData();
     postReq.append("UserId", this.state.userId);
-    postReq.append("employeeNum", this.state.employeeId);
+    postReq.append("EmployeeNum", this.state.employeeId);
     postReq.append("TelephoneNum", this.state.telNumber);
     postReq.append("CompanyId", this.props.legalName);
     postReq.append("DepartmentId", this.state.deptSelected);
@@ -325,7 +333,7 @@ class Create extends Component {
     postReq.append("AddressTo", this.state.addressTo);
     postReq.append("PickUpBy", this.state.pickUpBy);
     postReq.append("Remark", this.state.remarks);
-    postReq.append("IsConfirmed", this.state.agreeTerms);
+    postReq.append("IsConfirmed", IsConfirmed);
     postReq.append("ReturnDate", this.state.returnDate);
     postReq.append("ResponsiblePerson", this.state.resPerson);
     postReq.append("ContracySignedByFirstPerson", this.state.contractSign1);
@@ -337,20 +345,20 @@ class Create extends Component {
     postReq.append("DocumentCheckBy", this.state.docCheckBySelected)
 
     for (let i = 0; i < this.state.documentTableLTI.length; i++) {
-      postReq.append("Documents[" + i + "].Attachment.File", this.state.documentTableLTI[i].docSelected);
-      postReq.append("Documents[" + i + "].DocumentNameEnglish", this.state.documentTableLTI[i].engName);
-      postReq.append("Documents[" + i + "].DocumentNameChinese", this.state.documentTableLTI[i].cnName);
+      postReq.append(`Documents[${i}].Attachment.File`, this.state.documentTableLTI[i].docSelected);
+      postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.documentTableLTI[i].engName);
+      postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.documentTableLTI[i].cnName);
 
     }
 
     for (let i = 0; i < this.state.documentTableLTU.length; i++) {
-      postReq.append("DocumentIds[" + i + "]", this.state.documentTableLTU[i].documentId);
+      postReq.append(`DocumentIds[${i}]`, this.state.documentTableLTU[i].documentId);
     }
 
 
     //multiple dept. Heads
     for (let i = 0; i < this.state.deptHeadSelected.length; i++) {
-      postReq.append("DepartmentHeads[" + i + "]", this.state.deptHeadSelected[i].value);
+      postReq.append(`DepartmentHeads[${i}]`, this.state.deptHeadSelected[i].value);
     }
 
 
@@ -419,58 +427,21 @@ class Create extends Component {
   }
 
   async getDocuments(companyId, deptId, chopTypeId, teamId) {
-    // let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=mbafc&departmentid=itafc&choptypeid=BCSCHOP&teamid=mbafcit'
-    let tempDocs = []
-
+    // let url = `${config.url}/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit`
     let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
+
     try {
       await axios.get(url).then(res => {
-        tempDocs = res.data
+        this.setState({ documents: res.data })
       })
     } catch (error) {
       console.error(error)
     }
-    tempDocs.map((doc, index) => {
-      const keys = Object.keys(doc)
-      const obj = {}
-      obj.id = index
-      for (let i = 0; i < keys.length; i++) {
-        if (keys[i] === "departmentHeads") {
-          let dhApproved = ""
-          doc.departmentHeads.map(dh => {
-            dhApproved = dhApproved + dh.displayName + '; '
-          })
-          obj.dhApproved = dhApproved
-        }
-        else if (keys[i] === "expiryDate") {
-          let tempDate = doc[keys[i]]
-          let expiryDate = ""
-          for (let p = 0; p < tempDate.length; p++) {
-            if (p === 4 || p === 6) {
-              expiryDate = expiryDate + '/'
-            }
-            expiryDate = expiryDate + tempDate[p]
-
-          }
-          obj[keys[i]] = expiryDate
-        }
-        else {
-          obj[keys[i]] = doc[keys[i]]
-        }
-      }
-      this.setState(state => {
-        const documents = state.documents.concat(obj)
-
-        return {
-          documents
-        }
-      })
-    })
   }
 
   async postData(formData, isSubmitted) {
     try {
-      await axios.post(`${config.url}/tasks`, formData, { headers: { 'Content-Type': '  application/json' } })
+      await axios.post(`${config.url}/tasks`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then(res => {
           if (isSubmitted === 'N') {
             Swal.fire({
@@ -500,9 +471,20 @@ class Create extends Component {
     this.formRef.current.reset()
     window.location.reload();
   }
+  convertExpDate(dateValue) {
+    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+    return regEx;
+  }
+  changeDeptHeads(heads) {
+    let dh = ""
+    heads.map(head => {
+      dh = dh + head + "; "
+    })
+    return dh
+  }
 
   async getUserData() {
-    let token = localStorage.getItem('token')
+    // let token = localStorage.getItem('token')
     let ticket = localStorage.getItem('ticket')
     let userId = localStorage.getItem('userId')
     await axios.get(`${config.url}/users/` + userId, { headers: { 'ticket': ticket } })
@@ -545,9 +527,9 @@ class Create extends Component {
 
     //APPLICATION TYPE
     if (name === "appTypeSelected") {
-      
+
       //Clear Doc Table and agreeTerms
-      this.setState({documentTableLTI: [], documentTableLTU: [], agreeTerms: false })
+      this.setState({ documentTableLTI: [], documentTableLTU: [], agreeTerms: false })
 
       //Update Chop Types
       this.getChopTypes(this.props.legalName, event.target.value)
@@ -576,6 +558,7 @@ class Create extends Component {
           reqInfo: LTU
         })
         this.getDocCheckBy("")
+
         if (this.state.deptSelected !== "") {
           this.getTeams(this.state.deptSelected)
           if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.deptSelected !== "") {
@@ -705,73 +688,77 @@ class Create extends Component {
     }
   }
 
-  getSuggestions(value) {
-    this.setState({
-      isLoading: !this.isLoading
-    });
-    const thisReq = this.lastReq =
-      axios.get(`${config.url}/users?displayName=%${value}`)
-        .then(response => {
-          if (thisReq !== this.lastReq) {
-            return;
-          }
-          this.setState({
-            suggestions: response.data,
-            isLoading: false
-          });
-        })
-  }
 
-  getSuggestionValue = suggestion => suggestion.displayName
+  toggleSelection = (key, shift, row) => {
+    // start off with the existing state
+    let selection = [...this.state.selection];
+    let selectedDocs = [...this.state.selectedDocs];
+    const keyIndex = selection.indexOf(key);
 
-  renderSuggestion = suggestion => (
-    <Table className="suggestBox">
-      <tbody>
-        <tr>
-          <td>{suggestion.displayName}</td>
-        </tr>
-      </tbody>
-    </Table>
-  )
-
-  renderInputComponent = inputProps => (
-    <div className="input-group-prepend">
-      {this.state.isLoading ? <Spinner className="input-group-text" color="primary" /> : <i className="input-group-text cui-magnifying-glass" />}
-      <input {...inputProps} />
-    </div>
-  );
-
-  uploadFile = event => {
-    if (event.target.files.length !== 0) {
-      if (event.target.files.length === 1) {
-        const obj = [
-          event.target.files[0]
-        ]
-        this.setState(state => {
-          const selectedFiles = state.selectedFiles.concat(obj)
-
-          return {
-            selectedFiles
-          }
-        })
-      }
-      else {
-
-        for (let i = 0; i < event.target.files.length; i++) {
-          const obj = []
-          obj.push(event.target.files[i])
-          this.setState(state => {
-            const selectedFiles = state.selectedFiles.concat(obj)
-
-            return {
-              selectedFiles
-            }
-          })
-        }
-      }
+    // check to see if the key exists
+    if (keyIndex >= 0) {
+      // it does exist so we will remove it using destructing
+      selection = [
+        ...selection.slice(0, keyIndex),
+        ...selection.slice(keyIndex + 1)
+      ];
+      selectedDocs = [
+        ...selectedDocs.slice(0, keyIndex),
+        ...selectedDocs.slice(keyIndex + 1)
+      ];
+    } else {
+      // it does not exist so add it
+      selectedDocs.push(row)
+      selection.push(key);
     }
-    console.log(this.state.selectedFiles)
-  }
+    // update the state
+    this.setState({ selection, selectedDocs });
+  };
+
+  /**
+   * Toggle all checkboxes for select table
+   */
+  toggleAll = () => {
+    const { keyField } = this.props;
+    const selectAll = !this.state.selectAll;
+    const selection = [];
+    const selectedDocs = [];
+
+    if (selectAll) {
+      // we need to get at the internals of ReactTable
+      const wrappedInstance = this.checkboxTable.getWrappedInstance();
+      // the 'sortedData' property contains the currently accessible records based on the filter and sort
+      const currentRecords = wrappedInstance.getResolvedState().sortedData;
+      // we just push all the IDs onto the selection array
+      currentRecords.forEach(item => {
+        selection.push(`select-${item._original[keyField]}`);
+        selectedDocs.push(item._original)
+      });
+    }
+    this.setState({ selectAll, selection, selectedDocs }, console.log(this.state.selectedDocs));
+  };
+
+  /**
+   * Whether or not a row is selected for select table
+   */
+  isSelected = key => {
+    return this.state.selection.includes(`select-${key}`);
+  };
+
+  rowFn = (state, rowInfo, column, instance) => {
+    const { selection } = this.state;
+
+    return {
+      onClick: (e) => {
+        console.log("It was in this row:", rowInfo);
+      },
+      style: {
+        background:
+          rowInfo &&
+          selection.includes(`select-${rowInfo.original.documentId}`)
+      }
+    };
+  };
 
   uploadDocument = event => {
     if (event.target.files[0]) {
@@ -788,13 +775,13 @@ class Create extends Component {
       this.setState({ [sname]: newValue })
     }
     else {
-      this.setState({ [sname]: newValue.value})
+      this.setState({ [sname]: newValue.value })
     }
   }
 
-  addDocCheck(row) {
-    this.setState({ selectedDocs: row })
-  }
+  // addDocCheck(row) {
+  //   this.setState({ selectedDocs: row })
+  // }
 
   selectDocument() {
     if (this.state.documents.length === 0) {
@@ -826,7 +813,7 @@ class Create extends Component {
     const deptHeads = []
     const docCheckByUsers = []
     var pointer;
-    const { pickUpBy, suggestions, resPerson, contractSign1, contractSign2, hover, deptHead, docCheckBy } = this.state;
+    const { hover, docCheckBy, deptHead } = this.state;
     for (let i = 0; i < deptHead.length; i++) {
       const obj = { value: deptHead[i].userId, label: deptHead[i].displayName }
       deptHeads.push(obj)
@@ -870,19 +857,64 @@ class Create extends Component {
       callback(filterDocCheck(inputValue));
     }
 
-    const defaultColumnProperties = {
-      resizable: true
-    };
 
-    const docHeaders = [
-      { key: 'documentNameEnglish', name: 'Document Name (English)' },
-      { key: 'documentNameChinese', name: 'Document Name (Chinese)' },
-      { key: 'expiryDate', name: 'Expiry Date' },
-      { key: 'dhApproved', name: 'DH Approved' },
-    ].map(c => ({ ...c, ...defaultColumnProperties }))
-
-    const DocTable = <div>
-      <Table bordered>
+    const DocTable = <div className="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th className="smallTd" >No.</th>
+            <th>Document Name in English</th>
+            <th>Document Name in Chinese</th>
+            <th>Attached File</th>
+            <th className="smallTd"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {this.state.documentTableLTI.map((document, index) =>
+            <tr key={index}>
+              <td className="smallTd">{index + 1}</td>
+              <td><div>{document.engName}</div></td>
+              <td><div>{document.cnName}</div></td>
+              <td id="viewDoc">
+                <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+              </td>
+              <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+      {/* <ReactTable
+        data={this.state.documentTableLTI}
+        columns={[
+          {
+            Header: "No.",
+            Cell: row => (
+              <div> {row.index + 1} </div>
+            ),
+            style: { textAlign: "center" },
+            width: 50
+          },
+          {
+            Header: "Document Name in English",
+            accessor: 'engName',
+            style: { textAlign: "center", overflow: "visible" },
+          },
+          {
+            Header: "Document Name in Chinese",
+            accessor: 'cnName',
+            style: { textAlign: "center" },
+          },
+          {
+            Header: "Attached File",
+            Cell: row => (
+              <a href={row.original.docURL} target='_blank' rel="noopener noreferrer" > {row.original.docName} </a>
+            ),
+            style: { textAlign: "center" },
+          }
+        ]}
+        defaultPageSize={2}
+      />
+      <Table size="sm" bordered>
         <thead>
           <tr>
             <th>No.</th>
@@ -896,8 +928,8 @@ class Create extends Component {
           {this.state.documentTableLTI.map((document, index) =>
             <tr key={index}>
               <th>{index + 1}</th>
-              <th>{document.engName}</th>
-              <th>{document.cnName}</th>
+              <th><div>{document.engName}</div></th>
+              <th><div>{document.cnName}</div></th>
               <th id="viewDoc">
                 <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
               </th>
@@ -905,7 +937,8 @@ class Create extends Component {
             </tr>
           )}
         </tbody>
-      </Table></div>
+      </Table> */}
+    </div>
 
     const documentForLTI =
       <div id="documentTableLTI">
@@ -955,27 +988,55 @@ class Create extends Component {
     const documentForLTU =
       <div>
         <InputGroup >
-        <InputGroupAddon addonType="prepend">
-          <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
-        </InputGroupAddon>
-        <Input id="documentTableLTU" disabled />
-      <FormFeedback>Invalid Input a valid Document Name</FormFeedback>
-      </InputGroup>
+          <InputGroupAddon addonType="prepend">
+            <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
+          </InputGroupAddon>
+          <Input id="documentTableLTU" disabled />
+          <FormFeedback>Invalid Input a valid Document Name</FormFeedback>
+        </InputGroup>
         <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
           <ModalHeader className="center"> Select Documents </ModalHeader>
           <ModalBody>
-            <ReactDataGrid
-              columns={docHeaders}
-              rowGetter={i => this.state.documents[i]}
-              rowsCount={this.state.documents.length}
-              minWidth={1100}
-              rowScrollTimeout={null}
-              enableRowSelect={null}
-              onRowSelect={this.addDocCheck}
-              onColumnResize={(idx, width) =>
-                console.log('Column' + idx + ' has been resized to ' + width)}
-              minColumnWidth={100}
-
+            <SelectTable
+              {...this.props}
+              data={this.state.documents}
+              ref={r => (this.checkboxTable = r)}
+              toggleSelection={this.toggleSelection}
+              selectAll={this.state.selectAll}
+              // selectType="checkbox"
+              toggleAll={this.toggleAll}
+              isSelected={this.isSelected}
+              getTrProps={this.rowFn}
+              defaultPageSize={5}
+              columns={[
+                {
+                  Header: 'Document Name (English)',
+                  accessor: 'documentNameEnglish',
+                  style: { textAlign: "center" },
+                },
+                {
+                  Header: 'Document Name (Chinese)',
+                  accessor: 'documentNameChinese',
+                  style: { textAlign: "center" },
+                },
+                {
+                  Header: 'Expiry Date',
+                  accessor: 'expiryDate',
+                  Cell: row => (
+                    <div> {this.convertExpDate(row.original.expiryDate)} </div>
+                  ),
+                  style: { textAlign: "center" },
+                },
+                {
+                  Header: 'DH Approved',
+                  accessor: 'departmentHeads',
+                  Cell: row => (
+                    <div> {this.changeDeptHeads(row.original.departmentHeads)} </div>
+                  ),
+                  style: { textAlign: "center" },
+                },
+              ]}
+              keyField="documentId"
 
             />
           </ModalBody>
@@ -1102,7 +1163,7 @@ class Create extends Component {
                 ? <FormGroup>
                   <Label>Entitled Team</Label>
                   <InputGroup>
-                    <Input id="teamSelected" onChange={this.handleChange("teamSelected")}  defaultValue="0" type="select">
+                    <Input id="teamSelected" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
                       <option value="0" disabled>Please select a team</option>
                       {this.state.teams.map((team, index) =>
                         <option key={index} value={team.teamId}>{team.teamName}</option>
@@ -1161,7 +1222,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Number of Pages to Be Chopped</Label>
                 <InputGroup>
-                  <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number"  min="0" />
+                  <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min="0" />
                   <FormFeedback>Invalid Number of pages </FormFeedback>
                 </InputGroup>
               </FormGroup>
@@ -1174,11 +1235,11 @@ class Create extends Component {
                 <FormGroup visibelity="false" >
                   <Label>Return Date</Label>
                   <Row />
-                    <DatePicker id="returnDate"  placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                      className="form-control" required dateFormat="yyyy/MM/dd" withPortal
-                      selected={this.state.dateView2} 
-                      onChange={this.dateChange("returnDate", "dateView2")}
-                      minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                  <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                    className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                    selected={this.state.dateView2}
+                    onChange={this.dateChange("returnDate", "dateView2")}
+                    minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                   {/* <Input onClickOutside type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" /> */}
                 </FormGroup>
                 <FormGroup>
@@ -1298,12 +1359,12 @@ class Create extends Component {
             <div className="form-actions">
               <Row>
                 {this.state.agreeTerms
-                 ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
-                 : <Button type="submit" color="success" 
-                    onMouseEnter={() => this.setState({tooltipOpen: !this.state.tooltipOpen})}
+                  ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
+                  : <Button type="submit" color="success"
+                    onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })}
                     id="disabledSubmit" disabled >Submit</Button>}
-                 <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit">
-                   please confirm the agree terms </Tooltip>
+                <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit">
+                  please confirm the agree terms </Tooltip>
                 <span>&nbsp;</span>
                 <Button type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
               </Row>
