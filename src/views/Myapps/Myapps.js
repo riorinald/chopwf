@@ -55,10 +55,10 @@ class Myapps extends Component {
   }
 
   async getApplications() {
-    this.setState({ loading: !this.state.loading })
+    this.setState({ loading: true })
     await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
       // await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks?all=y&userid=rio@otds.admin`).then(res => {
-      this.setState({ applications: res.data, loading: !this.state.loading })
+      this.setState({ applications: res.data, loading: false })
     })
     // console.log(this.state.applications)
     // console.log(Object.keys(this.state.applications[0]))
@@ -75,9 +75,16 @@ class Myapps extends Component {
       })
   }
 
-  goBack() {
-    this.setState({ loading: !this.state.loading, collapse: !this.state.collapse })
+  goBack(didUpdate) {
+    if (didUpdate === true){
+      this.getApplications()
+      this.setState({ collapse: !this.state.collapse })
+    }
+    else {
+      this.setState({ loading: !this.state.loading, collapse: !this.state.collapse })
+    }
   }
+  
   recall(){
     console.log("recall")
  }
