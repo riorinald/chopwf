@@ -9,13 +9,12 @@ import ReactTable from "react-table";
 import "react-table/react-table.css"
 import Axios from 'axios';
 import config from '../../config';
-import { Redirect } from 'react-router-dom'
 
 let mounted = 0
 let array = []
 
 export const resetMounted = {
-    setMounted(){
+    setMounted() {
         mounted = 0
     }
 }
@@ -58,7 +57,7 @@ class MyPendingTasks extends Component {
 
             //data assigned on Row Selected 
             taskId: "",
-            appTypeId:"",
+            appTypeId: "",
             redirectToUrl: "",
             loading: false,
         }
@@ -77,7 +76,7 @@ class MyPendingTasks extends Component {
             this.getPendingTasks();
         }
         else {
-            this.setState({pendingTasks: array})
+            this.setState({ pendingTasks: array })
         }
         mounted = mounted + 1
     }
@@ -397,11 +396,11 @@ class MyPendingTasks extends Component {
                                                     rowEdit: null
                                                 });
                                             }
-                                            this.setState({ taskId: rowInfo.original.taskId, appTypeId:rowInfo.original.applicationTypeId,  redirectToUrl: `mypendingtask/details` })
+                                            this.setState({ taskId: rowInfo.original.taskId, appTypeId: rowInfo.original.applicationTypeId, redirectToUrl: `mypendingtask/details` })
 
                                             let status = rowInfo.original.statusId
                                             if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
-                                            // if (status === "PENDINGDEPTHEAD") {
+                                                // if (status === "PENDINGDEPTHEAD") {
                                                 this.setState({ toggleDetails: true, show: false })
                                             }
                                             else {
@@ -423,15 +422,15 @@ class MyPendingTasks extends Component {
                     </CardBody>
                 </Card>
                 {this.state.toggleDetails
-                    ? <Redirect to={{
+                    ? this.props.history.push({
                         pathname: 'editrequest',
                         state: { id: this.state.taskId }
-                    }} />
+                    })
                     : !this.state.show
-                        ? <Redirect to={{
+                        ? this.props.history.push({
                             pathname: this.state.redirectToUrl,
                             state: { id: this.state.taskId, appTypeId: this.state.appTypeId }
-                        }} />
+                        })
                         : null
                 }
             </div>

@@ -23,11 +23,13 @@ class Detail extends Component {
       redirectToTasks: false,
       showModal: false,
       taskDetails: null,
+      comments: ""
     }
     this.getTaskDetails = this.getTaskDetails.bind(this);
     this.approve = this.approve.bind(this)
     this.toggleView = this.toggleView.bind(this);
     this.redirect = this.redirect.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
@@ -53,10 +55,15 @@ class Detail extends Component {
   }
 
   approve(action) {
-    let userId = localStorage.getItem('userId')
+
+    let data = {
+      userId: localStorage.getItem('userId'),
+      comments: this.state.comments
+    }
+
     // let userId = "josh@otds.admin"
     try {
-      Axios.post(`${config.url}/tasks/${this.props.location.state.id}/?action=${action}&userid=${userId}`)
+      Axios.post(`${config.url}/tasks/${this.props.location.state.id}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
         .then(res => {
           Swal.fire({
             title: res.data.message === "The task successfully approved." ? "APPROVED" : "REJECTED",
@@ -73,6 +80,10 @@ class Detail extends Component {
       console.log(error)
     }
 
+  }
+
+  handleChange(event) {
+    this.setState({ comments: event.target.value })
   }
 
   toggleView() {
@@ -98,7 +109,8 @@ class Detail extends Component {
             showModal={this.state.showModal}
             toggleView={this.toggleView}
             capitalize={this.capitalize}
-            redirect={this.redirect} />
+            redirect={this.redirect}
+            handleChange={this.handleChange} />
             ;
         case 'LTU':
           return <DetailLTU
@@ -108,7 +120,8 @@ class Detail extends Component {
             showModal={this.state.showModal}
             toggleView={this.toggleView}
             redirect={this.redirect}
-            capitalize={this.capitalize} />
+            capitalize={this.capitalize}
+            handleChange={this.handleChange} />
             ;
         case 'LTI':
           return <DetailLTI
@@ -118,7 +131,8 @@ class Detail extends Component {
             showModal={this.state.showModal}
             toggleView={this.toggleView}
             redirect={this.redirect}
-            capitalize={this.capitalize} />
+            capitalize={this.capitalize}
+            handleChange={this.handleChange} />
             ;
         case 'CNIPS':
           return <DetailCNIPS
@@ -128,7 +142,8 @@ class Detail extends Component {
             showModal={this.state.showModal}
             toggleView={this.toggleView}
             redirect={this.redirect}
-            capitalize={this.capitalize} />
+            capitalize={this.capitalize}
+            handleChange={this.handleChange} />
             ;
         default:
           return <p><kbd>{this.props.match.params.id}</kbd> Not Exist </p>

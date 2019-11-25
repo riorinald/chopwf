@@ -32,6 +32,7 @@ import ReactTable from "react-table";
 import "react-table/react-table.css"
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import PropTypes from "prop-types";
+import { resetMounted } from '../MyPendingTasks/MyPendingTasks';
 
 
 
@@ -150,7 +151,7 @@ class EditRequest extends Component {
         if (this.props.location.state !== undefined) {
             this.getTaskDetails(this.props.location.state.id)
         }
-        console.log(this.state.taskDetails.applicationTypeId)
+        // console.log(this.state.taskDetails.applicationTypeId)
     }
 
 
@@ -194,11 +195,14 @@ class EditRequest extends Component {
     }
 
     getOption(person) {
+        let i = 0
+        // console.log(this.state.deptHeads)
         this.state.deptHeads.map((head, index) => {
             if (head.value === person) {
-                return index
+                i = index
             }
         })
+        return i
     }
 
 
@@ -216,6 +220,7 @@ class EditRequest extends Component {
 
         temporary.responsiblePersonOption = this.getOption(temporary.responsiblePerson)
         temporary.pickUpByOption = this.getOption(temporary.pickUpBy)
+        console.log(this.getOption(temporary.pickUpBy))
         if (temporary.applicationTypeId === "CNIPS") {
             temporary.contractSignedByFirstPersonOption = this.getOption(temporary.contractSignedByFirstPerson)
             temporary.contractSignedBySecondPersonOption = this.getOption(temporary.contractSignedBySecondPerson)
@@ -362,6 +367,7 @@ class EditRequest extends Component {
         var rand = Math.floor((Math.random() * maxNumber) + 1);
         var tempDate = new Date();
         var date = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear() + ' ' + tempDate.getHours() + ':' + tempDate.getMinutes() + ':' + tempDate.getSeconds();
+        console.log(this.state.editRequestForm.docSelected)
         if (this.state.editRequestForm.docSelected !== null) {
             const obj = {
                 // documentId: "dd66ea7c-773e-4312-827a-8fd3437472be",
@@ -611,31 +617,38 @@ class EditRequest extends Component {
     async postData(formData, isSubmitted) {
         try {
 
-            let url = `${config.url}/v1/tasks/${this.props.location.state.id}`
-            await Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(res => {
-                console.log(res.data)
-            })
-            // await axios.post(`${config.url}/tasks`, formData, { headers: { 'Content-Type': '  application/json' } })
-            //     .then(res => {
-            //         if (isSubmitted === 'N') {
-            //             Swal.fire({
-            //                 title: res.data.status,
-            //                 text: 'Request Saved ',
-            //                 footer: 'Your request is saved as a draft',
-            //                 type: 'info',
-            //                 onClose: () => { this.formReset() }
-            //             })
-            //         }
-            //         if (isSubmitted === 'Y') {
-            //             Swal.fire({
-            //                 title: res.data.status,
-            //                 text: 'Request Submitted',
-            //                 footer: 'Your request is being processed and is waiting for the approval',
-            //                 type: 'success',
-            //                 onClose: () => { this.formReset() }
-            //             })
-            //         }
-            //     })
+            let url = `${config.url}/tasks/${this.props.location.state.id}`
+            // let url = 'http://192.168.1.47/echopx/api/v1/tasks/04af4714-3053-46b3-9689-c7f6738449d0'
+            await Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+                .then(res => {
+                    if (isSubmitted === 'N') {
+                        Swal.fire({
+                            title: res.data.status,
+                            text: 'Request Saved ',
+                            footer: 'Your request is saved as a draft',
+                            type: 'info',
+                            onClose: () => {
+                                // this.setState({ redirectToPendingTasks: true })
+                                this.props.history.push('/mypendingtask')
+                            }
+                        })
+
+                    }
+                    if (isSubmitted === 'Y') {
+                        Swal.fire({
+                            title: res.data.status,
+                            text: 'Request Submitted',
+                            footer: 'Your request is being processed and is waiting for the approval',
+                            type: 'success',
+                            onClose: () => {
+                                this.props.history.push('/mypendingtask')
+                                // this.setState({ redirectToPendingTasks: true })
+                            }
+
+                        })
+
+                    }
+                })
         } catch (error) {
             console.error(error);
         }
@@ -643,47 +656,62 @@ class EditRequest extends Component {
 
     async handleAgreeTerm(event) {
 
-        console.log(this.state.editData)
+        console.log(this.state.taskDetails)
 
     }
 
     async submitRequest(isSubmitted) {
 
+        let returnDate = this.state.taskDetails.returnDate === undefined ? "00010101" : this.state.taskDetails.returnDate
 
-
-
-
-
-
+        let userId = localStorage.getItem('userId')
         let postReq = new FormData();
+        postReq.append("UserId", userId);
+        postReq.append("EmployeeNum", this.state.taskDetails.employeeNum);
+        postReq.append("TelephoneNum", this.state.taskDetails.telephoneNum);
+        postReq.append("CompanyId", this.props.legalName);
+        postReq.append("DepartmentId", this.state.taskDetails.departmentId);
+        postReq.append("ApplicationTypeId", this.state.taskDetails.applicationTypeId);
+        postReq.append("ContractNum", "");
+        postReq.append("ChopTypeId", this.state.taskDetails.chopTypeId);
+        postReq.append("TeamId", this.state.taskDetails.teamId);
+        postReq.append("PurposeOfUse", this.state.taskDetails.purposeOfUse);
+        postReq.append("NumOfPages", this.state.taskDetails.numOfPages);
+        postReq.append("IsUseInOffice", this.state.taskDetails.isUseInOffice);
+        postReq.append("AddressTo", this.state.taskDetails.addressTo);
+        postReq.append("PickUpBy", this.state.taskDetails.pickUpBy);
+        postReq.append("Remark", this.state.taskDetails.remark);
+        postReq.append("IsConfirmed", this.state.taskDetails.isConfirm);
+        postReq.append("ReturnDate", returnDate);
+        postReq.append("ResponsiblePerson", this.state.taskDetails.responsiblePerson);
+        postReq.append("ContracySignedByFirstPerson", this.state.taskDetails.contractSignedByFirstPerson);
+        postReq.append("ContractSignedBySecondPerson", this.state.taskDetails.contractSignedBySecondPerson);
+        postReq.append("EffectivePeriod", this.state.taskDetails.effectivePeriod);
+        postReq.append("IsSubmitted", isSubmitted);
+        postReq.append("isConnectChop", this.state.taskDetails.connectChop);
+        postReq.append("BranchId", this.state.taskDetails.branchId)
+        postReq.append("DocumentCheckBy", this.state.taskDetails.documentCheckBy)
+        // postReq.append(`DocumentIds[0]`, "");
 
-        let edited = Object.keys(this.state.editData)
-        for (let i = 0; i < edited.length; i++) {
-            if (edited[i] === "documentNames") {
-                if (this.state.taskDetails.applicationTypeId === "LTU") {
-                    for (let i = 0; i < this.state.editData.documentNames.length; i++) {
-                        postReq.append(`DocumentIds[${i}]`, this.state.editData.documentNames[i].documentId);
-                    }
-                }
-                else {
-                    for (let i = 0; i < this.state.editData.documentNames.length; i++) {
-                        postReq.append(`Documents[${i}].Attachment.File`, this.state.editData.documentNames[i].docSelected);
-                        postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.editData.documentNames[i].documentNameEnglish);
-                        postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.editData.documentNames[i].documentNameChinese);
-
-                    }
-                }
-            }
-            else if (edited[i] === "departmentHeads") {
-                for (let i = 0; i < this.state.editData.departmentHeads.length; i++) {
-                    postReq.append(`DepartmentHeads[${i}]`, this.state.editData.departmentHeads[i]);
-                }
-            }
-            else {
-                postReq.append(edited[i], this.state.editData[edited[i]])
+        if (this.state.taskDetails.applicationTypeId === "LTU") {
+            for (let i = 0; i < this.state.taskDetails.documentNames.length; i++) {
+                postReq.append(`DocumentIds[${i}]`, this.state.taskDetails.documentNames[i].documentId);
             }
         }
-        postReq.append('IsSubmitted', isSubmitted)
+        else {
+            for (let i = 0; i < this.state.taskDetails.documentNames.length; i++) {
+                let documentSelected = this.state.taskDetails.documentNames[i].docSelected !== undefined ? this.state.taskDetails.documentNames[i].docSelected : ""
+                postReq.append(`Documents[${i}].Attachment.File`, documentSelected);
+                postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.taskDetails.documentNames[i].documentNameEnglish);
+                postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.taskDetails.documentNames[i].documentNameChinese);
+
+            }
+
+        }
+        //multiple dept. Heads
+        for (let i = 0; i < this.state.taskDetails.departmentHeads.length; i++) {
+            postReq.append(`DepartmentHeads[${i}]`, this.state.taskDetails.departmentHeads[i]);
+        }
 
         for (var pair of postReq.entries()) {
             console.log(pair[0] + ', ' + pair[1]);
@@ -692,6 +720,13 @@ class EditRequest extends Component {
 
         if (isSubmitted === "N") {
             this.postData(postReq, isSubmitted)
+            resetMounted.setMounted()
+        }
+        else {
+            //if all valid = isConfirmed || All Fields are filled
+            console.log(this.state.taskDetails)
+            this.postData(postReq, isSubmitted)
+            resetMounted.setMounted()
         }
     }
 
@@ -701,17 +736,11 @@ class EditRequest extends Component {
     render() {
         const { redirectToPendingTasks, taskDetails, dateView1, deptHeads, selectedDeptHeads, editRequestForm } = this.state
 
-
-
-
-
-
         return (
             <div>
                 {this.props.location.state === undefined
-                    ? <Redirect to={{
-                        pathname: 'mypendingtask'
-                    }} />
+                    ? <Redirect to={'/mypendingtask'} />
+                    // this.props.history.push('/mypendingtask')
                     : <Card className="animated fadeIn">
                         <CardHeader>
                             <Button onClick={this.redirectToPendingTasks}>Back</Button> &nbsp;
@@ -788,7 +817,7 @@ class EditRequest extends Component {
                                     <Label>Chop Type</Label>
                                     <Input type="select" id="chopTypeSelected"
                                         // onClick={() => { props.getChopTypes(props.legalName, props.taskDetails.appTypeSelected) }}
-                                        onChange={this.handleChange("chopTypeId")} defaultValue={taskDetails.chopTypeId} name="chopType" >
+                                        onChange={this.handleChange("chopTypeId")} value={taskDetails.chopTypeId} name="chopType" >
                                         {this.state.chopTypes.map((option, id) => (
                                             <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
                                         ))}
@@ -950,7 +979,7 @@ class EditRequest extends Component {
                                                                     <th>{document.documentNameEnglish}</th>
                                                                     <th>{document.documentNameChinese}</th>
                                                                     <th id="viewDoc">
-                                                                        <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentName}</a>
+                                                                        <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentNameEnglish}</a>
                                                                     </th>
                                                                     <th><img width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} src={deleteBin} /></th>
                                                                 </tr>
@@ -1141,7 +1170,7 @@ class EditRequest extends Component {
                     </Card>
                 }
 
-                {redirectToPendingTasks ? <Redirect to='/mypendingtask' /> : ""}
+                {redirectToPendingTasks ? this.props.history.push('/mypendingtask') : ""}
 
             </div>
         )
