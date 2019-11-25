@@ -12,7 +12,6 @@ import {
 import ReactTable from "react-table";
 import "react-table/react-table.css"
 
-
 const DetailSTU = (props) => {
 
     return <div>
@@ -248,7 +247,7 @@ const DetailSTU = (props) => {
                                                 Header: "Attached Document",
                                                 accessor: "documentName",
                                                 Cell: row => (
-                                                    <a href={row.original.documentUrl} target='_blank' rel="noopener noreferrer">{row.original.documentName}</a>
+                                                    <a href={row.original.documentUrl} target='_blank' rel="noopener noreferrer">{row.original.documentNameEnglish}</a>
                                                 ),
                                                 style: { textAlign: "center" },
                                             },
@@ -267,7 +266,7 @@ const DetailSTU = (props) => {
                 </Row>
                 <Row>
                     <Col>
-                        <Input type="textarea"></Input>
+                        <Input type="textarea" onChange={props.handleChange}></Input>
                     </Col>
                 </Row>
                 <br />

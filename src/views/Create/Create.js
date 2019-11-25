@@ -370,7 +370,7 @@ class Create extends Component {
     if (isSubmitted === 'N' && this.validator.allValid()) {
       this.postData(postReq, isSubmitted)
     }
-    if (this.validator.allValid() === false) {
+    else if (this.validator.allValid() === false) {
       Swal.fire({
         type: 'info',
         title: 'required',
@@ -380,7 +380,7 @@ class Create extends Component {
       this.validator.showMessages();
     }
 
-    if (this.state.valid && this.state.inOffice) {
+    else if (this.state.valid && this.state.inOffice) {
       this.postData(postReq, isSubmitted)
     }
 
