@@ -20,7 +20,8 @@ super(props)
 this.state ={
     applications: [],
     appHistory: [],
-    loading: false
+    loading: false,
+    updated: false
     }
 }
 componentDidMount(){
@@ -38,14 +39,17 @@ componentDidMount(){
             this.setState({ appHistory : res.data, loading: false})
         })
 }
-    render(){
 
+updated = () => {
+    this.setState({updated:true})
+}
+render(){
         return(
             <Card className="animated fadeIn">
             <CardHeader>
                 <Row className=" align-items-left">
-                  <Button className="mr-1" color="primary" onClick={this.props.goBack}><i className="fa fa-angle-left" /> Back </Button>
-                  <Button className="mr-1" color="danger" ><i className="icon-loop" /> Recall </Button>
+                  <Button className="mr-1" color="primary" onClick={()=>this.props.goBack(this.state.updated)}><i className="fa fa-angle-left" /> Back </Button>
+                  <Button className="mr-1" color="danger"  onClick={this.updated}><i className="icon-loop" /> Recall </Button>
                   <Button className="mr-1" color="warning"><i className="icon-bell" />Remind Task Owner </Button>
                   <Button className="mr-1" color="success"><i className="icon-plus" /> Extend </Button>
               </Row></CardHeader>

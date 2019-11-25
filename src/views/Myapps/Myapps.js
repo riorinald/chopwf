@@ -46,6 +46,7 @@ class Myapps extends Component {
     }
     this.getApplications = this.getApplications.bind(this);
     this.goBack = this.goBack.bind(this);
+    this.recall = this.recall.bind(this);
   }
   componentDidMount() {
     this.getApplications();
@@ -54,10 +55,10 @@ class Myapps extends Component {
   }
 
   async getApplications() {
-    this.setState({ loading: !this.state.loading })
+    this.setState({ loading: true })
     await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
       // await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks?all=y&userid=rio@otds.admin`).then(res => {
-      this.setState({ applications: res.data, loading: !this.state.loading })
+      this.setState({ applications: res.data, loading: false })
     })
     // console.log(this.state.applications)
     // console.log(Object.keys(this.state.applications[0]))
@@ -74,9 +75,19 @@ class Myapps extends Component {
       })
   }
 
-  goBack() {
-    this.setState({ loading: !this.state.loading, collapse: !this.state.collapse })
+  goBack(didUpdate) {
+    if (didUpdate === true){
+      this.getApplications()
+      this.setState({ collapse: !this.state.collapse })
+    }
+    else {
+      this.setState({ loading: !this.state.loading, collapse: !this.state.collapse })
+    }
   }
+  
+  recall(){
+    console.log("recall")
+ }
 
   getColumnWidth = (accessor, headerText) => {
     let { applications } = this.state
@@ -131,13 +142,6 @@ class Myapps extends Component {
                     width: this.getColumnWidth('chopTypeId', "Chop Type"),
                     style: { textAlign: "center" }
                   },
-                  {
-                    Header: "Company Name",
-                    accessor: "companyId",
-                    Cell: this.renderEditable,
-                    width: this.getColumnWidth('companyId', "Company Name"),
-                    style: { textAlign: "center" }
-                  },
                   // {
                   //   Header: "Document Description",
                   //   accessor: "documentDescription",
@@ -153,14 +157,14 @@ class Myapps extends Component {
                     width: this.getColumnWidth('docCheckBy', "Document Check By"),
                     style: { textAlign: "center", 'whiteSpace': 'unset' }
                   },
-                  // {
-                  //   Header: "Department Heads",
-                  //   accessor: "deptHead",
-                  //   Cell: this.renderEditable,
-                  // width: this.getColumnWidth('applicationTypeName', "Application Type"),
-                  //   style: { textAlign: "center" },
-                  //   filterable: false
-                  // },
+                  {
+                    Header: "Department Heads",
+                    accessor: "deptHead",
+                    Cell: this.renderEditable,
+                  width: this.getColumnWidth('applicationTypeName', "Application Type"),
+                    style: { textAlign: "center" },
+                    filterable: false
+                  },
                   {
                     Header: "Team",
                     accessor: "teamId",
@@ -238,7 +242,8 @@ class Myapps extends Component {
             wait={1000}
             applications={this.state.applicationDetail}
             id={selectedApplication.taskId}
-            goBack={this.goBack} />
+            goBack={this.goBack}
+            recall={this.recall} />
         }
       </div>
     );

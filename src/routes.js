@@ -12,7 +12,7 @@ const Detail = React.lazy(() => import('./views/MyPendingTasks/Details/Detail'))
 const Redirect = React.lazy(()=> import('./views/Create/Redirecting'))
 const EditRequest = React.lazy(() => import('./views/EditRequest/EditRequest'));
 const ApplictionDetail = React.lazy(() =>import('./views/Myapps/ApplicationDetail'));
-
+const page404 = React.lazy(()=>import('./views/404'));
 
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
@@ -31,16 +31,18 @@ const routes = [
   { path: '/CAR2GO/create', name: 'Create', component: Create},
 
   { path: '/myapps',exact: true, name: 'Myapps', component: Myapps },
-  { path: '/myapps/:id',exact: true, name: 'Myapps', component: ApplictionDetail },
+  // { path: '/myapps/:id',exact: true, name: 'Myapps', component: ApplictionDetail },
 
   { path: '/mypendingtask', exact: true, name: 'MyPendingTasks', component: MyPendingTasks},
   { path: '/mypendingtask/:id', exact: true, name: 'DetailTaskSTU', component: Detail},
   { path: '/chopapps', name: 'ChopApplication', component: ChopApps},
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
-  { path: '/instruction', name: 'Insctructions', component: Instructions },
-  { path: '/help', name: 'Help', component: Help },
+  { path: '/instruction',exact: true, name: 'Insctructions', component: Instructions },
+  { path: '/help',exact: true, name: 'Help', component: Help },
   { path: '/login', name: 'Login', component: Login },
-  { path: '/editrequest', name: 'EditRequest', component: EditRequest }
+  { path: '/editrequest',exact: true, name: 'EditRequest', component: EditRequest },
+  { path: '/404', name: 'page404', component: page404},
+
 ];
 
 export default routes;

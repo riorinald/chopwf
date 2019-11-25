@@ -64,8 +64,10 @@ class ChopApplication extends Component {
   render() {
     const { applications, collapse, selectedApplication } = this.state
     // let columnData = Object.keys(applications[0])
-
+  if (this.props.roleId === "REQUESTOR") 
+  return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
     return (
+      
       <div>
         <h3>My Applications</h3>
         <Collapse isOpen={!collapse}>

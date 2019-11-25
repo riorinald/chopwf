@@ -46,7 +46,7 @@ class App extends Component {
       <HashRouter>
         <React.Suspense fallback={loading()}>
           <Switch>
-            <Route exact path="/404" name="Page 404" render={props => <Page404 {...props} />} />
+            <Route exact path="/page404" name="Page 404" render={props => <Page404 {...props} />} />
             <Route path='/login' component={Login} />  
             {/* {fakeAuth.isAuthenticated
               ? <Route path="/" name="Home" render={props => <DefaultLayout {...props} />} />
