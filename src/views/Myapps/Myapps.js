@@ -39,25 +39,46 @@ class Myapps extends Component {
 
       collapse: true,
 
+      username: localStorage.getItem('userId'),
+
       applications: [],
       selectedApplication: [],
-      applicationDetail: []
+      applicationDetail: [],
+
+      applicationTypes: [],
+      chopTypes: [],
+      filtered: [],
+
+      searchOption: {
+        requestNum: "",
+        applicationTypeName: "",
+        chopTypeName: "",
+        departmentHeadName: "",
+        teamName: "",
+        documentCheckByName: "",
+        statusName: "",
+        createdDate: "",
+        createdByName: ""
+    }
 
     }
     this.getApplications = this.getApplications.bind(this);
     this.goBack = this.goBack.bind(this);
-    this.recall = this.recall.bind(this);
   }
+
   componentDidMount() {
     this.getApplications();
     resetMounted.setMounted();
 
+    this.getData("applicationTypes", `${config.url}/apptypes`);
+    this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
   }
 
   async getApplications() {
     this.setState({ loading: true })
-    await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
-      // await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks?all=y&userid=rio@otds.admin`).then(res => {
+    // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
+      await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks?all=n&userid=${this.state.username}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`)
+      .then(res => {
       this.setState({ applications: res.data, loading: false })
     })
     // console.log(this.state.applications)
@@ -67,13 +88,24 @@ class Myapps extends Component {
   async getAppDetails(id) {
     this.setState({ loading: !this.state.loading })
     // let id = this.state.selectedApplication.taskId
-    await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application/${id}`)
+    // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application/${id}`)
+    await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks/${id}?userid=${this.state.username}`)
       .then(res => {
         this.setState({
           applicationDetail: res.data, collapse: !this.state.collapse
         })
       })
   }
+
+  search = () => {
+    this.getApplications()
+  }
+
+  onKeyPressed = (e) => {
+    if (e.key === "Enter") {
+      this.getApplications()
+  }
+}
 
   goBack(didUpdate) {
     if (didUpdate === true){
@@ -85,9 +117,69 @@ class Myapps extends Component {
     }
   }
   
-  recall(){
-    console.log("recall")
- }
+  handleSearch = name => event => {
+    const options = this.state.searchOption
+    options[name] = event.target.value
+    this.setState(state => {
+        const searchOption = options
+        return {
+            searchOption
+        }
+    }, console.log(this.state.searchOption))
+}
+
+  getDeptHeads(heads) {
+    let dh = ""
+    heads.map(head => {
+        dh = dh + head + "; "
+    })
+    return dh
+  }
+
+  async getData(state, url) {
+    try {
+        const response = await Axios.get(url);
+        this.setState({
+            [state]: response.data
+        })
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+  convertDate(dateValue) {
+    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+    return regEx
+  }
+
+
+  onFilteredChangeCustom = (value, accessor) => {
+    this.setState(state => {
+        const searchOption = state.searchOption
+        searchOption[accessor] = value
+        return {
+            searchOption
+        }
+    })
+    let filtered = this.state.filtered;
+    let insertNewFilter = 1;
+    if (filtered.length) {
+        filtered.forEach((filter, i) => {
+            if (filter["id"] === accessor) {
+                if (value === "" || !value.length) filtered.splice(i, 1);
+                else filter["value"] = value;
+
+                insertNewFilter = 0;
+            }
+        });
+    }
+
+    if (insertNewFilter) {
+        filtered.push({ id: accessor, value: value });
+    }
+
+    this.setState({ filtered: filtered });
+  };
 
   getColumnWidth = (accessor, headerText) => {
     let { applications } = this.state
@@ -113,80 +205,156 @@ class Myapps extends Component {
       <div>
         <h4>My Applications</h4>
         {this.state.collapse ?
-          <Card >
+          <Card>
             <CardHeader>MY APPLICATIONS <Button className="float-right" onClick={this.search} >Search</Button>
             </CardHeader>
-            <CardBody>
+            <CardBody onKeyDown={this.onKeyPressed}>
               <ReactTable
                 data={applications}
                 filterable
+                onFilteredChange={(filtered, column, value) => {
+                  this.setState({ filtered: filtered })
+                  this.onFilteredChangeCustom(value, column.id || column.accessor);
+                }}
+                defaultFilterMethod={(filter, row, column) => {
+
+                    const id = filter.pivotId || filter.id;
+                    return row[id]
+                }}
                 columns={[
                   {
-                    Header: "Request Number",
-                    accessor: "requestNum",
-                    Cell: this.renderEditable,
-                    width: this.getColumnWidth('requestNum', "Request Number"),
-                    style: { textAlign: "center" }
+                      Header: "Request Number",
+                      accessor: "requestNum",
+                      Cell: this.renderEditable,
+                      style: { textAlign: "center" },
+                      width: this.getColumnWidth('requestNum', "Request Number")
                   },
                   {
-                    Header: "Application Type",
-                    accessor: "apptypeId",
-                    Cell: this.renderEditable,
-                    width: this.getColumnWidth('apptypeId', "Application Type"),
-                    style: { textAlign: "center" }
+                      Header: "Application Type",
+                      accessor: "applicationTypeName",
+                      Cell: this.renderEditable,
+                      width: this.getColumnWidth('applicationTypeName', "Application Type"),
+                      filterMethod: (filter, row) => {
+                          return row[filter.id] === filter.value;
+                      },
+                      Filter: ({ filter, onChange }) => {
+                          return (
+                              <Input type="select" value={this.state.searchOption.applicationTypeName} onChange={this.handleSearch('applicationTypeName')} >
+                                  <option value="">Please Select</option>
+                                  {this.state.applicationTypes.map(type =>
+                                      <option key={type.appTypeId} value={type.appTypeName} >{type.appTypeName}</option>
+                                  )}
+                              </Input>
+
+                          )
+                      },
+                      style: { textAlign: "center" }
                   },
                   {
-                    Header: "Chop Type",
-                    accessor: "chopTypeId",
-                    Cell: this.renderEditable,
-                    width: this.getColumnWidth('chopTypeId', "Chop Type"),
-                    style: { textAlign: "center" }
-                  },
-                  // {
-                  //   Header: "Document Description",
-                  //   accessor: "documentDescription",
-                  //   Cell: this.renderEditable,
-                  // width: this.getColumnWidth('applicationTypeName', "Application Type"),
-                  //   style: { textAlign: "center" },
-                  //   filterable: false
-                  // },
-                  {
-                    Header: "Document Check By",
-                    accessor: "docCheckBy",
-                    Cell: this.renderEditable,
-                    width: this.getColumnWidth('docCheckBy', "Document Check By"),
-                    style: { textAlign: "center", 'whiteSpace': 'unset' }
-                  },
-                  {
-                    Header: "Department Heads",
-                    accessor: "deptHead",
-                    Cell: this.renderEditable,
-                  width: this.getColumnWidth('applicationTypeName', "Application Type"),
-                    style: { textAlign: "center" },
-                    filterable: false
+                      Header: "Chop Type",
+                      accessor: "chopTypeName",
+                      Cell: this.renderEditable,
+                      style: { textAlign: "center" },
+                      width: this.getColumnWidth('chopTypeName', "Chop Type"),
+                      filterMethod: (filter, row) => {
+                          return row[filter.id] === filter.value;
+                      },
+                      Filter: ({ filter, onChange }) => {
+                          return (
+                              <Input type="select" value={this.state.searchOption.chopTypeName} onChange={this.handleSearch('chopTypeName')} >
+                                  <option value="">Please Select</option>
+                                  {this.state.chopTypes.map(type =>
+                                      <option key={type.chopTypeId} value={type.chopTypeName} >{type.chopTypeName}</option>
+                                  )}
+                              </Input>
+
+                          )
+                      },
                   },
                   {
-                    Header: "Team",
-                    accessor: "teamId",
-                    Cell: this.renderEditable,
-                    width: this.getColumnWidth('teamId', "Team"),
-                    style: { textAlign: "center" }
+
+                      Header: "Document Name English",
+                      accessor: "documentNameEnglish",
+                      width: this.getColumnWidth('documentNameEnglish', "Document Name English"),
+                      // Cell: this.renderEditable,
+                      Cell: row => (
+                          <div> {this.getDeptHeads(row.original.documentNameEnglish)} </div>
+                      ),
+                      style: { textAlign: "center" },
+                      filterable: false
                   },
                   {
-                    Header: "Pick Up By",
-                    accessor: "pickUpBy",
-                    Cell: this.renderEditable,
-                    width: this.getColumnWidth('pickUpBy', "Pick Up By"),
-                    style: { textAlign: "center" }
+
+                      Header: "Document Name Chinese",
+                      accessor: "documentNameChinese",
+                      width: this.getColumnWidth('documentNameChinese', "Document Name Chinese"),
+                      // Cell: this.renderEditable,
+                      Cell: row => (
+                          <div> {this.getDeptHeads(row.original.documentNameChinese)} </div>
+                      ),
+                      style: { textAlign: "center" },
+                      filterable: false
                   },
                   {
-                    Header: "Created By",
-                    accessor: "createdBy",
-                    Cell: this.renderEditable,
-                    width: this.getColumnWidth('createdBy', "Application Type"),
-                    style: { textAlign: "center" }
+                      Header: "Document Check By",
+                      accessor: "documentCheckByName",
+                      width: this.getColumnWidth('documentCheckByName', "Document Check By"),
+                      Cell: this.renderEditable,
+                      style: { textAlign: "center" }
                   },
-                ]}
+                  {
+                      Header: "Department Head",
+                      accessor: `departmentHeadName`,
+                      width: this.getColumnWidth('departmentHeadName', "Department Head"),
+                      // Cell: this.renderEditable,
+                      Cell: row => (
+                          <div> {this.getDeptHeads(row.original.departmentHeadName)} </div>
+                      ),
+                      style: { textAlign: "center" }
+                  },
+                  {
+                      Header: "Entitled Team",
+                      accessor: "teamName",
+                      width: this.getColumnWidth('teamName', "Entitled Team"),
+                      Cell: this.renderEditable,
+                      style: { textAlign: "center" }
+                  },
+                  {
+                      Header: "Status",
+                      accessor: "statusName",
+                      width: this.getColumnWidth('statusName', "Status"),
+                      Cell: this.renderEditable,
+                      style: { textAlign: "center" }
+                  },
+                  {
+                      Header: "Date of Creation",
+                      accessor: "createdDate",
+                      width: this.getColumnWidth('createdDate', "Date of Creation"),
+                      // Cell: this.renderEditable,
+                      Cell: row => (
+                          <div> {this.convertDate(row.original.createdDate)} </div>
+                      ),
+                      style: { textAlign: "center" }
+                  },
+                  {
+                      Header: "Created By",
+                      accessor: "createdByName",
+                      width: this.getColumnWidth('createdByName', "Created By"),
+                      Cell: this.renderEditable,
+                      style: { textAlign: "center" }
+                  },
+                  {
+                      Header: "New Return Date",
+                      accessor: "newReturnDate",
+                      filterable: false,
+                      width: this.getColumnWidth('newReturnDate', "New Return Date"),
+                      // Cell: this.renderEditable,
+                      Cell: row => (
+                          <div> {this.convertDate(row.original.newReturnDate)} </div>
+                      ),
+                      style: { textAlign: "center" }
+                  },
+              ]}
                 defaultPageSize={this.state.limit}
                 // pages={this.state.page}
                 // manual
