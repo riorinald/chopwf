@@ -201,7 +201,7 @@ const DetailSTU = (props) => {
                                 <Label htmlFor="text-input">Department Heads</Label>
                             </Col>
                             <Col xs="12" md="8">
-                                <Input disabled type="text" value={props.taskDetail.departmentHeadName} id="text-input" name="text-input" placeholder="Text" />
+                                <Input disabled type="text" value={props.getDeptHeads(props.taskDetail.departmentHeads)} id="text-input" name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
 
@@ -247,7 +247,7 @@ const DetailSTU = (props) => {
                                                 Header: "Attached Document",
                                                 accessor: "documentName",
                                                 Cell: row => (
-                                                    <a href={row.original.documentUrl} target='_blank' rel="noopener noreferrer">{row.original.documentNameEnglish}</a>
+                                                    <a href={row.original.documentUrl} target='_blank' rel="noopener noreferrer">{row.original.documentFileName}</a>
                                                 ),
                                                 style: { textAlign: "center" },
                                             },
@@ -276,6 +276,9 @@ const DetailSTU = (props) => {
                             <Button color={action.action === "approve" ? "success" : "danger"} onClick={() => props.approve(action.action)} > {props.capitalize(action.action)}</Button>
                         </Col>
                     )}
+                    {/* <Col sm={1}>
+                        <Button color="success" onClick={() => props.tempApprove()}>Approve</Button>
+                    </Col> */}
                 </Row>
                 <Row>
                     <Col>&nbsp;</Col>
@@ -283,16 +286,23 @@ const DetailSTU = (props) => {
                 <Row>
                     <Col> <h4>Approval Histories</h4></Col>
                 </Row>
-                <Row className="bottom-border">&nbsp;</Row>
-                <Row>
-                    <Col md="1">
-                        <img src={'../../assets/img/avatars/5.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
-                    </Col>
-                    <Col md="8">
-                        <h5>lastname, firstname (000)<span> <Badge color="success">Status</Badge></span></h5>
-                        <small>dd/mm/yyyy 00:00 AM</small>
-                    </Col>
-                </Row>
+
+
+                {props.histories.map((history, index) =>
+                    <div key={index}>
+                        <Row className="bottom-border"></Row>
+                        <Row>
+                            <Col md="1">
+                                <img src={history.avatar} className="img-avatar" alt="admin@bootstrapmaster.com" />
+                            </Col>
+                            <Col md="8">
+                                <h5>{history.name} (000)<span> <Badge color="success">{history.status}</Badge></span></h5>
+                                <small>{history.notes}</small>
+                            </Col>
+                        </Row>
+                    </div>
+                )}
+
             </CardBody>
         </Card>
     </div >

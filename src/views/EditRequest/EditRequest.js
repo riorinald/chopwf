@@ -144,6 +144,7 @@ class EditRequest extends Component {
         this.getDocuments = this.getDocuments.bind(this);
         this.selectDocument = this.selectDocument.bind(this);
         this.handleAgreeTerm = this.handleAgreeTerm.bind(this);
+        this.deleteTask = this.deleteTask.bind(this);
     }
 
     async componentDidMount() {
@@ -183,6 +184,16 @@ class EditRequest extends Component {
         }
     }
 
+    async deleteTask() {
+        Swal.fire({
+            title: "REQUEST DELETED",
+            html: 'The request has been deleted',
+            type: "success",
+            onClose: () => { this.setState({ redirectToPendingTasks: true }) }
+        })
+
+    }
+
     convertExpDate(dateValue) {
         let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
         return regEx;
@@ -220,7 +231,7 @@ class EditRequest extends Component {
 
         temporary.responsiblePersonOption = this.getOption(temporary.responsiblePerson)
         temporary.pickUpByOption = this.getOption(temporary.pickUpBy)
-        console.log(this.getOption(temporary.pickUpBy))
+        // console.log(this.getOption(temporary.pickUpBy))
         if (temporary.applicationTypeId === "CNIPS") {
             temporary.contractSignedByFirstPersonOption = this.getOption(temporary.contractSignedByFirstPerson)
             temporary.contractSignedBySecondPersonOption = this.getOption(temporary.contractSignedBySecondPerson)
@@ -352,6 +363,7 @@ class EditRequest extends Component {
     uploadDocument = event => {
         if (event.target.files[0]) {
             let file = event.target.files[0]
+            console.log(file)
             let fileName = event.target.files[0].name
             this.setState(state => {
                 let editRequestForm = this.state.editRequestForm
@@ -615,43 +627,64 @@ class EditRequest extends Component {
     };
 
     async postData(formData, isSubmitted) {
-        try {
+        let url = `${config.url}/tasks/${this.props.location.state.id}`
+        await Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+            .then(res => {
+                if (isSubmitted === 'N') {
+                    Swal.fire({
+                        title: res.data.status,
+                        text: 'Request Saved ',
+                        footer: 'Your request is saved as a draft',
+                        type: 'info',
+                        onClose: () => {
+                            this.setState({ redirectToPendingTasks: true })
+                            // this.props.history.push('/mypendingtask')
+                        }
+                    })
 
-            let url = `${config.url}/tasks/${this.props.location.state.id}`
-            // let url = 'http://192.168.1.47/echopx/api/v1/tasks/04af4714-3053-46b3-9689-c7f6738449d0'
-            await Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-                .then(res => {
-                    if (isSubmitted === 'N') {
-                        Swal.fire({
-                            title: res.data.status,
-                            text: 'Request Saved ',
-                            footer: 'Your request is saved as a draft',
-                            type: 'info',
-                            onClose: () => {
-                                // this.setState({ redirectToPendingTasks: true })
-                                this.props.history.push('/mypendingtask')
-                            }
-                        })
+                }
+                if (isSubmitted === 'Y') {
+                    Swal.fire({
+                        title: res.data.status,
+                        text: 'Request Submitted',
+                        footer: 'Your request is being processed and is waiting for the approval',
+                        type: 'success',
+                        onClose: () => {
+                            // this.props.history.push('/mypendingtask')
+                            this.setState({ redirectToPendingTasks: true })
+                        }
 
-                    }
-                    if (isSubmitted === 'Y') {
-                        Swal.fire({
-                            title: res.data.status,
-                            text: 'Request Submitted',
-                            footer: 'Your request is being processed and is waiting for the approval',
-                            type: 'success',
-                            onClose: () => {
-                                this.props.history.push('/mypendingtask')
-                                // this.setState({ redirectToPendingTasks: true })
-                            }
+                    })
 
-                        })
-
-                    }
+                }
+            })
+            .catch(error => {
+                let stat = error.response.data.status !== "failed"
+                let msg = ""
+                if (stat) {
+                    let keys = Object.keys(error.response.data.errors)
+                    keys.map((key, index) => {
+                        msg = index + 1 + '.' + ' ' + msg + error.response.data.errors[key]
+                    })
+                }
+                else {
+                    msg = "Validation Errors occured"
+                }
+                Swal.fire({
+                    title: stat ? error.response.data.title : "ERROR",
+                    text: msg,
+                    type: 'error'
                 })
-        } catch (error) {
-            console.error(error);
-        }
+            })
+        // } catch (error) {
+        //     console.log()
+        //     Swal.fire({
+        //         title: "ERROR",
+        //         text: error,
+        //         type: 'error',
+        //     })
+        //     // console.log(error);
+        // }
     }
 
     async handleAgreeTerm(event) {
@@ -693,6 +726,7 @@ class EditRequest extends Component {
         postReq.append("DocumentCheckBy", this.state.taskDetails.documentCheckBy)
         // postReq.append(`DocumentIds[0]`, "");
 
+
         if (this.state.taskDetails.applicationTypeId === "LTU") {
             for (let i = 0; i < this.state.taskDetails.documentNames.length; i++) {
                 postReq.append(`DocumentIds[${i}]`, this.state.taskDetails.documentNames[i].documentId);
@@ -700,10 +734,16 @@ class EditRequest extends Component {
         }
         else {
             for (let i = 0; i < this.state.taskDetails.documentNames.length; i++) {
-                let documentSelected = this.state.taskDetails.documentNames[i].docSelected !== undefined ? this.state.taskDetails.documentNames[i].docSelected : ""
+                // if (this.state.taskDetails.documentNames[i].documentId.length === 36) {
+                //     postReq.append(`DocumentIds[${i}]`, this.state.taskDetails.documentNames[i].documentId)
+                // }
+                // else {
+                let documentSelected = this.state.taskDetails.documentNames[i].docSelected !== undefined ? this.state.taskDetails.documentNames[i].docSelected : {}
                 postReq.append(`Documents[${i}].Attachment.File`, documentSelected);
                 postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.taskDetails.documentNames[i].documentNameEnglish);
                 postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.taskDetails.documentNames[i].documentNameChinese);
+                // }
+
 
             }
 
@@ -713,9 +753,9 @@ class EditRequest extends Component {
             postReq.append(`DepartmentHeads[${i}]`, this.state.taskDetails.departmentHeads[i]);
         }
 
-        for (var pair of postReq.entries()) {
-            console.log(pair[0] + ', ' + pair[1]);
-        }
+        // for (var pair of postReq.entries()) {
+        //     console.log(pair[0] + ', ' + pair[1]);
+        // }
 
 
         if (isSubmitted === "N") {
@@ -724,7 +764,7 @@ class EditRequest extends Component {
         }
         else {
             //if all valid = isConfirmed || All Fields are filled
-            console.log(this.state.taskDetails)
+            // console.log(this.state.taskDetails)
             this.postData(postReq, isSubmitted)
             resetMounted.setMounted()
         }
@@ -960,32 +1000,33 @@ class EditRequest extends Component {
                                             </Row>
                                             <Collapse isOpen={taskDetails.documentNames.length !== 0}>
                                                 <div>
-                                                    <Table bordered>
+                                                    <table>
                                                         <thead>
                                                             <tr>
-                                                                <th>No.</th>
+                                                                <th className="smallTd" >No.</th>
                                                                 {taskDetails.applicationTypeId === "CNIPS" ? <th>Contract Number</th> : null}
                                                                 <th>Document Name in English</th>
                                                                 <th>Document Name in Chinese</th>
                                                                 <th>Attached File</th>
-                                                                <th></th>
+                                                                <th className="smallTd"></th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             {taskDetails.documentNames.map((document, index) =>
                                                                 <tr key={index}>
-                                                                    <th>{index + 1}</th>
-                                                                    {taskDetails.applicationTypeId === "CNIPS" ? <th> {document.contractNum} </th> : null}
-                                                                    <th>{document.documentNameEnglish}</th>
-                                                                    <th>{document.documentNameChinese}</th>
-                                                                    <th id="viewDoc">
-                                                                        <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentNameEnglish}</a>
-                                                                    </th>
-                                                                    <th><img width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} src={deleteBin} /></th>
+                                                                    <td className="smallTd">{index + 1}</td>
+                                                                    {taskDetails.applicationTypeId === "CNIPS" ? <td> {document.contractNum} </td> : null}
+                                                                    <td>{document.documentNameEnglish}</td>
+                                                                    <td>{document.documentNameChinese}</td>
+                                                                    <td id="viewDoc">
+                                                                        <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a>
+                                                                    </td>
+                                                                    <td className="smallTd"><img width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} src={deleteBin} /></td>
                                                                 </tr>
                                                             )}
                                                         </tbody>
-                                                    </Table></div>
+                                                    </table>
+                                                </div>
                                             </Collapse>
                                         </div>}
                                 </FormGroup>
@@ -1153,15 +1194,20 @@ class EditRequest extends Component {
                         <CardFooter>
                             <div className="form-actions">
                                 <Row>
-                                    {taskDetails.isConfirm
-                                        ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
-                                        : <Button type="submit" color="success"
-                                            // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })}
-                                            id="disabledSubmit" disabled >Submit</Button>}
-                                    {/* <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit"> */}
-                                    {/* please confirm the agree terms </Tooltip> */}
-                                    <span>&nbsp;</span>
-                                    <Button type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
+                                    <Col md={11}>
+                                        {taskDetails.isConfirm
+                                            ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
+                                            : <Button type="submit" color="success"
+                                                // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })}
+                                                id="disabledSubmit" disabled >Submit</Button>}
+                                        {/* <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit"> */}
+                                        {/* please confirm the agree terms </Tooltip> */}
+                                        <span>&nbsp;</span>
+                                        <Button type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
+                                    </Col>
+                                    <Col>
+                                        <Button onClick={this.deleteTask} color="danger" >Delete</Button>
+                                    </Col>
                                 </Row>
 
 
