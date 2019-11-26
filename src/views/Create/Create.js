@@ -1153,7 +1153,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Purpose of Use</Label>
                 <InputGroup>
-                  <Input ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                  <Input maxLength={500} ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                   <FormFeedback>Please input the purpose of use</FormFeedback>
                 </InputGroup>
               </FormGroup>
@@ -1168,7 +1168,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Number of Pages to Be Chopped</Label>
                 <InputGroup>
-                  <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min="0" />
+                  <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
                   <FormFeedback>Invalid Number of pages </FormFeedback>
                 </InputGroup>
               </FormGroup>
@@ -1185,7 +1185,7 @@ class Create extends Component {
                     className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                     selected={this.state.dateView2}
                     onChange={this.dateChange("returnDate", "dateView2")}
-                    minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                    minDate={new Date()} maxDate={addDays(new Date(), 30)} />
                   {/* <Input onClickOutside type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" /> */}
                 </FormGroup>
                 <FormGroup>
@@ -1203,7 +1203,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Address to</Label>
                 <InputGroup>
-                  <Input ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
+                  <Input maxLength={200} ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
                   <FormFeedback>Invalid person to address to</FormFeedback>
                 </InputGroup>
               </FormGroup>
@@ -1223,7 +1223,7 @@ class Create extends Component {
               <FormGroup>
                 <Label>Remark</Label>
                 <InputGroup>
-                  <Input ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
+                  <Input maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
                   <FormFeedback>Please add remarks</FormFeedback>
                 </InputGroup>
               </FormGroup>
