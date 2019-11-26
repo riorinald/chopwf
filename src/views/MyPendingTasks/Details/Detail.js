@@ -23,13 +23,15 @@ class Detail extends Component {
       redirectToTasks: false,
       showModal: false,
       taskDetails: null,
-      comments: ""
+      comments: "",
+      histories: [],
     }
     this.getTaskDetails = this.getTaskDetails.bind(this);
     this.approve = this.approve.bind(this)
     this.toggleView = this.toggleView.bind(this);
     this.redirect = this.redirect.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.getApprovalHistories = this.getApprovalHistories.bind(this);
   }
 
   componentDidMount() {
@@ -42,16 +44,28 @@ class Detail extends Component {
     }
   }
 
+  async getApprovalHistories() {
+    const response = await Axios.get('http://5b7aa3bb6b74010014ddb4f6.mockapi.io/application/364e425f-bf55-478c-b055-8ef811173aa1/approval')
+    await this.setState({ histories: response.data })
+    console.log(response.data)
+  }
+
   async getTaskDetails(id) {
     let userId = localStorage.getItem('userId')
     // let userId = "josh@otds.admin"
     const res = await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`)
     await this.setState({ taskDetails: res.data })
+    this.getApprovalHistories()
+
   }
 
   convertDate(dateValue) {
     let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
     return regEx
+  }
+
+  tempApprove(){
+    
   }
 
   approve(action) {
@@ -94,6 +108,14 @@ class Detail extends Component {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  getDeptHeads(heads) {
+    let dh = ""
+    heads.map(head => {
+      dh = dh + head + "; "
+    })
+    return dh
+  }
+
   redirect() {
     this.setState({ redirectToTasks: true })
   }
@@ -105,12 +127,16 @@ class Detail extends Component {
           return <DetailSTU
             legalName={this.props.legalName}
             taskDetail={this.state.taskDetails}
+            histories={this.state.histories}
             approve={this.approve}
             showModal={this.state.showModal}
             toggleView={this.toggleView}
+            getDeptHeads={this.getDeptHeads}
             capitalize={this.capitalize}
             redirect={this.redirect}
-            handleChange={this.handleChange} />
+            handleChange={this.handleChange}
+            tempApprove={this.tempApprove}
+          />
             ;
         case 'LTU':
           return <DetailLTU
@@ -119,9 +145,11 @@ class Detail extends Component {
             approve={this.approve}
             showModal={this.state.showModal}
             toggleView={this.toggleView}
+            getDeptHeads={this.getDeptHeads}
             redirect={this.redirect}
             capitalize={this.capitalize}
-            handleChange={this.handleChange} />
+            handleChange={this.handleChange}
+            histories={this.state.histories} />
             ;
         case 'LTI':
           return <DetailLTI
@@ -131,19 +159,23 @@ class Detail extends Component {
             showModal={this.state.showModal}
             toggleView={this.toggleView}
             redirect={this.redirect}
+            getDeptHeads={this.getDeptHeads}
             capitalize={this.capitalize}
-            handleChange={this.handleChange} />
+            handleChange={this.handleChange}
+            histories={this.state.histories} />
             ;
         case 'CNIPS':
           return <DetailCNIPS
             legalName={this.props.legalName}
             taskDetail={this.state.taskDetails}
             approve={this.approve}
+            getDeptHeads={this.getDeptHeads}
             showModal={this.state.showModal}
             toggleView={this.toggleView}
             redirect={this.redirect}
             capitalize={this.capitalize}
-            handleChange={this.handleChange} />
+            handleChange={this.handleChange}
+            histories={this.state.histories} />
             ;
         default:
           return <p><kbd>{this.props.match.params.id}</kbd> Not Exist </p>

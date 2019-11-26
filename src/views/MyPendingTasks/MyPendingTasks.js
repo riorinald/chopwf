@@ -26,6 +26,7 @@ class MyPendingTasks extends Component {
 
             selectionChanged: false,
             rowEdit: null,
+            rowIndex: null,
             value: "",
             editableRows: {},
             selectedRowIndex: [],
@@ -60,6 +61,26 @@ class MyPendingTasks extends Component {
             appTypeId: "",
             redirectToUrl: "",
             loading: false,
+
+            status: [
+                "Recalled",
+                "Pending for Document check by (L4 or above) Approval ",
+                "Pending for Department Head Approval",
+                "Bring the Original Documents for Chop",
+                "Pending for Chop Owner Approval",
+                "Send Back to Requestor",
+                "Rejected",
+                "Pending for Chop Keeper Acknowledge Lend Out",
+                "Pending Chop Keeper Acknowledge Return",
+                "Completed",
+                "Draft",
+                "Pending Requestor Return/Extension",
+                "Pending Department Head Approval for Extension",
+                "Pending Chop Keeper Approval for extension",
+                "Pending Chop Owner Approval for extension",
+                "Chop request expired after 30 days",
+                "Pending Requestor Return"
+            ]
         }
 
         this.getPendingTasks = this.getPendingTasks.bind(this);
@@ -71,7 +92,7 @@ class MyPendingTasks extends Component {
     async componentDidMount() {
         await this.getData("applicationTypes", `${config.url}/apptypes`);
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
-        console.log(mounted)
+        // console.log(mounted)
         if (mounted === 0) {
             this.getPendingTasks();
         }
@@ -127,7 +148,7 @@ class MyPendingTasks extends Component {
             return {
                 searchOption
             }
-        }, console.log(this.state.searchOption))
+        })
     }
 
 
@@ -343,6 +364,20 @@ class MyPendingTasks extends Component {
                                     accessor: "statusName",
                                     width: this.getColumnWidth('statusName', "Status"),
                                     Cell: this.renderEditable,
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
+                                                <option value="" >Please Select a status</option>
+                                                {this.state.status.map((stat, index) =>
+                                                    <option key={index} value={stat} >{stat}</option>
+                                                )}
+                                            </Input>
+
+                                        )
+                                    },
                                     style: { textAlign: "center" }
                                 },
                                 {
@@ -374,14 +409,19 @@ class MyPendingTasks extends Component {
                                     style: { textAlign: "center" }
                                 },
                             ]}
+
                             defaultPageSize={10}
+
                             getTrProps={(state, rowInfo) => {
                                 if (rowInfo && rowInfo.row) {
+
                                     return {
                                         onClick: e => {
+                                            this.setState({ rowIndex: rowInfo.index })
                                             // console.log("inside");
                                             // console.log(this.state.rowEdit)
 
+                                            // console.log(`Index = ${rowInfo.index} and Edit = ${this.state.rowEdit} `)
                                             if (rowInfo.index !== this.state.rowEdit) {
                                                 this.setState({
                                                     rowEdit: rowInfo.index,
@@ -415,7 +455,12 @@ class MyPendingTasks extends Component {
                                         }
                                     };
                                 } else {
-                                    return {};
+                                    if (this.state.rowInfo) {
+                                        console.log(this.state.rowInfo)
+                                    }
+                                    else {
+                                        return {};
+                                    }
                                 }
                             }}
                         />

@@ -883,61 +883,7 @@ class Create extends Component {
           )}
         </tbody>
       </table>
-      {/* <ReactTable
-        data={this.state.documentTableLTI}
-        columns={[
-          {
-            Header: "No.",
-            Cell: row => (
-              <div> {row.index + 1} </div>
-            ),
-            style: { textAlign: "center" },
-            width: 50
-          },
-          {
-            Header: "Document Name in English",
-            accessor: 'engName',
-            style: { textAlign: "center", overflow: "visible" },
-          },
-          {
-            Header: "Document Name in Chinese",
-            accessor: 'cnName',
-            style: { textAlign: "center" },
-          },
-          {
-            Header: "Attached File",
-            Cell: row => (
-              <a href={row.original.docURL} target='_blank' rel="noopener noreferrer" > {row.original.docName} </a>
-            ),
-            style: { textAlign: "center" },
-          }
-        ]}
-        defaultPageSize={2}
-      />
-      <Table size="sm" bordered>
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Document Name in English</th>
-            <th>Document Name in Chinese</th>
-            <th>Attached File</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {this.state.documentTableLTI.map((document, index) =>
-            <tr key={index}>
-              <th>{index + 1}</th>
-              <th><div>{document.engName}</div></th>
-              <th><div>{document.cnName}</div></th>
-              <th id="viewDoc">
-                <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
-              </th>
-              <th><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></th>
-            </tr>
-          )}
-        </tbody>
-      </Table> */}
+    
     </div>
 
     const documentForLTI =
