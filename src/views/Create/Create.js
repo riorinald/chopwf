@@ -44,6 +44,7 @@ import {
   FormFeedback,
   Table,
   Tooltip,
+  UncontrolledTooltip,
   Spinner
 } from 'reactstrap';
 
@@ -1356,17 +1357,19 @@ class Create extends Component {
             </Form>
           </CardBody>
           <CardFooter>
-            <div className="form-actions">
-              <Row>
+            <div className="form-actions" >
+              <Row noGutters className="float-left">
+                <Col className="mr-2" >
                 {this.state.agreeTerms
                   ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
-                  : <Button type="submit" color="success"
-                    onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })}
-                    id="disabledSubmit" disabled >Submit</Button>}
-                <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit">
-                  please confirm the agree terms </Tooltip>
-                <span>&nbsp;</span>
-                <Button type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
+                  : <Button id="disabledSubmit" type="submit" color="success" disabled
+                    onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} >Submit</Button>}
+                  <Tooltip placement="left"  isOpen={this.state.tooltipOpen} target="disabledSubmit">please confirm the agree terms</Tooltip>
+                </Col>
+                <Col>
+                  <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
+                  <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
+                </Col>
               </Row>
 
               {/* </div>

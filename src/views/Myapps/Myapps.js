@@ -280,7 +280,7 @@ class Myapps extends Component {
                       Cell: row => (
                           <div> {this.getDeptHeads(row.original.documentNameEnglish)} </div>
                       ),
-                      style: { textAlign: "center" },
+                      style: { textAlign: "center", 'whiteSpace': 'unset' },
                       filterable: false
                   },
                   {
@@ -292,7 +292,7 @@ class Myapps extends Component {
                       Cell: row => (
                           <div> {this.getDeptHeads(row.original.documentNameChinese)} </div>
                       ),
-                      style: { textAlign: "center" },
+                      style: { textAlign: "center", 'whiteSpace': 'unset'  },
                       filterable: false
                   },
                   {
@@ -300,7 +300,7 @@ class Myapps extends Component {
                       accessor: "documentCheckByName",
                       width: this.getColumnWidth('documentCheckByName', "Document Check By"),
                       Cell: this.renderEditable,
-                      style: { textAlign: "center" }
+                      style: { textAlign: "center"  }
                   },
                   {
                       Header: "Department Head",
