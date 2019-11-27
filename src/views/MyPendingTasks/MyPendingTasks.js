@@ -58,7 +58,6 @@ class MyPendingTasks extends Component {
 
             //data assigned on Row Selected 
             taskId: "",
-            appTypeId: "",
             redirectToUrl: "",
             loading: false,
 
@@ -87,6 +86,8 @@ class MyPendingTasks extends Component {
         this.search = this.search.bind(this)
         this.onFilteredChangeCustom = this.onFilteredChangeCustom.bind(this)
         this.getData = this.getData.bind(this);
+        this.setFilter = this.setFilter.bind(this);
+        this.redirectDetails = this.redirectDetails.bind(this);
     }
 
     async componentDidMount() {
@@ -227,6 +228,19 @@ class MyPendingTasks extends Component {
         }
     }
 
+    setFilter(filtered) {
+        this.setState({ filtered: filtered })
+    }
+
+    redirectDetails(taskId, status, redirectUrl) {
+        if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
+            this.setState({ taskId: taskId, redirectToUrl: redirectUrl, toggleDetails: true, show: false })
+        }
+        else {
+            this.setState({ taskId: taskId, redirectToUrl: redirectUrl, toggleDetails: false, show: false })
+        }
+    }
+
     render() {
         const { pendingTasks } = this.state;
         return (
@@ -236,13 +250,7 @@ class MyPendingTasks extends Component {
                 {/* {this.state.show? */}
                 <Card className="animated fadeIn">
                     <CardHeader >
-                        <Row>
-                            <Col lg={11} >PENDING TASKS</Col>
-                            <Col style={{ display: "flex" }}>
-                                <Button onClick={this.search} >Search</Button>
-                            </Col>
-                        </Row>
-
+                        PENDING TASKS <Button className="float-right" onClick={this.search} >Search</Button>
                     </CardHeader>
                     <CardBody onKeyDown={this.handleKeyDown} >
                         <ReactTable
@@ -251,7 +259,7 @@ class MyPendingTasks extends Component {
                             filterable
                             loading={this.state.loading}
                             onFilteredChange={(filtered, column, value) => {
-                                this.setState({ filtered: filtered })
+                                this.setFilter(filtered)
                                 this.onFilteredChangeCustom(value, column.id || column.accessor);
                             }}
                             defaultFilterMethod={(filter, row, column) => {
@@ -436,16 +444,16 @@ class MyPendingTasks extends Component {
                                                     rowEdit: null
                                                 });
                                             }
-                                            this.setState({ taskId: rowInfo.original.taskId, appTypeId: rowInfo.original.applicationTypeId, redirectToUrl: `mypendingtask/details` })
 
                                             let status = rowInfo.original.statusId
-                                            if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
-                                                // if (status === "PENDINGDEPTHEAD") {
-                                                this.setState({ toggleDetails: true, show: false })
-                                            }
-                                            else {
-                                                this.setState({ toggleDetails: false, show: false })
-                                            }
+                                            this.redirectDetails(rowInfo.original.taskId, status, `mypendingtask/${rowInfo.original.applicationTypeId}`)
+                                            // this.setState({ taskId: rowInfo.original.taskId, redirectToUrl: `mypendingtask/${rowInfo.original.applicationTypeId}` })
+
+
+
+                                            // if (status === "PENDINGDEPTHEAD") {
+
+
                                         },
                                         style: {
                                             background:
@@ -474,7 +482,7 @@ class MyPendingTasks extends Component {
                     : !this.state.show
                         ? this.props.history.push({
                             pathname: this.state.redirectToUrl,
-                            state: { id: this.state.taskId, appTypeId: this.state.appTypeId }
+                            state: { id: this.state.taskId }
                         })
                         : null
                 }
