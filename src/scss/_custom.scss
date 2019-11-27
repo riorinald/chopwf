@@ -32,16 +32,15 @@
     border-color: #ffc107;
 }
 .img-avaa {
-    width: 100%;
-    height: auto;
-    margin-left: 1em;
+    width: 90%;
+    // height: auto;
     border-radius: 50%;
+    // margin-left: 1em;
 }
-@media only screen and (max-width: 720px) {
+@media only screen and (max-width: 780px) {
     .img-avaa {
-        width: 40%;
+        width: 20%;
         height: auto;
-        margin-left: 1em;
         border-radius: 50%;
     }
   }
