@@ -46,15 +46,14 @@ class Detail extends Component {
 
   async getApprovalHistories() {
     const response = await Axios.get('http://5b7aa3bb6b74010014ddb4f6.mockapi.io/application/364e425f-bf55-478c-b055-8ef811173aa1/approval')
-    await this.setState({ histories: response.data })
-    console.log(response.data)
+    this.setState({ histories: response.data })
   }
 
   async getTaskDetails(id) {
     let userId = localStorage.getItem('userId')
     // let userId = "josh@otds.admin"
     const res = await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`)
-    await this.setState({ taskDetails: res.data })
+    this.setState({ taskDetails: res.data })
     this.getApprovalHistories()
 
   }
@@ -64,8 +63,8 @@ class Detail extends Component {
     return regEx
   }
 
-  tempApprove(){
-    
+  tempApprove() {
+
   }
 
   approve(action) {
@@ -121,8 +120,13 @@ class Detail extends Component {
   }
 
   checkDetail() {
+
+    // console.log(this.props.match.params)
     if (this.state.taskDetails) {
-      switch (this.props.location.state.appTypeId) {
+      if (this.props.match.params.id !== this.state.taskDetails.applicationTypeId) {
+        this.setState({ redirectToTasks: true })
+      }
+      switch (this.props.match.params.id) {
         case 'STU':
           return <DetailSTU
             legalName={this.props.legalName}

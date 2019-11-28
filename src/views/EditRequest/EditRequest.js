@@ -147,8 +147,8 @@ class EditRequest extends Component {
         this.deleteTask = this.deleteTask.bind(this);
     }
 
-    async componentDidMount() {
-        await this.getDeptHeads()
+    componentDidMount() {
+        this.getDeptHeads()
         if (this.props.location.state !== undefined) {
             this.getTaskDetails(this.props.location.state.id)
         }
@@ -241,6 +241,10 @@ class EditRequest extends Component {
             temporary.documentCheckByOption = this.getOption(temporary.documentCheckBy)
         }
 
+        this.setState(state => {
+            let editRequestForm = this.state.editRequestForm
+            editRequestForm.collapseUIO = temporary.isUseInOffice === "Y" ? true : false
+        })
         this.setSelectedDeptHead(temporary.departmentHeads)
 
         await this.getData("departments", `${config.url}/departments`)
@@ -689,7 +693,6 @@ class EditRequest extends Component {
 
     async handleAgreeTerm(event) {
 
-        console.log(this.state.taskDetails)
 
     }
 
@@ -734,15 +737,15 @@ class EditRequest extends Component {
         }
         else {
             for (let i = 0; i < this.state.taskDetails.documentNames.length; i++) {
-                // if (this.state.taskDetails.documentNames[i].documentId.length === 36) {
-                //     postReq.append(`DocumentIds[${i}]`, this.state.taskDetails.documentNames[i].documentId)
-                // }
-                // else {
-                let documentSelected = this.state.taskDetails.documentNames[i].docSelected !== undefined ? this.state.taskDetails.documentNames[i].docSelected : {}
-                postReq.append(`Documents[${i}].Attachment.File`, documentSelected);
-                postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.taskDetails.documentNames[i].documentNameEnglish);
-                postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.taskDetails.documentNames[i].documentNameChinese);
-                // }
+                if (this.state.taskDetails.documentNames[i].documentId.length === 36) {
+                    postReq.append(`DocumentIds[${i}]`, this.state.taskDetails.documentNames[i].documentId)
+                }
+                else {
+                    let documentSelected = this.state.taskDetails.documentNames[i].docSelected !== undefined ? this.state.taskDetails.documentNames[i].docSelected : {}
+                    postReq.append(`Documents[${i}].Attachment.File`, documentSelected);
+                    postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.taskDetails.documentNames[i].documentNameEnglish);
+                    postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.taskDetails.documentNames[i].documentNameChinese);
+                }
 
 
             }
@@ -753,9 +756,9 @@ class EditRequest extends Component {
             postReq.append(`DepartmentHeads[${i}]`, this.state.taskDetails.departmentHeads[i]);
         }
 
-        // for (var pair of postReq.entries()) {
-        //     console.log(pair[0] + ', ' + pair[1]);
-        // }
+        for (var pair of postReq.entries()) {
+            console.log(pair[0] + ', ' + pair[1]);
+        }
 
 
         if (isSubmitted === "N") {
@@ -1058,7 +1061,7 @@ class EditRequest extends Component {
                                     <Row />
                                     <AppSwitch onChange={this.toggleUIO} checked={taskDetails.isUseInOffice === "Y"} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label dataOn={'yes'} dataOff={'no'} />
                                 </FormGroup>
-                                <Collapse isOpen={!editRequestForm.collapseUIO}>
+                                <Collapse isOpen={!editRequestForm.collapseUIO }>
                                     <FormGroup visibelity="false" >
                                         <Label>Return Date</Label>
                                         <Row />
@@ -1177,7 +1180,7 @@ class EditRequest extends Component {
                                             <CustomInput
                                                 className="form-check-input"
                                                 type="checkbox"
-                                                checked={taskDetails.isConfirm}
+                                                checked={taskDetails.isConfirm === "Y"}
                                                 onChange={this.handleAgreeTerm}
                                                 onClick={this.isValid}
                                                 id="confirm" value="option1">

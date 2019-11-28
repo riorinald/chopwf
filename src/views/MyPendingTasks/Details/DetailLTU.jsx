@@ -16,7 +16,7 @@ import "react-table/react-table.css"
 const DetailLTU = props =>
     <div>
         <Card >
-            <CardHeader> <Button onClick={props.redirecterror.response.data} > Back </Button>  {props.taskDetail.requestNum} </CardHeader>
+            <CardHeader> <Button onClick={props.redirect} > Back </Button>  {props.taskDetail.requestNum} </CardHeader>
             <CardBody color="dark">
                 <Row noGutters={true}>
                     <Col md="6"><span className="display-5"> {props.taskDetail.requestNum}</span></Col>

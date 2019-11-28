@@ -4,19 +4,23 @@ import {
   Card,
   CardHeader,
   CardBody,
+  CardFooter,
   Progress,
+  Modal, ModalHeader, ModalBody, ModalFooter,
   Col,
   Button,
   Label,
   FormGroup,
   Input,
-  Row,
-  Collapse
+  Row
 } from 'reactstrap';
 import ReactTable from "react-table";
 import "react-table/react-table.css"
+import ChopApplicationDetail from './ChopApplicationDetail';
 import Axios from 'axios';
 import config from '../../config';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 class ChopApplication extends Component {
   constructor(props) {
@@ -28,119 +32,321 @@ class ChopApplication extends Component {
       value: "",
       editableRows: {},
       selectedRowIndex: [],
-     
-      loading:false,
-      page:1,
-      limit:10,
+      applicationTypes: [],
+      chopTypes: [],
 
-      collapse: false,
+      loading: false,
+      page: 1,
+      limit: 10,
+
+      collapse: true,
+      modal: false,
+
+      filtered: [],
+
+      exportFromDateView: "",
+      exportToDateView: "",
+      exportDate: {
+        exportFrom: "",
+        exportTo: ""
+      },
+      validDate: true,
 
       applications: [],
-      selectedApplication: []
+      applicationDetail: {},
+      selectedId: null,
+
+      searchOption: {
+        requestNum: "",
+        applicationTypeName: "",
+        chopTypeName: "",
+        departmentHeadName: "",
+        teamName: "",
+        documentCheckByName: "",
+        statusName: "",
+        createdDate: "",
+        createdByName: ""
+      },
 
     }
     this.getApplications = this.getApplications.bind(this);
     this.goBack = this.goBack.bind(this);
+    this.toggleModal = this.toggleModal.bind(this);
+    this.exportLogs = this.exportLogs.bind(this);
+    // this.dateChange = this.dateChange.bind(this);
   }
   componentDidMount() {
     this.getApplications();
+    this.getData("applicationTypes", `${config.url}/apptypes`);
+    this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
 
   }
 
   async getApplications() {
-    this.setState({loading:!this.state.loading})
-    // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application?page=${this.state.page}&limit=${this.state.limit}`).then(res => {    
-    await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application?page=`).then(res => {
+    this.setState({ loading: !this.state.loading })
+    await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks?all=y&userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`).then(res => {
       this.setState({ applications: res.data, loading: !this.state.loading })
     })
-    // console.log(this.state.applications)
-    // console.log(Object.keys(this.state.applications[0]))
   }
 
-  goBack() {
-    this.setState({collapse: false})
+  async getAppDetails(id) {
+    this.setState({ loading: !this.state.loading })
+    // await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`)
+    await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks/5328c220-1f99-4da0-9e12-3e8d29441acd?userid=rio@otds.admin`)
+      .then(res => {
+        this.setState({ applicationDetail: res.data, collapse: !this.state.collapse })
+      })
+  }
+
+  async getData(state, url) {
+    try {
+      const response = await Axios.get(url);
+      this.setState({
+        [state]: response.data
+      })
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+
+  goBack(didUpdate) {
+    if (didUpdate === true) {
+      this.getApplications()
+      this.setState({ collapse: !this.state.collapse })
+    }
+    else {
+      this.setState({ loading: !this.state.loading, collapse: !this.state.collapse })
+    }
+  }
+
+  getColumnWidth = (accessor, headerText) => {
+    let { applications } = this.state
+    let max = 0
+    const maxWidth = 260;
+    const magicSpacing = 10;
+
+    for (var i = 0; i < applications.length; i++) {
+      if (applications[i] !== undefined && applications[i][accessor] !== null) {
+        if (JSON.stringify(applications[i][accessor] || 'null').length > max) {
+          max = JSON.stringify(applications[i][accessor] || 'null').length;
+        }
+      }
+    }
+
+    return Math.min(maxWidth, Math.max(max, headerText.length) * magicSpacing);
+  }
+
+  getDeptHeads(heads) {
+    let dh = ""
+    heads.map(head => {
+      dh = dh + head + "; "
+    })
+    return dh
+  }
+
+  search = () => {
+    this.getApplications()
+  }
+
+  convertDate(dateValue) {
+    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+    return regEx
+  }
+
+  handleSearch = name => event => {
+    const options = this.state.searchOption
+    options[name] = event.target.value
+    this.setState(state => {
+      const searchOption = options
+      return {
+        searchOption
+      }
+    }, console.log(this.state.searchOption))
+  }
+
+  toggleModal() {
+    this.setState({ modal: !this.state.modal })
+  }
+
+  dateChange = (name, view) => date => {
+    let dates = date.toISOString().substr(0, 10);
+    // console.log(date)
+    // console.log(dates)
+    this.setState({ [view]: date, validDate: true });
+    this.setState(state => {
+      let exportDate = this.state.exportDate
+      exportDate[name] = dates.replace(/-/g, "")
+      // editData[name] = dates.replace(/-/g, "")
+      return { exportDate }
+    })
+  };
+
+  exportLogs() {
+    let from = this.state.exportDate.exportFrom
+    let to = this.state.exportDate.exportTo
+    if (from !== "" && to !== "") {
+      console.log(`Exporting Logs from ${this.convertDate(from)} to ${this.convertDate(to)}`)
+      this.toggleModal()
+      this.setState({ validDate: true })
+    }
+    else {
+      this.setState({ validDate: false })
+    }
   }
 
   render() {
-    const { applications, collapse, selectedApplication } = this.state
+    const { applications, collapse, selectedId, modal, exportFromDateView, exportToDateView, exportDate, validDate } = this.state
     // let columnData = Object.keys(applications[0])
-  if (this.props.roleId === "REQUESTOR") 
-  return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
+    if (this.props.roleId === "REQUESTOR")
+      return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
     return (
-      
+
       <div>
-        <h3>My Applications</h3>
-        <Collapse isOpen={!collapse}>
-          <Card>
+        <h3>Chop Applications</h3>
+        {collapse
+          ? <Card>
             <CardHeader>
-              Applications
-          </CardHeader>
+              Chop Applications
+              <Button className="float-right" onClick={this.search} >Search</Button>
+              <div className="float-right">&nbsp;&nbsp;&nbsp;</div>
+              <Button color="primary" className="float-right" onClick={this.toggleModal} >Export Logs</Button>
+            </CardHeader>
             <CardBody>
               <ReactTable
                 data={applications}
                 filterable
+                onFilteredChange={(filtered, column, value) => {
+                  this.setState({ filtered: filtered })
+                  this.onFilteredChangeCustom(value, column.id || column.accessor);
+                }}
+                defaultFilterMethod={(filter, row, column) => {
+
+                  const id = filter.pivotId || filter.id;
+                  return row[id]
+                }}
                 columns={[
                   {
                     Header: "Request Number",
                     accessor: "requestNum",
                     Cell: this.renderEditable,
-                    style: { textAlign: "center" }
+                    style: { textAlign: "center" },
+                    width: this.getColumnWidth('requestNum', "Request Number")
                   },
                   {
                     Header: "Application Type",
-                    accessor: "apptypeId",
+                    accessor: "applicationTypeName",
                     Cell: this.renderEditable,
+                    width: this.getColumnWidth('applicationTypeName', "Application Type"),
+                    filterMethod: (filter, row) => {
+                      return row[filter.id] === filter.value;
+                    },
+                    Filter: ({ filter, onChange }) => {
+                      return (
+                        <Input type="select" value={this.state.searchOption.applicationTypeName} onChange={this.handleSearch('applicationTypeName')} >
+                          <option value="">Please Select</option>
+                          {this.state.applicationTypes.map(type =>
+                            <option key={type.appTypeId} value={type.appTypeName} >{type.appTypeName}</option>
+                          )}
+                        </Input>
+
+                      )
+                    },
                     style: { textAlign: "center" }
                   },
                   {
                     Header: "Chop Type",
-                    accessor: "chopTypeId",
+                    accessor: "chopTypeName",
                     Cell: this.renderEditable,
-                    style: { textAlign: "center" }
-                  }, {
-                    Header: "Company Name",
-                    accessor: "companyId",
-                    Cell: this.renderEditable,
-                    style: { textAlign: "center" }
+                    style: { textAlign: "center" },
+                    width: this.getColumnWidth('chopTypeName', "Chop Type"),
+                    filterMethod: (filter, row) => {
+                      return row[filter.id] === filter.value;
+                    },
+                    Filter: ({ filter, onChange }) => {
+                      return (
+                        <Input type="select" value={this.state.searchOption.chopTypeName} onChange={this.handleSearch('chopTypeName')} >
+                          <option value="">Please Select</option>
+                          {this.state.chopTypes.map(type =>
+                            <option key={type.chopTypeId} value={type.chopTypeName} >{type.chopTypeName}</option>
+                          )}
+                        </Input>
+
+                      )
+                    },
                   },
                   {
-                    Header: "Document Description",
-                    accessor: "documentDescription",
-                    Cell: this.renderEditable,
+
+                    Header: "Document Name English",
+                    accessor: "documentNameEnglish",
+                    width: this.getColumnWidth('documentNameEnglish', "Document Name English"),
+                    // Cell: this.renderEditable,
+                    Cell: row => (
+                      <div> {this.getDeptHeads(row.original.documentNameEnglish)} </div>
+                    ),
+                    style: { textAlign: "center" },
+                    filterable: false
+                  },
+                  {
+
+                    Header: "Document Name Chinese",
+                    accessor: "documentNameChinese",
+                    width: this.getColumnWidth('documentNameChinese', "Document Name Chinese"),
+                    // Cell: this.renderEditable,
+                    Cell: row => (
+                      <div> {this.getDeptHeads(row.original.documentNameChinese)} </div>
+                    ),
                     style: { textAlign: "center" },
                     filterable: false
                   },
                   {
                     Header: "Document Check By",
-                    accessor: "docCheckBy",
+                    accessor: "documentCheckByName",
+                    width: this.getColumnWidth('documentCheckByName', "Document Check By"),
                     Cell: this.renderEditable,
                     style: { textAlign: "center" }
                   },
                   {
-                    Header: "Department Heads",
-                    accessor: "deptHead",
+                    Header: "Department Head",
+                    accessor: `departmentHeadName`,
+                    width: this.getColumnWidth('departmentHeadName', "Department Head"),
+                    // Cell: this.renderEditable,
+                    Cell: row => (
+                      <div> {this.getDeptHeads(row.original.departmentHeadName)} </div>
+                    ),
+                    style: { textAlign: "center" }
+                  },
+                  {
+                    Header: "Entitled Team",
+                    accessor: "teamName",
+                    width: this.getColumnWidth('teamName', "Entitled Team"),
                     Cell: this.renderEditable,
-                    style: { textAlign: "center" },
-                    filterable: false
+                    style: { textAlign: "center" }
                   },
                   {
                     Header: "Status",
-                    accessor: "status",
+                    accessor: "statusName",
+                    width: this.getColumnWidth('statusName', "Status"),
                     Cell: this.renderEditable,
                     style: { textAlign: "center" }
                   },
                   {
-                    Header: "Created",
-                    accessor: "createdBy",
-                    Cell: this.renderEditable,
+                    Header: "Date of Creation",
+                    accessor: "createdDate",
+                    width: this.getColumnWidth('createdDate', "Date of Creation"),
+                    // Cell: this.renderEditable,
+                    Cell: row => (
+                      <div> {this.convertDate(row.original.createdDate)} </div>
+                    ),
                     style: { textAlign: "center" }
                   },
                   {
                     Header: "Created By",
-                    accessor: "createdBy",
+                    accessor: "createdByName",
+                    width: this.getColumnWidth('createdByName', "Created By"),
                     Cell: this.renderEditable,
                     style: { textAlign: "center" }
-                  },
+                  }
                 ]}
                 defaultPageSize={this.state.limit}
                 // pages={this.state.page}
@@ -170,7 +376,8 @@ class ChopApplication extends Component {
                           });
                         }
                         // console.log(rowInfo.original);
-                        this.setState({ selectedApplication: rowInfo.original, collapse: true })
+                        this.getAppDetails(rowInfo.original.taskId)
+                        this.setState({ selectedId: rowInfo.original.taskId })
                         // console.log(this.state.rowEdit);
 
                       },
@@ -188,205 +395,77 @@ class ChopApplication extends Component {
               />
             </CardBody>
           </Card>
-        </Collapse>
-        <Collapse isOpen={collapse}>
+          :
 
-          <Card >
-            <CardHeader >
-              <Row className="align-items-left">
-                <Col xs="auto">
+          <ChopApplicationDetail
+            wait={1000}
+            applications={this.state.applicationDetail}
+            id={selectedId}
+            goBack={this.goBack}
+            recall={this.recall} />
+        }
 
-                  <Button color="primary" onClick={this.goBack}><i className="fa fa-angle-left" /> Back </Button>
-                </Col>
-                <Col xs={{ size: 'auto' }}>
-                  <Button color="danger"><i className="icon-loop" /> Reacall </Button>
-                </Col>
-                <Col xs="auto" >
-                  <Button color="warning"><i className="icon-bell" />Rremind Task Owner </Button>
-                </Col>
-
-              </Row>
-            </CardHeader>
-            <CardBody color="dark">
-              <Row noGutters={true}>
-                <Col md="6"><span className="display-5">{selectedApplication.requestNo}</span></Col>
-                <Col md="6">
-                  <Progress multi>
-                    <Progress bar animated striped color="warning" defaultValue="50">Department Head Reviewing</Progress>
-                    <Progress bar color="secondary" defaultValue="50">Bring Original Document to EG for Chop</Progress>
-                  </Progress>
-                </Col>
-              </Row>
-              <Row>&nbsp;</Row>
-              <Row>
-                <Col md="1">
-                  <img src={'../../assets/img/avatars/5.jpg'} className="img-avaa" alt="admin@bootstrapmaster.com" />
-                </Col>
-                <Col>
-                  <Row>
-                    <Col md="5"><h5> Liu, ChenChen (685) </h5></Col>
-                    <Col md="5"><h5><i className="fa fa-tablet" />&nbsp; +86 10 12345678 </h5></Col>
-                  </Row>
-                  <Row >
-                    <Col md="4"><h6> DFS/CN, MBAFC </h6></Col>
-                  </Row>
-                  <Row >
-                    <Col md="3">
-                      <h6><center className="boxs">Applicant</center></h6>
-                    </Col>
-                    <Col md="2"></Col>
-                    <Col md="4"><h5><i className="fa fa-envelope" />&nbsp; chenchen@daimler.com</h5></Col>
-                  </Row>
-                </Col>
-              </Row>
-              <Row><Col>
-                &nbsp;
-         </Col></Row>
+        <Modal isOpen={modal} toggle={this.toggleModal}>
+          <ModalHeader >Export Logs</ModalHeader>
+          <ModalBody>
+            <FormGroup>
+              <Label>Select Date Range</Label>
               <Row>
                 <Col>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Employee Number</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" name="text-input"  placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Dept</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" defaultValue={selectedApplication.deptId} name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Chop Type</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" defaultValue={selectedApplication.chopTypeId} name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Document Name</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" defaultValue={selectedApplication.documentName} name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Use in Office or not</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" defaultValue={selectedApplication.useInOffice === "N" ? "No" : "Yes"} name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Pick Up By</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" defaultValue={selectedApplication.pickUpBy} name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Department Heads</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" defaultValue={selectedApplication.deptHead} name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
+                  <Label>From:</Label>
+                  <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                    className="form-control" required dateFormat="yyyy/MM/dd"
+                    selected={exportFromDateView}
+                    onChange={this.dateChange("exportFrom", "exportFromDateView")}
+
+                    showMonthDropdown
+                    showYearDropdown
+                    selectsStart
+                    startDate={exportFromDateView}
+                    endDate={exportToDateView}
+                  />
                 </Col>
                 <Col>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Tel</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Application Type</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" defaultValue={selectedApplication.appTypeId} name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Purpose of Use</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" defaultValue={selectedApplication.purposeOfUse} name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Number of Pages to Be Chopped </Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" defaultValue={selectedApplication.noOfPages} name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Address to</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" defaultValue={selectedApplication.addressTo} name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">Remark (e.g. tel.)</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" defaultValue={selectedApplication.remark} name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row>
-                    <Col md="4">
-                      <Label htmlFor="text-input">confirm</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input type="text" id="text-input" name="text-input" placeholder="Text" />
-                    </Col>
-                  </FormGroup>
-                </Col>
-              </Row>
-              <Row>
-                <Col> <h4>Attachments</h4></Col>
-              </Row>
-              <Row>
-                <Col><i className="cui-paperclip" /> Chop Use Workflow BRD.Docx</Col>
-              </Row>
-              <Row><Col>
-                &nbsp;
-         </Col></Row>
-              <Row>
-                <Col> <h4>Approval Histories</h4></Col>
-              </Row>
-              <Row className="bottom-border">&nbsp;</Row>
-              <Row>
-                <Col md="1">
-                  <img src={'../../assets/img/avatars/5.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
-                </Col>
-                <Col md="8">
-                  <h5>lastname, firstname (000)<span> <Badge color="success">Status</Badge></span></h5>
-                  <small>dd/mm/yyyy 00:00 AM</small>
-                </Col>
-              </Row>
-            </CardBody>
-          </Card>
+                  <Label>To:</Label>
+                  <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                    className="form-control" required dateFormat="yyyy/MM/dd"
 
-        </Collapse>
+                    showMonthDropdown
+                    showYearDropdown
+                    selected={exportToDateView}
+                    onChange={this.dateChange("exportTo", "exportToDateView")}
+                    selectsEnd
+                    endDate={exportToDateView}
+                    minDate={exportFromDateView}
+                    startDate={exportFromDateView}
+                  />
+                </Col>
+              </Row>
 
+            </FormGroup>
+            {exportDate.exportFrom !== "" & exportDate.exportTo !== ""
+              ? <div>Export logs from <b>{this.convertDate(exportDate.exportFrom)}</b> to <b>{this.convertDate(exportDate.exportTo)}</b> </div>
+              : null
+            }
+
+
+
+          </ModalBody>
+          <ModalFooter>
+            {!validDate
+              ? <div
+                // >
+                //   <small 
+                style={{ color: "red" }} >
+                Please select From and To date !!!
+              {/* </small> */}
+              </div>
+              : null
+            }
+            <Button color="primary" onClick={this.exportLogs}>Export Logs</Button>{' '}
+            <Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
+          </ModalFooter>
+        </Modal>
       </div>
     );
   }
