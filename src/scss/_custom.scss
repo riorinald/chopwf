@@ -35,13 +35,14 @@
     width: 90%;
     // height: auto;
     border-radius: 50%;
-    // margin-left: 1em;
+    margin-left: 1em;
 }
 @media only screen and (max-width: 780px) {
     .img-avaa {
         width: 20%;
         height: auto;
         border-radius: 50%;
+        margin-left: 0em;
     }
   }
 

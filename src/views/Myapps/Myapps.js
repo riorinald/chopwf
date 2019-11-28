@@ -125,7 +125,10 @@ class Myapps extends Component {
         return {
             searchOption
         }
-    }, console.log(this.state.searchOption))
+    },
+    // console.log(this.state.searchOption)\
+    )
+  this.getApplications()
 }
 
   getDeptHeads(heads) {

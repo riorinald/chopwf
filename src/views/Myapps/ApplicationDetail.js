@@ -117,10 +117,10 @@ render(){
                         </FormGroup>
                         <FormGroup row>
                             <Col md lg>
-                                <Label htmlFor="text-input">Chop Type</Label>
+                                <Label htmlFor="text-input">Application Type</Label>
                             </Col>
                             <Col md="12" lg="8">
-                                <Input disabled type="text" id="text-input" defaultValue={this.props.applications.chopTypeId} name="text-input" placeholder="Text" />
+                                <Input disabled type="text" defaultValue={this.props.applications.applicationTypeName} id="text-input" name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
                         {this.props.applications.branchName !== ""
@@ -153,18 +153,18 @@ render(){
                         </FormGroup>
                         <FormGroup row>
                             <Col md lg>
-                                <Label htmlFor="text-input">Confirm</Label>
-                            </Col>
-                            <Col md="12" lg="8">
-                                <Input disabled type="text" id="text-input" defaultValue={this.props.applications.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="Text" />
-                            </Col>
-                        </FormGroup>
-                        <FormGroup row>
-                            <Col md lg>
                                 <Label htmlFor="text-input">Purpose of Use</Label>
                             </Col>
                             <Col md="12" lg="8">
                                 <Input disabled type="text" defaultValue={this.props.applications.purposeOfUse} id="text-input" name="text-input" placeholder="Text" />
+                            </Col>
+                        </FormGroup>
+                        <FormGroup row>
+                            <Col md lg>
+                                <Label htmlFor="text-input">Confirm</Label>
+                            </Col>
+                            <Col md="12" lg="8">
+                                <Input disabled type="text" id="text-input" defaultValue={this.props.applications.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
                         <FormGroup row>
@@ -196,13 +196,22 @@ render(){
                                 <Input disabled type="text" defaultValue={this.props.applications.telephoneNum} id="text-input" name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
-
                         <FormGroup row>
                             <Col md lg>
-                                <Label htmlFor="text-input">Application Type</Label>
+                                <Label  htmlFor="text-input">Department Heads</Label>
+                                
+                            </Col>
+                            <Col id="deptHead" md="12" lg="8">
+                                <Input disabled type="text" defaultValue={this.setArray()} id="text-input" name="text-input" placeholder="Text" />
+                                <UncontrolledTooltip placement="right" target="deptHead">{this.setArray()}</UncontrolledTooltip>
+                            </Col>
+                        </FormGroup>
+                        <FormGroup row>
+                            <Col md lg>
+                                <Label htmlFor="text-input">Chop Type</Label>
                             </Col>
                             <Col md="12" lg="8">
-                                <Input disabled type="text" defaultValue={this.props.applications.applicationTypeName} id="text-input" name="text-input" placeholder="Text" />
+                                <Input disabled type="text" id="text-input" defaultValue={this.props.applications.chopTypeId} name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
                         <FormGroup row>
@@ -271,16 +280,6 @@ render(){
                             </Col>
                             <Col md="12" lg="8">
                                 <Input disabled type="text" defaultValue={this.props.applications.documentCheckByName} id="text-input" name="text-input" placeholder="Text" />
-                            </Col>
-                        </FormGroup>
-                        <FormGroup row>
-                            <Col md lg>
-                                <Label  htmlFor="text-input">Department Heads</Label>
-                                
-                            </Col>
-                            <Col id="deptHead" md="12" lg="8">
-                                <Input disabled type="text" defaultValue={this.setArray()} id="text-input" name="text-input" placeholder="Text" />
-                                <UncontrolledTooltip placement="right" target="deptHead">{this.setArray()}</UncontrolledTooltip>
                             </Col>
                         </FormGroup>
 

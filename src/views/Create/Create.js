@@ -166,6 +166,8 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       isLoading: false,
+      noteInfo:[],
+
       lastReq: ""
     };
 
@@ -193,6 +195,7 @@ class Create extends Component {
 
   componentDidMount() {
 
+    this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
     this.getUserData();
     this.getData("department", `${config.url}/departments`);
     this.getData("applicationTypes", `${config.url}/apptypes`);
@@ -1036,7 +1039,7 @@ class Create extends Component {
           <CardBody>
             <FormGroup>
               <h5>NOTES :</h5>
-              {notes}
+              {this.state.noteInfo.notes}
             </FormGroup>
             <Form className="form-horizontal" innerRef={this.formRef}>
               <FormGroup>
