@@ -4,7 +4,7 @@ import Axios from 'axios';
 import {
     Col, Row,
     Input, Button,
-    FormGroup, Label,
+    FormGroup, Label, Collapse,
     Card, CardHeader, CardBody, CardFooter
 } from 'reactstrap';
 import { AppBreadcrumb } from '@coreui/react';
@@ -16,8 +16,10 @@ class Administration extends Component {
         this.state = {
             notes: '',
             label: '',
-            editable: false
+            editable: false,
+            accordion: [true, false, false, false]
         }
+        this.handleChange = this.handleChange.bind(this);
     }
 
     componentDidMount(){
@@ -34,7 +36,7 @@ class Administration extends Component {
         })
     }
 
-    handleChanges = (event) => {
+    handleChange(event){
         this.setState({
             notes : event.target.value
         })
@@ -55,7 +57,6 @@ class Administration extends Component {
           });
         xhr.open("PUT", "http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1");
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.setRequestHeader("User-Agent", "PostmanRuntime/7.20.1");
         xhr.setRequestHeader("Accept", "*/*");
         xhr.send(data);
         swal.fire({
@@ -67,6 +68,15 @@ class Administration extends Component {
         this.setState({editable: !this.state.editable})
     }
 
+    toggleAccordion(tab){
+        const prevState = this.state.accordion;
+        const state = prevState.map((x, index) => tab === index ? !x : false);
+
+    this.setState({
+      accordion: state,
+    })
+    }
+
     render(){
 
         return (
@@ -75,16 +85,64 @@ class Administration extends Component {
                 <h3>Administration</h3>
                 </CardHeader>
                 <CardBody>
-                <Col className="mb-4">
-                <Label>Notes :</Label>
-                    <Input rows={5} disabled={!this.state.editable} onChange={this.handleChanges} type="textarea" value={this.state.notes} > </Input>                
-                </Col>
-                <Col className="text-right">
-                    {this.state.editable 
-                    ? <Button color="success" onClick={this.putUpdate}> Update </Button>
-                    : <Button color="info" onClick={this.toggleEdit}> Edit </Button>
-                    }
-                </Col>                    
+                    <Card  className="mb-4">
+                        <CardHeader>
+                            <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(0)}>
+                            <h5 className="m-0 p-0">Create Request</h5>
+                        </Button>
+                        </CardHeader>
+                        <Collapse isOpen={this.state.accordion[0]} data-parent="#accordion" id="collapseOne" aria-labelledby="headingOne">
+                        <CardBody className="px-0 py-3">
+                        <Col className="mb-4">
+                        <Label>Notes :</Label>
+                            <Input rows={5} name="notes" disabled={!this.state.editable} value={this.state.notes} onChange={this.handleChange} type="textarea"  > </Input>                
+                        </Col>
+                        <Col className="text-right">
+                            {this.state.editable 
+                            ? <Button color="success" onClick={this.putUpdate}> Update </Button>
+                            : <Button color="info" onClick={this.toggleEdit}> Edit </Button>
+                            }
+                        </Col>                    
+                        </CardBody>
+                        </Collapse>
+                    </Card>
+                    <Card  className="mb-4">
+                        <CardHeader>
+                            <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(1)}>
+                            <h5 className="m-0 p-0">Department</h5>
+                        </Button>
+                        </CardHeader>
+                        <Collapse isOpen={this.state.accordion[1]} data-parent="#accordion" id="collapseOne" aria-labelledby="headingOne">
+                        <CardBody>
+                        Department
+                        </CardBody>
+                        </Collapse>
+                    </Card>
+                    <Card  className="mb-4">
+                        <CardHeader>
+                            <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(2)}>
+                            <h5 className="m-0 p-0">branch company chop</h5>
+                        </Button>
+                        </CardHeader>
+                        <Collapse isOpen={this.state.accordion[2]} data-parent="#accordion" id="collapseOne" aria-labelledby="headingOne">
+                        <CardBody>
+                        Branch   
+                        </CardBody>
+                        </Collapse>
+                    </Card>
+                    <Card  className="mb-4">
+                        <CardHeader>
+                            <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(3)}>
+                            <h5 className="m-0 p-0">Entitled Teams</h5>
+                        </Button>
+                        </CardHeader>
+                        <Collapse isOpen={this.state.accordion[3]} data-parent="#accordion" id="collapseOne" aria-labelledby="headingOne">
+                        <CardBody>
+                        Teams  
+                        </CardBody>
+                        </Collapse>
+                    </Card>
+                    
                 </CardBody>
             </Card>
         )
