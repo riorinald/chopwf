@@ -12,6 +12,7 @@ const Detail = React.lazy(() => import('./views/MyPendingTasks/Details/Detail'))
 const Redirect = React.lazy(()=> import('./views/Create/Redirecting'))
 const EditRequest = React.lazy(() => import('./views/EditRequest/EditRequest'));
 const ApplictionDetail = React.lazy(() =>import('./views/Myapps/ApplicationDetail'));
+const Administration = React.lazy(() => import('./views/Administration'));
 const page404 = React.lazy(()=>import('./views/404'));
 
 
@@ -41,6 +42,7 @@ const routes = [
   { path: '/help',exact: true, name: 'Help', component: Help },
   { path: '/login', name: 'Login', component: Login },
   { path: '/editrequest',exact: true, name: 'EditRequest', component: EditRequest },
+  { path: '/administration',exact: true, nme: 'Administration', component: Administration},
   { path: '/404', name: 'page404', component: page404},
 
 ];

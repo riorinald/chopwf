@@ -26,7 +26,7 @@ export default {
     },
     {
       name: 'Administration',
-      url: '/adminstration',
+      url: '/administration',
       icon: 'fa fa-cog'
     },
   
