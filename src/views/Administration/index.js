@@ -2,13 +2,20 @@ import React,{Component} from 'react';
 import swal from 'sweetalert2';
 import Axios from 'axios';
 import {
-    Col, Row,
-    Input, Button,
+    Col, Row, CustomInput,
+    Input, Button, InputGroup,
     FormGroup, Label, Collapse,
+    Table, Badge, 
+    Modal, ModalBody,
     Card, CardHeader, CardBody, CardFooter
 } from 'reactstrap';
-import { AppBreadcrumb } from '@coreui/react';
+import ReactTable from "react-table";
+import "react-table/react-table.css"
+import selectTableHOC from "react-table/lib/hoc/selectTable";
 import qs from 'qs'
+import PropTypes from 'prop-types';
+
+const SelectTable = selectTableHOC(ReactTable);
 
 class Administration extends Component {
     constructor(props){
@@ -16,14 +23,27 @@ class Administration extends Component {
         this.state = {
             notes: '',
             label: '',
+            branch:[],
+            selectAll: false,
+            selection: [],
             editable: false,
+            showModal: false,
             accordion: [true, false, false, false]
         }
         this.handleChange = this.handleChange.bind(this);
     }
 
+    static defaultProps = {
+        keyField: "id"
+      };
+    
+      static propTypes = {
+        keyField: PropTypes.string
+      }
+
     componentDidMount(){
-        this.getData()
+        this.getData();
+        this.getBranch();
     }
 
     getData(){
@@ -36,10 +56,23 @@ class Administration extends Component {
         })
     }
 
+    getBranch(){
+        Axios.get(`http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/4`)
+        .then (res => {
+            this.setState({
+                branch : res.data.branchList
+            })
+        })
+    }
+
     handleChange(event){
         this.setState({
             notes : event.target.value
         })
+    }
+
+    toggleModal = () => {
+        this.setState({showModal: !this.state.showModal})
     }
 
     toggleEdit = () => {
@@ -49,7 +82,7 @@ class Administration extends Component {
     putUpdate = () => {
         // Axios.put(`http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1`, qs.stringify(this.state.notes), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
         let xhr = new XMLHttpRequest();
-        let data= qs.stringify(this.state)
+        let data= qs.stringify(this.state.notes)
         xhr.addEventListener("readystatechange", function () {
             if (this.readyState === 4) {
               console.log(this.responseText);
@@ -71,10 +104,103 @@ class Administration extends Component {
     toggleAccordion(tab){
         const prevState = this.state.accordion;
         const state = prevState.map((x, index) => tab === index ? !x : false);
-
     this.setState({
       accordion: state,
     })
+    }
+
+    isSelected = key => {
+        return this.state.selection.includes(`select-${key}`);
+      };
+    
+    rowFn = (state, rowInfo, column, instance) => {
+    const { selection } = this.state;
+    return {
+        onClick: (e) => {
+        console.log("It was in this row:", rowInfo);
+        },
+        style: {
+        background:
+            rowInfo &&
+            selection.includes(`select-${rowInfo.original.id}`)
+        }
+    };
+    };
+
+    toggleSelection = (key, shift, row) => {
+        // start off with the existing state
+        let selection = [...this.state.selection];
+        const keyIndex = selection.indexOf(key);
+    
+        // check to see if the key exists
+        if (keyIndex >= 0) {
+          // it does exist so we will remove it using destructing
+          selection = [
+            ...selection.slice(0, keyIndex),
+            ...selection.slice(keyIndex + 1)
+          ];
+        } else {
+          // it does not exist so add it
+          selection.push(key);
+        }
+        // update the state
+        this.setState({ selection });
+      };
+
+      toggleAll = () => {
+        const { keyField } = this.props;
+        const selectAll = !this.state.selectAll;
+        const selection = [];
+        const selectedDocs = [];
+    
+        if (selectAll) {
+          // we need to get at the internals of ReactTable
+          const wrappedInstance = this.checkboxTable.getWrappedInstance();
+          // the 'sortedData' property contains the currently accessible records based on the filter and sort
+          const currentRecords = wrappedInstance.getResolvedState().sortedData;
+          // we just push all the IDs onto the selection array
+          currentRecords.forEach(item => {
+            selection.push(`select-${item._original[keyField]}`);
+            selectedDocs.push(item._original)
+          });
+        }
+        this.setState({ selectAll, selection, selectedDocs }, console.log(this.state.selectedDocs));
+      };
+
+      handleFiles = (files) => {
+        // Check for the various File API support.
+        if (window.FileReader) {
+            // FileReader are supported.
+            this.getAsText(files);
+        }
+    }
+
+    getAsText(fileToRead) {
+        var reader = new FileReader();
+        var fileToRead = document.querySelector(fileToRead);
+        // Read file into memory as UTF-8      
+        reader.readAsText(fileToRead);
+        // Handle errors load
+        reader.onload = this.fileReadingFinished;
+        reader.onerror = this.errorHandler;
+    }
+    
+    processData(csv) {
+        var allTextLines = csv.split(/\r\n|\n/);
+        var lines = allTextLines.map(data => data.split(';'))
+
+        console.log(lines)
+    }
+
+    fileReadingFinished(event) {
+        var csv = event.target.result;
+        this.processData(csv);
+    }
+
+    errorHandler(event) {
+        if (event.target.error.name === "NotReadableError") {
+            alert("Cannot read file!");
+        }
     }
 
     render(){
@@ -95,7 +221,9 @@ class Administration extends Component {
                         <CardBody className="px-0 py-3">
                         <Col className="mb-4">
                         <Label>Notes :</Label>
-                            <Input rows={5} name="notes" disabled={!this.state.editable} value={this.state.notes} onChange={this.handleChange} type="textarea"  > </Input>                
+                        <InputGroup>
+                        <Input maxLength={500} disabled={!this.state.editable} value={this.state.notes} onChange={(event)=>this.handleChange(event)} placeholder="Enter Notes" type="textarea" rows="5" />
+                        </InputGroup>
                         </Col>
                         <Col className="text-right">
                             {this.state.editable 
@@ -103,6 +231,45 @@ class Administration extends Component {
                             : <Button color="info" onClick={this.toggleEdit}> Edit </Button>
                             }
                         </Col>                    
+                        </CardBody>
+                        </Collapse>
+                    </Card>
+                    <Card  className="mb-4">
+                        <CardHeader>
+                            <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(2)}>
+                            <h5 className="m-0 p-0">branch company chop</h5>
+                        </Button>
+                        </CardHeader>
+                        <Collapse isOpen={this.state.accordion[2]} data-parent="#accordion" id="collapseOne" aria-labelledby="headingOne">
+                        <CardBody>
+                        <Col className="text-right mb-2">
+                            <Button className="mr-2" onClick={this.toggleModal} color="warning"> Upload CSV </Button>
+                            <Button className="mr-2" color="danger"> Delete </Button>
+                        </Col>
+                        <Col className="mb-4">
+                        <SelectTable
+                            {...this.props}
+                            data={this.state.branch}
+                            ref={r => (this.checkboxTable = r)}
+                            toggleSelection={this.toggleSelection}
+                            selectAll={this.state.selectAll}
+                            selectType="checkbox"
+                            toggleAll={this.toggleAll}
+                            isSelected={this.isSelected}
+                            getTrProps={this.rowFn}
+                            filterable
+                            defaultPageSize={15}
+                            columns={[
+                                {
+                                Header: 'Branch Name',
+                                accessor: 'name',
+                                style: { textAlign: "left" },
+                                }
+                            ]}
+                            keyField="id"
+
+                            />
+                        </Col>
                         </CardBody>
                         </Collapse>
                     </Card>
@@ -120,18 +287,6 @@ class Administration extends Component {
                     </Card>
                     <Card  className="mb-4">
                         <CardHeader>
-                            <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(2)}>
-                            <h5 className="m-0 p-0">branch company chop</h5>
-                        </Button>
-                        </CardHeader>
-                        <Collapse isOpen={this.state.accordion[2]} data-parent="#accordion" id="collapseOne" aria-labelledby="headingOne">
-                        <CardBody>
-                        Branch   
-                        </CardBody>
-                        </Collapse>
-                    </Card>
-                    <Card  className="mb-4">
-                        <CardHeader>
                             <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(3)}>
                             <h5 className="m-0 p-0">Entitled Teams</h5>
                         </Button>
@@ -142,7 +297,13 @@ class Administration extends Component {
                         </CardBody>
                         </Collapse>
                     </Card>
-                    
+                    <Modal toggle={this.toggleModal} isOpen={this.state.showModal}>
+                        <ModalBody>
+                            <Col lg>
+                                <input type='file' id="csvInput" accept=".CSV" onChange={ this.handleFiles } />
+                            </Col>
+                        </ModalBody>
+                    </Modal>
                 </CardBody>
             </Card>
         )
