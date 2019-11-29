@@ -24,14 +24,14 @@ class Detail extends Component {
       showModal: false,
       taskDetails: null,
       comments: "",
-      histories: [],
+      hover: false,
     }
     this.getTaskDetails = this.getTaskDetails.bind(this);
     this.approve = this.approve.bind(this)
     this.toggleView = this.toggleView.bind(this);
     this.redirect = this.redirect.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.getApprovalHistories = this.getApprovalHistories.bind(this);
+    this.toggleHover = this.toggleHover.bind(this);
   }
 
   componentDidMount() {
@@ -44,27 +44,21 @@ class Detail extends Component {
     }
   }
 
-  async getApprovalHistories() {
-    const response = await Axios.get('http://5b7aa3bb6b74010014ddb4f6.mockapi.io/application/364e425f-bf55-478c-b055-8ef811173aa1/approval')
-    this.setState({ histories: response.data })
-  }
-
   async getTaskDetails(id) {
     let userId = localStorage.getItem('userId')
     // let userId = "josh@otds.admin"
     const res = await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`)
     this.setState({ taskDetails: res.data })
-    this.getApprovalHistories()
 
+  }
+
+  toggleHover() {
+    this.setState({ hover: !this.state.hover }, console.log(this.state.hover))
   }
 
   convertDate(dateValue) {
     let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
     return regEx
-  }
-
-  tempApprove() {
-
   }
 
   approve(action) {
@@ -131,7 +125,6 @@ class Detail extends Component {
           return <DetailSTU
             legalName={this.props.legalName}
             taskDetail={this.state.taskDetails}
-            histories={this.state.histories}
             approve={this.approve}
             showModal={this.state.showModal}
             toggleView={this.toggleView}
@@ -139,7 +132,8 @@ class Detail extends Component {
             capitalize={this.capitalize}
             redirect={this.redirect}
             handleChange={this.handleChange}
-            tempApprove={this.tempApprove}
+            toggleHover={this.toggleHover}
+            hover={this.state.hover}
           />
             ;
         case 'LTU':
@@ -153,7 +147,9 @@ class Detail extends Component {
             redirect={this.redirect}
             capitalize={this.capitalize}
             handleChange={this.handleChange}
-            histories={this.state.histories} />
+            toggleHover={this.toggleHover}
+            hover={this.state.hover}
+          />
             ;
         case 'LTI':
           return <DetailLTI
@@ -166,7 +162,9 @@ class Detail extends Component {
             getDeptHeads={this.getDeptHeads}
             capitalize={this.capitalize}
             handleChange={this.handleChange}
-            histories={this.state.histories} />
+            toggleHover={this.toggleHover}
+            hover={this.state.hover}
+          />
             ;
         case 'CNIPS':
           return <DetailCNIPS
@@ -179,7 +177,9 @@ class Detail extends Component {
             redirect={this.redirect}
             capitalize={this.capitalize}
             handleChange={this.handleChange}
-            histories={this.state.histories} />
+            toggleHover={this.toggleHover}
+            hover={this.state.hover}
+          />
             ;
         default:
           return <p><kbd>{this.props.match.params.id}</kbd> Not Exist </p>

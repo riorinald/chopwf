@@ -7,7 +7,9 @@ import {
     Label,
     Progress,
     Badge,
-    Modal, ModalBody, ModalFooter, ModalHeader
+    Modal, ModalBody, ModalFooter, ModalHeader,
+    Collapse,
+    ListGroup, ListGroupItem
 } from 'reactstrap';
 import ReactTable from "react-table";
 import "react-table/react-table.css"
@@ -201,7 +203,14 @@ const DetailSTU = (props) => {
                                 <Label htmlFor="text-input">Department Heads</Label>
                             </Col>
                             <Col xs="12" md="8">
-                                <Input disabled type="text" value={props.getDeptHeads(props.taskDetail.departmentHeads)} id="text-input" name="text-input" placeholder="Text" />
+                                <Input onMouseEnter={props.toggleHover} onMouseLeave={props.toggleHover} disabled type="text" value={props.getDeptHeads(props.taskDetail.departmentHeads)} id="text-input" name="text-input" placeholder="Text" />
+                                <Collapse isOpen={props.hover}>
+                                    <ListGroup>
+                                        {props.taskDetail.departmentHeads.map((head, index)=>
+                                        <ListGroupItem key={index} > {head} </ListGroupItem>
+                                        )}
+                                    </ListGroup>
+                                </Collapse>
                             </Col>
                         </FormGroup>
 
@@ -276,9 +285,6 @@ const DetailSTU = (props) => {
                             <Button color={action.action === "approve" ? "success" : "danger"} onClick={() => props.approve(action.action)} > {props.capitalize(action.action)}</Button>
                         </Col>
                     )}
-                    {/* <Col sm={1}>
-                        <Button color="success" onClick={() => props.tempApprove()}>Approve</Button>
-                    </Col> */}
                 </Row>
                 <Row>
                     <Col>&nbsp;</Col>
@@ -288,16 +294,16 @@ const DetailSTU = (props) => {
                 </Row>
 
 
-                {props.histories.map((history, index) =>
+                {props.taskDetail.histories.map((history, index) =>
                     <div key={index}>
                         <Row className="bottom-border"></Row>
                         <Row>
                             <Col md="1">
-                                <img src={history.avatar} className="img-avatar" alt="admin@bootstrapmaster.com" />
+                                <img src="" className="img-avatar" alt="Avatar" />
                             </Col>
                             <Col md="8">
-                                <h5>{history.name} (000)<span> <Badge color="success">{history.status}</Badge></span></h5>
-                                <small>{history.notes}</small>
+                                <h5>{history.approvedByName} (000)<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
+                                <small>{history.comments}</small>
                             </Col>
                         </Row>
                     </div>

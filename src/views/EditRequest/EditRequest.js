@@ -33,6 +33,8 @@ import "react-table/react-table.css"
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import PropTypes from "prop-types";
 import { resetMounted } from '../MyPendingTasks/MyPendingTasks';
+import SimpleReactValidator from 'simple-react-validator';
+
 
 
 
@@ -49,6 +51,8 @@ const reactSelectControl = {
     menuPortal: base => ({ ...base, zIndex: 9999 })
 }
 
+let val = { invalid: true }
+
 const animatedComponents = makeAnimated();
 
 class EditRequest extends Component {
@@ -61,6 +65,9 @@ class EditRequest extends Component {
     };
     constructor(props) {
         super(props)
+        this.validator = new SimpleReactValidator({
+            autoForceUpdate: this
+        });
         this.state = {
             selectAll: false,
             selection: [],
@@ -108,7 +115,6 @@ class EditRequest extends Component {
                 teamName: "",
                 effectivePeriod: ""
             },
-
             editRequestForm: {
                 engName: "",
                 cnName: "",
@@ -152,6 +158,7 @@ class EditRequest extends Component {
         if (this.props.location.state !== undefined) {
             this.getTaskDetails(this.props.location.state.id)
         }
+        this.validator = new SimpleReactValidator();
         // console.log(this.state.taskDetails.applicationTypeId)
     }
 
@@ -240,6 +247,8 @@ class EditRequest extends Component {
             temporary.effectivePeriod = temporary.effectivePeriod !== "" ? this.convertDate(temporary.effectivePeriod, 'dateView1') : null
             temporary.documentCheckByOption = this.getOption(temporary.documentCheckBy)
         }
+
+        this.setState({ isConfirm: temporary.isConfirm === "Y" ? true : false })
 
         this.setState(state => {
             let editRequestForm = this.state.editRequestForm
@@ -663,7 +672,7 @@ class EditRequest extends Component {
                 }
             })
             .catch(error => {
-                let stat = error.response.data.status !== "failed"
+                let stat = error.response.data.status !== "failed" && error.response.data.status !== "error"
                 let msg = ""
                 if (stat) {
                     let keys = Object.keys(error.response.data.errors)
@@ -692,6 +701,31 @@ class EditRequest extends Component {
     }
 
     async handleAgreeTerm(event) {
+        let checked = event.target.checked
+        if (this.validator.allValid()) {
+            alert('You submitted the form and stuff!');
+            this.setState(state => {
+                let taskDetails = this.state.taskDetails
+                if (checked) {
+                    taskDetails.isConfirm = "Y"
+                }
+                else {
+                    taskDetails.isConfirm = "N"
+                }
+
+                return {
+                    taskDetails
+                }
+
+            })
+        } else {
+            this.validator.showMessages();
+            // rerender to show messages for the first time
+            // you can use the autoForceUpdate option to do this automatically`
+            this.forceUpdate()
+        }
+
+
 
 
     }
@@ -777,7 +811,9 @@ class EditRequest extends Component {
 
 
     render() {
-        const { redirectToPendingTasks, taskDetails, dateView1, deptHeads, selectedDeptHeads, editRequestForm } = this.state
+        const { redirectToPendingTasks, taskDetails, dateView1, deptHeads, selectedDeptHeads, editRequestForm, isConfirm } = this.state
+
+
 
         return (
             <div>
@@ -818,7 +854,10 @@ class EditRequest extends Component {
                                 <FormGroup>
                                     <Label>Tel. </Label>
                                     <InputGroup>
-                                        <Input onChange={this.handleChange("telephoneNum")} value={taskDetails.telephoneNum} id="appendedInput" size="16" type="text" />
+                                        <Input {...val} onChange={this.handleChange("telephoneNum")} name="telephoneNum" value={taskDetails.telephoneNum} id="appendedInput" size="16" type="text" />
+                                    </InputGroup>
+                                    <InputGroup>
+                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Telephone Number', taskDetails.telephoneNum, 'required|numeric')}</small>
                                     </InputGroup>
                                 </FormGroup>
                                 <FormGroup>
@@ -831,6 +870,9 @@ class EditRequest extends Component {
                                             </option>
                                         ))}
                                     </Input>
+                                    <InputGroup>
+                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Department', taskDetails.departmentId, 'required')}</small>
+                                    </InputGroup>
                                     <FormFeedback>Invalid Departement Selected</FormFeedback>
                                 </FormGroup>
                                 <FormGroup>
@@ -853,6 +895,9 @@ class EditRequest extends Component {
                                             onChange={this.dateChange("effectivePeriod", "dateView1")}
                                             minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                                         <FormFeedback>Invalid Date Selected</FormFeedback>
+                                        <InputGroup>
+                                            <small style={{ color: '#F86C6B' }} >{this.validator.message('Effective Period', taskDetails.effectivePeriod, 'required')}</small>
+                                        </InputGroup>
                                     </FormGroup>
                                     : ""
                                 }
@@ -866,6 +911,9 @@ class EditRequest extends Component {
                                         ))}
 
                                     </Input>
+                                    <InputGroup>
+                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Chop Type', taskDetails.chopTypeId, 'required')}</small>
+                                    </InputGroup>
                                     <FormFeedback>Invalid Chop Type Selected</FormFeedback>
                                 </FormGroup>
 
@@ -1033,11 +1081,17 @@ class EditRequest extends Component {
                                             </Collapse>
                                         </div>}
                                 </FormGroup>
+                                <InputGroup>
+                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Names', taskDetails.documentNames, 'required')}</small>
+                                </InputGroup>
                                 <FormGroup>
                                     <Label>Purpose of Use</Label>
                                     <InputGroup>
                                         <Input onChange={this.handleChange("purposeOfUse")} value={taskDetails.purposeOfUse} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                                         <FormFeedback>Please input the purpose of use</FormFeedback>
+                                    </InputGroup>
+                                    <InputGroup>
+                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose Of Use', taskDetails.purposeOfUse, 'required')}</small>
                                     </InputGroup>
                                 </FormGroup>
 
@@ -1046,6 +1100,9 @@ class EditRequest extends Component {
                                         <Label>Connecting Chop (骑缝章) </Label>
                                         <Row />
                                         <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={taskDetails.connectChop === "Y"} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
+                                        <InputGroup>
+                                            <small style={{ color: '#F86C6B' }} >{this.validator.message('Connecting Chop', taskDetails.connectChop, 'required')}</small>
+                                        </InputGroup>
                                     </FormGroup>
                                     : ""}
                                 <FormGroup>
@@ -1054,6 +1111,9 @@ class EditRequest extends Component {
                                         <Input onChange={this.handleChange("numOfPages")} value={taskDetails.numOfPages} id="numOfPages" size="16" type="number" min="0" />
                                         <FormFeedback>Invalid Number of pages </FormFeedback>
                                     </InputGroup>
+                                    <InputGroup>
+                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages', taskDetails.numOfPages, 'required')}</small>
+                                    </InputGroup>
                                 </FormGroup>
 
                                 <FormGroup>
@@ -1061,7 +1121,8 @@ class EditRequest extends Component {
                                     <Row />
                                     <AppSwitch onChange={this.toggleUIO} checked={taskDetails.isUseInOffice === "Y"} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label dataOn={'yes'} dataOff={'no'} />
                                 </FormGroup>
-                                <Collapse isOpen={!editRequestForm.collapseUIO }>
+
+                                <Collapse isOpen={!editRequestForm.collapseUIO}>
                                     <FormGroup visibelity="false" >
                                         <Label>Return Date</Label>
                                         <Row />
@@ -1071,6 +1132,10 @@ class EditRequest extends Component {
                                             onChange={this.dateChange("returnDate", "dateView2")}
                                             minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                                     </FormGroup>
+                                    {!editRequestForm.collapseUIO ? <InputGroup>
+                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', taskDetails.returnDate, 'required')}</small>
+                                    </InputGroup> : null}
+
                                     <FormGroup>
                                         <Label>Responsible Person <i className="fa fa-user" /></Label>
                                         <AsyncSelect id="resPerson"
@@ -1082,12 +1147,19 @@ class EditRequest extends Component {
                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         />
                                     </FormGroup>
+                                    {!editRequestForm.collapseUIO ?
+                                        <InputGroup>
+                                            <small style={{ color: '#F86C6B' }} >{this.validator.message('Responsible Person', taskDetails.responsiblePerson, 'required')}</small>
+                                        </InputGroup> : null}
                                 </Collapse>
                                 <FormGroup>
                                     <Label>Address to</Label>
                                     <InputGroup>
                                         <Input onChange={this.handleChange("addressTo")} value={taskDetails.addressTo} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
                                         <FormFeedback>Invalid person to address to</FormFeedback>
+                                    </InputGroup>
+                                    <InputGroup>
+                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Address To', taskDetails.addressTo, 'required')}</small>
                                     </InputGroup>
                                 </FormGroup>
                                 <FormGroup>
@@ -1101,6 +1173,9 @@ class EditRequest extends Component {
                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                     />
                                     <InputGroup>
+                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Pick Up By', taskDetails.pickUpBy, 'required')}</small>
+                                    </InputGroup>
+                                    <InputGroup>
                                         <FormFeedback>Please enter a valid name to search</FormFeedback>
                                     </InputGroup>
                                 </FormGroup>
@@ -1109,6 +1184,9 @@ class EditRequest extends Component {
                                     <InputGroup>
                                         <Input onChange={this.handleChange("remark")} value={taskDetails.remark} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
                                         <FormFeedback>Please add remarks</FormFeedback>
+                                    </InputGroup>
+                                    <InputGroup>
+                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Remark', taskDetails.remark, 'required')}</small>
                                     </InputGroup>
                                 </FormGroup>
 
@@ -1127,6 +1205,7 @@ class EditRequest extends Component {
                                                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                                 />
                                                 <InputGroup>
+                                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Contract Signed By ', taskDetails.contractSignedByFirstPerson, 'required')}</small>
                                                 </InputGroup>
                                             </Col>
                                             <Col>
@@ -1139,6 +1218,7 @@ class EditRequest extends Component {
                                                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                                 />
                                                 <InputGroup>
+                                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Contract Signed By', taskDetails.contractSignedBySecondPerson, 'required')}</small>
                                                 </InputGroup>
                                             </Col>
                                         </Row>
@@ -1154,6 +1234,9 @@ class EditRequest extends Component {
                                                 loadOptions={this.loadOptionsDept}
                                                 value={deptHeads[taskDetails.documentCheckByOption]}
                                                 styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
+                                            <InputGroup>
+                                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Check By', taskDetails.documentCheckBy, 'required')}</small>
+                                            </InputGroup>
                                         </FormGroup>
                                         : <FormGroup>
                                             <Label>Department Heads <i className="fa fa-user" /></Label>
@@ -1167,6 +1250,9 @@ class EditRequest extends Component {
                                                 menuPortalTarget={document.body}
                                                 components={animatedComponents}
                                                 styles={taskDetails.deptHeadSelected === null ? reactSelectControl : ""} />
+                                            <InputGroup>
+                                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Department Head', taskDetails.departmentHeads, 'required')}</small>
+                                            </InputGroup>
                                             {taskDetails.deptHeadSelected === null
                                                 ? <small style={{ color: '#F86C6B' }}>Please select a Department Head</small>
                                                 : ""

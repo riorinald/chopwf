@@ -7,7 +7,8 @@ import {
     Label,
     Progress,
     Badge,
-    Modal, ModalBody, ModalFooter, ModalHeader
+    Modal, ModalBody, ModalFooter, ModalHeader,
+    Collapse, ListGroup, ListGroupItem
 
 } from 'reactstrap';
 import ReactTable from "react-table";
@@ -216,6 +217,13 @@ const DetailLTI = props =>
                             <Col xs="12" md="8">
                                 <Input disabled type="text" value={props.taskDetail.departmentHeadName} id="text-input" name="text-input" placeholder="Text" />
                             </Col>
+                            <Collapse isOpen={props.hover}>
+                                <ListGroup>
+                                    {props.taskDetail.departmentHeads.map((head, index) =>
+                                        <ListGroupItem key={index} > {head} </ListGroupItem>
+                                    )}
+                                </ListGroup>
+                            </Collapse>
                         </FormGroup>
                         <FormGroup row>
                             <Col md="4">
