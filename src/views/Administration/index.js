@@ -6,7 +6,7 @@ import {
     Input, Button, InputGroup,
     FormGroup, Label, Collapse,
     Table, Badge, 
-    Modal, ModalBody,
+    Modal, ModalBody, ModalFooter,
     Card, CardHeader, CardBody, CardFooter
 } from 'reactstrap';
 import ReactTable from "react-table";
@@ -14,6 +14,7 @@ import "react-table/react-table.css"
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import qs from 'qs'
 import PropTypes from 'prop-types';
+import Papa from 'papaparse';
 
 const SelectTable = selectTableHOC(ReactTable);
 
@@ -24,13 +25,14 @@ class Administration extends Component {
             notes: '',
             label: '',
             branch:[],
-            selectAll: false,
-            selection: [],
+            newBranch:[],
+            updateBranch: false,
+            filteredData: [], 
             editable: false,
             showModal: false,
             accordion: [true, false, false, false]
         }
-        this.handleChange = this.handleChange.bind(this);
+        // this.handleChange = this.handleChange.bind(this);
     }
 
     static defaultProps = {
@@ -72,17 +74,19 @@ class Administration extends Component {
     }
 
     toggleModal = () => {
-        this.setState({showModal: !this.state.showModal})
+        this.setState({showModal: !this.state.showModal, newBranch:[]})
     }
 
     toggleEdit = () => {
         this.setState({editable: !this.state.editable})
     }
 
-    putUpdate = () => {
+    putNotes = () => {
         // Axios.put(`http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1`, qs.stringify(this.state.notes), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
         let xhr = new XMLHttpRequest();
-        let data= qs.stringify(this.state.notes)
+        let notes = {notes : this.state.notes}
+        let data = qs.stringify(notes)
+
         xhr.addEventListener("readystatechange", function () {
             if (this.readyState === 4) {
               console.log(this.responseText);
@@ -91,6 +95,7 @@ class Administration extends Component {
         xhr.open("PUT", "http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1");
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.setRequestHeader("Accept", "*/*");
+        xhr.setRequestHeader("Accept-Encoding", "gzip, deflate");
         xhr.send(data);
         swal.fire({
             title: "Updated",
@@ -101,6 +106,33 @@ class Administration extends Component {
         this.setState({editable: !this.state.editable})
     }
 
+    putBranch = () => {
+        let xhr = new XMLHttpRequest();
+        let inData = {branchList: JSON.stringify(this.state.newBranch)}
+        let data= qs.stringify(inData)
+        // encodeURIComponent(JSON.stringify(inData))
+        
+        console.log(inData, data)
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+              console.log(this.responseText);
+            }
+          });
+
+        xhr.open("PUT", "http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/4");
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("Accept", "*/*");
+        // xhr.send(data);
+        swal.fire({
+            title: "Updated",
+            timer: 1500,
+            type: 'success',
+            timerProgressBar: true
+        })
+        this.setState({updateBranch: false, toggleModal: false})
+    }
+
     toggleAccordion(tab){
         const prevState = this.state.accordion;
         const state = prevState.map((x, index) => tab === index ? !x : false);
@@ -109,92 +141,30 @@ class Administration extends Component {
     })
     }
 
-    isSelected = key => {
-        return this.state.selection.includes(`select-${key}`);
-      };
+    handleFiles = (event) => {
+    // Check for the various File API support.
+    let files = event.target.files[0];
     
-    rowFn = (state, rowInfo, column, instance) => {
-    const { selection } = this.state;
-    return {
-        onClick: (e) => {
-        console.log("It was in this row:", rowInfo);
-        },
-        style: {
-        background:
-            rowInfo &&
-            selection.includes(`select-${rowInfo.original.id}`)
-        }
-    };
-    };
-
-    toggleSelection = (key, shift, row) => {
-        // start off with the existing state
-        let selection = [...this.state.selection];
-        const keyIndex = selection.indexOf(key);
-    
-        // check to see if the key exists
-        if (keyIndex >= 0) {
-          // it does exist so we will remove it using destructing
-          selection = [
-            ...selection.slice(0, keyIndex),
-            ...selection.slice(keyIndex + 1)
-          ];
-        } else {
-          // it does not exist so add it
-          selection.push(key);
-        }
-        // update the state
-        this.setState({ selection });
-      };
-
-      toggleAll = () => {
-        const { keyField } = this.props;
-        const selectAll = !this.state.selectAll;
-        const selection = [];
-        const selectedDocs = [];
-    
-        if (selectAll) {
-          // we need to get at the internals of ReactTable
-          const wrappedInstance = this.checkboxTable.getWrappedInstance();
-          // the 'sortedData' property contains the currently accessible records based on the filter and sort
-          const currentRecords = wrappedInstance.getResolvedState().sortedData;
-          // we just push all the IDs onto the selection array
-          currentRecords.forEach(item => {
-            selection.push(`select-${item._original[keyField]}`);
-            selectedDocs.push(item._original)
-          });
-        }
-        this.setState({ selectAll, selection, selectedDocs }, console.log(this.state.selectedDocs));
-      };
-
-      handleFiles = (files) => {
-        // Check for the various File API support.
-        if (window.FileReader) {
-            // FileReader are supported.
-            this.getAsText(files);
+    if (window.FileReader) {
+        // FileReader are supported.
+        this.getAsText(files);
         }
     }
 
     getAsText(fileToRead) {
         var reader = new FileReader();
-        var fileToRead = document.querySelector(fileToRead);
         // Read file into memory as UTF-8      
         reader.readAsText(fileToRead);
         // Handle errors load
         reader.onload = this.fileReadingFinished;
         reader.onerror = this.errorHandler;
     }
-    
-    processData(csv) {
-        var allTextLines = csv.split(/\r\n|\n/);
-        var lines = allTextLines.map(data => data.split(';'))
 
-        console.log(lines)
-    }
-
-    fileReadingFinished(event) {
+    fileReadingFinished = (event) => {
         var csv = event.target.result;
-        this.processData(csv);
+        var result = Papa.parse(csv, {header: true, skipEmptyLines: true,})
+        console.log(result.data)
+        this.setState({newBranch: result.data, updateBranch: true})
     }
 
     errorHandler(event) {
@@ -202,6 +172,11 @@ class Administration extends Component {
             alert("Cannot read file!");
         }
     }
+
+    defaultFilterMethod = (filter, row, column) => {
+        const id = filter.pivotId || filter.id;
+        return row[id] !== undefined ? row[id].department === filter.value : true;
+    };
 
     render(){
 
@@ -227,7 +202,7 @@ class Administration extends Component {
                         </Col>
                         <Col className="text-right">
                             {this.state.editable 
-                            ? <Button color="success" onClick={this.putUpdate}> Update </Button>
+                            ? <Button color="success" onClick={this.putNotes}> Update </Button>
                             : <Button color="info" onClick={this.toggleEdit}> Edit </Button>
                             }
                         </Col>                    
@@ -237,7 +212,7 @@ class Administration extends Component {
                     <Card  className="mb-4">
                         <CardHeader>
                             <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(2)}>
-                            <h5 className="m-0 p-0">branch company chop</h5>
+                            <h5 className="m-0 p-0">Branch Company Chop</h5>
                         </Button>
                         </CardHeader>
                         <Collapse isOpen={this.state.accordion[2]} data-parent="#accordion" id="collapseOne" aria-labelledby="headingOne">
@@ -247,27 +222,23 @@ class Administration extends Component {
                             <Button className="mr-2" color="danger"> Delete </Button>
                         </Col>
                         <Col className="mb-4">
-                        <SelectTable
-                            {...this.props}
+                        <ReactTable
+                            // {...this.props}
                             data={this.state.branch}
-                            ref={r => (this.checkboxTable = r)}
-                            toggleSelection={this.toggleSelection}
-                            selectAll={this.state.selectAll}
-                            selectType="checkbox"
-                            toggleAll={this.toggleAll}
-                            isSelected={this.isSelected}
-                            getTrProps={this.rowFn}
                             filterable
-                            defaultPageSize={15}
+                            defaultPageSize={10}
+                            className="-striped -highlight"
+                            defaultFilterMethod={this.defaultFilterMethod}
                             columns={[
                                 {
                                 Header: 'Branch Name',
                                 accessor: 'name',
                                 style: { textAlign: "left" },
+                                filterMethod: (filter, row) =>
+                                row[filter.id].startsWith(filter.value) &&
+                                row[filter.id].endsWith(filter.value)
                                 }
                             ]}
-                            keyField="id"
-
                             />
                         </Col>
                         </CardBody>
@@ -297,12 +268,34 @@ class Administration extends Component {
                         </CardBody>
                         </Collapse>
                     </Card>
-                    <Modal toggle={this.toggleModal} isOpen={this.state.showModal}>
+                    <Modal size="lg" scrollable toggle={this.toggleModal} isOpen={this.state.showModal}>
                         <ModalBody>
+                            <Col lg className="mb-3">
+                                <CustomInput className="mb-2" type='file' id="csvInput" accept=".CSV" onChange={ this.handleFiles } />
+                                <Collapse ><Button color="info" block> Upload </Button></Collapse>
+                            </Col>
                             <Col lg>
-                                <input type='file' id="csvInput" accept=".CSV" onChange={ this.handleFiles } />
+                                <Table hover bordered striped responsive size="sm">
+                                    <thead>
+                                    <tr>
+                                       <td>id</td>
+                                       <td>name</td>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.state.newBranch.map((id) => 
+                                        <tr key={id.id}>
+                                            <td>{id.id}</td>
+                                            <td>{id.name}</td>
+                                        </tr> )}
+                                    </tbody>
+                                </Table>
                             </Col>
                         </ModalBody>
+                        <ModalFooter>
+                        <Collapse isOpen={this.state.updateBranch} ><Button onClick={this.putBranch}color="info" block> Upload </Button></Collapse>
+                        <Collapse isOpen={true}><Button onClick={this.toggleModal} color="danger" block> Cancel </Button></Collapse>
+                        </ModalFooter>
                     </Modal>
                 </CardBody>
             </Card>
