@@ -25,8 +25,8 @@ export default {
       icon: 'fa fa-cubes'
     },
     {
-      name: 'Administration',
-      url: '/administration',
+      name: 'Chop Admin',
+      url: '/chopadmin',
       icon: 'fa fa-cog'
     },
   

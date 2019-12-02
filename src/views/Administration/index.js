@@ -219,7 +219,7 @@ class Administration extends Component {
                         <CardBody>
                         <Col className="text-right mb-2">
                             <Button className="mr-2" onClick={this.toggleModal} color="warning"> Upload CSV </Button>
-                            <Button className="mr-2" color="danger"> Delete </Button>
+                            {/* <Button className="mr-2" color="danger"> Delete </Button> */}
                         </Col>
                         <Col className="mb-4">
                         <ReactTable
@@ -293,7 +293,7 @@ class Administration extends Component {
                             </Col>
                         </ModalBody>
                         <ModalFooter>
-                        <Collapse isOpen={this.state.updateBranch} ><Button onClick={this.putBranch}color="info" block> Upload </Button></Collapse>
+                        <Collapse isOpen={this.state.newBranch[1]!==''} ><Button onClick={this.putBranch}color="info" block> Upload </Button></Collapse>
                         <Collapse isOpen={true}><Button onClick={this.toggleModal} color="danger" block> Cancel </Button></Collapse>
                         </ModalFooter>
                     </Modal>
