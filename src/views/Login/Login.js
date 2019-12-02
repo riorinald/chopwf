@@ -135,7 +135,7 @@ class Login extends Component {
 
         if (redirectToReferrer) {
             console.log("redirect")
-            return <Redirect to='/create' />
+            return <Redirect to='/portal' />
         }
 
 

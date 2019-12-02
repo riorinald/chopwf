@@ -29,6 +29,7 @@ const DefaultLayout = React.lazy(() => import('./containers/DefaultLayout'));
 
 // Pages
 const Page404 = React.lazy(() => import('./views/Pages/Page404'));
+const Portal = React.lazy(() => import('./views/Portal/Portal'))
 
 const PrivateRoute = ({component: Component, ...rest}) => (
   <Route {...rest} render={props => (
@@ -47,6 +48,7 @@ class App extends Component {
         <React.Suspense fallback={loading()}>
           <Switch>
             <Route exact path="/page404" name="Page 404" render={props => <Page404 {...props} />} />
+            <Route exact path="/portal" name="Portal" render={props => <Portal {...props} />} />
             <Route path='/login' component={Login} />  
             {/* {fakeAuth.isAuthenticated
               ? <Route path="/" name="Home" render={props => <DefaultLayout {...props} />} />
