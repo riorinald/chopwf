@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { AppSwitch } from '@coreui/react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-// import Autosuggest from 'react-autosuggest';
 import theme from './theme.css'
 import deleteBin from '../../assets/img/deletebin.png'
 import InputMask from "react-input-mask";
@@ -45,17 +44,10 @@ import {
   Table,
   Tooltip,
   UncontrolledTooltip,
-  Spinner
 } from 'reactstrap';
 
 
 const SelectTable = selectTableHOC(ReactTable);
-
-
-//notes can be updated by text only or editable in HTML editor
-const notes = <p>如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。
-  For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly.
-  If you have any questions regarding the application process, please feel free to contact HR. </p>;
 
 const animatedComponents = makeAnimated();
 
@@ -76,8 +68,6 @@ class Create extends Component {
 
       selectAll: false,
       selection: [],
-
-      // legalEntity: this.props.legalName,
 
       //retrieve from department Types Table
       department: [],
@@ -165,10 +155,8 @@ class Create extends Component {
         { id: "deptHeadSelected", valid: false },
         { id: "documentTableLTI", valid: false },
       ],
-      isLoading: false,
       noteInfo:[],
 
-      lastReq: ""
     };
 
 
@@ -181,11 +169,9 @@ class Create extends Component {
     this.addDocumentLTI = this.addDocumentLTI.bind(this);
     this.addDocumentLTU = this.addDocumentLTU.bind(this);
     this.toggleHover = this.toggleHover.bind(this);
-    // this.addDocCheck = this.addDocCheck.bind(this);
     this.handleSelectOption = this.handleSelectOption.bind(this);
     this.isValid = this.isValid.bind(this);
     this.checkDept = this.checkDept.bind(this);
-
     this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
@@ -488,7 +474,6 @@ class Create extends Component {
   }
 
   async getUserData() {
-    // let token = localStorage.getItem('token')
     let ticket = localStorage.getItem('ticket')
     let userId = localStorage.getItem('userId')
     await axios.get(`${config.url}/users/` + userId, { headers: { 'ticket': ticket } })
@@ -545,7 +530,7 @@ class Create extends Component {
           isLTU: false,
           isLTI: true,
           isCNIPS: false,
-          reqInfo: LTI
+          reqInfo: LTI   
         })
         if (this.state.deptSelected !== "") {
           this.getTeams(this.state.deptSelected)
@@ -898,9 +883,6 @@ class Create extends Component {
             ? <Col ><FormGroup>
               <InputMask placeholder="enter contract number" mask="*-*-*-9999-9999" className="form-control" defaultValue={this.state.contractNum} onChange={this.handleChange("contractNum")}></InputMask>
             </FormGroup></Col>
-            // <Col ><FormGroup>
-            //   <Input onChange={this.handleChange("contractNum")} placeholder="Please enter the contract Number"></Input>
-            // </FormGroup></Col>
             : ""}
 
           <Col md>
@@ -953,7 +935,6 @@ class Create extends Component {
               ref={r => (this.checkboxTable = r)}
               toggleSelection={this.toggleSelection}
               selectAll={this.state.selectAll}
-              // selectType="checkbox"
               toggleAll={this.toggleAll}
               isSelected={this.isSelected}
               getTrProps={this.rowFn}
@@ -1053,7 +1034,6 @@ class Create extends Component {
                     </InputGroupAddon>
                     <Input disabled ref={this.employeeId} onChange={this.handleChange("employeeId")} value={this.state.employeeId} id="prependedInput" size="16" type="text" />
                   </InputGroup>
-                  {/* <p className="help-block">Here's some help text</p> */}
                 </div>
               </FormGroup>
               <FormGroup>
