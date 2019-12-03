@@ -19,12 +19,6 @@ const page404 = React.lazy(()=>import('./views/404'));
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/', exact: true, name: 'Home' },
-  // { path: '/MBAFC', name: 'MBAFC',},
-  // { path: '/MBAFC/myapps', name: 'Myapps', component: Myapps },
-  // { path: '/MBAFC/mypendingtask', exact: true, name: 'MyPendingTasks', component: MyPendingTasks},
-  // { path: '/MBAFC/instruction', name: 'Insctructions', component: Instructions },
-  // { path: '/MBAFC/help', name: 'Help', component: Help },
-
   { path: '/create', name: 'Create', component: Redirect},
   { path: '/MBAFC/create', name: 'Create', component: Create},
   { path: '/MBLC/create', name: 'Create', component: Create},
@@ -44,6 +38,18 @@ const routes = [
   { path: '/editrequest',exact: true, name: 'EditRequest', component: EditRequest },
   { path: '/chopadmin',exact: true, nme: 'Administration', component: Administration},
   { path: '/404', name: 'page404', component: page404},
+
+  { path: '/license/create', exact:true, name: 'Create Request' },
+  { path: '/license/myapplication', exact:true, name: 'My Application' },
+  { path: '/license/mypendingtask', exact:true, name: 'My Pending Task' },
+  { path: '/license/admin-apps', exact:true, name: 'License Application' },
+  { path: '/license/admin', exact:true, name: 'License Admin' },
+  { path: '/license/userguide', exact:true, name: 'User Guide' },
+  { path: '/license/help', exact:true, name: 'Help' }
+
+
+
+  
 
 ];
 
