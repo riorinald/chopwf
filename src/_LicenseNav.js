@@ -11,7 +11,7 @@ export default {
     },
     {
       name: 'My Applications',
-      url: '/license/myapps',
+      url: '/license/myapplication',
       icon: 'icon-layers'
     },
     {
@@ -40,7 +40,7 @@ export default {
     },
     {
       name: 'Help',
-      url: '/licese/help',
+      url: '/license/help',
       icon: 'fa fa-question-circle',
     },
   ],

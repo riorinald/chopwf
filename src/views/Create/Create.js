@@ -1044,7 +1044,7 @@ class Create extends Component {
               </FormGroup>
               <FormGroup>
                 <Label>Dept</Label>
-                <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
+                <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")}  defaultValue="0" name="dept">
                   <option disabled value="0">Please Select . . .</option>
 
                   {this.state.department.map((option, index) => (

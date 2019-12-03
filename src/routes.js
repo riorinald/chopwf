@@ -14,6 +14,11 @@ const EditRequest = React.lazy(() => import('./views/EditRequest/EditRequest'));
 const ApplictionDetail = React.lazy(() =>import('./views/Myapps/ApplicationDetail'));
 const Administration = React.lazy(() => import('./views/Administration'));
 const page404 = React.lazy(()=>import('./views/404'));
+const LicenseCreate = React.lazy(() => import('./views/License/LicenseCreate'));
+const LicenseMyApplications = React.lazy(() => import('./views/License/LicenseMyApplications'));
+const LicenseMyPendingTasks = React.lazy(() => import('./views/License/LicenseMyPendingTasks'));
+const LicenseApplication = React.lazy(() => import('./views/License/LicenseApplication'));
+const LicenseAdmin = React.lazy(() => import('./views/License/LicenseAdmin'));
 
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
@@ -39,11 +44,11 @@ const routes = [
   { path: '/chopadmin',exact: true, nme: 'Administration', component: Administration},
   { path: '/404', name: 'page404', component: page404},
 
-  { path: '/license/create', exact:true, name: 'Create Request' },
-  { path: '/license/myapplication', exact:true, name: 'My Application' },
-  { path: '/license/mypendingtask', exact:true, name: 'My Pending Task' },
-  { path: '/license/admin-apps', exact:true, name: 'License Application' },
-  { path: '/license/admin', exact:true, name: 'License Admin' },
+  { path: '/license/create', exact:true, name: 'Create Request', component: LicenseCreate },
+  { path: '/license/myapplication', exact:true, name: 'My Application', component: LicenseMyApplications },
+  { path: '/license/mypendingtask', exact:true, name: 'My Pending Task', component: LicenseMyPendingTasks },
+  { path: '/license/admin-apps', exact:true, name: 'License Application' , component: LicenseApplication},
+  { path: '/license/admin', exact:true, name: 'License Admin' , component: LicenseAdmin},
   { path: '/license/userguide', exact:true, name: 'User Guide' },
   { path: '/license/help', exact:true, name: 'Help' }
 
