@@ -18,6 +18,7 @@ import {
 // sidebar nav config
 import navigation from '../../_nav';
 import reqNavigation from '../../_Rnav';
+import LicenseNav from '../../_LicenseNav';
 // routes config
 import routes from '../../routes';
 import LegalEntity from '../../context';
@@ -52,6 +53,16 @@ class DefaultLayout extends Component {
     })
   }
 
+  handleSideBarNav(application){
+    switch(application) {
+      case 'chop':
+        return navigation
+      case 'license':
+        return LicenseNav
+      default:
+        return console.log('error! no sideBar')
+    }
+  }
 
 
   render() {
@@ -68,7 +79,7 @@ class DefaultLayout extends Component {
             <AppSidebarHeader />
             <AppSidebarForm />
             <Suspense>
-              <AppSidebarNav navConfig={localStorage.getItem('roleId') === 'REQUESTOR' ? reqNavigation : navigation} {...this.props} router={router} />
+              <AppSidebarNav navConfig={this.handleSideBarNav(localStorage.getItem('application'))} {...this.props} router={router} />
             </Suspense>
             <AppSidebarFooter />
             <AppSidebarMinimizer />
@@ -94,7 +105,7 @@ class DefaultLayout extends Component {
                         )} />
                     ) : (null);
                   })}
-                  <Redirect from="/" to={{ pathname: "/404" }} />
+                  {/* <Redirect from="/" to={{ pathname: "/404" }} /> */}
                 </Switch>
               </Suspense>
             </Container> 
