@@ -24,14 +24,12 @@ class Detail extends Component {
       showModal: false,
       taskDetails: null,
       comments: "",
-      hover: false,
     }
     this.getTaskDetails = this.getTaskDetails.bind(this);
     this.approve = this.approve.bind(this)
     this.toggleView = this.toggleView.bind(this);
     this.redirect = this.redirect.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.toggleHover = this.toggleHover.bind(this);
   }
 
   componentDidMount() {
@@ -52,9 +50,7 @@ class Detail extends Component {
 
   }
 
-  toggleHover() {
-    this.setState({ hover: !this.state.hover }, console.log(this.state.hover))
-  }
+ 
 
   convertDate(dateValue) {
     let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
@@ -69,23 +65,32 @@ class Detail extends Component {
     }
 
     // let userId = "josh@otds.admin"
-    try {
-      Axios.post(`${config.url}/tasks/${this.props.location.state.id}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
-        .then(res => {
-          Swal.fire({
-            title: res.data.message === "The task successfully approved." ? "APPROVED" : "REJECTED",
-            html: res.data.message,
-            type: "success"
-          }).then((result) => {
-            if (result.value) {
-              this.setState({ redirectToTasks: true })
-              resetMounted.setMounted()
-            }
-          })
+    // try {
+    Axios.post(`${config.url}/tasks/${this.props.location.state.id}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
+      .then(res => {
+        Swal.fire({
+          title: res.data.message === "The task successfully approved." ? "APPROVED" : "REJECTED",
+          html: res.data.message,
+          type: "success"
+        }).then((result) => {
+          if (result.value) {
+            this.setState({ redirectToTasks: true })
+            resetMounted.setMounted()
+          }
         })
-    } catch (error) {
-      console.log(error)
-    }
+      })
+      .catch(error => {
+        Swal.fire({
+          title: "ERROR",
+          html: error.response.data.message,
+          type: "error"
+        })
+        // console.log(error.response.data)
+      })
+    // } 
+    // catch (error) {
+    //   console.log(error)
+    // }
 
   }
 
@@ -101,13 +106,12 @@ class Detail extends Component {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  getDeptHeads(heads) {
-    let dh = ""
-    heads.map(head => {
-      dh = dh + head + "; "
-    })
-    return dh
-  }
+  setArray = () => {
+    let result = this.state.taskDetails.departmentHeads
+     return result.join("; ")
+ }
+
+
 
   redirect() {
     this.setState({ redirectToTasks: true })
@@ -128,12 +132,11 @@ class Detail extends Component {
             approve={this.approve}
             showModal={this.state.showModal}
             toggleView={this.toggleView}
-            getDeptHeads={this.getDeptHeads}
+            setArray={this.setArray}
             capitalize={this.capitalize}
             redirect={this.redirect}
             handleChange={this.handleChange}
             toggleHover={this.toggleHover}
-            hover={this.state.hover}
           />
             ;
         case 'LTU':
@@ -143,12 +146,11 @@ class Detail extends Component {
             approve={this.approve}
             showModal={this.state.showModal}
             toggleView={this.toggleView}
-            getDeptHeads={this.getDeptHeads}
+            setArray={this.setArray}
             redirect={this.redirect}
             capitalize={this.capitalize}
             handleChange={this.handleChange}
             toggleHover={this.toggleHover}
-            hover={this.state.hover}
           />
             ;
         case 'LTI':
@@ -159,11 +161,10 @@ class Detail extends Component {
             showModal={this.state.showModal}
             toggleView={this.toggleView}
             redirect={this.redirect}
-            getDeptHeads={this.getDeptHeads}
+            setArray={this.setArray}
             capitalize={this.capitalize}
             handleChange={this.handleChange}
             toggleHover={this.toggleHover}
-            hover={this.state.hover}
           />
             ;
         case 'CNIPS':
@@ -171,14 +172,14 @@ class Detail extends Component {
             legalName={this.props.legalName}
             taskDetail={this.state.taskDetails}
             approve={this.approve}
-            getDeptHeads={this.getDeptHeads}
+            setArray={this.setArray}
             showModal={this.state.showModal}
             toggleView={this.toggleView}
             redirect={this.redirect}
             capitalize={this.capitalize}
             handleChange={this.handleChange}
             toggleHover={this.toggleHover}
-            hover={this.state.hover}
+            
           />
             ;
         default:

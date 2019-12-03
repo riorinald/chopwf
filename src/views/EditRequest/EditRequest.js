@@ -219,11 +219,16 @@ class EditRequest extends Component {
 
     getOption(person) {
         let i = 0
-        this.state.deptHeads.map((head, index) => {
-            if (head.value === person) {
-                i = index
-            }
-        })
+        if (person !== "") {
+            this.state.deptHeads.map((head, index) => {
+                if (head.value === person) {
+                    i = index
+                }
+            })
+        }
+        else {
+            i = null
+        }
         return i
     }
 
@@ -365,7 +370,7 @@ class EditRequest extends Component {
         }
         if (event.target.value) {
 
-            event.target.className = "form-control"
+            event.target.className = "is-valid form-control"
         }
         else {
             event.target.className = "is-invalid form-control"
@@ -496,6 +501,12 @@ class EditRequest extends Component {
 
 
     handleSelectOption = sname => newValue => {
+
+        var element = document.getElementById(sname)
+        element.classList.contains("form-control")
+            ? element.className = "is-valid form-control"
+            : element.className = "isValid"
+
         if (sname === "departmentHeads") {
             let value = []
             this.setState({ selectedDeptHeads: newValue })
@@ -655,6 +666,7 @@ class EditRequest extends Component {
                 }
             })
             .catch(error => {
+                console.log(error.response.data)
                 let stat = error.response.data.status !== "failed" && error.response.data.status !== "error"
                 let msg = ""
                 if (stat) {
@@ -676,11 +688,14 @@ class EditRequest extends Component {
 
     async validate() {
         let details = this.state.validateForm
+        if (this.state.taskDetails.isUseInOffice === "Y") {
+            details = details.filter(item => item !== "responsiblePerson" && item !== "returnDate")
+        }
         for (let i = 0; i < details.length; i++) {
-            console.log(details[i])
-            console.log(this.state.taskDetails[details[i]])
+            // console.log(details[i])
+            // console.log(this.state.taskDetails[details[i]])
             var element = document.getElementById(details[i])
-            if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]] === 0) {
+            if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
                 element.classList.contains("form-control")
                     ? element.className = "is-invalid form-control"
                     : element.className = "notValid"
@@ -692,7 +707,7 @@ class EditRequest extends Component {
             }
         }
         for (let i = 0; i < details.length; i++) {
-            if (this.state.taskDetails[details[i]] === "") {
+            if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
                 this.setState({ isValid: false })
                 break;
             }
@@ -706,12 +721,12 @@ class EditRequest extends Component {
         let checked = event.target.checked
         await this.setValidForm()
         await this.validate()
-
+        // console.log(this.state.isValid)
+        // console.log(this.validator.allValid())
         if (this.state.isValid && this.validator.allValid()) {
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
                 if (checked) { taskDetails.isConfirm = "Y" }
-                else { taskDetails.isConfirm = "N" }
                 return { taskDetails }
             })
         } else {

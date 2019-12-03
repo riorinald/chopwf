@@ -5,7 +5,7 @@ import {
     Button,
     FormGroup,
     Label,
-    Progress,
+    Progress, UncontrolledTooltip,
     Badge,
     Modal, ModalBody, ModalFooter, ModalHeader,
     Collapse,
@@ -202,15 +202,9 @@ const DetailSTU = (props) => {
                             <Col md="4">
                                 <Label htmlFor="text-input">Department Heads</Label>
                             </Col>
-                            <Col xs="12" md="8">
-                                <Input onMouseEnter={props.toggleHover} onMouseLeave={props.toggleHover} disabled type="text" value={props.getDeptHeads(props.taskDetail.departmentHeads)} id="text-input" name="text-input" placeholder="Text" />
-                                <Collapse isOpen={props.hover}>
-                                    <ListGroup>
-                                        {props.taskDetail.departmentHeads.map((head, index)=>
-                                        <ListGroupItem key={index} > {head} </ListGroupItem>
-                                        )}
-                                    </ListGroup>
-                                </Collapse>
+                            <Col id="deptHead" xs="12" md="8">
+                                <Input onMouseEnter={props.toggleHover} onMouseLeave={props.toggleHover} disabled type="text" value={props.setArray()} id="text-input" name="text-input" placeholder="Text" />
+                                <UncontrolledTooltip placement="right" target="deptHead">{props.setArray()}</UncontrolledTooltip>
                             </Col>
                         </FormGroup>
 

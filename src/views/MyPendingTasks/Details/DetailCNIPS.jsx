@@ -222,14 +222,14 @@ const DetailCNIPS = props =>
                                 <Input disabled type="text" value={props.taskDetail.contractSignedBySecondPersonName} id="text-input" name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
-                        <FormGroup row>
+                        {/* <FormGroup row>
                             <Col md="4">
                                 <Label htmlFor="text-input">Entitled Team</Label>
                             </Col>
                             <Col xs="12" md="8">
                                 <Input disabled type="text" value={props.taskDetail.teamName} id="text-input" name="text-input" placeholder="Text" />
                             </Col>
-                        </FormGroup>
+                        </FormGroup> */}
 
                     </Col>
                 </Row>
