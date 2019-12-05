@@ -19,7 +19,7 @@ const LicenseMyApplications = React.lazy(() => import('./views/License/LicenseMy
 const LicenseMyPendingTasks = React.lazy(() => import('./views/License/LicenseMyPendingTasks'));
 const LicenseApplication = React.lazy(() => import('./views/License/LicenseApplication'));
 const LicenseAdmin = React.lazy(() => import('./views/License/LicenseAdmin'));
-const LicenseApplicationDetail = React.lazy(() => import('./views/License/LicenseApplicationDetail'));
+// const LicenseApplicationDetail = React.lazy(() => import('./views/License/LicenseApplicationDetail'));
 
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config

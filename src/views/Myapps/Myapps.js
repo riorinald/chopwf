@@ -60,7 +60,27 @@ class Myapps extends Component {
         statusName: "",
         createdDate: "",
         createdByName: ""
-      }
+      },
+
+      status: [
+        "Recall",
+        "Pending for Document check by (L4 or above) Approval ",
+        "Pending for Department Head Approval",
+        "Bring the Original Documents for Chop",
+        "Pending for Chop Owner Approval",
+        "Send Back to Requestor",
+        "Rejected",
+        "Pending for Chop Keeper Acknowledge Lend Out",
+        "Pending Chop Keeper Acknowledge Return",
+        "Completed",
+        "Draft",
+        "Pending Requestor Return/Extension",
+        "Pending Department Head Approval for Extension",
+        "Pending Chop Keeper Approval for extension",
+        "Pending Chop Owner Approval for extension",
+        "Chop request expired after 30 days",
+        "Pending Requestor Return"
+    ]
 
     }
     this.getApplications = this.getApplications.bind(this);
@@ -78,7 +98,7 @@ class Myapps extends Component {
   async getApplications() {
     this.setState({ loading: true })
     // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
-    await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks?all=n&userid=${this.state.username}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`)
+    await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks?all=y&userid=${this.state.username}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`)
       .then(res => {
         this.setState({ applications: res.data, loading: false })
       })
@@ -331,7 +351,18 @@ class Myapps extends Component {
                     accessor: "statusName",
                     width: this.getColumnWidth('statusName', "Status"),
                     Cell: this.renderEditable,
-                    style: { textAlign: "center" }
+                    style: { textAlign: "center" },
+                    Filter: ({ filter, onChange }) => {
+                      return (
+                          <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
+                              <option value="" >Please Select a status</option>
+                              {this.state.status.map((stat, index) =>
+                                  <option key={index} value={stat} >{stat}</option>
+                              )}
+                          </Input>
+
+                      )
+                    },
                   },
                   {
                     Header: "Date of Creation",

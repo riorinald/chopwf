@@ -80,7 +80,7 @@ class DefaultHeader extends Component {
           </AppNavbarBrand> */
         }
         <AppSidebarMinimizer className="customMT d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
-        <h2 className="h5 d-sm-down-none"><b>{this.state.application.toUpperCase()} Use WORKFLOW for {ContextValue.legalEntity.name}</b></h2>
+        <h2 className="h5 d-sm-down-none"><b>{this.state.application} Use WORKFLOW for {ContextValue.legalEntity.name}</b></h2>
         <Nav className="ml-auto" navbar>
           <NavItem >
             <Button color="ghost" onClick={this.toggle} to="#"><i className="fa fa-exchange" /> Another Workflow ? </Button>
@@ -96,7 +96,7 @@ class DefaultHeader extends Component {
               </ModalFooter>
             </Modal>
           </NavItem>
-          <NavItem className="d-md-down-none">
+          <NavItem className="d-sm-down-none">
             {username}
           </NavItem>
           <UncontrolledDropdown nav direction="down" >

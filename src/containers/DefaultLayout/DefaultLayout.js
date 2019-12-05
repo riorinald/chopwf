@@ -55,12 +55,12 @@ class DefaultLayout extends Component {
 
   handleSideBarNav(application){
     switch(application) {
-      case 'chop':
+      case 'CHOP':
         return navigation
-      case 'license':
+      case 'LICENSE':
         return LicenseNav
       default:
-        return console.log('error! no sideBar')
+        return console.log('error! no sideBar value application not match')
     }
   }
 

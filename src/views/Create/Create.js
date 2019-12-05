@@ -881,7 +881,7 @@ class Create extends Component {
 
           {this.state.isCNIPS
             ? <Col ><FormGroup>
-              <InputMask placeholder="enter contract number" mask="*-*-*-9999-9999" className="form-control" defaultValue={this.state.contractNum} onChange={this.handleChange("contractNum")}></InputMask>
+              <InputMask placeholder="enter contract number" mask="*-**-*-9999-9999" className="form-control" defaultValue={this.state.contractNum} onChange={this.handleChange("contractNum")}></InputMask>
             </FormGroup></Col>
             : ""}
 

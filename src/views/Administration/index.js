@@ -179,6 +179,9 @@ class Administration extends Component {
     };
 
     render(){
+        
+    if (this.props.roleId === "REQUESTOR")
+      return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
 
         return (
             <Card>
