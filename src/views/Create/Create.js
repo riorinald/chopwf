@@ -155,7 +155,7 @@ class Create extends Component {
         { id: "deptHeadSelected", valid: false },
         { id: "documentTableLTI", valid: false },
       ],
-      noteInfo:[],
+      noteInfo: [],
 
     };
 
@@ -309,6 +309,7 @@ class Create extends Component {
 
     let postReq = new FormData();
     postReq.append("UserId", this.state.userId);
+    postReq.append("UserId", this.state.userId);
     postReq.append("EmployeeNum", this.state.employeeId);
     postReq.append("TelephoneNum", this.state.telNumber);
     postReq.append("CompanyId", this.props.legalName);
@@ -352,9 +353,9 @@ class Create extends Component {
     }
 
 
-    // for (var pair of postReq.entries()) {
-    //   console.log(pair[0] + ', ' + pair[1]);
-    // }
+    for (var pair of postReq.entries()) {
+      console.log(pair[0] + ', ' + pair[1]);
+    }
 
 
     if (isSubmitted === 'N' && this.validator.allValid()) {
@@ -435,7 +436,7 @@ class Create extends Component {
         .then(res => {
           if (isSubmitted === 'N') {
             Swal.fire({
-              title: res.data.status,
+              title: res.data.status === "200" ? "Saved" : "",
               text: 'Request Saved ',
               footer: 'Your request is saved as a draft',
               type: 'info',
@@ -444,7 +445,7 @@ class Create extends Component {
           }
           if (isSubmitted === 'Y') {
             Swal.fire({
-              title: res.data.status,
+              title: res.data.status === "200" ? "Submitted" : "",
               text: 'Request Submitted',
               footer: 'Your request is being processed and is waiting for the approval',
               type: 'success',
@@ -476,6 +477,7 @@ class Create extends Component {
   async getUserData() {
     let ticket = localStorage.getItem('ticket')
     let userId = localStorage.getItem('userId')
+    // let userId = "daniel@otds.admin"
     await axios.get(`${config.url}/users/` + userId, { headers: { 'ticket': ticket } })
       .then(res => {
         this.setState({ employeeId: res.data.employeeNum, telNumber: res.data.telephoneNum, userId: userId })
@@ -530,7 +532,7 @@ class Create extends Component {
           isLTU: false,
           isLTI: true,
           isCNIPS: false,
-          reqInfo: LTI   
+          reqInfo: LTI
         })
         if (this.state.deptSelected !== "") {
           this.getTeams(this.state.deptSelected)
@@ -872,7 +874,7 @@ class Create extends Component {
           )}
         </tbody>
       </table>
-    
+
     </div>
 
     const documentForLTI =
@@ -1044,7 +1046,7 @@ class Create extends Component {
               </FormGroup>
               <FormGroup>
                 <Label>Dept</Label>
-                <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")}  defaultValue="0" name="dept">
+                <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
                   <option disabled value="0">Please Select . . .</option>
 
                   {this.state.department.map((option, index) => (
@@ -1289,11 +1291,11 @@ class Create extends Component {
             <div className="form-actions" >
               <Row noGutters className="float-left">
                 <Col className="mr-2" >
-                {this.state.agreeTerms
-                  ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
-                  : <Button id="disabledSubmit" type="submit" color="success" disabled
-                    onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} >Submit</Button>}
-                  <Tooltip placement="left"  isOpen={this.state.tooltipOpen} target="disabledSubmit">please confirm the agree terms</Tooltip>
+                  {this.state.agreeTerms
+                    ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
+                    : <Button id="disabledSubmit" type="submit" color="success" disabled
+                      onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} >Submit</Button>}
+                  <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit">please confirm the agree terms</Tooltip>
                 </Col>
                 <Col>
                   <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>

@@ -17,7 +17,7 @@ import "react-table/react-table.css"
 const DetailSTU = (props) => {
 
     return <div>
-        <Card >
+        <Card className="animated fadeIn" >
             <CardHeader> <Button onClick={props.redirect} > Back &nbsp; </Button>  {props.taskDetail.requestNum} </CardHeader>
             <CardBody color="dark">
                 <Row noGutters={true}>
@@ -203,7 +203,7 @@ const DetailSTU = (props) => {
                                 <Label htmlFor="text-input">Department Heads</Label>
                             </Col>
                             <Col id="deptHead" xs="12" md="8">
-                                <Input onMouseEnter={props.toggleHover} onMouseLeave={props.toggleHover} disabled type="text" value={props.setArray()} id="text-input" name="text-input" placeholder="Text" />
+                                <Input disabled type="text" value={props.setArray()} id="text-input" name="text-input" placeholder="Text" />
                                 <UncontrolledTooltip placement="right" target="deptHead">{props.setArray()}</UncontrolledTooltip>
                             </Col>
                         </FormGroup>
@@ -293,10 +293,11 @@ const DetailSTU = (props) => {
                         <Row className="bottom-border"></Row>
                         <Row>
                             <Col md="1">
-                                <img src="" className="img-avatar" alt="Avatar" />
+                                <img src={history.approvedByAvatarUrl} className="img-avatar" alt="Avatar" />
                             </Col>
                             <Col md="8">
                                 <h5>{history.approvedByName} (000)<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
+                                <div><b>Approved On:</b>  {props.convertApprovedDate(history.approvedDate)} </div>
                                 <small>{history.comments}</small>
                             </Col>
                         </Row>

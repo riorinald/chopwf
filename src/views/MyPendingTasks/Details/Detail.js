@@ -24,6 +24,7 @@ class Detail extends Component {
       showModal: false,
       taskDetails: null,
       comments: "",
+      loading: false
     }
     this.getTaskDetails = this.getTaskDetails.bind(this);
     this.approve = this.approve.bind(this)
@@ -44,21 +45,28 @@ class Detail extends Component {
 
   async getTaskDetails(id) {
     let userId = localStorage.getItem('userId')
+    this.setState({ loading: true })
     // let userId = "josh@otds.admin"
-    const res = await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`)
-    this.setState({ taskDetails: res.data })
+    await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`).then(res => {
+      this.setState({ taskDetails: res.data, loading: false })
+    })
 
   }
 
- 
+
 
   convertDate(dateValue) {
     let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
     return regEx
   }
 
-  approve(action) {
+  convertApprovedDate(dateValue) {
 
+    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\w{2})/g, '$1/$2/$3 $4:$5 $6')
+    return regEx
+  }
+
+  approve(action) {
     let data = {
       userId: localStorage.getItem('userId'),
       comments: this.state.comments
@@ -108,8 +116,8 @@ class Detail extends Component {
 
   setArray = () => {
     let result = this.state.taskDetails.departmentHeads
-     return result.join("; ")
- }
+    return result.join("; ")
+  }
 
 
 
@@ -136,7 +144,7 @@ class Detail extends Component {
             capitalize={this.capitalize}
             redirect={this.redirect}
             handleChange={this.handleChange}
-            toggleHover={this.toggleHover}
+            convertApprovedDate={this.convertApprovedDate}
           />
             ;
         case 'LTU':
@@ -150,7 +158,6 @@ class Detail extends Component {
             redirect={this.redirect}
             capitalize={this.capitalize}
             handleChange={this.handleChange}
-            toggleHover={this.toggleHover}
           />
             ;
         case 'LTI':
@@ -164,7 +171,6 @@ class Detail extends Component {
             setArray={this.setArray}
             capitalize={this.capitalize}
             handleChange={this.handleChange}
-            toggleHover={this.toggleHover}
           />
             ;
         case 'CNIPS':
@@ -178,8 +184,7 @@ class Detail extends Component {
             redirect={this.redirect}
             capitalize={this.capitalize}
             handleChange={this.handleChange}
-            toggleHover={this.toggleHover}
-            
+
           />
             ;
         default:
@@ -194,12 +199,7 @@ class Detail extends Component {
       <div className="animated fadeIn">
         {this.state.redirectToTasks
           ? <Redirect to='/mypendingtask' />
-          :
-          <Card>
-            <CardBody>
-              {this.checkDetail()}
-            </CardBody>
-          </Card>
+          : this.checkDetail()
         }
 
       </div>
