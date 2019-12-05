@@ -16,8 +16,8 @@ import {
   // AppBreadcrumb2 as AppBreadcrumb,
 } from '@coreui/react';
 // sidebar nav config
-import navigation from '../../_nav';
-import reqNavigation from '../../_Rnav';
+import ChopKeeperNav from '../../_nav';
+import RequestorNav from '../../_Rnav';
 import LicenseNav from '../../_LicenseNav';
 // routes config
 import routes from '../../routes';
@@ -47,7 +47,6 @@ class DefaultLayout extends Component {
   }
 
   handleLegalEntity(_State) {
-    console.log(_State.legalEntity)
     this.setState({
       legalEntity: _State.legalEntity
     })
@@ -56,11 +55,17 @@ class DefaultLayout extends Component {
   handleSideBarNav(application){
     switch(application) {
       case 'CHOP':
-        return navigation
+        if(this.state.roleId === 'REQUESTOR')
+          return RequestorNav;
+        if(this.state.roleId === 'CHOPKEEPER'||'CHOPOWNER')
+          return ChopKeeperNav;
+        else  return console.log('error! Roles not match, no sideBarNav');
+
       case 'LICENSE':
-        return LicenseNav
+        return LicenseNav;
+
       default:
-        return console.log('error! no sideBar value application not match')
+        return console.log('error! workflow application not match, no sideBarNav');
     }
   }
 
@@ -105,7 +110,7 @@ class DefaultLayout extends Component {
                         )} />
                     ) : (null);
                   })}
-                  {/* <Redirect from="/" to={{ pathname: "/404" }} /> */}
+                  <Redirect from="/" to={{ pathname: "/404" }} />
                 </Switch>
               </Suspense>
             </Container> 
