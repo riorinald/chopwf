@@ -23,7 +23,7 @@ class Portal extends Component {
     }
     if (value === 'LICENSE'){
       localStorage.setItem('application', 'LICENSE')
-      this.props.history.push('/license') 
+      this.props.history.push('/license/create') 
     }    
   }
 

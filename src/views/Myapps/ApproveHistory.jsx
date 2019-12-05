@@ -21,8 +21,8 @@ const AapprovalHistory = props =>
         <img src={props.histories.approvedByAvatarUrl} className="img-avaa img-responsive" alt="admin@bootstrapmaster.com" />
       </Col>
       <Col sm md="10" lg>
-        <h5>{props.histories.approvedByName} (000)<span> <Badge pill color="success">{props.histories.approvalStatus}</Badge></span></h5>
-        <Badge className="mb-1" color="light">{convertDate(props.histories.approvedDate)}</Badge>
+        <h5>{props.histories.approvedByName} (000)<span> <Badge color="success">{props.histories.approvalStatus}</Badge></span></h5>
+        <h6><Badge className="mb-1" color="light">{convertDate(props.histories.approvedDate)}</Badge></h6>
         <Col className="p-0"> <p>{props.histories.comments}</p> </Col>
     </Col>
     </Row>
