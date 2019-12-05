@@ -36,7 +36,7 @@ const LicenseApplicationDetail = (props) => {
                         {/* <Button className="mr-1" color="success" onClick={()=>{this.updated('Extended')}}><i className="icon-plus" /> Extend </Button> */}
                     </Row></CardHeader>
                 <CardBody>
-                    <Row className="mb-3">
+                    <Row className="mb-4">
                         <Col xs="12" md lg><span className="display-5"> {props.applications.requestNumber}</span></Col>
                         <Col sm="12 py-2" md lg>
                             <Progress multi>
@@ -45,7 +45,7 @@ const LicenseApplicationDetail = (props) => {
                             </Progress>
                         </Col>
                     </Row>
-                    <Row className="mb-4">
+                    <Row className="mb-5">
                         <Col xs="12" sm="12" md lg className="text-md-left text-center">
                             <Row>
                                 <Col xs={12} sm={12} md={4} lg={2}>
@@ -72,8 +72,8 @@ const LicenseApplicationDetail = (props) => {
                             </Row>
                         </Col>
                     </Row>
-                    <Col className="mb-4">
-                        <FormGroup row>
+                    <Col className="mb-5">
+                        <FormGroup row className="mb-0 mb-md-4">
                             <Col md lg>
                                 <Label>Employee Number</Label>
                             </Col>
@@ -87,7 +87,7 @@ const LicenseApplicationDetail = (props) => {
                                 <Input disabled type="text" defaultValue={props.applications.department} name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
-                        <FormGroup row>
+                        <FormGroup row className="mb-0 mb-md-4">
                             <Col md lg>
                                 <Label>License Name</Label>
                             </Col>
@@ -101,7 +101,7 @@ const LicenseApplicationDetail = (props) => {
                                 <Input disabled type="text" defaultValue={props.applications.licensePurpose} name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
-                        <FormGroup row>
+                        <FormGroup row className="mb-0 mb-md-4">
                             <Col md lg>
                                 <Label>Document Type</Label>
                             </Col>
@@ -115,7 +115,7 @@ const LicenseApplicationDetail = (props) => {
                                 <Input disabled type="text" defaultValue={props.applications.returnDate} name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
-                        <FormGroup row>
+                        <FormGroup row className="mb-0 mb-md-4">
                             <Col md lg>
                                 <Label>Deliver Ways</Label>
                             </Col>
@@ -129,7 +129,7 @@ const LicenseApplicationDetail = (props) => {
                                 <Input disabled type="text" defaultValue={props.applications.address} name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
-                        <FormGroup row>
+                        <FormGroup row className="mb-0 mb-md-4">
                             <Col md lg>
                                 <Label>Receiver</Label>
                             </Col>
@@ -143,7 +143,7 @@ const LicenseApplicationDetail = (props) => {
                                 <Input disabled type="text" defaultValue={props.applications.returnWays} name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
-                        <FormGroup row>
+                        <FormGroup row className="mb-0 mb-md-4">
                             <Col md lg>
                                 <Label>Receiver Mobile Number</Label>
                             </Col>
@@ -157,7 +157,7 @@ const LicenseApplicationDetail = (props) => {
                                 <Input disabled type="text" defaultValue={props.applications.expressNumber} name="text-input" placeholder="Text" />
                             </Col>
                         </FormGroup>
-                        <FormGroup row>
+                        <FormGroup row className="mb-0 mb-md-4">
                             <Col md lg>
                                 <Label>Senior Manager or above of Requestor Department</Label>
                             </Col>
