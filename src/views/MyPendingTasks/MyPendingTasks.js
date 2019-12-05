@@ -129,6 +129,20 @@ class MyPendingTasks extends Component {
         return dh
     }
 
+    goToDetails(id, url) {
+        this.props.history.push({
+            pathname: url,
+            state: { id: id }
+        })
+    }
+
+    goToEditRequest(id) {
+        this.props.history.push({
+            pathname: 'editrequest',
+            state: { id: id }
+        })
+    }
+
 
 
     async getPendingTasks() {
@@ -446,13 +460,13 @@ class MyPendingTasks extends Component {
                                             }
 
                                             let status = rowInfo.original.statusId
-                                            this.redirectDetails(rowInfo.original.taskId, status, `mypendingtask/${rowInfo.original.applicationTypeId}`)
-                                            // this.setState({ taskId: rowInfo.original.taskId, redirectToUrl: `mypendingtask/${rowInfo.original.applicationTypeId}` })
-
-
-
-                                            // if (status === "PENDINGDEPTHEAD") {
-
+                                            console.log(status)
+                                            if (status === "DRAFTED" || status === "RECALL" || status === "SENDBACK") {
+                                                this.goToEditRequest(rowInfo.original.taskId)
+                                            }
+                                            else {
+                                                this.goToDetails(rowInfo.original.taskId, `mypendingtask/${rowInfo.original.applicationTypeId}`)
+                                            }
 
                                         },
                                         style: {
@@ -474,18 +488,6 @@ class MyPendingTasks extends Component {
                         />
                     </CardBody>
                 </Card>
-                {this.state.toggleDetails
-                    ? this.props.history.push({
-                        pathname: 'editrequest',
-                        state: { id: this.state.taskId }
-                    })
-                    : !this.state.show
-                        ? this.props.history.push({
-                            pathname: this.state.redirectToUrl,
-                            state: { id: this.state.taskId }
-                        })
-                        : null
-                }
             </div>
         )
     }

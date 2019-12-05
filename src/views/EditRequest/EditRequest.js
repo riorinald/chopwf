@@ -12,14 +12,13 @@ import {
     ModalBody,
     ModalFooter,
     CustomInput,
+    Spinner
 } from 'reactstrap';
 import config from '../../config';
 import Axios from 'axios';
-import { Redirect } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { addDays } from 'date-fns';
-import ReactDataGrid from 'react-data-grid';
 import InputMask from "react-input-mask";
 import deleteBin from '../../assets/img/deletebin.png'
 import { AppSwitch } from '@coreui/react';
@@ -68,6 +67,7 @@ class EditRequest extends Component {
             selectAll: false,
             selection: [],
 
+            loading: false,
             taskDetails: {
                 taskId: "",
                 requestNum: "",
@@ -129,7 +129,6 @@ class EditRequest extends Component {
             showDoc: false,
             selectedDocs: [],
 
-            redirectToPendingTasks: false,
             deptHeads: [],
             selectedDeptHeads: [],
             dateView1: "",
@@ -140,8 +139,8 @@ class EditRequest extends Component {
             teams: [],
         }
         this.getTaskDetails = this.getTaskDetails.bind(this);
-        this.redirectToPendingTasks = this.redirectToPendingTasks.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.redirectToPendingTasks = this.redirectToPendingTasks.bind(this)
         this.handleDocumentChange = this.handleDocumentChange.bind(this);
         this.toggleConnection = this.toggleConnection.bind(this);
         this.toggleUIO = this.toggleUIO.bind(this);
@@ -154,9 +153,14 @@ class EditRequest extends Component {
     }
 
     componentDidMount() {
-        this.getDeptHeads()
         if (this.props.location.state !== undefined) {
+            this.getDeptHeads()
             this.getTaskDetails(this.props.location.state.id)
+        }
+        else {
+            this.props.history.push({
+                pathname: '/mypendingtask'
+            })
         }
         this.validator = new SimpleReactValidator();
     }
@@ -197,12 +201,16 @@ class EditRequest extends Component {
     }
 
     async deleteTask() {
-        Swal.fire({
-            title: "REQUEST DELETED",
-            html: 'The request has been deleted',
-            type: "success",
-            onClose: () => { this.setState({ redirectToPendingTasks: true }) }
+        console.log(this.state.taskDetails.taskId)
+        Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res=>{
+            console.log(res.data)
         })
+        // Swal.fire({
+        //     title: "REQUEST DELETED",
+        //     html: 'The request has been deleted',
+        //     type: "success",
+        //     onClose: () => { this.props.history.push({ pathname: '/mypendingtask' }) }
+        // })
 
     }
 
@@ -234,6 +242,7 @@ class EditRequest extends Component {
 
 
     async getTaskDetails(id) {
+        this.setState({ loading: true })
         const response = await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`)
         let temporary = response.data
         if (temporary.departmentId !== "") {
@@ -271,7 +280,7 @@ class EditRequest extends Component {
             }
         }
 
-        this.setState({ taskDetails: temporary })
+        this.setState({ taskDetails: temporary, loading: false })
     }
 
     setValidForm() {
@@ -331,7 +340,7 @@ class EditRequest extends Component {
     }
 
     redirectToPendingTasks() {
-        this.setState({ redirectToPendingTasks: true })
+        this.props.history.push('/mypendingtask')
     }
 
     filterColors = (inputValue) => {
@@ -644,8 +653,7 @@ class EditRequest extends Component {
                         footer: 'Your request is saved as a draft',
                         type: 'info',
                         onClose: () => {
-                            this.setState({ redirectToPendingTasks: true })
-                            // this.props.history.push('/mypendingtask')
+                            this.props.history.push('/mypendingtask')
                         }
                     })
 
@@ -657,8 +665,7 @@ class EditRequest extends Component {
                         footer: 'Your request is being processed and is waiting for the approval',
                         type: 'success',
                         onClose: () => {
-                            // this.props.history.push('/mypendingtask')
-                            this.setState({ redirectToPendingTasks: true })
+                            this.props.history.push('/mypendingtask')
                         }
 
                     })
@@ -817,18 +824,16 @@ class EditRequest extends Component {
 
 
     render() {
-        const { redirectToPendingTasks, taskDetails, dateView1, deptHeads, selectedDeptHeads, editRequestForm } = this.state
+        const { taskDetails, dateView1, deptHeads, selectedDeptHeads, editRequestForm } = this.state
 
         this.validator.purgeFields();
 
         return (
             <div>
-                {this.props.location.state === undefined
-                    ? <Redirect to={'/mypendingtask'} />
-                    // this.props.history.push('/mypendingtask')
-                    : <Card className="animated fadeIn">
+                {!this.state.loading ?
+                    <Card className="animated fadeIn">
                         <CardHeader>
-                            <Button onClick={this.redirectToPendingTasks}>Back</Button> &nbsp;
+                            <Button onClick={() => this.redirectToPendingTasks()}>Back</Button> &nbsp;
                              EDIT REQUEST - {taskDetails.requestNum}
                         </CardHeader>
                         <CardBody color="dark">
@@ -1326,10 +1331,8 @@ class EditRequest extends Component {
                             </div>
                         </CardFooter>
                     </Card>
+                    : <div className="animated fadeIn pt-1 text-center" ><Spinner /></div>
                 }
-
-                {redirectToPendingTasks ? this.props.history.push('/mypendingtask') : ""}
-
             </div>
         )
     }
