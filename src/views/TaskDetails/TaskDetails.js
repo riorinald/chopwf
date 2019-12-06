@@ -552,14 +552,14 @@ class TaskDetails extends Component {
                             {taskDetails.histories.map((history, index) =>
                                 <div key={index}>
                                     <Row className="bottom-border"></Row>
-                                    <Row>
-                                        <Col md="1">
-                                            <img src={history.approvedByAvatarUrl} className="img-avatar" alt="Avatar" />
+                                    <Row className="text-md-left text-center">
+                                        <Col xs="12" sm="12" md="2" lg="1">
+                                            <img src={history.approvedByAvatarUrl} className="img-avaa img-responsive" alt="Avatar" />
                                         </Col>
-                                        <Col md="8">
+                                        <Col sm md="10" lg>
                                             <h5>{history.approvedByName} (000)<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
-                                            <div><b>Approved On:</b>  {this.convertApprovedDate(history.approvedDate)} </div>
-                                            <small>{history.comments}</small>
+                                            <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
+                                            <Col className="p-0"> <p>{history.comments}</p> </Col>
                                         </Col>
                                     </Row>
                                 </div>

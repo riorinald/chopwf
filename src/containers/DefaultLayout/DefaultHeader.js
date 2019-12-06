@@ -26,7 +26,7 @@ class DefaultHeader extends Component {
     super(props);
     this.state = {
       modal: false,
-      legalEntity: "MBAFC",
+      legalEntity: localStorage.getItem('legalEntity'),
       application: localStorage.getItem('application'),
       disabled: true
     };

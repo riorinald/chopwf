@@ -1312,7 +1312,7 @@ class EditRequest extends Component {
                         <CardFooter>
                             <div className="form-actions">
                                 <Row>
-                                    <Col md={11}>
+                                    <Col className="d-flex justify-content-start">
                                         {taskDetails.isConfirm
                                             ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
                                             : <Button type="submit" color="success"
@@ -1323,7 +1323,7 @@ class EditRequest extends Component {
                                         <span>&nbsp;</span>
                                         <Button type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
                                     </Col>
-                                    <Col>
+                                    <Col className="d-flex justify-content-end">
                                         <Button onClick={this.deleteTask} color="danger" >Delete</Button>
                                     </Col>
                                 </Row>
