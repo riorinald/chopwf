@@ -204,14 +204,16 @@ class EditRequest extends Component {
         console.log(this.state.taskDetails.taskId)
         Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res=>{
             console.log(res.data)
-        })
-        // Swal.fire({
-        //     title: "REQUEST DELETED",
-        //     html: 'The request has been deleted',
-        //     type: "success",
-        //     onClose: () => { this.props.history.push({ pathname: '/mypendingtask' }) }
-        // })
 
+        Swal.fire({
+            title: "REQUEST DELETED",
+            html: res.data.message,
+            type: "success",
+            onClose: () => { 
+                resetMounted.setMounted()
+                this.props.history.push({ pathname: '/mypendingtask' }) }
+             })
+        })
     }
 
     convertExpDate(dateValue) {
@@ -1311,7 +1313,7 @@ class EditRequest extends Component {
                         <CardFooter>
                             <div className="form-actions">
                                 <Row>
-                                    <Col md={11}>
+                                    <Col className="d-flex justify-content-start">
                                         {taskDetails.isConfirm
                                             ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
                                             : <Button type="submit" color="success"
@@ -1322,7 +1324,7 @@ class EditRequest extends Component {
                                         <span>&nbsp;</span>
                                         <Button type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
                                     </Col>
-                                    <Col>
+                                    <Col className="d-flex justify-content-end">
                                         <Button onClick={this.deleteTask} color="danger" >Delete</Button>
                                     </Col>
                                 </Row>

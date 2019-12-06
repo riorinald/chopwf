@@ -399,7 +399,7 @@ class Create extends Component {
     this.setState({ hover: !this.state.hover })
   }
 
-  changeSelect() {
+  changeSelect = () => {
     this.setState({
       modal: !this.state.modal,
     });
@@ -437,9 +437,9 @@ class Create extends Component {
         .then(res => {
           if (isSubmitted === 'N') {
             Swal.fire({
-              title: res.data.status === "200" ? "Saved" : "",
-              text: 'Request Saved ',
-              footer: 'Your request is saved as a draft',
+              title: res.data.status === 200 ? "Request Saved" : "",
+              text: 'Request Number : '+ res.data.requestNum,
+              footer: 'Your request is saved as draft.',
               type: 'info',
               onClose: () => { this.formReset() }
             })
@@ -455,7 +455,23 @@ class Create extends Component {
           }
         })
     } catch (error) {
-      console.error(error);
+      if (error.response && isSubmitted === 'N') {
+      Swal.fire({
+          title: error.response.statusText,
+          text: error.response.data.message,
+          footer: JSON.stringify(error.response.data),
+          type: 'error',
+        })
+      }
+      if (error.response && isSubmitted === 'Y') {
+        Swal.fire({
+            title: error.response.statusText,
+            text: JSON.stringify(error.response.data),
+            footer: 'traceId : ' + error.response.data.traceId,
+            type: 'error',
+          })
+        }
+      console.error(error.response);
     }
   }
 
@@ -1330,8 +1346,8 @@ class Create extends Component {
             </div>
           </CardFooter>
         </Card>
-        <Modal color="info" isOpen={this.state.modal} toggle={this.toggleModal} className={'modal-info ' + this.props.className} >
-          <ModalHeader className="center" toggle={this.toggleModal}> Contract Chop </ModalHeader>
+        <Modal backdrop="static" color="info" isOpen={this.state.modal} toggle={this.toggleModal} className={'modal-info ' + this.props.className} >
+          <ModalHeader className="center" toggle={this.changeSelect}> Contract Chop </ModalHeader>
           <ModalBody>
             <div><p>
               <b>MBAFC</b> Contract Chop is only used for <b>Mortgage Loan Contract</b> and <b>Mortgage Filling Business</b>.
@@ -1342,7 +1358,7 @@ class Create extends Component {
           </ModalBody>
           <ModalFooter>
             <Button color="success" onClick={this.toggleModal} size="md"> Yes </Button>
-            <Button color="secondary" onClick={() => this.changeSelect("No")} size="md"> No </Button>
+            <Button color="secondary" onClick={this.changeSelect} size="md"> No </Button>
           </ModalFooter>
         </Modal>
       </div >
