@@ -156,6 +156,7 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       noteInfo: [],
+      inputMasak: "*-aa-*-9999-9999"
 
     };
 
@@ -327,7 +328,7 @@ class Create extends Component {
     postReq.append("IsConfirmed", IsConfirmed);
     postReq.append("ReturnDate", this.state.returnDate);
     postReq.append("ResponsiblePerson", this.state.resPerson);
-    postReq.append("ContracySignedByFirstPerson", this.state.contractSign1);
+    postReq.append("ContractSignedByFirstPerson", this.state.contractSign1);
     postReq.append("ContractSignedBySecondPerson", this.state.contractSign2);
     postReq.append("EffectivePeriod", this.state.effectivePeriod);
     postReq.append("IsSubmitted", isSubmitted);
@@ -624,14 +625,35 @@ class Create extends Component {
     this.setState({
       [name]: event.target.value
     });
+
     if (event.target.value) {
       event.target.className = "form-control"
-
     }
+    
+
     else {
       event.target.className = "is-invalid form-control"
     }
   };
+
+
+  handleInputMask = (event) =>{
+      let value =  ("" + event.target.value).toUpperCase();
+        this.setState({
+          contractNum: value
+        });
+          if (/^..[ALRalr]/.test(event.target.value)) {
+            this.setState({
+              inputMasak: "*-a-*-9999-9999",
+            });
+          }
+          else {
+            this.setState({
+              inputMasak: "*-aa-*-9999-9999",
+            }); 
+          }
+  }
+  
 
   deleteDocument(table, i) {
     this.setState(state => {
@@ -850,7 +872,7 @@ class Create extends Component {
 
 
     const DocTable = <div className="tableWrap">
-      <table>
+      <Table hover bordered responsive size="sm">
         <thead>
           <tr>
             <th className="smallTd" >No.</th>
@@ -873,7 +895,7 @@ class Create extends Component {
             </tr>
           )}
         </tbody>
-      </table>
+      </Table>
 
     </div>
 
@@ -883,7 +905,7 @@ class Create extends Component {
 
           {this.state.isCNIPS
             ? <Col ><FormGroup>
-              <InputMask placeholder="enter contract number" mask="*-**-*-9999-9999" className="form-control" defaultValue={this.state.contractNum} onChange={this.handleChange("contractNum")}></InputMask>
+              <InputMask placeholder="enter contract number" mask={this.state.inputMasak} className="form-control" value={this.state.contractNum} onChange={this.handleInputMask}></InputMask>
             </FormGroup></Col>
             : ""}
 
