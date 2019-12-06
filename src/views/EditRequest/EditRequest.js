@@ -444,7 +444,7 @@ class EditRequest extends Component {
         if (this.state.editRequestForm.docSelected !== null) {
             const obj = {
                 taskId: this.state.taskDetails.taskId,
-                documentName: this.state.editRequestForm.docAttachedName,
+                documentFileName: this.state.editRequestForm.docAttachedName,
                 documentCode: "",
                 contractNumber: this.state.editRequestForm.contractNum,
                 description: "",

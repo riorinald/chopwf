@@ -310,7 +310,6 @@ class Create extends Component {
 
     let postReq = new FormData();
     postReq.append("UserId", this.state.userId);
-    postReq.append("UserId", this.state.userId);
     postReq.append("EmployeeNum", this.state.employeeId);
     postReq.append("TelephoneNum", this.state.telNumber);
     postReq.append("CompanyId", this.props.legalName);
@@ -494,6 +493,7 @@ class Create extends Component {
   async getUserData() {
     let ticket = localStorage.getItem('ticket')
     let userId = localStorage.getItem('userId')
+    // let userId = "josh@otds.admin"
     // let userId = "daniel@otds.admin"
     await axios.get(`${config.url}/users/` + userId, { headers: { 'ticket': ticket } })
       .then(res => {
