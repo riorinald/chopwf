@@ -16,7 +16,7 @@ import {
 } from 'reactstrap';
 import ReactTable from "react-table";
 import "react-table/react-table.css"
-import ChopApplicationDetail from './ChopApplicationDetail';
+// import ChopApplicationDetail from './ChopApplicationDetail';
 import Axios from 'axios';
 import config from '../../config';
 import DatePicker from 'react-datepicker';
@@ -195,6 +195,13 @@ class ChopApplication extends Component {
     }
   }
 
+  goToDetails(id, url) {
+    this.props.history.push({
+      pathname: url,
+      state: { taskId: id }
+    })
+  }
+
   render() {
     const { applications, collapse, selectedId, modal, exportFromDateView, exportToDateView, exportDate, validDate } = this.state
     // let columnData = Object.keys(applications[0])
@@ -204,8 +211,7 @@ class ChopApplication extends Component {
 
       <div>
         <h3>Chop Applications</h3>
-        {collapse
-          ? <Card>
+         <Card>
             <CardHeader>
               Chop Applications
               <Button className="float-right" onClick={this.search} >Search</Button>
@@ -376,7 +382,7 @@ class ChopApplication extends Component {
                           });
                         }
                         // console.log(rowInfo.original);
-                        this.getAppDetails(rowInfo.original.taskId)
+                        this.goToDetails(rowInfo.original.taskId, `/chopapps/details/${rowInfo.original.applicationTypeId}`)
                         this.setState({ selectedId: rowInfo.original.taskId })
                         // console.log(this.state.rowEdit);
 
@@ -395,7 +401,7 @@ class ChopApplication extends Component {
               />
             </CardBody>
           </Card>
-          :
+          {/* :
 
           <ChopApplicationDetail
             wait={1000}
@@ -403,7 +409,7 @@ class ChopApplication extends Component {
             id={selectedId}
             goBack={this.goBack}
             recall={this.recall} />
-        }
+        } */}
 
         <Modal isOpen={modal} toggle={this.toggleModal}>
           <ModalHeader >Export Logs</ModalHeader>

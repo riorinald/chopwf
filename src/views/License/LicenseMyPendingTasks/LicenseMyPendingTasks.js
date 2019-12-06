@@ -16,7 +16,6 @@ import {
     Row,
     Collapse
 } from 'reactstrap';
-import LicenseTaskDetails from './LicenseTaskDetails'
 
 class LicenseMyPendingTasks extends Component {
     constructor(props) {

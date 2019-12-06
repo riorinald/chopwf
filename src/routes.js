@@ -8,18 +8,20 @@ const MyPendingTasks = React.lazy(()=> import('./views/MyPendingTasks'))
 const Instructions = React.lazy(() => import('./views/UserInstruction'));
 const Help = React.lazy(() => import('./views/Help'));
 const Login = React.lazy(() => import('./views/Login'));
-const Detail = React.lazy(() => import('./views/MyPendingTasks/Details/Detail'));
+// const Detail = React.lazy(() => import('./views/MyPendingTasks/Details/Detail'));
 const Redirect = React.lazy(()=> import('./views/Create/Redirecting'))
 const EditRequest = React.lazy(() => import('./views/EditRequest/EditRequest'));
-const ApplictionDetail = React.lazy(() =>import('./views/Myapps/ApplicationDetail'));
+// const ApplictionDetail = React.lazy(() =>import('./views/Myapps/ApplicationDetail'));
 const Administration = React.lazy(() => import('./views/Administration'));
 const page404 = React.lazy(()=>import('./views/404'));
+const TaskDetails = React.lazy(()=>import('./views/TaskDetails/TaskDetails'));
+
 const LicenseCreate = React.lazy(() => import('./views/License/LicenseCreate'));
 const LicenseMyApplications = React.lazy(() => import('./views/License/LicenseMyApplications'));
 const LicenseMyPendingTasks = React.lazy(() => import('./views/License/LicenseMyPendingTasks'));
 const LicenseApplication = React.lazy(() => import('./views/License/LicenseApplication'));
 const LicenseAdmin = React.lazy(() => import('./views/License/LicenseAdmin'));
-const LicenseTaskDetails = React.lazy(() => import('./views/License/LicenseMyPendingTasks/LicenseTaskDetails'));
+const LicenseTaskDetails = React.lazy(() => import('./views/License/LicenseApplicationDetail/LicenseApplicationDetail'));
 
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
@@ -32,10 +34,11 @@ const routes = [
   { path: '/CAR2GO/create', name: 'Create', component: Create},
 
   { path: '/myapps',exact: true, name: 'Myapps', component: Myapps },
+  { path: '/:page/details/:appid',exact: true, name: 'Details', component: TaskDetails },
   // { path: '/myapps/:id',exact: true, name: 'Myapps', component: ApplictionDetail },
 
   { path: '/mypendingtask', exact: true, name: 'MyPendingTasks', component: MyPendingTasks},
-  { path: '/mypendingtask/:id', exact: true, name: 'DetailTaskSTU', component: Detail},
+  // { path: '/mypendingtask/:id', exact: true, name: 'DetailTaskSTU', component: Detail},
   { path: '/chopapps', name: 'ChopApplication', component: ChopApps},
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/instruction',exact: true, name: 'Insctructions', component: Instructions },
@@ -53,7 +56,7 @@ const routes = [
   { path: '/license/admin', exact:true, name: 'License Admin' , component: LicenseAdmin},
   { path: '/license/userguide', exact:true, name: 'User Guide' },
   { path: '/license/help', exact:true, name: 'Help' },
-  { path: '/license/mypendingtask/:taskId', exact:true, name: 'Task Details', component: LicenseTaskDetails }
+  { path: '/license/:page/:taskId', exact:true, name: 'Task Details', component: LicenseTaskDetails }
 
 
 

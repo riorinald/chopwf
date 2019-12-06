@@ -202,17 +202,16 @@ class EditRequest extends Component {
 
     async deleteTask() {
         console.log(this.state.taskDetails.taskId)
-        Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res=>{
+        resetMounted.setMounted()
+        Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res => {
             console.log(res.data)
 
-        Swal.fire({
-            title: "REQUEST DELETED",
-            html: res.data.message,
-            type: "success",
-            onClose: () => { 
-                resetMounted.setMounted()
-                this.props.history.push({ pathname: '/mypendingtask' }) }
-             })
+            Swal.fire({
+                title: "REQUEST DELETED",
+                html: res.data.message,
+                type: "success",
+                onClose: () => { this.props.history.push({ pathname: '/mypendingtask' }) }
+            })
         })
     }
 
@@ -650,7 +649,7 @@ class EditRequest extends Component {
             .then(res => {
                 if (isSubmitted === 'N') {
                     Swal.fire({
-                        title: res.data.status,
+                        title: "SAVED",
                         text: 'Request Saved ',
                         footer: 'Your request is saved as a draft',
                         type: 'info',
@@ -662,7 +661,7 @@ class EditRequest extends Component {
                 }
                 if (isSubmitted === 'Y') {
                     Swal.fire({
-                        title: res.data.status,
+                        title: "SUBMITTED",
                         text: 'Request Submitted',
                         footer: 'Your request is being processed and is waiting for the approval',
                         type: 'success',

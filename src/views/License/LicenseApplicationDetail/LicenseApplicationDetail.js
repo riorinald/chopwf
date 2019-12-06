@@ -1,182 +1,264 @@
-import React from 'react';
+import React, { Component } from 'react';
+// import ReactTable from "react-table";
+// import "react-table/react-table.css"
+import Axios from 'axios';
 import {
-    Card, CardBody, CardHeader, Table, Col, Row,
+    Card, CardBody, CardHeader, Table, Col, Row, CardFooter,
     Input,
     Button,
     FormGroup,
     Label,
-    Progress,
-    Spinner, UncontrolledTooltip,
-    Modal, ModalBody, ModalFooter, ModalHeader
+    Progress, Badge, Spinner
 } from 'reactstrap';
-import ReactTable from "react-table";
-import Axios from 'axios';
-import Swal from 'sweetalert2';
-import LicenseApprovalHistories from './LicenseApprovalHistories';
 
-// class LicenseApplicationDetail extends React.Component {
-//     constructor(props) {
-//         super(props)
-//         this.state = {
+class LicenseApplicationDetail extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            taskDetails: {},
+            approvalHistories: [],
+            redirect: false,
+            loading: false,
+            page: ""
+        }
+        this.goBack = this.goBack.bind(this)
+    }
 
-//         }
-//     }
-const LicenseApplicationDetail = (props) => {
-    // render() {
-    //     return(
+    componentDidMount() {
+        if (this.props.location.state === undefined) {
+            this.goBack()
+        }
+        else {
+            this.setState({ page: this.props.match.params.page })
+            this.getTaskDetails(this.props.match.params.taskId)
+        }
+    }
 
-    return <div>
-                <Card className="animated fadeIn">
-                <CardHeader>
-                    <Row className="align-items-left">
-                        <Button className="mr-1" color="primary" onClick={() => props.goBack(this.state.updated)}><i className="fa fa-angle-left" /> Back </Button>
-                        <Button className="mr-1" color="danger" onClick={() => { this.updated('Recalled') }}><i className="icon-loop" /> Recall </Button>
-                        <Button className="mr-1" color="light-blue" onClick={() => { this.updated('Copy As Draft') }}><i className="fa fa-copy" /> Copy as Draft </Button>                        
-                        <Button className="mr-1" color="warning" onClick={() => { this.updated('Reminded to Owner') }}><i className="icon-bell" />Remind Task Owner </Button>
-                        {/* <Button className="mr-1" color="success" onClick={()=>{this.updated('Extended')}}><i className="icon-plus" /> Extend </Button> */}
-                    </Row></CardHeader>
-                <CardBody>
-                    <Row className="mb-4">
-                        <Col xs="12" md lg><span className="display-5"> {props.applications.requestNumber}</span></Col>
-                        <Col sm="12 py-2" md lg>
-                            <Progress multi>
-                                <Progress bar color="green" value="50">{props.applications.currentStatusName}</Progress>
-                                <Progress bar animated striped color="warning" value="50">{props.applications.nextStatusName}</Progress>
-                            </Progress>
-                        </Col>
-                    </Row>
-                    <Row className="mb-5">
-                        <Col xs="12" sm="12" md lg className="text-md-left text-center">
-                            <Row>
-                                <Col xs={12} sm={12} md={4} lg={2}>
-                                    <img src={'../../assets/img/avatars/5.jpg'} className="img-avaa img-responsive center-block" alt="admin@bootstrapmaster.com" />
+
+    async getTaskDetails(taskId) {
+        this.setState({ loading: true })
+        await Axios.get(`http://5de7307ab1ad690014a4e040.mockapi.io/licenseTask/${taskId}`)
+            .then(res => {
+                this.setState({ taskDetails: res.data, loading: false })
+            })
+        await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application/2e4fb172-1eca-47d2-92fb-51fa4068a4b0/approval`)
+            .then(res => {
+                this.setState({ approvalHistories: res.data })
+            })
+    }
+
+    goBack() {
+        console.log(`/license/${this.state.page}`)
+        this.props.history.push({
+            pathname: `/license/${this.state.page}`
+        })
+    }
+
+    updated(action) {
+        console.log(action)
+    }
+
+
+    render() {
+        const { taskDetails, redirect, approvalHistories, loading, page } = this.state
+        return (
+            <div>
+                {!loading ?
+                    <Card className="animated fadeIn">
+                        <CardHeader>
+                            <Row className="align-items-left">
+                                <Button className="mr-1" color="primary" onClick={() => this.goBack()}><i className="fa fa-angle-left" /> Back </Button>
+                                {page === "myapplication" ? <div>
+                                    <Button className="mr-1" color="danger" onClick={() => { this.updated('Recalled') }}><i className="icon-loop" /> Recall </Button>
+                                    <Button className="mr-1" color="light-blue" onClick={() => { this.updated('Copy As Draft') }}><i className="fa fa-copy" /> Copy as Draft </Button>
+                                    <Button className="mr-1" color="warning" onClick={() => { this.updated('Reminded to Owner') }}><i className="icon-bell" />Remind Task Owner </Button>
+                                </div>
+                                    : null}
+                            </Row></CardHeader>
+                        <CardBody>
+                            <Row className="mb-3">
+                                <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNumber}</span></Col>
+                                <Col sm="12 py-2" md lg>
+                                    <Progress multi>
+                                        <Progress bar color="green" value="50">{taskDetails.currentStatusName}</Progress>
+                                        <Progress bar animated striped color="warning" value="50">{taskDetails.nextStatusName}</Progress>
+                                    </Progress>
                                 </Col>
-                                <Col md><h5> {props.applications.employeeName} </h5>
+                            </Row>
+                            <Row className="mb-4">
+                                <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col md><h6> DFS/CN, MBAFC </h6></Col>
-                                    </Row>
-                                    <Row>
-                                        <Col xs={12} sm={12} md={6} lg={6}>
-                                            <h6><center className="boxs">Applicant</center></h6>
+                                        <Col xs={12} sm={12} md={4} lg={2}>
+                                            <img src={'../../assets/img/avatars/5.jpg'} className="img-avaa img-responsive center-block" alt="admin@bootstrapmaster.com" />
+                                        </Col>
+                                        <Col md><h5> {taskDetails.employeeName} </h5>
+                                            <Row>
+                                                <Col md><h6> DFS/CN, MBAFC </h6></Col>
+                                            </Row>
+                                            <Row>
+                                                <Col xs={12} sm={12} md={6} lg={6}>
+                                                    <h6><center className="boxs">Applicant</center></h6>
+                                                </Col>
+                                            </Row>
                                         </Col>
                                     </Row>
                                 </Col>
+                                <Col xs="12" sm="12" md lg className="text-md-left text-center">
+                                    <Row>
+                                        <Col md><h5><i className="fa fa-tablet mr-2" /> +86 10 {taskDetails.telephoneNum} </h5></Col>
+                                    </Row>
+                                    <Row>
+                                        <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.email}</h5></Col>
+                                    </Row>
+                                </Col>
                             </Row>
-                        </Col>
-                        <Col xs="12" sm="12" md lg className="text-md-left text-center">
-                            <Row>
-                                <Col md><h5><i className="fa fa-tablet mr-2" /> +86 10 {props.applications.telephoneNum} </h5></Col>
-                            </Row>
-                            <Row>
-                                <Col md><h5><i className="fa fa-envelope mr-2" /> {props.applications.email}</h5></Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                    <Col className="mb-5">
-                        <FormGroup row className="mb-0 mb-md-4">
-                            <Col md lg>
-                                <Label>Employee Number</Label>
+                            <Col className="mb-4">
+                                <FormGroup row>
+                                    <Col md lg>
+                                        <Label>Employee Number</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.employeeNumber} name="text-input" placeholder="Text" />
+                                    </Col>
+                                    <Col md lg>
+                                        <Label>Department</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.department} name="text-input" placeholder="Text" />
+                                    </Col>
+                                </FormGroup>
+                                <FormGroup row>
+                                    <Col md lg>
+                                        <Label>License Name</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.licenseName} name="text-input" placeholder="Text" />
+                                    </Col>
+                                    <Col md lg>
+                                        <Label>Purpose</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.licensePurpose} name="text-input" placeholder="Text" />
+                                    </Col>
+                                </FormGroup>
+                                <FormGroup row>
+                                    <Col md lg>
+                                        <Label>Document Type</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.documentType} name="text-input" placeholder="Text" />
+                                    </Col>
+                                    <Col md lg>
+                                        <Label>Planned Return Date</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.returnDate} name="text-input" placeholder="Text" />
+                                    </Col>
+                                </FormGroup>
+                                <FormGroup row>
+                                    <Col md lg>
+                                        <Label>Deliver Ways</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.deliverWays} name="text-input" placeholder="Text" />
+                                    </Col>
+                                    <Col md lg>
+                                        <Label>Deliver to Address</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.address} name="text-input" placeholder="Text" />
+                                    </Col>
+                                </FormGroup>
+                                <FormGroup row>
+                                    <Col md lg>
+                                        <Label>Receiver</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.receiver} name="text-input" placeholder="Text" />
+                                    </Col>
+                                    <Col md lg>
+                                        <Label>Return Ways</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.returnWays} name="text-input" placeholder="Text" />
+                                    </Col>
+                                </FormGroup>
+                                <FormGroup row>
+                                    <Col md lg>
+                                        <Label>Receiver Mobile Number</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.receiverPhone} name="text-input" placeholder="Text" />
+                                    </Col>
+                                    <Col md lg>
+                                        <Label>Deliver Express Number</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.expressNumber} name="text-input" placeholder="Text" />
+                                    </Col>
+                                </FormGroup>
+                                <FormGroup row>
+                                    <Col md lg>
+                                        <Label>Senior Manager or above of Requestor Department</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.seniorManagerAbove} name="text-input" placeholder="Text" />
+                                    </Col>
+                                    <Col md lg>
+                                        <Label>Return Express Number</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <Input disabled type="text" defaultValue={taskDetails.returnExpressNumber} name="text-input" placeholder="Text" />
+                                    </Col>
+                                </FormGroup>
                             </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.employeeNumber} name="text-input" placeholder="Text" />
-                            </Col>
-                            <Col md lg>
-                                <Label>Department</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.department} name="text-input" placeholder="Text" />
-                            </Col>
-                        </FormGroup>
-                        <FormGroup row className="mb-0 mb-md-4">
-                            <Col md lg>
-                                <Label>License Name</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.licenseName} name="text-input" placeholder="Text" />
-                            </Col>
-                            <Col md lg>
-                                <Label>Purpose</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.licensePurpose} name="text-input" placeholder="Text" />
-                            </Col>
-                        </FormGroup>
-                        <FormGroup row className="mb-0 mb-md-4">
-                            <Col md lg>
-                                <Label>Document Type</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.documentType} name="text-input" placeholder="Text" />
-                            </Col>
-                            <Col md lg>
-                                <Label>Planned Return Date</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.returnDate} name="text-input" placeholder="Text" />
-                            </Col>
-                        </FormGroup>
-                        <FormGroup row className="mb-0 mb-md-4">
-                            <Col md lg>
-                                <Label>Deliver Ways</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.deliverWays} name="text-input" placeholder="Text" />
-                            </Col>
-                            <Col md lg>
-                                <Label>Deliver to Address</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.address} name="text-input" placeholder="Text" />
-                            </Col>
-                        </FormGroup>
-                        <FormGroup row className="mb-0 mb-md-4">
-                            <Col md lg>
-                                <Label>Receiver</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.receiver} name="text-input" placeholder="Text" />
-                            </Col>
-                            <Col md lg>
-                                <Label>Return Ways</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.returnWays} name="text-input" placeholder="Text" />
-                            </Col>
-                        </FormGroup>
-                        <FormGroup row className="mb-0 mb-md-4">
-                            <Col md lg>
-                                <Label>Receiver Mobile Number</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.receiverPhone} name="text-input" placeholder="Text" />
-                            </Col>
-                            <Col md lg>
-                                <Label>Deliver Express Number</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.expressNumber} name="text-input" placeholder="Text" />
-                            </Col>
-                        </FormGroup>
-                        <FormGroup row className="mb-0 mb-md-4">
-                            <Col md lg>
-                                <Label>Senior Manager or above of Requestor Department</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.seniorManagerAbove} name="text-input" placeholder="Text" />
-                            </Col>
-                            <Col md lg>
-                                <Label>Return Express Number</Label>
-                            </Col>
-                            <Col md lg>
-                                <Input disabled type="text" defaultValue={props.applications.returnExpressNumber} name="text-input" placeholder="Text" />
-                            </Col>
-                        </FormGroup>
-                    </Col>
-                    <Row><Col><h4>Approval History</h4></Col></Row>
-                    { props.appHistory.map(id => <LicenseApprovalHistories appHistory={id} key={id.id} />)}
-                </CardBody>
-            </Card>
-            </div>
+                            {page === "mypendingtask"
+                                ? <div>
+                                    <Row>
+                                        <Col> <h4>Comments</h4></Col>
+                                    </Row>
+                                    <Row>
+                                        <Col >
+                                            <Input type="textarea" ></Input>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col>&nbsp;</Col>
+                                    </Row>
+                                    <Row>
+                                        <Col md="1">
+                                            <Button color="success" >Approve</Button>
+                                        </Col>
+                                        <Col>
+                                            <Button color="danger" >Reject</Button>
+                                        </Col>
+                                    </Row>
+                                </div>
+                                : null}
+                        </CardBody>
+                        <CardFooter>
+                            <Row><Col><h4>Approval History</h4></Col></Row>
+                            {approvalHistories.map((history, index) =>
+                                <div key={index}>
+                                    <Row className="bottom-border"></Row>
+                                    <Row>
+                                        <Col md="1">
+                                            <img src={history.avatar} className="img-avatar" alt="Avatar" />
+                                        </Col>
+                                        <Col md="8">
+                                            <h5>{history.name} (000)<span> <Badge color="success">{history.status}</Badge></span></h5>
+                                            <div><b>Approved On:</b> {history.updatedAt}</div>
+                                            <small>{history.comments}</small>
+                                        </Col>
+                                    </Row>
+                                </div>
+                            )}
+                        </CardFooter>
+                    </Card>
+                    : <div style={{ textAlign: "center" }} ><Spinner size="md" style={{ width: '3rem', height: '3rem' }} ></Spinner></div>
+                }
+            </div>)
+    }
 }
 
-export default LicenseApplicationDetail;
+export default LicenseApplicationDetail
