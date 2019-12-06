@@ -95,10 +95,12 @@ class MyPendingTasks extends Component {
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
         // console.log(mounted)
         if (mounted === 0) {
+            this.setState({ loading: !this.state.loading })
             this.getPendingTasks();
         }
         else {
-            this.setState({ pendingTasks: array })
+            this.setState({ loading: !this.state.loading })
+            this.setState({ pendingTasks: array, loading: !this.state.loading })
         }
         mounted = mounted + 1
     }
@@ -132,7 +134,7 @@ class MyPendingTasks extends Component {
     goToDetails(id, url) {
         this.props.history.push({
             pathname: url,
-            state: { id: id }
+            state: { taskId: id }
         })
     }
 
@@ -146,7 +148,6 @@ class MyPendingTasks extends Component {
 
 
     async getPendingTasks() {
-        this.setState({ loading: !this.state.loading })
         let userId = localStorage.getItem('userId')
         // let userId = "josh@otds.admin"
         let url = `${config.url}/tasks?userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&all=N`
@@ -258,11 +259,11 @@ class MyPendingTasks extends Component {
     render() {
         const { pendingTasks } = this.state;
         return (
-            <div>
+            <div className="animated fadeIn">
                 <h4>MY PENDING TASKS</h4>
 
                 {/* {this.state.show? */}
-                <Card className="animated fadeIn">
+                <Card>
                     <CardHeader >
                         PENDING TASKS <Button className="float-right" onClick={this.search} >Search</Button>
                     </CardHeader>
@@ -465,7 +466,8 @@ class MyPendingTasks extends Component {
                                                 this.goToEditRequest(rowInfo.original.taskId)
                                             }
                                             else {
-                                                this.goToDetails(rowInfo.original.taskId, `mypendingtask/${rowInfo.original.applicationTypeId}`)
+                                                this.goToDetails(rowInfo.original.taskId, `/mypendingtask/details/${rowInfo.original.applicationTypeId}`)
+                                                // this.goToDetails(rowInfo.original.taskId, `mypendingtask/CNIPS`)
                                             }
 
                                         },

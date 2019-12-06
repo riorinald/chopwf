@@ -653,23 +653,48 @@ class Create extends Component {
   addDocumentLTI() {
     var maxNumber = 45;
     var rand = Math.floor((Math.random() * maxNumber) + 1);
+    let valid = true
+    let doc = this.state.documentTableLTI
     if (this.state.docSelected !== null) {
-      const obj = {
-        id: rand,
-        engName: this.state.engName,
-        cnName: this.state.cnName,
-        docSelected: this.state.docSelected,
-        docName: this.state.docAttachedName,
-        docURL: URL.createObjectURL(this.state.docSelected),
+
+      for (let i = 0; i < doc.length; i++) {
+        console.log(doc[i].engName, doc[i].cnName, doc[i].docName)
+        if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
+          valid = false
+          break
+        }
+        else {
+          valid = true
+        }
       }
 
-      this.setState(state => {
-        const documentTableLTI = state.documentTableLTI.concat(obj)
-
-        return {
-          documentTableLTI
+      if (valid) {
+        const obj = {
+          id: rand,
+          engName: this.state.engName,
+          cnName: this.state.cnName,
+          docSelected: this.state.docSelected,
+          docName: this.state.docAttachedName,
+          docURL: URL.createObjectURL(this.state.docSelected),
         }
-      })
+
+        this.setState(state => {
+          const documentTableLTI = state.documentTableLTI.concat(obj)
+
+          return {
+            documentTableLTI
+          }
+        })
+        this.setState({ engName: "", cnName: "", docSelected: null, docAttachedName: "" })
+      }
+      else {
+        Swal.fire({
+          title: "Document Exists",
+          html: 'The selected document already exists!',
+          type: "warning"
+        })
+      }
+
     }
   }
 
