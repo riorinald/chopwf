@@ -251,10 +251,13 @@ class Myapps extends Component {
                 this.onFilteredChangeCustom(value, column.id || column.accessor);
               }}
               defaultFilterMethod={(filter, row, column) => {
-
                 const id = filter.pivotId || filter.id;
                 return row[id]
               }}
+              defaultSorted={[{
+                  id: "createdDate",
+                  desc: true
+              }]}
               columns={[
                 {
                   Header: "Request Number",

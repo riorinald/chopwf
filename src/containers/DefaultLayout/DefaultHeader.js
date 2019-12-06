@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem } from 'reactstrap';
+import { Dropdown, UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem } from 'reactstrap';
 import PropTypes from 'prop-types';
 import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
 import { fakeAuth } from '../../App';
@@ -42,18 +42,26 @@ class DefaultHeader extends Component {
 
   changeEntity = event => {
     this.props.history.push(`/${event.target.value}/create`)
+      this.setState({
+          legalEntity: event.target.value,
+          modal: !this.state.modal, 
+          }, 
+          this.updateLegalEntity,
+          localStorage.setItem("legalEntity", event.target.value) );
+      }
+   
+  updateLegalEntity(){
+    this.props.handleLegalEntity(this.state)
+      }
+
+  changeWorkflow = event => {
+    this.props.history.push(`/${event.target.value.toLowerCase()}/create`)
     this.setState({
-      legalEntity: event.target.value,
+      application: event.target.value,
       modal: !this.state.modal, 
-    }, 
-    this.updateLegalEntity,
-    localStorage.setItem("legalEntity", event.target.value) );
-   }
-
-   updateLegalEntity(){
-     this.props.handleLegalEntity(this.state)
-   }
-
+      }, 
+    localStorage.setItem("application", event.target.value) );
+  }
 
   logout() {
     console.log("logout")
@@ -93,6 +101,19 @@ class DefaultHeader extends Component {
                 <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "CAR2GO" ? true : false} color="secondary" value="CAR2GO" size="lg" block > CAR2GO </Button>
               </ModalBody>
               <ModalFooter>
+                <UncontrolledDropdown className="btn-block" direction="down">
+                  <DropdownToggle caret >
+                    {this.state.application} WORKFLOW
+                  </DropdownToggle>
+                  <DropdownMenu >
+                    <DropdownItem>
+                      <Button onClick={this.changeWorkflow} disabled={this.state.application === "CHOP"? true : false} color="secondary" value="CHOP" block> CHOP WORKFLOW </Button>
+                    </DropdownItem>
+                    <DropdownItem>
+                      <Button onClick={this.changeWorkflow} disabled={this.state.application === "LICENSE"? true : false} color="secondary" value="LICENSE"  block> LICENSE WORKFLOW </Button>
+                    </DropdownItem>
+                  </DropdownMenu>
+                </UncontrolledDropdown>
               </ModalFooter>
             </Modal>
           </NavItem>
