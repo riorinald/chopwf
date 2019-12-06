@@ -39,7 +39,7 @@ class TaskDetails extends Component {
 
     componentDidMount() {
         if (this.props.location.state === undefined) {
-            this.goBack()
+            this.goBack(false)
         }
         else {
             this.setState({ page: this.props.match.params.page, appType: this.props.match.params.appid })
@@ -62,7 +62,10 @@ class TaskDetails extends Component {
         return result.join("; ")
     }
 
-    goBack() {
+    goBack(updated) {
+        if (updated) {
+            resetMounted.setMounted()
+        }
         this.props.history.push({
             pathname: `/${this.props.match.params.page}`
         })
@@ -84,17 +87,13 @@ class TaskDetails extends Component {
             comments: this.state.comments
         }
 
-        Axios.post(`${config.url}/tasks/${this.props.location.state.id}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
+        Axios.post(`${config.url}/tasks/${this.state.taskDetails.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
             .then(res => {
                 Swal.fire({
-                    title: res.data.message === "The task successfully approved." ? "APPROVED" : "REJECTED",
-                    html: res.data.message,
-                    type: "success"
-                }).then((result) => {
-                    if (result.value) {
-                        this.setState({ redirectToTasks: true })
-                        resetMounted.setMounted()
-                    }
+                    title: res.data.message,
+                    html: `The request has been ${res.data.message}`,
+                    type: "success",
+                    onAfterClose: this.goBack(true)
                 })
             })
             .catch(error => {
@@ -130,11 +129,11 @@ class TaskDetails extends Component {
                         <CardHeader>
                             {/* <Button onClick={this.goBack} > Back &nbsp; </Button>  {taskDetails.requestNum} */}
                             <Row className="align-items-left">
-                                <Button className="ml-1 mr-1" color="primary" onClick={this.goBack}><i className="fa fa-angle-left" /> Back </Button>
+                                <Button className="ml-1 mr-1" color="primary" onClick={() => this.goBack(false)}><i className="fa fa-angle-left" /> Back </Button>
                                 {page === "myapps" ?
                                     taskDetails.actions.map(((action, index) =>
                                         <span key={index}>
-                                            <Button className="mr-1" color={action.action === "recall" ? "danger" : action.action === "copy" ? "light-blue" : "warning"} onClick={() => { this.postAction(action.action) }}><i className="icon-loop" /> {action.action === "copy" ? `${this.capitalize(action.action)} as Draft` : action.action === "remind" ? `${this.capitalize(action.action)} Task Owner` : this.capitalize(action.action)}  </Button>
+                                            <Button className="mr-1" color={action.action === "recall" ? "danger" : action.action === "copy" ? "light-blue" : "warning"} onClick={() => { this.approve(action.action) }}><i className="icon-loop" /> {action.action === "copy" ? `${this.capitalize(action.action)} as Draft` : action.action === "remind" ? `${this.capitalize(action.action)} Task Owner` : this.capitalize(action.action)}  </Button>
                                         </span>
                                     ))
                                     : null}
@@ -212,6 +211,39 @@ class TaskDetails extends Component {
                                         </FormGroup>
                                         : ""
                                     }
+                                    {appType !== "LTI" ?
+                                        <div>
+                                            <FormGroup row>
+                                                <Col md="4">
+                                                    <Label htmlFor="text-input">Use in Office or not</Label>
+                                                </Col>
+                                                <Col xs="12" md="8">
+                                                    <Input disabled type="text" id="text-input" value={taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} name="text-input" placeholder="Text" />
+                                                </Col>
+                                            </FormGroup>
+                                            {taskDetails.isUseInOffice === "N"
+                                                ? <div>
+                                                    <FormGroup row>
+                                                        <Col md="4">
+                                                            <Label htmlFor="text-input">Return Date</Label>
+                                                        </Col>
+                                                        <Col xs="12" md="8">
+                                                            <Input disabled type="text" id="text-input" value={taskDetails.returnDate} name="text-input" placeholder="Text" />
+                                                        </Col>
+                                                    </FormGroup>
+                                                    <FormGroup row>
+                                                        <Col md="4">
+                                                            <Label htmlFor="text-input">Responsible Person</Label>
+                                                        </Col>
+                                                        <Col xs="12" md="8">
+                                                            <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonNameName} name="text-input" placeholder="Text" />
+                                                        </Col>
+                                                    </FormGroup>
+                                                </div>
+
+                                                : ""}
+                                        </div>
+                                        : null}
                                     {appType === "LTU" || appType === "LTI"
                                         ? <FormGroup row>
                                             <Col md="4">
@@ -239,37 +271,6 @@ class TaskDetails extends Component {
 
                                     <FormGroup row>
                                         <Col md="4">
-                                            <Label htmlFor="text-input">Use in Office or not</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
-                                            <Input disabled type="text" id="text-input" value={taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} name="text-input" placeholder="Text" />
-                                        </Col>
-                                    </FormGroup>
-                                    {taskDetails.isUseInOffice === "N"
-                                        ? <FormGroup row>
-                                            <Col md="4">
-                                                <Label htmlFor="text-input">Return Date</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" id="text-input" value={taskDetails.returnDate} name="text-input" placeholder="Text" />
-                                            </Col>
-                                        </FormGroup>
-
-                                        : ""}
-                                    {taskDetails.isUseInOffice === "N"
-                                        ? <FormGroup row>
-                                            <Col md="4">
-                                                <Label htmlFor="text-input">Responsible Person</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonNameName} name="text-input" placeholder="Text" />
-                                            </Col>
-                                        </FormGroup>
-
-                                        : ""}
-
-                                    <FormGroup row>
-                                        <Col md="4">
                                             <Label htmlFor="text-input">Pick Up By</Label>
                                         </Col>
                                         <Col xs="12" md="8">
@@ -292,6 +293,28 @@ class TaskDetails extends Component {
                                             <Input disabled type="text" value={taskDetails.telephoneNum} id="text-input" name="text-input" placeholder="Text" />
                                         </Col>
                                     </FormGroup>
+                                    {appType === "LTI"
+                                        ? taskDetails.isUseInOffice === "N"
+                                            ? <FormGroup row>
+                                                <Col md="4">
+                                                    <Label htmlFor="text-input">Purpose of Use</Label>
+                                                </Col>
+                                                <Col xs="12" md="8">
+                                                    <Input disabled type="text" value={taskDetails.purposeOfUse} id="text-input" name="text-input" placeholder="Text" />
+                                                </Col>
+                                            </FormGroup>
+                                            : null
+                                        : null}
+                                    {appType === "CNIPS"
+                                        ? taskDetails.isUseInOffice === "Y"
+                                            ? <FormGroup row>
+                                                <Col md="4">
+                                                    <Label htmlFor="text-input">Purpose of Use</Label>
+                                                </Col>
+                                                <Col xs="12" md="8">
+                                                    <Input disabled type="text" value={taskDetails.purposeOfUse} id="text-input" name="text-input" placeholder="Text" />
+                                                </Col>
+                                            </FormGroup> : "" : ""}
                                 </Col>
                                 <Col>
 
@@ -313,14 +336,69 @@ class TaskDetails extends Component {
                                             </Col>
                                         </FormGroup>
                                         : null}
-                                    <FormGroup row>
-                                        <Col md="4">
-                                            <Label htmlFor="text-input">Purpose of Use</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.purposeOfUse} id="text-input" name="text-input" placeholder="Text" />
-                                        </Col>
-                                    </FormGroup>
+
+                                    {appType === "LTI" ?
+                                        <div>
+                                            <FormGroup row>
+                                                <Col md="4">
+                                                    <Label htmlFor="text-input">Use in Office or not</Label>
+                                                </Col>
+                                                <Col xs="12" md="8">
+                                                    <Input disabled type="text" id="text-input" value={taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} name="text-input" placeholder="Text" />
+                                                </Col>
+                                            </FormGroup>
+                                            {taskDetails.isUseInOffice === "N"
+                                                ? <div>
+                                                    <FormGroup row>
+                                                        <Col md="4">
+                                                            <Label htmlFor="text-input">Return Date</Label>
+                                                        </Col>
+                                                        <Col xs="12" md="8">
+                                                            <Input disabled type="text" id="text-input" value={taskDetails.returnDate} name="text-input" placeholder="Text" />
+                                                        </Col>
+                                                    </FormGroup>
+                                                    <FormGroup row>
+                                                        <Col md="4">
+                                                            <Label htmlFor="text-input">Responsible Person</Label>
+                                                        </Col>
+                                                        <Col xs="12" md="8">
+                                                            <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonNameName} name="text-input" placeholder="Text" />
+                                                        </Col>
+                                                    </FormGroup>
+                                                </div>
+
+                                                : ""}
+                                        </div>
+                                        : null}
+                                    {appType === "LTI"
+                                        ? taskDetails.isUseInOffice === "Y"
+                                            ? <FormGroup row>
+                                                <Col md="4">
+                                                    <Label htmlFor="text-input">Purpose of Use</Label>
+                                                </Col>
+                                                <Col xs="12" md="8">
+                                                    <Input disabled type="text" value={taskDetails.purposeOfUse} id="text-input" name="text-input" placeholder="Text" />
+                                                </Col>
+                                            </FormGroup>
+                                            : null
+                                        : appType === "CNIPS"
+                                            ? taskDetails.isUseInOffice === "N"
+                                                ? <FormGroup row>
+                                                    <Col md="4">
+                                                        <Label htmlFor="text-input">Purpose of Use</Label>
+                                                    </Col>
+                                                    <Col xs="12" md="8">
+                                                        <Input disabled type="text" value={taskDetails.purposeOfUse} id="text-input" name="text-input" placeholder="Text" />
+                                                    </Col>
+                                                </FormGroup> : "" : <FormGroup row>
+                                                <Col md="4">
+                                                    <Label htmlFor="text-input">Purpose of Use</Label>
+                                                </Col>
+                                                <Col xs="12" md="8">
+                                                    <Input disabled type="text" value={taskDetails.purposeOfUse} id="text-input" name="text-input" placeholder="Text" />
+                                                </Col>
+                                            </FormGroup>
+                                    }
                                     <FormGroup row>
                                         <Col md="4">
                                             <Label htmlFor="text-input">Number of Pages to Be Chopped </Label>

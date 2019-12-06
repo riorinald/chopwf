@@ -461,13 +461,12 @@ class MyPendingTasks extends Component {
                                             }
 
                                             let status = rowInfo.original.statusId
-                                            console.log(status)
-                                            if (status === "DRAFTED" || status === "RECALL" || status === "SENDBACK") {
+                                            if (status === "DRAFTED" || status === "RECALLED" || status === "SENDBACK") {
                                                 this.goToEditRequest(rowInfo.original.taskId)
                                             }
                                             else {
                                                 this.goToDetails(rowInfo.original.taskId, `/mypendingtask/details/${rowInfo.original.applicationTypeId}`)
-                                                // this.goToDetails(rowInfo.original.taskId, `mypendingtask/CNIPS`)
+                                                // this.goToDetails(rowInfo.original.taskId, `/mypendingtask/details/CNIPS`)
                                             }
 
                                         },
