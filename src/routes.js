@@ -26,19 +26,19 @@ const LicenseTaskDetails = React.lazy(() => import('./views/License/LicenseAppli
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
-  { path: '/', exact: true, name: 'Home' },
-  { path: '/create', name: 'Create', component: Redirect},
-  { path: '/MBAFC/create', name: 'Create', component: Create},
-  { path: '/MBLC/create', name: 'Create', component: Create},
-  { path: '/MBIA/create', name: 'Create', component: Create},
-  { path: '/CAR2GO/create', name: 'Create', component: Create},
-
-  { path: '/myapps',exact: true, name: 'Myapps', component: Myapps },
+  // { path: '/', exact: true, name: 'Home' },
+  // { path: '/create', name: 'Create', component: Redirect},
+  // { path: '/MBAFC/create', name: 'Create', component: Create},
+  // { path: '/MBLC/create', name: 'Create', component: Create},
+  // { path: '/MBIA/create', name: 'Create', component: Create},
+  // { path: '/CAR2GO/create', name: 'Create', component: Create},
+  
+  { path: '/create', exact: true, name: 'Create', component: Redirect},
+  { path: '/create/:company', exact: true, name: 'Create', component: Create},
+  { path: '/myapps', exact: true, name: 'Myapps', component: Myapps },
   { path: '/:page/details/:appid',exact: true, name: 'Details', component: TaskDetails },
-  // { path: '/myapps/:id',exact: true, name: 'Myapps', component: ApplictionDetail },
-
+  
   { path: '/mypendingtask', exact: true, name: 'MyPendingTasks', component: MyPendingTasks},
-  // { path: '/mypendingtask/:id', exact: true, name: 'DetailTaskSTU', component: Detail},
   { path: '/chopapps', name: 'ChopApplication', component: ChopApps},
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/instruction',exact: true, name: 'Insctructions', component: Instructions },

@@ -3,10 +3,11 @@ import {Redirect} from 'react-router-dom';
 import LegalEntity from '../../context';
 
 
-const RedirectCreate = () => { return <LegalEntity.Consumer>
-  {ContextValue => (
-  <Redirect from="/" to= {`${ContextValue.legalEntity.name}/create`} />
-  )}
+const RedirectCreate = (props) => { 
+  return <LegalEntity.Consumer>{
+    ContextValue => (
+        props.history.push(`/create/${ContextValue.legalEntity.name}/`)
+      )}
   </LegalEntity.Consumer>
 } 
 

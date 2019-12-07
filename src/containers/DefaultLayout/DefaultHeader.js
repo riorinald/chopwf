@@ -41,7 +41,7 @@ class DefaultHeader extends Component {
   }
 
   changeEntity = event => {
-    this.props.history.push(`/${event.target.value}/create`)
+    this.props.history.push(`/create/${event.target.value}`)
       this.setState({
           legalEntity: event.target.value,
           modal: !this.state.modal, 
@@ -54,13 +54,13 @@ class DefaultHeader extends Component {
     this.props.handleLegalEntity(this.state)
       }
 
-  changeWorkflow = event => {
-    this.props.history.push(`/${event.target.value.toLowerCase()}/create`)
+  changeWorkflow = (value) => {
+    this.props.history.push(`/${value.toLowerCase()}/create`)
     this.setState({
-      application: event.target.value,
+      application: value,
       modal: !this.state.modal, 
       }, 
-    localStorage.setItem("application", event.target.value) );
+    localStorage.setItem("application", value) );
   }
 
   logout() {
@@ -107,10 +107,10 @@ class DefaultHeader extends Component {
                   </DropdownToggle>
                   <DropdownMenu >
                     <DropdownItem>
-                      <Button onClick={this.changeWorkflow} disabled={this.state.application === "CHOP"? true : false} color="secondary" value="CHOP" block> CHOP WORKFLOW </Button>
-                    </DropdownItem>
-                    <DropdownItem>
-                      <Button onClick={this.changeWorkflow} disabled={this.state.application === "LICENSE"? true : false} color="secondary" value="LICENSE"  block> LICENSE WORKFLOW </Button>
+                    {this.state.application === "LICENSE"
+                      ? <center onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</center>
+                      : <center onClick={() => this.changeWorkflow('LICENSE')} >LICENSE WORKFLOW</center>
+                    }
                     </DropdownItem>
                   </DropdownMenu>
                 </UncontrolledDropdown>
