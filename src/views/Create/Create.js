@@ -436,7 +436,7 @@ class Create extends Component {
         .then(res => {
           if (isSubmitted === 'N') {
             Swal.fire({
-              title: res.data.status === 200 ? "Request Saved" : "",
+              title: res.data.status === 200 ? 'Request Saved' : '',
               text: 'Request Number : '+ res.data.requestNum,
               footer: 'Your request is saved as draft.',
               type: 'info',
@@ -445,8 +445,8 @@ class Create extends Component {
           }
           if (isSubmitted === 'Y') {
             Swal.fire({
-              title: res.data.status === "200" ? "Submitted" : "",
-              text: 'Request Submitted',
+              title: res.data.status === 200 ? 'Request Submitted' : "",
+              text: 'Request Number : '+ res.data.requestNum,
               footer: 'Your request is being processed and is waiting for the approval',
               type: 'success',
               onClose: () => { this.formReset() }
@@ -1136,26 +1136,10 @@ class Create extends Component {
                 <FormFeedback>Invalid Application Type Selected</FormFeedback>
                 <FormFeedback valid={this.validator.fieldValid('aplicationType')}>
                   {this.validator.message('aplicationType', this.state.appTypeSelected, 'required')}</FormFeedback>
-
               </FormGroup>
-              {this.state.isLTI
-                ? <FormGroup>
-                  <Label>Effective Period</Label>
-                  {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
-                  <DatePicker id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                    className="form-control" required dateFormat="yyyy/MM/dd" withPortal
-                    peekNextMonth
-                    showMonthDropdown
-                    showYearDropdown
-                    selected={this.state.dateView1}
-                    onChange={this.dateChange("effectivePeriod", "dateView1")}
-                    minDate={new Date()} maxDate={addDays(new Date(), 365)} />
-                  <FormFeedback>Invalid Date Selected</FormFeedback>
-                </FormGroup>
-                : ""
-              }
-              {this.state.isLTU
-                ? <FormGroup>
+
+                <Collapse isOpen={this.state.isLTI}>
+                  <FormGroup>
                   <Label>Entitled Team</Label>
                   <InputGroup>
                     <Input id="teamSelected" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
@@ -1167,8 +1151,34 @@ class Create extends Component {
                     <FormFeedback>Invalid Entitled Team Selected</FormFeedback>
                   </InputGroup>
                 </FormGroup>
-                : ""
-              }
+                  <Label>Effective Period</Label>
+                  {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
+                  <DatePicker id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                    className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                    peekNextMonth
+                    showMonthDropdown
+                    showYearDropdown
+                    selected={this.state.dateView1}
+                    onChange={this.dateChange("effectivePeriod", "dateView1")}
+                    minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                  <FormFeedback>Invalid Date Selected</FormFeedback>
+                </Collapse>
+  
+              <Collapse isOpen={this.state.isLTU}>
+                <FormGroup>
+                  <Label>Entitled Team</Label>
+                  <InputGroup>
+                    <Input id="teamSelected" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
+                      <option value="0" disabled>Please select a team</option>
+                      {this.state.teams.map((team, index) =>
+                        <option key={index} value={team.teamId}>{team.teamName}</option>
+                      )}
+                    </Input>
+                    <FormFeedback>Invalid Entitled Team Selected</FormFeedback>
+                  </InputGroup>
+                </FormGroup>
+                </Collapse>
+
               <FormGroup>
                 <Label>Chop Type</Label>
                 <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected"
