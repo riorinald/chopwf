@@ -525,21 +525,18 @@ class TaskDetails extends Component {
                                     <Row>
                                         <Col> <h4>Comments</h4></Col>
                                     </Row>
-                                    <Row>
+                                    <Row className="mb-2">
                                         <Col>
                                             <Input type="textarea" onChange={this.handleChange}></Input>
                                         </Col>
                                     </Row>
-                                    <br />
-                                    <Row>
-                                        {taskDetails.actions.map((action, index) =>
-                                            <Col key={index} sm={1}>
-                                                <Button color={action.action === "approve" ? "success" : "danger"} onClick={() => this.approve(action.action)} > {this.capitalize(action.action)}</Button>
-                                            </Col>
-                                        )}
-                                    </Row>
-                                    <Row>
-                                        <Col>&nbsp;</Col>
+
+                                    <Row className="mb-4">
+                                        <Col>
+                                            {taskDetails.actions.map((action, index) =>
+                                            <Button className="mx-1" key={index} color={action.action === "approve" ? "success" : "danger"} onClick={() => this.approve(action.action)} > {this.capitalize(action.action)}</Button>
+                                            )}
+                                        </Col>
                                     </Row>
                                 </div>
                                 : null}
