@@ -84,7 +84,7 @@ class ChopApplication extends Component {
 
   async getApplications() {
     this.setState({ loading: !this.state.loading })
-    await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks?all=y&userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`).then(res => {
+    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`).then(res => {
       this.setState({ applications: res.data, loading: !this.state.loading })
     })
   }
@@ -92,7 +92,7 @@ class ChopApplication extends Component {
   async getAppDetails(id) {
     this.setState({ loading: !this.state.loading })
     // await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`)
-    await Axios.get(`http://192.168.1.47/echopx/api/v1/tasks/5328c220-1f99-4da0-9e12-3e8d29441acd?userid=rio@otds.admin`)
+    await Axios.get(`${config.url}/tasks/5328c220-1f99-4da0-9e12-3e8d29441acd?userid=rio@otds.admin`)
       .then(res => {
         this.setState({ applicationDetail: res.data, collapse: !this.state.collapse })
       })
