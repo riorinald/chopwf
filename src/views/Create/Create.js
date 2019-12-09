@@ -1362,11 +1362,11 @@ class Create extends Component {
           </CardBody>
           <CardFooter>
             <div className="form-actions" >
-              <Row noGutters className="float-left">
-                <Col className="mr-2" >
+              <Row className="align-items-left">
+                <Col>
                   {this.state.agreeTerms
-                    ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
-                    : <Button id="disabledSubmit" type="submit" color="success" disabled
+                    ? <Button className="mr-2" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
+                    : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
                       onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} >Submit</Button>}
                   <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit">please confirm the agree terms</Tooltip>
                 </Col>
