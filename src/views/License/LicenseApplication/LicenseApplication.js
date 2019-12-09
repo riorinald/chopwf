@@ -22,7 +22,7 @@ class LicenseApplication extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            pendingTasks: [],
+            licenseApplication: [],
             taskDetails: [],
             approvalHistories: [],
             selectedRow: [],
@@ -33,7 +33,7 @@ class LicenseApplication extends Component {
     }
 
     componentDidMount() {
-        this.getPendingTasks()
+        this.getLicenseApplications()
     }
 
     goToDetails(taskId) {
@@ -44,11 +44,11 @@ class LicenseApplication extends Component {
 
     }
 
-    async getPendingTasks() {
+    async getLicenseApplications() {
         this.setState({ loading: true })
         await Axios.get(`http://5de7307ab1ad690014a4e040.mockapi.io/licenseTask`)
             .then(res => {
-                this.setState({ pendingTasks: res.data, loading: false })
+                this.setState({ licenseApplication: res.data, loading: false })
             })
     }
 
@@ -56,15 +56,15 @@ class LicenseApplication extends Component {
 
 
     getColumnWidth = (accessor, headerText) => {
-        let { pendingTasks } = this.state
+        let { licenseApplication } = this.state
         let max = 0
         const maxWidth = 260;
         const magicSpacing = 10;
 
-        for (var i = 0; i < pendingTasks.length; i++) {
-            if (pendingTasks[i] !== undefined && pendingTasks[i][accessor] !== null) {
-                if (JSON.stringify(pendingTasks[i][accessor] || 'null').length > max) {
-                    max = JSON.stringify(pendingTasks[i][accessor] || 'null').length;
+        for (var i = 0; i < licenseApplication.length; i++) {
+            if (licenseApplication[i] !== undefined && licenseApplication[i][accessor] !== null) {
+                if (JSON.stringify(licenseApplication[i][accessor] || 'null').length > max) {
+                    max = JSON.stringify(licenseApplication[i][accessor] || 'null').length;
                 }
             }
         }
@@ -86,19 +86,19 @@ class LicenseApplication extends Component {
                 searchOption
             }
         })
-        this.getPendingTasks()
+        this.getLicenseApplications()
     }
 
     render() {
-        const { pendingTasks } = this.state
+        const { licenseApplication } = this.state
         return (
             <div>
-                <h4>My Pending Tasks</h4>
+                <h4>License Applications</h4>
                 <Card className="animated fadeIn">
-                    <CardHeader>MY PENDING TASKS</CardHeader>
+                    <CardHeader>LICENSE APPLICATIONS</CardHeader>
                     <CardBody>
                         <ReactTable
-                            data={pendingTasks}
+                            data={licenseApplication}
                             filterable
                             onFilteredChange={(filtered, column, value) => {
                                 this.setState({ filtered: filtered })

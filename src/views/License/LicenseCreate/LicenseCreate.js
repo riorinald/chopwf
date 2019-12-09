@@ -11,6 +11,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import axios from 'axios';
 import config from '../../../config';
 import SimpleReactValidator from 'simple-react-validator';
+import Select from 'react-select'
+
 
 
 class LicenseCreate extends Component {
@@ -18,14 +20,9 @@ class LicenseCreate extends Component {
         super(props)
         this.state = {
             //get data from api
-            licenseNames: [
-                {
-                    id: 1,
-                    name: "test"
-                }
-            ],
-            //get data from api
+            licenseNames: [],
             seniorManagers: [],
+            departments: [],
 
             //data to submit
             formData: {
@@ -56,6 +53,7 @@ class LicenseCreate extends Component {
 
         this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
         this.handleAgreeTerms = this.handleAgreeTerms.bind(this);
+        this.handleSelectOption = this.handleSelectOption.bind(this);
         this.submitRequest = this.submitRequest.bind(this);
 
 
@@ -64,6 +62,14 @@ class LicenseCreate extends Component {
     //Mount
     componentDidMount() {
         this.getUserData();
+        this.getData('licenseNames');
+        this.getData('seniorManagers');
+        this.getData('departments');
+    }
+
+    async getData(name) {
+        const res = await axios.get(`https://5dedc007b3d17b00146a1c5a.mockapi.io/details/${name}`)
+        this.setState({ [name]: res.data })
     }
 
     //Get User Infromation from database
@@ -76,6 +82,15 @@ class LicenseCreate extends Component {
             formData.userId = userId
             formData.employeeNum = res.data.employeeNum
             formData.telephoneNum = res.data.telephoneNum
+            return formData
+        })
+    }
+
+
+    handleSelectOption(event) {
+        this.setState(state => {
+            let formData = this.state.formData
+            formData.seniorManager = event.value
             return formData
         })
     }
@@ -268,7 +283,7 @@ class LicenseCreate extends Component {
     }
 
     render() {
-        const { formData, licenseNames, returnDateView } = this.state
+        const { formData, licenseNames, returnDateView, seniorManagers, departments } = this.state
         this.validator.purgeFields();
 
         return (
@@ -298,7 +313,12 @@ class LicenseCreate extends Component {
                             <FormGroup>
                                 <Label>Department </Label>
                                 <InputGroup>
-                                    <Input placeholder="Please specify department" id="department" onChange={this.handleChange("department")} size="16" type="text" />
+                                    <Input id="department" onChange={this.handleChange("department")} defaultValue="0" type="select">
+                                        <option value="0">Please selet a department</option>
+                                        {departments.map((dept, index) =>
+                                            <option key={index} value={dept.id} > {dept.name} </option>
+                                        )}
+                                    </Input>
                                 </InputGroup>
                                 <small style={{ color: '#F86C6B' }} >{this.validator.message('Department', formData.department, 'required')}</small>
                             </FormGroup>
@@ -406,10 +426,10 @@ class LicenseCreate extends Component {
 
                             <FormGroup>
                                 <Label>Senior Manager or above of requestor department</Label>
-                                <Input id="seniorManager" onChange={this.handleChange("seniorManager")} defaultValue="0" type="select">
-                                    <option value="0" >Please select a senior manager</option>
-                                    <option value="1" >Test</option>
-                                </Input>
+                                <Select
+                                    options={seniorManagers}
+                                    onChange={this.handleSelectOption}
+                                />
                                 <small style={{ color: '#F86C6B' }} >{this.validator.message('Senior Manager', formData.seniorManager, 'required')}</small>
                             </FormGroup>
 
