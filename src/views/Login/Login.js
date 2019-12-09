@@ -88,7 +88,7 @@ class Login extends Component {
             await axios.post(`${config.url}/login`, loginCredentials
                 , { headers: { 'Content-Type': '  application/json' } })
                 .then(res => {
-                    console.log(res);
+                    let info = "LOGIN " + res.data.status.toUpperCase()
                     localStorage.setItem('authenticate', true)
                     localStorage.setItem('legalEntity', 'MBAFC')
                     localStorage.setItem('ticket', res.data.ticket)
@@ -96,7 +96,7 @@ class Login extends Component {
                     localStorage.setItem('roleId', res.data.roleId)
                     localStorage.setItem('token', res.data.token)
                     if (res.data.status === "success") {
-                        this.setState({ info: "login " + res.data.status})
+                        this.setState({ info: info})
                         setTimeout(this.redirect, 1000);
                     }
                 })
@@ -122,7 +122,7 @@ class Login extends Component {
             username: this.state.username,
             password: this.state.password
         }
-        this.setState({ fade: true,info: "Loding ... " })
+        this.setState({ fade: true,info: "Loading ... " })
         this.validate(loginCredentials);
     }
 
