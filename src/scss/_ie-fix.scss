@@ -9,3 +9,13 @@ html body .app.flex-row.align-items-center {
     flex-direction: column;
   }
 }
+
+.IE-margin-top {
+  margin-top: 55vh !important;
+}
+
+@media screen and (max-height: 500px) {
+  .IE-margin-top {
+    margin-top: 35vh !important;
+  }
+}
