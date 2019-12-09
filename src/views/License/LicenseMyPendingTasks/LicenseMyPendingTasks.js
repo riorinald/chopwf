@@ -35,11 +35,20 @@ class LicenseMyPendingTasks extends Component {
         this.getPendingTasks()
     }
 
-    goToDetails(taskId) {
-        this.props.history.push({
-            pathname: `mypendingtask/${taskId}`,
-            state: { redirected: true }
-        })
+    goToDetails(taskId, status) {
+        if (status === "documentType1") {
+            this.props.history.push({
+                pathname: `mypendingtask/${taskId}`,
+                state: { redirected: true }
+            })
+        }
+        else {
+            this.props.history.push({
+                pathname: `details/edit/${taskId}`,
+                state: { redirected: true }
+            })
+        }
+
 
     }
 
@@ -215,7 +224,7 @@ class LicenseMyPendingTasks extends Component {
                                         onClick: e => {
                                             // console.log(rowInfo.original, rowInfo)
                                             // this.getTaskDetails(rowInfo.original.id)
-                                            this.goToDetails(rowInfo.original.id)
+                                            this.goToDetails(rowInfo.original.id, rowInfo.original.documentType)
                                         },
                                         style: {
                                             background:
