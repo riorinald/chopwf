@@ -1275,6 +1275,7 @@ class Create extends Component {
                 </FormGroup>
                 <FormGroup>
                   <Label>Responsible Person <i className="fa fa-user" /></Label>
+                  <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                   <AsyncSelect id="resPerson"
                     onBlur={this.checkDepartment}
                     classNamePrefix="rs"
@@ -1317,20 +1318,25 @@ class Create extends Component {
 
               {this.state.isLTI
                 ? <FormGroup>
-                  <Label>Document Check By <i className="fa fa-user" /></Label><AsyncSelect
-                    id="docCheckByLTI"
-                    loadOptions={loadOptions}
-                    isMulti
-                    menuPortalTarget={document.body}
-                    components={animatedComponents}
-                    styles={this.state.deptHeadSelected === null ? reactSelectControl : ""}
-                  /> </FormGroup>
+                  <Label>Document Check By <i className="fa fa-user" /></Label>
+                  <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                    <AsyncSelect
+                      id="docCheckByLTI"
+                      onBlur={this.checkDepartment}
+                      loadOptions={loadOptions}
+                      isMulti
+                      menuPortalTarget={document.body}
+                      components={animatedComponents}
+                      styles={this.state.deptHeadSelected === null ? reactSelectControl : ""}
+                    />
+                  </FormGroup>
                 : null}
 
               {this.state.isCNIPS
                 ? <FormGroup>
                   <Label>Contract Signed By: <i className="fa fa-user" /></Label>
-                  <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
+                  <small className="mb-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
+                  <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                   <Row>
                     <Col>
                       <AsyncSelect
@@ -1362,7 +1368,10 @@ class Create extends Component {
                 : this.state.isLTU
                   ? <FormGroup>
                     <Label>Document Check By <i className="fa fa-user" /></Label>
-                    <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
+                    <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                    <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} 
+                      onChange={this.handleSelectOption("docCheckBySelected")}
+                      onBlur={this.checkDepartment}
                       loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
                   </FormGroup>
                   : <FormGroup>
