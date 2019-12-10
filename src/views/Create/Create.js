@@ -18,6 +18,7 @@ import ReactTable from "react-table";
 import "react-table/react-table.css"
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import PropTypes from "prop-types";
+import LegalEntity from '../../context';
 
 import {
   Button,
@@ -69,6 +70,7 @@ class Create extends Component {
       selectAll: false,
       selection: [],
 
+      legalName: this.props.legalName,
       //retrieve from department Types Table
       department: [],
       //retrieve from application types table
@@ -192,6 +194,9 @@ class Create extends Component {
 
   }
 
+  componentWillReceiveProps(){
+    this.forceUpdate()
+  }
 
   validate() {
     for (let i = 0; i < this.state.reqInfo.length; i++) {
@@ -971,7 +976,7 @@ class Create extends Component {
           <Col xl={1}>
             <FormGroup>
               {/* <Label></Label> */}
-              <Button block onClick={this.addDocumentLTI}>Add</Button>
+              <Button id="addDocs" block onClick={this.addDocumentLTI}>Add</Button>
             </FormGroup>
           </Col>
         </Row>
@@ -1081,6 +1086,8 @@ class Create extends Component {
       </div>
 
     return (
+      <LegalEntity.Consumer>{
+        ContextValue => (
       <div className="animated fadeIn">
         <h4>Create</h4>
         <Card>
@@ -1382,20 +1389,17 @@ class Create extends Component {
           </CardBody>
           <CardFooter>
             <div className="form-actions" >
-              <Row noGutters className="float-left">
-                <Col className="mr-2" >
+              <Row className="align-items-left">
+                <Col>
                   {this.state.agreeTerms
-                    ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
-                    : <Button id="disabledSubmit" type="submit" color="success" disabled
+                    ? <Button className="mr-2" id="submit" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
+                    : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
                       onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} >Submit</Button>}
                   <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit">please confirm the agree terms</Tooltip>
-                </Col>
-                <Col>
                   <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
                   <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
                 </Col>
               </Row>
-
               {/* </div>
             <div className="form-actions"> */}
             </div>
@@ -1404,10 +1408,8 @@ class Create extends Component {
         <Modal backdrop="static" color="info" isOpen={this.state.modal} toggle={this.toggleModal} className={'modal-info ' + this.props.className} >
           <ModalHeader className="center" toggle={this.changeSelect}> Contract Chop </ModalHeader>
           <ModalBody>
-            <div><p>
-              <b>MBAFC</b> Contract Chop is only used for <b>Mortgage Loan Contract</b> and <b>Mortgage Filling Business</b>.
-                 For any other contracts (e.g. purchase orders/release orders) and agreements, please select company chop.
-                  </p>
+            <div>
+              {ContextValue.legalEntity.contractChop}
               <p className="h6">Do you confirm to apply Contract Chop for your documents?</p>
             </div>
           </ModalBody>
@@ -1417,8 +1419,9 @@ class Create extends Component {
           </ModalFooter>
         </Modal>
       </div >
+      )}
+    </LegalEntity.Consumer>
     );
-
   }
 }
 
