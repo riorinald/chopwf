@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import {
+    Card, CardHeader, CardBody, CardFooter, Button
+} from 'reactstrap'
 
 class LicenseAdmin extends Component {
     constructor(props) {
@@ -11,7 +14,16 @@ class LicenseAdmin extends Component {
     render() {
         return (
             <div>
-LicenseAdmin
+                <h4>License Admin</h4>
+                <Card>
+                    <CardHeader>Administration</CardHeader>
+                    <CardBody>
+
+                    </CardBody>
+                    <CardFooter>
+                        <Button color="success" >Save</Button>
+                    </CardFooter>
+                </Card>
             </div>
         )
     }

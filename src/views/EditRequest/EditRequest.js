@@ -115,7 +115,6 @@ class EditRequest extends Component {
             validateForm: [],
 
             isValid: false,
-
             editRequestForm: {
                 engName: "",
                 cnName: "",
@@ -140,7 +139,7 @@ class EditRequest extends Component {
         }
         this.getTaskDetails = this.getTaskDetails.bind(this);
         this.handleChange = this.handleChange.bind(this);
-        this.redirectToPendingTasks = this.redirectToPendingTasks.bind(this)
+        this.goBack = this.goBack.bind(this)
         this.handleDocumentChange = this.handleDocumentChange.bind(this);
         this.toggleConnection = this.toggleConnection.bind(this);
         this.toggleUIO = this.toggleUIO.bind(this);
@@ -159,7 +158,7 @@ class EditRequest extends Component {
         }
         else {
             this.props.history.push({
-                pathname: '/mypendingtask'
+                pathname: `/${this.props.match.params.page}`
             })
         }
         this.validator = new SimpleReactValidator();
@@ -201,16 +200,16 @@ class EditRequest extends Component {
     }
 
     async deleteTask() {
-        console.log(this.state.taskDetails.taskId)
+        // console.log(this.state.taskDetails.taskId)
         resetMounted.setMounted()
         Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res => {
-            console.log(res.data)
+            // console.log(res.data)
 
             Swal.fire({
                 title: "REQUEST DELETED",
                 html: res.data.message,
                 type: "success",
-                onClose: () => { this.props.history.push({ pathname: '/mypendingtask' }) }
+                onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) }
             })
         })
     }
@@ -340,8 +339,8 @@ class EditRequest extends Component {
         }
     }
 
-    redirectToPendingTasks() {
-        this.props.history.push('/mypendingtask')
+    goBack() {
+        this.props.history.push(`/${this.props.match.params.page}`)
     }
 
     filterColors = (inputValue) => {
@@ -424,7 +423,7 @@ class EditRequest extends Component {
     uploadDocument = event => {
         if (event.target.files[0]) {
             let file = event.target.files[0]
-            console.log(file)
+            // console.log(file)
             let fileName = event.target.files[0].name
             this.setState(state => {
                 let editRequestForm = this.state.editRequestForm
@@ -440,32 +439,62 @@ class EditRequest extends Component {
         var rand = Math.floor((Math.random() * maxNumber) + 1);
         var tempDate = new Date();
         var date = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear() + ' ' + tempDate.getHours() + ':' + tempDate.getMinutes() + ':' + tempDate.getSeconds();
-        console.log(this.state.editRequestForm.docSelected)
-        if (this.state.editRequestForm.docSelected !== null) {
-            const obj = {
-                taskId: this.state.taskDetails.taskId,
-                documentFileName: this.state.editRequestForm.docAttachedName,
-                documentCode: "",
-                contractNumber: this.state.editRequestForm.contractNum,
-                description: "",
-                created: date,
-                updated: "",
-                documentType: "",
-                documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
-                expiryDate: null,
-                departmentHeads: null,
-                documentId: rand,
-                documentNameEnglish: this.state.editRequestForm.engName,
-                documentNameChinese: this.state.editRequestForm.cnName,
-                docSelected: this.state.editRequestForm.docSelected
-            }
+        // console.log(this.state.editRequestForm.docSelected)
+        let valid = true
+        let doc = this.state.taskDetails.documentNames
 
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.documentNames.push(obj)
-                return { taskDetails }
-            })
+        if (this.state.editRequestForm.docSelected !== null) {
+            for (let i = 0; i < doc.length; i++) {
+                if (doc[i].documentNameEnglish === this.state.editRequestForm.engName && doc[i].documentNameChinese === this.state.editRequestForm.cnName && doc[i].documentFileName === this.state.editRequestForm.docAttachedName) {
+                    valid = false
+                    break
+                }
+                else {
+                    valid = true
+                }
+            }
+            if (valid) {
+                const obj = {
+                    taskId: this.state.taskDetails.taskId,
+                    documentFileName: this.state.editRequestForm.docAttachedName,
+                    documentCode: "",
+                    contractNumber: this.state.editRequestForm.contractNum,
+                    description: "",
+                    created: date,
+                    updated: "",
+                    documentType: "",
+                    documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
+                    expiryDate: null,
+                    departmentHeads: null,
+                    documentId: rand,
+                    documentNameEnglish: this.state.editRequestForm.engName,
+                    documentNameChinese: this.state.editRequestForm.cnName,
+                    docSelected: this.state.editRequestForm.docSelected
+                }
+
+                this.setState(state => {
+                    let taskDetails = this.state.taskDetails
+                    taskDetails.documentNames.push(obj)
+                    return { taskDetails }
+                })
+            }
+            else {
+                Swal.fire({
+                    title: "Document Exists",
+                    html: 'The selected document already exists!',
+                    type: "warning"
+                })
+            }
         }
+        this.setState(state => {
+            let editRequestForm = this.state.editRequestForm
+            editRequestForm.docAttachedName = ""
+            editRequestForm.contractNum = ""
+            editRequestForm.docSelected = null
+            editRequestForm.engName = ""
+            editRequestForm.cnName = ""
+            return editRequestForm
+        })
     }
     addDocumentLTU() {
         this.state.selectedDocs.map(doc => {
@@ -618,7 +647,7 @@ class EditRequest extends Component {
                 selectedDocs.push(item._original)
             });
         }
-        this.setState({ selectAll, selection, selectedDocs }, console.log(this.state.selectedDocs));
+        this.setState({ selectAll, selection, selectedDocs });
     };
 
     /**
@@ -633,7 +662,7 @@ class EditRequest extends Component {
 
         return {
             onClick: (e) => {
-                console.log("It was in this row:", rowInfo);
+                // console.log("It was in this row:", rowInfo);
             },
             style: {
                 background:
@@ -654,7 +683,7 @@ class EditRequest extends Component {
                         footer: 'Your request is saved as a draft',
                         type: 'info',
                         onClose: () => {
-                            this.props.history.push('/mypendingtask')
+                            this.props.history.push(`/${this.props.match.params.page}`)
                         }
                     })
 
@@ -666,7 +695,7 @@ class EditRequest extends Component {
                         footer: 'Your request is being processed and is waiting for the approval',
                         type: 'success',
                         onClose: () => {
-                            this.props.history.push('/mypendingtask')
+                            this.props.history.push(`/${this.props.match.params.page}`)
                         }
 
                     })
@@ -784,18 +813,20 @@ class EditRequest extends Component {
             }
         }
         else {
+            let def = 0
+            let temp = 0
             for (let i = 0; i < this.state.taskDetails.documentNames.length; i++) {
                 if (this.state.taskDetails.documentNames[i].documentId.length === 36) {
                     postReq.append(`DocumentIds[${i}]`, this.state.taskDetails.documentNames[i].documentId)
+                    def = i
                 }
                 else {
+                    temp = (i - def) - 1
                     let documentSelected = this.state.taskDetails.documentNames[i].docSelected !== undefined ? this.state.taskDetails.documentNames[i].docSelected : {}
-                    postReq.append(`Documents[${i}].Attachment.File`, documentSelected);
-                    postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.taskDetails.documentNames[i].documentNameEnglish);
-                    postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.taskDetails.documentNames[i].documentNameChinese);
+                    postReq.append(`Documents[${temp}].Attachment.File`, documentSelected);
+                    postReq.append(`Documents[${temp}].DocumentNameEnglish`, this.state.taskDetails.documentNames[i].documentNameEnglish);
+                    postReq.append(`Documents[${temp}].DocumentNameChinese`, this.state.taskDetails.documentNames[i].documentNameChinese);
                 }
-
-
             }
 
         }
@@ -834,7 +865,7 @@ class EditRequest extends Component {
                 {!this.state.loading ?
                     <Card className="animated fadeIn">
                         <CardHeader>
-                            <Button onClick={() => this.redirectToPendingTasks()}>Back</Button> &nbsp;
+                            <Button onClick={() => this.goBack()}>Back</Button> &nbsp;
                              EDIT REQUEST - {taskDetails.requestNum}
                         </CardHeader>
                         <CardBody color="dark">
@@ -1313,7 +1344,7 @@ class EditRequest extends Component {
                             <div className="form-actions">
                                 <Row>
                                     <Col className="d-flex justify-content-start">
-                                        {taskDetails.isConfirm
+                                        {taskDetails.isConfirm === "Y"
                                             ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
                                             : <Button type="submit" color="success"
                                                 // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })}

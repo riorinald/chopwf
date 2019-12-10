@@ -437,7 +437,7 @@ class Create extends Component {
           if (isSubmitted === 'N') {
             Swal.fire({
               title: res.data.status === 200 ? 'Request Saved' : '',
-              text: 'Request Number : '+ res.data.requestNum,
+              text: 'Request Number : ' + res.data.requestNum,
               footer: 'Your request is saved as draft.',
               type: 'info',
               onClose: () => { this.formReset() }
@@ -446,7 +446,7 @@ class Create extends Component {
           if (isSubmitted === 'Y') {
             Swal.fire({
               title: res.data.status === 200 ? 'Request Submitted' : "",
-              text: 'Request Number : '+ res.data.requestNum,
+              text: 'Request Number : ' + res.data.requestNum,
               footer: 'Your request is being processed and is waiting for the approval',
               type: 'success',
               onClose: () => { this.formReset() }
@@ -455,7 +455,7 @@ class Create extends Component {
         })
     } catch (error) {
       if (error.response && isSubmitted === 'N') {
-      Swal.fire({
+        Swal.fire({
           title: error.response.statusText,
           text: error.response.data.message,
           footer: JSON.stringify(error.response.data),
@@ -464,12 +464,12 @@ class Create extends Component {
       }
       if (error.response && isSubmitted === 'Y') {
         Swal.fire({
-            title: error.response.statusText,
-            text: JSON.stringify(error.response.data),
-            footer: 'traceId : ' + error.response.data.traceId,
-            type: 'error',
-          })
-        }
+          title: error.response.statusText,
+          text: JSON.stringify(error.response.data),
+          footer: 'traceId : ' + error.response.data.traceId,
+          type: 'error',
+        })
+      }
       console.error(error.response);
     }
   }
@@ -645,7 +645,7 @@ class Create extends Component {
     if (event.target.value) {
       event.target.className = "form-control"
     }
-    
+
 
     else {
       event.target.className = "is-invalid form-control"
@@ -653,23 +653,23 @@ class Create extends Component {
   };
 
 
-  handleInputMask = (event) =>{
-      let value =  ("" + event.target.value).toUpperCase();
-        this.setState({
-          contractNum: value
-        });
-          if (/^..[ALRalr]/.test(event.target.value)) {
-            this.setState({
-              inputMasak: "*-a-*-9999-9999",
-            });
-          }
-          else {
-            this.setState({
-              inputMasak: "*-aa-*-9999-9999",
-            }); 
-          }
+  handleInputMask = (event) => {
+    let value = ("" + event.target.value).toUpperCase();
+    this.setState({
+      contractNum: value
+    });
+    if (/^..[ALRalr]/.test(event.target.value)) {
+      this.setState({
+        inputMasak: "*-a-*-9999-9999",
+      });
+    }
+    else {
+      this.setState({
+        inputMasak: "*-aa-*-9999-9999",
+      });
+    }
   }
-  
+
 
   deleteDocument(table, i) {
     this.setState(state => {
@@ -1042,18 +1042,19 @@ class Create extends Component {
         </Modal>
 
         <Collapse isOpen={this.state.documentTableLTU.length !== 0}>
-          <div>
-            <br />
-            <Label>Documents</Label>
-            <Table bordered>
+          {/* <div> */}
+          <br />
+
+          <div className="tableWrap">
+            <Table hover bordered responsive size="sm">
               <thead>
                 <tr>
-                  <th>No.</th>
+                  <th className="smallTd" >No.</th>
                   <th>Document Name (English)</th>
                   <th>Document Name (Chinese)</th>
                   <th>Expiry Date</th>
                   <th>DH Approved</th>
-                  <th></th>
+                  <th className="smallTd"></th>
                 </tr>
               </thead>
               <tbody>
@@ -1073,7 +1074,9 @@ class Create extends Component {
                 )}
               </tbody>
             </Table>
+
           </div>
+
         </Collapse>
       </div>
 
@@ -1138,8 +1141,8 @@ class Create extends Component {
                   {this.validator.message('aplicationType', this.state.appTypeSelected, 'required')}</FormFeedback>
               </FormGroup>
 
-                <Collapse isOpen={this.state.isLTI}>
-                  <FormGroup>
+              <Collapse isOpen={this.state.isLTI}>
+                <FormGroup>
                   <Label>Entitled Team</Label>
                   <InputGroup>
                     <Input id="teamSelected" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
@@ -1151,19 +1154,19 @@ class Create extends Component {
                     <FormFeedback>Invalid Entitled Team Selected</FormFeedback>
                   </InputGroup>
                 </FormGroup>
-                  <Label>Effective Period</Label>
-                  {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
-                  <DatePicker id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                    className="form-control" required dateFormat="yyyy/MM/dd" withPortal
-                    peekNextMonth
-                    showMonthDropdown
-                    showYearDropdown
-                    selected={this.state.dateView1}
-                    onChange={this.dateChange("effectivePeriod", "dateView1")}
-                    minDate={new Date()} maxDate={addDays(new Date(), 365)} />
-                  <FormFeedback>Invalid Date Selected</FormFeedback>
-                </Collapse>
-  
+                <Label>Effective Period</Label>
+                {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
+                <DatePicker id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                  className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                  peekNextMonth
+                  showMonthDropdown
+                  showYearDropdown
+                  selected={this.state.dateView1}
+                  onChange={this.dateChange("effectivePeriod", "dateView1")}
+                  minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                <FormFeedback>Invalid Date Selected</FormFeedback>
+              </Collapse>
+
               <Collapse isOpen={this.state.isLTU}>
                 <FormGroup>
                   <Label>Entitled Team</Label>
@@ -1177,7 +1180,7 @@ class Create extends Component {
                     <FormFeedback>Invalid Entitled Team Selected</FormFeedback>
                   </InputGroup>
                 </FormGroup>
-                </Collapse>
+              </Collapse>
 
               <FormGroup>
                 <Label>Chop Type</Label>
@@ -1234,7 +1237,10 @@ class Create extends Component {
               <FormGroup>
                 <Label>Use in Office or Not</Label>
                 <Row />
-                <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
+                {this.state.isLTI || this.state.isLTU
+                  ? <AppSwitch disabled id="useInOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
+                  : <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
+                }
               </FormGroup>
               <Collapse isOpen={!this.state.collapse}>
                 <FormGroup visibelity="false" >
@@ -1286,6 +1292,19 @@ class Create extends Component {
                   <FormFeedback>Please add remarks</FormFeedback>
                 </InputGroup>
               </FormGroup>
+
+              {this.state.isLTI
+                ? <FormGroup>
+                  <Label>Document Check By <i className="fa fa-user" /></Label><AsyncSelect
+                    id="docCheckByLTI"
+                    loadOptions={loadOptions}
+                    isMulti
+                    menuPortalTarget={document.body}
+                    components={animatedComponents}
+                    styles={this.state.deptHeadSelected === null ? reactSelectControl : ""}
+                  /> </FormGroup>
+                : null}
+
               {this.state.isCNIPS
                 ? <FormGroup>
                   <Label>Contract Signed By: <i className="fa fa-user" /></Label>
@@ -1337,6 +1356,7 @@ class Create extends Component {
                       ? <small style={{ color: '#F86C6B' }}>Please select a Department Head</small>
                       : ""
                     }
+
                   </FormGroup>
               }
 

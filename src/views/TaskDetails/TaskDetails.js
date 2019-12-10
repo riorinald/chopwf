@@ -93,7 +93,7 @@ class TaskDetails extends Component {
                     title: res.data.message,
                     html: `The request has been ${res.data.message}`,
                     type: "success",
-                    onAfterClose: this.goBack(true)
+                    onClose: () => { this.goBack(true) }
                 })
             })
             .catch(error => {
@@ -534,7 +534,7 @@ class TaskDetails extends Component {
                                     <Row className="mb-4">
                                         <Col>
                                             {taskDetails.actions.map((action, index) =>
-                                            <Button className="mx-1" key={index} color={action.action === "approve" ? "success" : "danger"} onClick={() => this.approve(action.action)} > {this.capitalize(action.action)}</Button>
+                                                <Button className="mx-1" key={index} color={action.action === "approve" ? "success" : "danger"} onClick={() => this.approve(action.action)} > {this.capitalize(action.action)}</Button>
                                             )}
                                         </Col>
                                     </Row>
