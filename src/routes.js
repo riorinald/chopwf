@@ -47,7 +47,7 @@ const routes = [
   { path: '/instruction', exact: true, name: 'Insctructions', component: Instructions },
   { path: '/help', exact: true, name: 'Help', component: Help },
   { path: '/login', name: 'Login', component: Login },
-  { path: '/editrequest', exact: true, name: 'EditRequest', component: EditRequest },
+  { path: '/:page/editrequest', exact: true, name: 'EditRequest', component: EditRequest },
   { path: '/chopadmin', exact: true, nme: 'Administration', component: Administration },
   { path: '/404', name: 'page404', component: page404 },
 

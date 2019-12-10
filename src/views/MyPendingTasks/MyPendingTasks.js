@@ -142,7 +142,7 @@ class MyPendingTasks extends Component {
 
     goToEditRequest(id) {
         this.props.history.push({
-            pathname: 'editrequest',
+            pathname: 'mypendingtask/editrequest',
             state: { id: id }
         })
     }
@@ -249,6 +249,7 @@ class MyPendingTasks extends Component {
     }
 
     handleKeyDown = (e) => {
+        console.log(e.key)
         if (e.key === "Enter") {
             this.getPendingTasks()
         }
@@ -280,11 +281,11 @@ class MyPendingTasks extends Component {
                 <h4>MY PENDING TASKS</h4>
 
                 {/* {this.state.show? */}
-                <Card>
+                <Card  onKeyDown={this.handleKeyDown} >
                     <CardHeader >
                         PENDING TASKS <Button className="float-right" onClick={this.search} >Search</Button>
                     </CardHeader>
-                    <CardBody onKeyDown={this.handleKeyDown} >
+                    <CardBody >
                         <ReactTable
                             data={pendingTasks}
                             sortable
@@ -491,7 +492,7 @@ class MyPendingTasks extends Component {
                                             }
 
                                             let status = rowInfo.original.statusId
-                                            if (status === "DRAFTED" || status === "RECALLED" || status === "SENDBACK") {
+                                            if (status === "DRAFTED" || status === "RECALLED" || status === "SENDBACKED") {
                                                 this.goToEditRequest(rowInfo.original.taskId)
                                             }
                                             else {

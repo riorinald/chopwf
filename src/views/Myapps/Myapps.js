@@ -4,14 +4,8 @@ import {
   Card,
   CardHeader,
   CardBody,
-  Progress,
-  Col,
   Button,
-  Label,
-  FormGroup,
   Input,
-  Row,
-  Collapse
 } from 'reactstrap';
 import ReactTable from "react-table";
 import "react-table/react-table.css"
@@ -102,7 +96,7 @@ class Myapps extends Component {
       .then(res => {
         this.setState({ applications: res.data, loading: false })
       })
-    // console.log(this.state.applications)
+    // console.log(this.state.applications) 
     // console.log(Object.keys(this.state.applications[0]))
   }
 
@@ -119,6 +113,13 @@ class Myapps extends Component {
         })
 
       })
+  }
+
+  goToEditRequest(id) {
+    this.props.history.push({
+      pathname: 'myapps/editrequest',
+      state: { id: id }
+    })
   }
 
   goToDetails(id, url) {
@@ -236,7 +237,7 @@ class Myapps extends Component {
     const { applications, collapse, selectedApplication } = this.state
     // let columnData = Object.keys(applications[0])
     return (
-      <div  className="animated fadeIn">
+      <div className="animated fadeIn">
         <h4>My Applications</h4>
         {/* {this.state.collapse ? */}
         <Card>
@@ -255,8 +256,8 @@ class Myapps extends Component {
                 return row[id]
               }}
               defaultSorted={[{
-                  id: "createdDate",
-                  desc: true
+                id: "createdDate",
+                desc: true
               }]}
               columns={[
                 {
@@ -430,13 +431,18 @@ class Myapps extends Component {
                           rowEdit: null
                         });
                       }
-                      // console.log(rowInfo.original);
-                      this.goToDetails(rowInfo.original.taskId, `/myapps/details/${rowInfo.original.applicationTypeId}`)
+                      let status = rowInfo.original.statusId
+                      if (status === "DRAFTED" || status === "RECALLED" || status === "SENDBACKED") {
+                        this.goToEditRequest(rowInfo.original.taskId)
+                      }
+                      else {
+                        this.goToDetails(rowInfo.original.taskId, `/myapps/details/${rowInfo.original.applicationTypeId}`)
+                      }
+
+
                       this.setState({ selectedApplication: rowInfo.original })
 
-                      // this.setState({ collapse: !this.state.collapse })
-                      // console.log(this.state.rowEdit);
-                      // this.props.history.push(`/${selectedApplication.taskId}`, {id: selectedApplication.id})
+
                     },
                     style: {
                       background:
