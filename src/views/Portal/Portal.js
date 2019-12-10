@@ -42,7 +42,7 @@ class Portal extends Component {
           <Container>
             <Row className="justify-content-center">
               <Col sm={6} md lg={3}>
-                <Card tag="a" style={{ cursor: "pointer" }} onClick={() => {this.redirectTo('CHOP')}} className="shadow-lg p-3 mb-5 bg-white rounded">
+                <Card id="CWF" tag="a" style={{ cursor: "pointer" }} onClick={() => {this.redirectTo('CHOP')}} className="shadow-lg p-3 mb-5 bg-white rounded">
                   <CardBody className="text-center"><h5>CHOP WORKFLOW APPLICATION</h5>
                      <Col className="text-center p-4">
                       <i className="fa fa-sitemap fa-5x"></i>
@@ -51,7 +51,7 @@ class Portal extends Component {
                 </Card>
               </Col>
               <Col sm={6} md lg={3}>
-                <Card tag="a" style={{ cursor: "pointer" }} onClick={() => {this.redirectTo('LICENSE')}} className="shadow-lg p-3 mb-5 bg-white rounded">
+                <Card id="LWF" tag="a" style={{ cursor: "pointer" }} onClick={() => {this.redirectTo('LICENSE')}} className="shadow-lg p-3 mb-5 bg-white rounded">
                   <CardBody className="text-center"><h5>LICENSE WORKFLOW APPLICATION</h5>
                     <Col className="text-center p-4">
                     <i className="fa fa-files-o fa-5x"></i>

@@ -101,7 +101,11 @@ class Login extends Component {
                     }
                 })
         } catch (error) {
+            if (error.response){
             this.setState({ info: error.response.statusText});
+            } else {
+            this.setState({ info: "server unreachable"});
+            }   
         }
     }
 
@@ -184,9 +188,9 @@ class Login extends Component {
                         {/* </Card> */}
                     </ModalBody>
                     <ModalFooter>
-                        <Button block color="primary" style={{ justifyContent: "center" }} onClick={this.loginCheck}>Login </Button>
+                        <Button id="login" block color="primary" style={{ justifyContent: "center" }} onClick={this.loginCheck}>Login </Button>
                         <br />
-                        <Button block color="success" style={{ justifyContent: "center" }} onClick={this.WindowsLogin}>Login With Windows </Button>
+                        <Button id="loginWindows" block color="success" style={{ justifyContent: "center" }} onClick={this.WindowsLogin}>Login With Windows </Button>
                     </ModalFooter>
                 <Fade in={this.state.fade}>
                     <Alert color="info"><center>{this.state.info}</center></Alert>

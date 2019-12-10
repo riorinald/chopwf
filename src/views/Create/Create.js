@@ -19,8 +19,10 @@ import "react-table/react-table.css"
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import PropTypes from "prop-types";
 import LegalEntity from '../../context';
+// import Skeleton from 'react-loading-skeleton';
 
 import {
+  Badge,
   Button,
   CustomInput,
   Card,
@@ -158,7 +160,8 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       noteInfo: [],
-      inputMasak: "*-aa-*-9999-9999"
+      inputMasak: "*-aa-*-9999-9999",
+      selectInfo: ''
 
     };
 
@@ -380,6 +383,14 @@ class Create extends Component {
       this.postData(postReq, isSubmitted)
     }
 
+  }
+
+  checkDepartment = () => {
+    if(this.state.deptSelected === ""){
+      this.setState({selectInfo : 'please select the Department'})
+    }else{
+      this.setState({selectInfo : ''})
+    }
   }
 
   //toggle useInOffice
@@ -645,8 +656,9 @@ class Create extends Component {
 
     this.setState({
       [name]: event.target.value
-    });
-
+    },
+    ()=>{this.checkDepartment()}
+    );
     if (event.target.value) {
       event.target.className = "form-control"
     }
@@ -1092,6 +1104,7 @@ class Create extends Component {
           <CardBody>
             <FormGroup>
               <h5>NOTES :</h5>
+              {/* {this.state.noteInfo.notes || <Skeleton count={3}/>} */}
               {this.state.noteInfo.notes}
             </FormGroup>
             <Form className="form-horizontal" innerRef={this.formRef}>
@@ -1257,7 +1270,7 @@ class Create extends Component {
                 <FormGroup>
                   <Label>Responsible Person <i className="fa fa-user" /></Label>
                   <AsyncSelect id="resPerson"
-
+                    onBlur={this.checkDepartment}
                     classNamePrefix="rs"
                     loadOptions={loadOptions}
                     onChange={this.handleSelectOption("resPerson")}
@@ -1275,9 +1288,11 @@ class Create extends Component {
               </FormGroup>
               <FormGroup>
                 <Label>Pick Up By <i className="fa fa-user" /> </Label>
+                <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                 <AsyncSelect
                   id="pickUpBy"
                   loadOptions={loadOptions}
+                  onBlur={this.checkDepartment}
                   onChange={this.handleSelectOption("pickUpBy")}
                   menuPortalTarget={document.body}
                   styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -1301,6 +1316,7 @@ class Create extends Component {
                     <Col>
                       <AsyncSelect
                         id="contractSign1"
+                        onBlur={this.checkDepartment}
                         loadOptions={loadOptions}
                         onChange={this.handleSelectOption("contractSign1")}
                         menuPortalTarget={document.body}
@@ -1312,6 +1328,7 @@ class Create extends Component {
                     <Col>
                       <AsyncSelect
                         id="contractSign2"
+                        onBlur={this.checkDepartment}
                         loadOptions={loadOptions}
                         onChange={this.handleSelectOption("contractSign2")}
                         menuPortalTarget={document.body}
@@ -1332,10 +1349,12 @@ class Create extends Component {
                   : <FormGroup>
                     <Label>Department Heads <i className="fa fa-user" /></Label>
                     <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity</small>
+                    <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>                    
                     <AsyncSelect
                       id="deptHeadSelected"
                       loadOptions={loadOptions}
                       isMulti
+                      onBlur={this.checkDepartment}
                       onChange={this.handleSelectOption("deptHeadSelected")}
                       menuPortalTarget={document.body}
                       components={animatedComponents}
