@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, forwardRef } from 'react';
 import {
     Card, CardBody, CardHeader, Col, Row,
     Input,
@@ -9,6 +9,8 @@ import ReactTable from "react-table";
 import "react-table/react-table.css"
 import Axios from 'axios';
 import config from '../../config';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 let mounted = 0
 let array = []
@@ -40,6 +42,7 @@ class MyPendingTasks extends Component {
 
 
             show: true,
+            dateView: new Date(),
 
             searchOption: {
                 requestNum: "",
@@ -167,7 +170,15 @@ class MyPendingTasks extends Component {
         })
     }
 
-
+    dateChange = (name, view) => date => {
+        let dates = date.toISOString().substr(0, 10);
+        this.setState({ [view]: date });
+        this.setState(prevState => ({
+           searchOption: { ...prevState.searchOption,
+            [name]: dates.replace(/-/g, "")} 
+        }),
+        this.getPendingTasks)
+      };
 
     onFilteredChangeCustom = (value, accessor) => {
         this.setState(state => {
@@ -258,6 +269,12 @@ class MyPendingTasks extends Component {
 
     render() {
         const { pendingTasks } = this.state;
+        const ref = React.createRef()
+        const ExampleCustomInput = forwardRef(({ value, onClick }, ref) => (
+            <Button color="light" ref={ref} onClick={onClick}>
+              {value}
+            </Button>
+          ))
         return (
             <div className="animated fadeIn">
                 <h4>MY PENDING TASKS</h4>
@@ -282,7 +299,7 @@ class MyPendingTasks extends Component {
                                 const id = filter.pivotId || filter.id;
                                 return row[id]
                             }}
-
+                            getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
 
                             columns={[
                                 {
@@ -411,6 +428,19 @@ class MyPendingTasks extends Component {
                                     Cell: row => (
                                         <div> {this.convertDate(row.original.createdDate)} </div>
                                     ),
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <DatePicker value={this.state.dateView}
+                                            todayButton="Today"
+                                            selected={this.state.dateView}
+                                            onChange={this.dateChange('createdDate','dateView')}
+                                             placeholderText="YYYY/MM/DD"
+                                             required dateFormat="yyyy/MM/dd" 
+                                             customInput={<ExampleCustomInput ref={ref}/>}>
+                                            </DatePicker>
+
+                                        )
+                                    },
                                     style: { textAlign: "center" }
                                 },
                                 {
