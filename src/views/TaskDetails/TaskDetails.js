@@ -511,7 +511,7 @@ class TaskDetails extends Component {
                                                             // style: { textAlign: "center" },
                                                         },
                                                     ]}
-                                                    defaultPageSize={5}
+                                                    defaultPageSize={10}
                                                 />
                                             </ModalBody>
                                             <ModalFooter>

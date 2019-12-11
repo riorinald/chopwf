@@ -2,7 +2,7 @@ import React, { Component, forwardRef } from 'react';
 import {
     Card, CardBody, CardHeader, Col, Row,
     Input,
-    Button,
+    Button, InputGroup
 
 } from 'reactstrap';
 import ReactTable from "react-table";
@@ -11,6 +11,8 @@ import Axios from 'axios';
 import config from '../../config';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import InputMask from "react-input-mask";
+
 
 let mounted = 0
 let array = []
@@ -39,7 +41,7 @@ class MyPendingTasks extends Component {
 
             filtered: [],
 
-
+            dateView1: "",
 
             show: true,
             dateView: new Date(),
@@ -160,8 +162,19 @@ class MyPendingTasks extends Component {
     }
 
     handleSearch = name => event => {
+        let value = event.target.value
+        if (name === "createdDate") {
+            let temp = ""
+            // for (let i = 0; i < value.length; i++) {
+            //     if (i !== 4 && i !== 7 && i !== 10) {
+            //         temp = temp + value[i]
+            //     }
+            // }
+            // value = temp
+        }
+        console.log(value)
         const options = this.state.searchOption
-        options[name] = event.target.value
+        options[name] = value
         this.setState(state => {
             const searchOption = options
             return {
@@ -171,14 +184,21 @@ class MyPendingTasks extends Component {
     }
 
     dateChange = (name, view) => date => {
-        let dates = date.toISOString().substr(0, 10);
+        console.log(date)
+        let dates = ""
+        if (date) {
+            dates = `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`
+        }
         this.setState({ [view]: date });
         this.setState(prevState => ({
-           searchOption: { ...prevState.searchOption,
-            [name]: dates.replace(/-/g, "")} 
+            searchOption: {
+                ...prevState.searchOption,
+                [name]: dates
+            }
         }),
-        this.getPendingTasks)
-      };
+            this.getPendingTasks
+        )
+    };
 
     onFilteredChangeCustom = (value, accessor) => {
         this.setState(state => {
@@ -249,7 +269,6 @@ class MyPendingTasks extends Component {
     }
 
     handleKeyDown = (e) => {
-        console.log(e.key)
         if (e.key === "Enter") {
             this.getPendingTasks()
         }
@@ -273,15 +292,15 @@ class MyPendingTasks extends Component {
         const ref = React.createRef()
         const ExampleCustomInput = forwardRef(({ value, onClick }, ref) => (
             <Button color="light" ref={ref} onClick={onClick}>
-              {value}
+                {value}
             </Button>
-          ))
+        ))
         return (
             <div className="animated fadeIn">
                 <h4>MY PENDING TASKS</h4>
 
                 {/* {this.state.show? */}
-                <Card  onKeyDown={this.handleKeyDown} >
+                <Card onKeyDown={this.handleKeyDown} >
                     <CardHeader >
                         PENDING TASKS <Button className="float-right" onClick={this.search} >Search</Button>
                     </CardHeader>
@@ -429,17 +448,21 @@ class MyPendingTasks extends Component {
                                     Cell: row => (
                                         <div> {this.convertDate(row.original.createdDate)} </div>
                                     ),
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
                                     Filter: ({ filter, onChange }) => {
                                         return (
-                                            <DatePicker value={this.state.dateView}
-                                            todayButton="Today"
-                                            selected={this.state.dateView}
-                                            onChange={this.dateChange('createdDate','dateView')}
-                                             placeholderText="YYYY/MM/DD"
-                                             required dateFormat="yyyy/MM/dd" 
-                                             customInput={<ExampleCustomInput ref={ref}/>}>
-                                            </DatePicker>
-
+                                            <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                                                className="form-control" dateFormat="yyyy/MM/dd"
+                                                peekNextMonth
+                                                showMonthDropdown
+                                                showYearDropdown
+                                                selected={this.state.dateView1}
+                                                isClearable
+                                                getTheadFilterThProps
+                                                onChange={this.dateChange("createdDate", "dateView1")}
+                                            />
                                         )
                                     },
                                     style: { textAlign: "center" }

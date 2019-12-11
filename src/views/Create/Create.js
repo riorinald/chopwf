@@ -1259,14 +1259,14 @@ class Create extends Component {
                       <FormFeedback>Invalid Number of pages </FormFeedback>
                     </InputGroup>
                   </FormGroup>
-                  <FormGroup>
-                    <Label>Use in Office or Not</Label>
-                    <Row />
-                    {this.state.isLTI || this.state.isLTU
-                      ? <AppSwitch disabled id="useInOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
-                      : <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
-                    }
-                  </FormGroup>
+                  <Collapse isOpen={!this.state.isLTI && !this.state.isLTU}>
+                    <FormGroup>
+                      <Label>Use in Office</Label>
+                      <Row />
+                      <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
+                    </FormGroup>
+                  </Collapse>
+
                   <Collapse isOpen={!this.state.collapse}>
                     <FormGroup visibelity="false" >
                       <Label>Return Date</Label>

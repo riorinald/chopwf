@@ -1176,12 +1176,14 @@ class EditRequest extends Component {
                                     </InputGroup>
                                 </FormGroup>
 
-                                <FormGroup>
-                                    <Label>Use in Office or Not</Label>
-                                    <Row />
-                                    <AppSwitch onChange={this.toggleUIO} checked={taskDetails.isUseInOffice === "Y"} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label dataOn={'yes'} dataOff={'no'} />
-                                </FormGroup>
-
+                                {taskDetails.applicationTypeId !== "LTU" && taskDetails.applicationTypeId !== "LTI"
+                                    ? <FormGroup>
+                                        <Label>Use in Office</Label>
+                                        <Row />
+                                        <AppSwitch onChange={this.toggleUIO} checked={taskDetails.isUseInOffice === "Y"} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label dataOn={'yes'} dataOff={'no'} />
+                                    </FormGroup>
+                                    : null
+                                }
                                 <Collapse isOpen={!editRequestForm.collapseUIO}>
                                     <FormGroup visibelity="false" >
                                         <Label>Return Date</Label>
