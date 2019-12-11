@@ -154,6 +154,34 @@ class ChopApplication extends Component {
     return regEx
   }
 
+  onFilteredChangeCustom = (value, accessor) => {
+    this.setState(state => {
+      const searchOption = state.searchOption
+      searchOption[accessor] = value
+      return {
+        searchOption
+      }
+    })
+    let filtered = this.state.filtered;
+    let insertNewFilter = 1;
+    if (filtered.length) {
+      filtered.forEach((filter, i) => {
+        if (filter["id"] === accessor) {
+          if (value === "" || !value.length) filtered.splice(i, 1);
+          else filter["value"] = value;
+
+          insertNewFilter = 0;
+        }
+      });
+    }
+
+    if (insertNewFilter) {
+      filtered.push({ id: accessor, value: value });
+    }
+
+    this.setState({ filtered: filtered });
+  };
+
   handleSearch = name => event => {
     const options = this.state.searchOption
     options[name] = event.target.value

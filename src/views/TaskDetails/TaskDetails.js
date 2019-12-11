@@ -116,7 +116,19 @@ class TaskDetails extends Component {
     }
 
 
-
+    handleButton(action){	
+        switch(action.action){	
+            case 'recall':	
+                return <Button className="mr-1" color="danger" onClick={() => { this.postAction(action.action) }}><i className="icon-loop" /> Recall </Button>	
+                ; 	
+            case 'copy' :	
+                return <Button className="mr-1" color="light-blue" onClick={() => { this.postAction(action.action) }}><i className="fa fa-copy" /> Copy as Draft </Button> 	
+                ;	
+            case 'remind' :	
+                return <Button className="mr-1" color="warning" onClick={() => { this.postAction(action.action) }}><i className="icon-bell" />Remind Task Owner </Button>	
+                ;	
+        }	
+    }
 
     render() {
 
@@ -128,16 +140,14 @@ class TaskDetails extends Component {
                     <Card className="animated fadeIn" >
                         <CardHeader>
                             {/* <Button onClick={this.goBack} > Back &nbsp; </Button>  {taskDetails.requestNum} */}
-                            <Row className="align-items-left">
-                                <Button className="ml-1 mr-1" color="primary" onClick={() => this.goBack(false)}><i className="fa fa-angle-left" /> Back </Button>
-                                {page === "myapps" ?
-                                    taskDetails.actions.map(((action, index) =>
-                                        <span key={index}>
-                                            <Button className="mr-1" color={action.action === "recall" ? "danger" : action.action === "copy" ? "light-blue" : "warning"} onClick={() => { this.approve(action.action) }}><i className="icon-loop" /> {action.action === "copy" ? `${this.capitalize(action.action)} as Draft` : action.action === "remind" ? `${this.capitalize(action.action)} Task Owner` : this.capitalize(action.action)}  </Button>
-                                        </span>
-                                    ))
-                                    : null}
-                            </Row>
+                            <Row className="align-items-left">	
+                        <Button className="ml-1 mr-1" color="primary" onClick={() => this.goBack(false)}><i className="fa fa-angle-left" /> Back </Button>	
+                        {taskDetails.actions.map(((action, index) =>	
+                        <span key={index}>	
+                            {this.handleButton(action)}	
+                        </span>	
+                        ))}	
+                    </Row>
                         </CardHeader>
                         <CardBody color="dark">
                             <Row noGutters={true}>
@@ -149,7 +159,6 @@ class TaskDetails extends Component {
                                     </Progress>
                                 </Col>
                             </Row>
-                            <Row>&nbsp;</Row>
                             <Row>
                                 <Col md="1">
                                     <img src={'../../assets/img/avatars/5.jpg'} className="img-avaa" alt="admin@bootstrapmaster.com" />

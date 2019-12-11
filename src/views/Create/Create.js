@@ -1325,6 +1325,7 @@ class Create extends Component {
                       onBlur={this.checkDepartment}
                       loadOptions={loadOptions}
                       isMulti
+                      onChange={this.handleSelectOption("docCheckBySelected")}
                       menuPortalTarget={document.body}
                       components={animatedComponents}
                       styles={this.state.deptHeadSelected === null ? reactSelectControl : ""}

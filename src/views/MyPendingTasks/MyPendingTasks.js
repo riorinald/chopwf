@@ -42,7 +42,7 @@ class MyPendingTasks extends Component {
 
 
             show: true,
-            dateView: new Date(),
+            dateView: null,
 
             searchOption: {
                 requestNum: "",
@@ -171,13 +171,14 @@ class MyPendingTasks extends Component {
     }
 
     dateChange = (name, view) => date => {
+        if(date !== null){
         let dates = date.toISOString().substr(0, 10);
         this.setState({ [view]: date });
         this.setState(prevState => ({
            searchOption: { ...prevState.searchOption,
             [name]: dates.replace(/-/g, "")} 
         }),
-        this.getPendingTasks)
+        this.getPendingTasks)}
       };
 
     onFilteredChangeCustom = (value, accessor) => {
@@ -429,19 +430,19 @@ class MyPendingTasks extends Component {
                                     Cell: row => (
                                         <div> {this.convertDate(row.original.createdDate)} </div>
                                     ),
-                                    Filter: ({ filter, onChange }) => {
-                                        return (
-                                            <DatePicker value={this.state.dateView}
-                                            todayButton="Today"
-                                            selected={this.state.dateView}
-                                            onChange={this.dateChange('createdDate','dateView')}
-                                             placeholderText="YYYY/MM/DD"
-                                             required dateFormat="yyyy/MM/dd" 
-                                             customInput={<ExampleCustomInput ref={ref}/>}>
-                                            </DatePicker>
-
-                                        )
-                                    },
+                                    // Filter: ({ filter, onChange }) => {
+                                    //     return (
+                                    //         <DatePicker value={this.state.dateView}
+                                    //         todayButton="Today"
+                                    //         selected={this.state.dateView}
+                                    //         onChange={this.dateChange('createdDate','dateView')}
+                                    //          placeholderText="YYYY/MM/DD"
+                                    //          required dateFormat="yyyy/MM/dd"
+                                    //          strictParsing
+                                    //         //  customInput={<ExampleCustomInput ref={ref}/>}
+                                    //          />
+                                    //     )
+                                    // },
                                     style: { textAlign: "center" }
                                 },
                                 {
