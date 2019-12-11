@@ -430,19 +430,19 @@ class MyPendingTasks extends Component {
                                     Cell: row => (
                                         <div> {this.convertDate(row.original.createdDate)} </div>
                                     ),
-                                    // Filter: ({ filter, onChange }) => {
-                                    //     return (
-                                    //         <DatePicker value={this.state.dateView}
-                                    //         todayButton="Today"
-                                    //         selected={this.state.dateView}
-                                    //         onChange={this.dateChange('createdDate','dateView')}
-                                    //          placeholderText="YYYY/MM/DD"
-                                    //          required dateFormat="yyyy/MM/dd"
-                                    //          strictParsing
-                                    //         //  customInput={<ExampleCustomInput ref={ref}/>}
-                                    //          />
-                                    //     )
-                                    // },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <DatePicker value={this.state.dateView}
+                                            todayButton="Today"
+                                            selected={this.state.dateView}
+                                            onChange={this.dateChange('createdDate','dateView')}
+                                             placeholderText="YYYY/MM/DD"
+                                             required dateFormat="yyyy/MM/dd"
+                                             strictParsing
+                                            //  customInput={<ExampleCustomInput ref={ref}/>}
+                                             />
+                                        )
+                                    },
                                     style: { textAlign: "center" }
                                 },
                                 {

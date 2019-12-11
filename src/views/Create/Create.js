@@ -111,6 +111,7 @@ class Create extends Component {
       pickUpBy: "",
       remarks: "",
       deptHeadSelected: [],
+      docCheckByLTI: [],
       contractSign1: "",
       contractSign2: "",
       effectivePeriod: "",
@@ -197,7 +198,7 @@ class Create extends Component {
 
   }
 
-  componentWillReceiveProps(){
+  componentWillReceiveProps() {
     this.forceUpdate()
   }
 
@@ -360,6 +361,10 @@ class Create extends Component {
       postReq.append(`DepartmentHeads[${i}]`, this.state.deptHeadSelected[i].value);
     }
 
+    for (let i = 0; i < this.state.docCheckByLTI.length; i++) {
+      postReq.append(`DocumentCheckBy[${i}]`, this.state.docCheckByLTI[i].value);
+    }
+
 
     for (var pair of postReq.entries()) {
       console.log(pair[0] + ', ' + pair[1]);
@@ -386,10 +391,10 @@ class Create extends Component {
   }
 
   checkDepartment = () => {
-    if(this.state.deptSelected === ""){
-      this.setState({selectInfo : 'please select the Department'})
-    }else{
-      this.setState({selectInfo : ''})
+    if (this.state.deptSelected === "") {
+      this.setState({ selectInfo: 'please select the Department' })
+    } else {
+      this.setState({ selectInfo: '' })
     }
   }
 
@@ -657,7 +662,7 @@ class Create extends Component {
     this.setState({
       [name]: event.target.value
     },
-    ()=>{this.checkDepartment()}
+      () => { this.checkDepartment() }
     );
     if (event.target.value) {
       event.target.className = "form-control"
@@ -842,7 +847,7 @@ class Create extends Component {
   }
 
   handleSelectOption = sname => newValue => {
-    if (sname === "deptHeadSelected") {
+    if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
       this.setState({ [sname]: newValue })
     }
     else {
@@ -1100,356 +1105,350 @@ class Create extends Component {
     return (
       <LegalEntity.Consumer>{
         ContextValue => (
-      <div className="animated fadeIn">
-        <h4>Create</h4>
-        <Card>
-          <CardHeader>CREATE NEW REQUEST</CardHeader>
-          <CardBody>
-            <FormGroup>
-              <h5>NOTES :</h5>
-              {/* {this.state.noteInfo.notes || <Skeleton count={3}/>} */}
-              {this.state.noteInfo.notes}
-            </FormGroup>
-            <Form className="form-horizontal" innerRef={this.formRef}>
-              <FormGroup>
-                <Label>Employee Number
+          <div className="animated fadeIn">
+            <h4>Create</h4>
+            <Card>
+              <CardHeader>CREATE NEW REQUEST</CardHeader>
+              <CardBody>
+                <FormGroup>
+                  <h5>NOTES :</h5>
+                  {/* {this.state.noteInfo.notes || <Skeleton count={3}/>} */}
+                  {this.state.noteInfo.notes}
+                </FormGroup>
+                <Form className="form-horizontal" innerRef={this.formRef}>
+                  <FormGroup>
+                    <Label>Employee Number
                         <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted</i> </span>
-                </Label>
-                <div className="controls">
-                  <InputGroup className="input-prepend">
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText>ID</InputGroupText>
-                    </InputGroupAddon>
-                    <Input disabled ref={this.employeeId} onChange={this.handleChange("employeeId")} value={this.state.employeeId} id="prependedInput" size="16" type="text" />
-                  </InputGroup>
-                </div>
-              </FormGroup>
-              <FormGroup>
-                <Label>Tel. </Label>
-                <InputGroup>
-                  <Input ref={this.telNumber} value={this.state.telNumber} onChange={this.handleChange("telNumber")} id="appendedInput" size="16" type="text" />
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <Label>Dept</Label>
-                <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
-                  <option disabled value="0">Please Select . . .</option>
-
-                  {this.state.department.map((option, index) => (
-                    <option value={option.deptId} key={option.deptId}>
-                      {option.deptName}
-
-                    </option>
-                  ))}
-                </Input>
-                <FormFeedback>Invalid Departement Selected</FormFeedback>
-              </FormGroup>
-              <FormGroup>
-                <Label>Application Type</Label>
-                <Input ref={this.appTypeSelected} type="select"
-                  onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" defaultValue="0" name="select"
-                  onBlur={() => this.validator.showMessageFor('aplicationType')}>
-                  <option disabled value="0">Please Select . . .</option>
-                  {this.state.applicationTypes.map((option, id) => (
-
-                    <option value={option.appTypeId} key={option.appTypeId}>{option.appTypeName}</option>
-
-                  ))}
-                </Input>
-                <FormFeedback>Invalid Application Type Selected</FormFeedback>
-                <FormFeedback valid={this.validator.fieldValid('aplicationType')}>
-                  {this.validator.message('aplicationType', this.state.appTypeSelected, 'required')}</FormFeedback>
-              </FormGroup>
-
-              <Collapse isOpen={this.state.isLTI}>
-                <FormGroup>
-                  <Label>Entitled Team</Label>
-                  <InputGroup>
-                    <Input id="teamSelected" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
-                      <option value="0" disabled>Please select a team</option>
-                      {this.state.teams.map((team, index) =>
-                        <option key={index} value={team.teamId}>{team.teamName}</option>
-                      )}
-                    </Input>
-                    <FormFeedback>Invalid Entitled Team Selected</FormFeedback>
-                  </InputGroup>
-                </FormGroup>
-                <Label>Effective Period</Label>
-                {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
-                <DatePicker id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                  className="form-control" required dateFormat="yyyy/MM/dd" withPortal
-                  peekNextMonth
-                  showMonthDropdown
-                  showYearDropdown
-                  selected={this.state.dateView1}
-                  onChange={this.dateChange("effectivePeriod", "dateView1")}
-                  minDate={new Date()} maxDate={addDays(new Date(), 365)} />
-                <FormFeedback>Invalid Date Selected</FormFeedback>
-              </Collapse>
-
-              <Collapse isOpen={this.state.isLTU}>
-                <FormGroup>
-                  <Label>Entitled Team</Label>
-                  <InputGroup>
-                    <Input id="teamSelected" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
-                      <option value="0" disabled>Please select a team</option>
-                      {this.state.teams.map((team, index) =>
-                        <option key={index} value={team.teamId}>{team.teamName}</option>
-                      )}
-                    </Input>
-                    <FormFeedback>Invalid Entitled Team Selected</FormFeedback>
-                  </InputGroup>
-                </FormGroup>
-              </Collapse>
-
-              <FormGroup>
-                <Label>Chop Type</Label>
-                <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected"
-                  onClick={() => { this.getChopTypes(this.props.legalName, this.state.appTypeSelected) }}
-                  onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
-                  <option disabled value="0">Please Select ..</option>
-                  {this.state.chopTypes.map((option, id) => (
-                    <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
-                  ))}
-
-                </Input>
-                <FormFeedback>Invalid Chop Type Selected</FormFeedback>
-              </FormGroup>
-              {this.state.showBranches
-                ? <FormGroup>
-                  <Label>Branch Company Chop</Label>
-                  <Input type="select" defaultValue="0">
-                    <option onChange={this.handleChange("branchSelected")} value="0" disabled>Please specify your Brand Company Chop</option>
-                    {this.state.branches.map((branch, index) =>
-                      <option value={branch.branchId} key={index}>{branch.branchName}</option>
-                    )}
-                  </Input>
-                </FormGroup>
-                : ""
-              }
-
-              <FormGroup check={false}>
-                <Label>Document Name</Label>
-                {this.state.isLTU ? documentForLTU : documentForLTI}
-              </FormGroup>
-              <FormGroup>
-                <Label>Purpose of Use</Label>
-                <InputGroup>
-                  <Input maxLength={500} ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
-                  <FormFeedback>Please input the purpose of use</FormFeedback>
-                </InputGroup>
-              </FormGroup>
-              {!this.state.isLTI
-                ? <FormGroup>
-                  <Label>Connecting Chop (骑缝章) </Label>
-                  <Row />
-                  <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
-                </FormGroup>
-                : ""}
-
-              <FormGroup>
-                <Label>Number of Pages to Be Chopped</Label>
-                <InputGroup>
-                  <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
-                  <FormFeedback>Invalid Number of pages </FormFeedback>
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <Label>Use in Office or Not</Label>
-                <Row />
-                {this.state.isLTI || this.state.isLTU
-                  ? <AppSwitch disabled id="useInOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
-                  : <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
-                }
-              </FormGroup>
-              <Collapse isOpen={!this.state.collapse}>
-                <FormGroup visibelity="false" >
-                  <Label>Return Date</Label>
-                  <Row />
-                  <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                    className="form-control" required dateFormat="yyyy/MM/dd" withPortal
-                    selected={this.state.dateView2}
-                    onChange={this.dateChange("returnDate", "dateView2")}
-                    minDate={new Date()} maxDate={addDays(new Date(), 30)} />
-                  {/* <Input onClickOutside type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" /> */}
-                </FormGroup>
-                <FormGroup>
-                  <Label>Responsible Person <i className="fa fa-user" /></Label>
-                  <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-                  <AsyncSelect id="resPerson"
-                    onBlur={this.checkDepartment}
-                    classNamePrefix="rs"
-                    loadOptions={loadOptions}
-                    onChange={this.handleSelectOption("resPerson")}
-                    menuPortalTarget={document.body}
-                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                  />
-                </FormGroup>
-              </Collapse>
-              <FormGroup>
-                <Label>Address to</Label>
-                <InputGroup>
-                  <Input maxLength={200} ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
-                  <FormFeedback>Invalid person to address to</FormFeedback>
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <Label>Pick Up By <i className="fa fa-user" /> </Label>
-                <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-                <AsyncSelect
-                  id="pickUpBy"
-                  loadOptions={loadOptions}
-                  onBlur={this.checkDepartment}
-                  onChange={this.handleSelectOption("pickUpBy")}
-                  menuPortalTarget={document.body}
-                  styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                />
-                <InputGroup>
-                  <FormFeedback>Please enter a valid name to search</FormFeedback>
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <Label>Remark</Label>
-                <InputGroup>
-                  <Input maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
-                  <FormFeedback>Please add remarks</FormFeedback>
-                </InputGroup>
-              </FormGroup>
-
-              {this.state.isLTI
-                ? <FormGroup>
-                  <Label>Document Check By <i className="fa fa-user" /></Label>
-                  <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-                    <AsyncSelect
-                      id="docCheckByLTI"
-                      onBlur={this.checkDepartment}
-                      loadOptions={loadOptions}
-                      isMulti
-                      onChange={this.handleSelectOption("docCheckBySelected")}
-                      menuPortalTarget={document.body}
-                      components={animatedComponents}
-                      styles={this.state.deptHeadSelected === null ? reactSelectControl : ""}
-                    />
+                    </Label>
+                    <div className="controls">
+                      <InputGroup className="input-prepend">
+                        <InputGroupAddon addonType="prepend">
+                          <InputGroupText>ID</InputGroupText>
+                        </InputGroupAddon>
+                        <Input disabled ref={this.employeeId} onChange={this.handleChange("employeeId")} value={this.state.employeeId} id="prependedInput" size="16" type="text" />
+                      </InputGroup>
+                    </div>
                   </FormGroup>
-                : null}
+                  <FormGroup>
+                    <Label>Tel. </Label>
+                    <InputGroup>
+                      <Input ref={this.telNumber} value={this.state.telNumber} onChange={this.handleChange("telNumber")} id="appendedInput" size="16" type="text" />
+                    </InputGroup>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label>Dept</Label>
+                    <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
+                      <option disabled value="0">Please Select . . .</option>
 
-              {this.state.isCNIPS
-                ? <FormGroup>
-                  <Label>Contract Signed By: <i className="fa fa-user" /></Label>
-                  <small className="mb-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
-                  <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-                  <Row>
-                    <Col>
-                      <AsyncSelect
-                        id="contractSign1"
+                      {this.state.department.map((option, index) => (
+                        <option value={option.deptId} key={option.deptId}>
+                          {option.deptName}
+
+                        </option>
+                      ))}
+                    </Input>
+                    <FormFeedback>Invalid Departement Selected</FormFeedback>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label>Application Type</Label>
+                    <Input ref={this.appTypeSelected} type="select"
+                      onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" defaultValue="0" name="select"
+                      onBlur={() => this.validator.showMessageFor('aplicationType')}>
+                      <option disabled value="0">Please Select . . .</option>
+                      {this.state.applicationTypes.map((option, id) => (
+
+                        <option value={option.appTypeId} key={option.appTypeId}>{option.appTypeName}</option>
+
+                      ))}
+                    </Input>
+                    <FormFeedback>Invalid Application Type Selected</FormFeedback>
+                    <FormFeedback valid={this.validator.fieldValid('aplicationType')}>
+                      {this.validator.message('aplicationType', this.state.appTypeSelected, 'required')}</FormFeedback>
+                  </FormGroup>
+
+                  <Collapse isOpen={this.state.isLTI}>
+                    <FormGroup>
+                      <Label>Entitled Team</Label>
+                      <InputGroup>
+                        <Input id="teamSelected" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
+                          <option value="0" disabled>Please select a team</option>
+                          {this.state.teams.map((team, index) =>
+                            <option key={index} value={team.teamId}>{team.teamName}</option>
+                          )}
+                        </Input>
+                        <FormFeedback>Invalid Entitled Team Selected</FormFeedback>
+                      </InputGroup>
+                    </FormGroup>
+                    <Label>Effective Period</Label>
+                    {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
+                    <DatePicker id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                      className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                      peekNextMonth
+                      showMonthDropdown
+                      showYearDropdown
+                      selected={this.state.dateView1}
+                      onChange={this.dateChange("effectivePeriod", "dateView1")}
+                      minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                    <FormFeedback>Invalid Date Selected</FormFeedback>
+                  </Collapse>
+
+                  <Collapse isOpen={this.state.isLTU}>
+                    <FormGroup>
+                      <Label>Entitled Team</Label>
+                      <InputGroup>
+                        <Input id="teamSelected" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
+                          <option value="0" disabled>Please select a team</option>
+                          {this.state.teams.map((team, index) =>
+                            <option key={index} value={team.teamId}>{team.teamName}</option>
+                          )}
+                        </Input>
+                        <FormFeedback>Invalid Entitled Team Selected</FormFeedback>
+                      </InputGroup>
+                    </FormGroup>
+                  </Collapse>
+
+                  <FormGroup>
+                    <Label>Chop Type</Label>
+                    <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected"
+                      onClick={() => { this.getChopTypes(this.props.legalName, this.state.appTypeSelected) }}
+                      onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
+                      <option disabled value="0">Please Select ..</option>
+                      {this.state.chopTypes.map((option, id) => (
+                        <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
+                      ))}
+
+                    </Input>
+                    <FormFeedback>Invalid Chop Type Selected</FormFeedback>
+                  </FormGroup>
+                  {this.state.showBranches
+                    ? <FormGroup>
+                      <Label>Branch Company Chop</Label>
+                      <Input type="select" defaultValue="0">
+                        <option onChange={this.handleChange("branchSelected")} value="0" disabled>Please specify your Brand Company Chop</option>
+                        {this.state.branches.map((branch, index) =>
+                          <option value={branch.branchId} key={index}>{branch.branchName}</option>
+                        )}
+                      </Input>
+                    </FormGroup>
+                    : ""
+                  }
+
+                  <FormGroup check={false}>
+                    <Label>Document Name</Label>
+                    {this.state.isLTU ? documentForLTU : documentForLTI}
+                  </FormGroup>
+                  <FormGroup>
+                    <Label>Purpose of Use</Label>
+                    <InputGroup>
+                      <Input maxLength={500} ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                      <FormFeedback>Please input the purpose of use</FormFeedback>
+                    </InputGroup>
+                  </FormGroup>
+                  {!this.state.isLTI
+                    ? <FormGroup>
+                      <Label>Connecting Chop (骑缝章) </Label>
+                      <Row />
+                      <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
+                    </FormGroup>
+                    : ""}
+
+                  <FormGroup>
+                    <Label>Number of Pages to Be Chopped</Label>
+                    <InputGroup>
+                      <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
+                      <FormFeedback>Invalid Number of pages </FormFeedback>
+                    </InputGroup>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label>Use in Office or Not</Label>
+                    <Row />
+                    {this.state.isLTI || this.state.isLTU
+                      ? <AppSwitch disabled id="useInOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
+                      : <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
+                    }
+                  </FormGroup>
+                  <Collapse isOpen={!this.state.collapse}>
+                    <FormGroup visibelity="false" >
+                      <Label>Return Date</Label>
+                      <Row />
+                      <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                        className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        selected={this.state.dateView2}
+                        onChange={this.dateChange("returnDate", "dateView2")}
+                        minDate={new Date()} maxDate={addDays(new Date(), 30)} />
+                      {/* <Input onClickOutside type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" /> */}
+                    </FormGroup>
+                    <FormGroup>
+                      <Label>Responsible Person <i className="fa fa-user" /></Label>
+                      <AsyncSelect id="resPerson"
                         onBlur={this.checkDepartment}
+                        classNamePrefix="rs"
                         loadOptions={loadOptions}
-                        onChange={this.handleSelectOption("contractSign1")}
+                        onChange={this.handleSelectOption("resPerson")}
                         menuPortalTarget={document.body}
                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                       />
-                      <InputGroup>
-                      </InputGroup>
-                    </Col>
-                    <Col>
+                    </FormGroup>
+                  </Collapse>
+                  <FormGroup>
+                    <Label>Address to</Label>
+                    <InputGroup>
+                      <Input maxLength={200} ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
+                      <FormFeedback>Invalid person to address to</FormFeedback>
+                    </InputGroup>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label>Pick Up By <i className="fa fa-user" /> </Label>
+                    <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                    <AsyncSelect
+                      id="pickUpBy"
+                      loadOptions={loadOptions}
+                      onBlur={this.checkDepartment}
+                      onChange={this.handleSelectOption("pickUpBy")}
+                      menuPortalTarget={document.body}
+                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                    />
+                    <InputGroup>
+                      <FormFeedback>Please enter a valid name to search</FormFeedback>
+                    </InputGroup>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label>Remark</Label>
+                    <InputGroup>
+                      <Input maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
+                      <FormFeedback>Please add remarks</FormFeedback>
+                    </InputGroup>
+                  </FormGroup>
+
+                  {this.state.isLTI
+                    ? <FormGroup>
+                      <Label>Document Check By <i className="fa fa-user" /></Label>
+                      <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect
-                        id="contractSign2"
-                        onBlur={this.checkDepartment}
+                        id="docCheckByLTI"
                         loadOptions={loadOptions}
-                        onChange={this.handleSelectOption("contractSign2")}
+                        isMulti
+                        onChange={this.handleSelectOption("docCheckBySelected")}
                         menuPortalTarget={document.body}
-                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                      />
-                      <InputGroup>
-                      </InputGroup>
+                        components={animatedComponents}
+                        styles={this.state.deptHeadSelected === null ? reactSelectControl : ""}
+                      /> </FormGroup>
+                    : null}
+
+                  {this.state.isCNIPS
+                    ? <FormGroup>
+                      <Label>Contract Signed By: <i className="fa fa-user" /></Label>
+                      <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
+                      <Row>
+                        <Col>
+                          <AsyncSelect
+                            id="contractSign1"
+                            onBlur={this.checkDepartment}
+                            loadOptions={loadOptions}
+                            onChange={this.handleSelectOption("contractSign1")}
+                            menuPortalTarget={document.body}
+                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                          />
+                          <InputGroup>
+                          </InputGroup>
+                        </Col>
+                        <Col>
+                          <AsyncSelect
+                            id="contractSign2"
+                            onBlur={this.checkDepartment}
+                            loadOptions={loadOptions}
+                            onChange={this.handleSelectOption("contractSign2")}
+                            menuPortalTarget={document.body}
+                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                          />
+                          <InputGroup>
+                          </InputGroup>
+                        </Col>
+                      </Row>
+                    </FormGroup>
+
+                    : this.state.isLTU
+                      ? <FormGroup>
+                        <Label>Document Check By <i className="fa fa-user" /></Label>
+                        <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                        <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
+                          loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
+                      </FormGroup>
+                      : <FormGroup>
+                        <Label>Department Heads <i className="fa fa-user" /></Label>
+                        <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity</small>
+                        <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                        <AsyncSelect
+                          id="deptHeadSelected"
+                          loadOptions={loadOptions}
+                          isMulti
+                          onBlur={this.checkDepartment}
+                          onChange={this.handleSelectOption("deptHeadSelected")}
+                          menuPortalTarget={document.body}
+                          components={animatedComponents}
+                          styles={this.state.deptHeadSelected === null ? reactSelectControl : ""} />
+                        {this.state.deptHeadSelected === null
+                          ? <small style={{ color: '#F86C6B' }}>Please select a Department Head</small>
+                          : ""
+                        }
+
+                      </FormGroup>
+                  }
+
+                  <Col md="16">
+                    <FormGroup check>
+                      <FormGroup>
+                        <CustomInput
+                          className="form-check-input"
+                          type="checkbox"
+                          checked={this.state.agreeTerms}
+                          onChange={this.handleAgreeTerm}
+                          // onClick={this.isValid}
+                          id="confirm" value="option1">
+                          <Label className="form-check-label" check >
+                            By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
+                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
+                      </Label>
+                        </CustomInput>
+                      </FormGroup>
+                    </FormGroup>
+                  </Col>
+                </Form>
+              </CardBody>
+              <CardFooter>
+                <div className="form-actions" >
+                  <Row className="align-items-left">
+                    <Col>
+                      {this.state.agreeTerms
+                        ? <Button className="mr-2" id="submit" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
+                        : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
+                          onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} >Submit</Button>}
+                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit">please confirm the agree terms</Tooltip>
+                      <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
+                      <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
                     </Col>
                   </Row>
-                </FormGroup>
-
-                : this.state.isLTU
-                  ? <FormGroup>
-                    <Label>Document Check By <i className="fa fa-user" /></Label>
-                    <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-                    <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} 
-                      onChange={this.handleSelectOption("docCheckBySelected")}
-                      onBlur={this.checkDepartment}
-                      loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
-                  </FormGroup>
-                  : <FormGroup>
-                    <Label>Department Heads <i className="fa fa-user" /></Label>
-                    <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity</small>
-                    <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>                    
-                    <AsyncSelect
-                      id="deptHeadSelected"
-                      loadOptions={loadOptions}
-                      isMulti
-                      onBlur={this.checkDepartment}
-                      onChange={this.handleSelectOption("deptHeadSelected")}
-                      menuPortalTarget={document.body}
-                      components={animatedComponents}
-                      styles={this.state.deptHeadSelected === null ? reactSelectControl : ""} />
-                    {this.state.deptHeadSelected === null
-                      ? <small style={{ color: '#F86C6B' }}>Please select a Department Head</small>
-                      : ""
-                    }
-
-                  </FormGroup>
-              }
-
-              <Col md="16">
-                <FormGroup check>
-                  <FormGroup>
-                    <CustomInput
-                      className="form-check-input"
-                      type="checkbox"
-                      checked={this.state.agreeTerms}
-                      onChange={this.handleAgreeTerm}
-                      // onClick={this.isValid}
-                      id="confirm" value="option1">
-                      <Label className="form-check-label" check >
-                        By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
-                        regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
-                      </Label>
-                    </CustomInput>
-                  </FormGroup>
-                </FormGroup>
-              </Col>
-            </Form>
-          </CardBody>
-          <CardFooter>
-            <div className="form-actions" >
-              <Row className="align-items-left">
-                <Col>
-                  {this.state.agreeTerms
-                    ? <Button className="mr-2" id="submit" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
-                    : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
-                      onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} >Submit</Button>}
-                  <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit">please confirm the agree terms</Tooltip>
-                  <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
-                  <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
-                </Col>
-              </Row>
-              {/* </div>
+                  {/* </div>
             <div className="form-actions"> */}
-            </div>
-          </CardFooter>
-        </Card>
-        <Modal backdrop="static" color="info" isOpen={this.state.modal} toggle={this.toggleModal} className={'modal-info ' + this.props.className} >
-          <ModalHeader className="center" toggle={this.changeSelect}> Contract Chop </ModalHeader>
-          <ModalBody>
-            <div>
-              {ContextValue.legalEntity.contractChop}
-              <p className="h6">Do you confirm to apply Contract Chop for your documents?</p>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="success" onClick={this.toggleModal} size="md"> Yes </Button>
-            <Button color="secondary" onClick={this.changeSelect} size="md"> No </Button>
-          </ModalFooter>
-        </Modal>
-      </div >
-      )}
-    </LegalEntity.Consumer>
+                </div>
+              </CardFooter>
+            </Card>
+            <Modal backdrop="static" color="info" isOpen={this.state.modal} toggle={this.toggleModal} className={'modal-info ' + this.props.className} >
+              <ModalHeader className="center" toggle={this.changeSelect}> Contract Chop </ModalHeader>
+              <ModalBody>
+                <div>
+                  {ContextValue.legalEntity.contractChop}
+                  <p className="h6">Do you confirm to apply Contract Chop for your documents?</p>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="success" onClick={this.toggleModal} size="md"> Yes </Button>
+                <Button color="secondary" onClick={this.changeSelect} size="md"> No </Button>
+              </ModalFooter>
+            </Modal>
+          </div >
+        )}
+      </LegalEntity.Consumer>
     );
   }
 }
