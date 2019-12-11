@@ -161,7 +161,7 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       noteInfo: [],
-      inputMasak: "*-aa-*-9999-9999",
+      inputMasak: "a-aa-*-9999-9999",
       selectInfo: ''
 
     };
@@ -680,16 +680,26 @@ class Create extends Component {
     this.setState({
       contractNum: value
     });
-    if (/^..[ALRalr]/.test(event.target.value)) {
+    if (/^.[Ii]/.test(event.target.value)) {
       this.setState({
-        inputMasak: "*-a-*-9999-9999",
+        inputMasak: "I-a-*-9999-9999",
+      });
+    } 
+    if (/^.[Ss]/.test(event.target.value)) {
+      this.setState({
+        inputMasak: "S-aa-*-9999-9999",
+      });
+    } else {
+      this.setState({
+        inputMasak: "_-aa-*-9999-9999",
       });
     }
-    else {
-      this.setState({
-        inputMasak: "*-aa-*-9999-9999",
-      });
-    }
+    // if (/^..[ALRalr]/.test(event.target.value)) {
+    //   this.setState({
+    //     inputMasak: "*-a-*-9999-9999",
+    //   });
+    // }
+
   }
 
 
@@ -968,7 +978,8 @@ class Create extends Component {
 
           {this.state.isCNIPS
             ? <Col ><FormGroup>
-              <InputMask placeholder="enter contract number" mask={this.state.inputMasak} className="form-control" value={this.state.contractNum} onChange={this.handleInputMask}></InputMask>
+              {/* <Tooltip placement="top" isOpen={this.state.} target="contractNum" toggle={toggle}></Tooltip> */}
+              <InputMask id="contractNum" placeholder="enter contract number" mask={this.state.inputMasak} className="form-control" value={this.state.contractNum} onChange={this.handleInputMask}></InputMask>
             </FormGroup></Col>
             : ""}
 
@@ -1280,6 +1291,7 @@ class Create extends Component {
                     </FormGroup>
                     <FormGroup>
                       <Label>Responsible Person <i className="fa fa-user" /></Label>
+                      <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect id="resPerson"
                         onBlur={this.checkDepartment}
                         classNamePrefix="rs"
@@ -1339,6 +1351,7 @@ class Create extends Component {
                     ? <FormGroup>
                       <Label>Contract Signed By: <i className="fa fa-user" /></Label>
                       <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
+                      <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <Row>
                         <Col>
                           <AsyncSelect
@@ -1415,15 +1428,15 @@ class Create extends Component {
                   </Col>
                 </Form>
               </CardBody>
-              <CardFooter>
+              <CardFooter id="submitTooltip">
                 <div className="form-actions" >
                   <Row className="align-items-left">
                     <Col>
                       {this.state.agreeTerms
                         ? <Button className="mr-2" id="submit" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
                         : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
-                          onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} >Submit</Button>}
-                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit">please confirm the agree terms</Tooltip>
+                          >Submit</Button>}
+                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen})} target="submitTooltip">please confirm the agree terms</Tooltip>
                       <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
                       <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
                     </Col>

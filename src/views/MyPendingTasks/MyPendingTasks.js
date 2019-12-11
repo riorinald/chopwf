@@ -65,7 +65,7 @@ class MyPendingTasks extends Component {
             loading: false,
 
             status: [
-                "Recalled",
+                "Recall",
                 "Pending for Document check by (L4 or above) Approval ",
                 "Pending for Department Head Approval",
                 "Bring the Original Documents for Chop",

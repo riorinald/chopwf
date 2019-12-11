@@ -67,6 +67,25 @@ class ChopApplication extends Component {
         createdDate: "",
         createdByName: ""
       },
+      status: [
+        "Recall",
+        "Pending for Document check by (L4 or above) Approval ",
+        "Pending for Department Head Approval",
+        "Bring the Original Documents for Chop",
+        "Pending for Chop Owner Approval",
+        "Send Back to Requestor",
+        "Rejected",
+        "Pending for Chop Keeper Acknowledge Lend Out",
+        "Pending Chop Keeper Acknowledge Return",
+        "Completed",
+        "Draft",
+        "Pending Requestor Return/Extension",
+        "Pending Department Head Approval for Extension",
+        "Pending Chop Keeper Approval for extension",
+        "Pending Chop Owner Approval for extension",
+        "Chop request expired after 30 days",
+        "Pending Requestor Return"
+    ]
 
     }
     this.getApplications = this.getApplications.bind(this);
@@ -397,7 +416,17 @@ class ChopApplication extends Component {
                   accessor: "statusName",
                   width: this.getColumnWidth('statusName', "Status"),
                   Cell: this.renderEditable,
-                  style: { textAlign: "center" }
+                  style: { textAlign: "center" },
+                  Filter: ({ filter, onChange }) => {
+                    return (
+                        <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
+                            <option value="" >Please Select a status</option>
+                            {this.state.status.map((stat, index) =>
+                                <option key={index} value={stat} >{stat}</option>
+                            )}
+                        </Input>
+                    )
+                },
                 },
                 {
                   Header: "Date of Creation",

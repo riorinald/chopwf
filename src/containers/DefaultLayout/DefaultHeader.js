@@ -98,7 +98,7 @@ class DefaultHeader extends Component {
               <NavItem >
                 <Button color="ghost" onClick={this.toggle} to="#"><i className="fa fa-exchange" /> Another Workflow ? </Button>
                 <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
-                  <ModalHeader className="center" toggle={this.toggle}> Switch Workflow </ModalHeader>
+                  <ModalHeader className="center" toggle={this.toggle}> Entity/Workflow </ModalHeader>
                   <ModalBody>
                     <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBAFC" ? true : false} color="secondary" value="MBAFC" size="lg" block> MBAFC </Button>
                     <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBLC" ? true : false} color="secondary" value="MBLC" size="lg" block> MBLC </Button>
