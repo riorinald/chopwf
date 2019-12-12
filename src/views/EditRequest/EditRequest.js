@@ -130,8 +130,8 @@ class EditRequest extends Component {
 
             deptHeads: [],
             selectedDeptHeads: [],
-            dateView1: "",
-            dateView2: "",
+            dateView1: new Date(),
+            dateView2: new Date(),
             departments: [],
             chopTypes: [],
             documents: [],
@@ -248,8 +248,10 @@ class EditRequest extends Component {
         if (temporary.departmentId !== "") {
             this.getTeams(temporary.departmentId)
         }
-
-        temporary.returnDate = temporary.returnDate !== "" ? this.convertDate(temporary.returnDate, 'dateView2') : ""
+        // if (temporary.returnDate !== "") {
+        //     this.convertDate(temporary.returnDate, 'dateView2')
+        // }
+        temporary.returnDate = temporary.returnDate === '' ? this.convertDate(temporary.returnDate, 'dateView2') : this.dateChanged(new Date())
         temporary.responsiblePersonOption = this.getOption(temporary.responsiblePerson)
         temporary.pickUpByOption = this.getOption(temporary.pickUpBy)
 
@@ -585,6 +587,11 @@ class EditRequest extends Component {
             return { taskDetails }
         })
     };
+
+    dateChanged(date) {
+        let dates = date.toISOString().substr(0, 10);
+        return dates.replace(/-/g, "")
+    }
 
     async selectDocument() {
         await this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId)
