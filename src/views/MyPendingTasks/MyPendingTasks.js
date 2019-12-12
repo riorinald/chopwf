@@ -44,7 +44,7 @@ class MyPendingTasks extends Component {
             dateView1: "",
 
             show: true,
-            dateView: new Date(),
+            dateView: null,
 
             searchOption: {
                 requestNum: "",

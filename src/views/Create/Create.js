@@ -1322,11 +1322,13 @@ class Create extends Component {
 
                   {this.state.isLTI
                     ? <FormGroup>
-                      <Label>Document Check By <i className="fa fa-user" /></Label><AsyncSelect
+                      <Label>Document Check By <i className="fa fa-user" /></Label>
+                      <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                      <AsyncSelect
                         id="docCheckByLTI"
                         loadOptions={loadOptions}
                         isMulti
-                        onChange={this.handleSelectOption("docCheckByLTI")}
+                        onChange={this.handleSelectOption("docCheckBySelected")}
                         menuPortalTarget={document.body}
                         components={animatedComponents}
                         styles={this.state.deptHeadSelected === null ? reactSelectControl : ""}
@@ -1368,6 +1370,7 @@ class Create extends Component {
                     : this.state.isLTU
                       ? <FormGroup>
                         <Label>Document Check By <i className="fa fa-user" /></Label>
+                        <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                         <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
                           loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
                       </FormGroup>
