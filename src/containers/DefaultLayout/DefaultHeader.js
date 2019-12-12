@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dropdown, UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem } from 'reactstrap';
+import { Col, UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem } from 'reactstrap';
 import PropTypes from 'prop-types';
 import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
 import { fakeAuth } from '../../App';
@@ -93,35 +93,30 @@ class DefaultHeader extends Component {
           </AppNavbarBrand> */
             }
             <AppSidebarMinimizer className="customMT d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
-            <h2 className="h5 d-sm-down-none"><b>{this.state.application} Use WORKFLOW for {ContextValue.legalEntity.name}</b></h2>
+            <h2 className="h5 d-sm-down-none"><b>{this.state.application} Use WORKFLOW for {this.state.legalEntity}</b></h2>
             <Nav className="ml-auto" navbar>
               <NavItem >
-                <Button color="ghost" onClick={this.toggle} to="#"><i className="fa fa-exchange" /> Another Workflow ? </Button>
+                <Button color="ghost" onClick={this.toggle} to="#"><i className="fa fa-exchange" /> Entity/Workflow </Button>
                 <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
-                  <ModalHeader className="center" toggle={this.toggle}> Entity/Workflow </ModalHeader>
+                  <ModalHeader className="center" toggle={this.toggle}> Switch Entity/Workflow </ModalHeader>
                   <ModalBody>
+                    <Col>
+                    <h6> Entity :</h6>
                     <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBAFC" ? true : false} color="secondary" value="MBAFC" size="lg" block> MBAFC </Button>
                     <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBLC" ? true : false} color="secondary" value="MBLC" size="lg" block> MBLC </Button>
                     <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBIA" ? true : false} color="secondary" value="MBIA" size="lg" block > MBIA </Button>
                     <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "CAR2GO" ? true : false} color="secondary" value="CAR2GO" size="lg" block > CAR2GO </Button>
+                    </Col>
+                    <Col className="px-2 py-2">
+                      <h6> Switch Workflow to :</h6>
+                      {this.state.application === "LICENSE"
+                      ? <Button block onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</Button>
+                      : <Button block onClick={() => this.changeWorkflow('LICENSE')} >LICENSE WORKFLOW</Button>
+                      }
+                    </Col>
                   </ModalBody>
-                  <ModalFooter>
-                    <UncontrolledDropdown className="btn-block" direction="down">
-                      <DropdownToggle caret >
-                        {this.state.application} WORKFLOW
-                  </DropdownToggle>
-                      <DropdownMenu >
-                        <DropdownItem>
-                          {this.state.application === "LICENSE"
-                            ? <center onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</center>
-                            : <center onClick={() => this.changeWorkflow('LICENSE')} >LICENSE WORKFLOW</center>
-                          }
-                        </DropdownItem>
-                      </DropdownMenu>
-                    </UncontrolledDropdown>
-                  </ModalFooter>
                 </Modal>
-              </NavItem>
+              </NavItem>`
               <NavItem className="d-sm-down-none">
                 {username}
               </NavItem>
