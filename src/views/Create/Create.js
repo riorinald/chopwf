@@ -130,6 +130,7 @@ class Create extends Component {
       agreeTerms: false,
       showBranches: false,
 
+      conNum: "",
       engName: "",
       cnName: "",
       docSelected: null,
@@ -161,7 +162,8 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       noteInfo: [],
-      inputMasak: "a-aa-*-9999-9999",
+      // inputMask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", "A", "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
+      inputMask: [],
       selectInfo: ''
 
     };
@@ -679,31 +681,44 @@ class Create extends Component {
   };
 
 
-  handleInputMask = (event) => {
-    let value = ("" + event.target.value).toUpperCase();
+  handleInputMask = () => {
+    // let value = ("" + event.target.value).toUpperCase();
+    let first = /(?!.*[A-HJ-QT-Z])[IS]/;
+    let third = /(?!.*[A-NQRT-Z])[PSO]/;
+    let digit = /[0-9]/;
+    let mask = []
+    switch(this.props.match.params.company){
+        case 'MBIA': 
+          mask = [first, "-", "IA", "-",third, "-", digit,digit,digit,digit, "-", digit,digit,digit,digit ];
+          break;
+        case 'MBLC': 
+          mask = [first, "-", "L", "-",third, "-", digit,digit,digit,digit, "-", digit,digit,digit,digit ];
+          break;
+        case 'MBAFC': 
+          mask = [first, "-", "A", "-",third, "-", digit,digit,digit,digit, "-", digit,digit,digit,digit ];
+          break;
+        case 'CAR2GO': 
+          mask = [first, "-", "R", "-",third, "-", digit,digit,digit,digit, "-", digit,digit,digit,digit ];
+          break;
+      }
     this.setState({
-      contractNum: value
-    });
-    if (/^.[Ii]/.test(event.target.value)) {
-      this.setState({
-        inputMasak: "I-a-*-9999-9999",
+        inputMask: mask
       });
-    }
-    if (/^.[Ss]/.test(event.target.value)) {
-      this.setState({
-        inputMasak: "S-aa-*-9999-9999",
-      });
-    } else {
-      this.setState({
-        inputMasak: "_-aa-*-9999-9999",
-      });
-    }
-    // if (/^..[ALRalr]/.test(event.target.value)) {
+
+    // if (/^.[I]/.test(value)) {
     //   this.setState({
-    //     inputMasak: "*-a-*-9999-9999",
+    //     inputMask: "I-a-*-9999-9999",
+    //   });
+    // }else {
+    //   this.setState({
+    //     contractNum: value
     //   });
     // }
-
+    // if (/^..[ALRalr]/.test(event.target.value)) {
+    //   this.setState({
+    //     inputMask: "*-a-*-9999-9999",
+    //   });
+    // }
   }
 
 
@@ -729,6 +744,7 @@ class Create extends Component {
     var rand = Math.floor((Math.random() * maxNumber) + 1);
     let valid = true
     let doc = this.state.documentTableLTI
+    this.setState({contractNum: this.state.conNum})
     if (this.state.docSelected !== null) {
 
       for (let i = 0; i < doc.length; i++) {
@@ -759,7 +775,7 @@ class Create extends Component {
             documentTableLTI
           }
         })
-        this.setState({ engName: "", cnName: "", docSelected: null, docAttachedName: "" })
+        this.setState({ conNum: "", engName: "", cnName: "", docSelected: null, docAttachedName: "" })
       }
       else {
         Swal.fire({
@@ -973,8 +989,36 @@ class Create extends Component {
           )}
         </tbody>
       </Table>
-
     </div>
+
+  const CNIPSTable = <div className="tableWrap">
+  <Table hover bordered responsive size="sm">
+    <thead>
+      <tr>
+        <th className="smallTd" >No.</th>
+        <th className="mediumTd">Contract Number</th>
+        <th>Document Name in English</th>
+        <th>Document Name in Chinese</th>
+        <th>Attached File</th>
+        <th className="smallTd"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {this.state.documentTableLTI.map((document, index) =>
+        <tr key={index}>
+          <td className="smallTd">{index + 1}</td>
+          <td><div>{document.conNum}</div></td>
+          <td><div>{document.engName}</div></td>
+          <td><div>{document.cnName}</div></td>
+          <td id="viewDoc">
+            <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+          </td>
+          <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
+        </tr>
+      )}
+    </tbody>
+  </Table>
+  </div>
 
     const documentForLTI =
       <div id="documentTableLTI">
@@ -983,7 +1027,11 @@ class Create extends Component {
           {this.state.isCNIPS
             ? <Col ><FormGroup>
               {/* <Tooltip placement="top" isOpen={this.state.} target="contractNum" toggle={toggle}></Tooltip> */}
-              <InputMask id="contractNum" placeholder="enter contract number" mask={this.state.inputMasak} className="form-control" value={this.state.contractNum} onChange={this.handleInputMask}></InputMask>
+              <InputMask id="contractNum" placeholder="enter contract number" mask={this.state.inputMask} className="form-control" 
+              onChange={this.handleChange('conNum')} value={this.state.conNum}
+              onClick={this.handleInputMask}></InputMask>
+              {/* ></InputMask> */}
+
             </FormGroup></Col>
             : ""}
 
@@ -1013,7 +1061,7 @@ class Create extends Component {
           </Col>
         </Row>
         <Collapse isOpen={this.state.documentTableLTI.length !== 0}>
-          {DocTable}
+          {this.state.isCNIPS ? CNIPSTable : DocTable}
         </Collapse>
       </div>
 
