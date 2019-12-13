@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-    Card, CardBody, CardHeader, Table, Col, Row,
+    Card, CardBody, CardHeader, CardFooter, Table, Col, Row,
     Input,
     Button,
     FormGroup,
@@ -28,7 +28,8 @@ class TaskDetails extends Component {
             comments: "",
             loading: true,
             page: "",
-            appType: ""
+            appType: "",
+            demo: ["Card", "Card", "Card", "Card", "Card", "Card", "Card", "Card", "Card"],
         }
 
         this.goBack = this.goBack.bind(this)
@@ -51,6 +52,7 @@ class TaskDetails extends Component {
         this.setState({ loading: true })
         let userId = localStorage.getItem('userId')
         await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`).then(res => {
+            // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
             this.setState({ taskDetails: res.data, loading: false })
         })
 
@@ -80,6 +82,8 @@ class TaskDetails extends Component {
         let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\w{2})/g, '$1/$2/$3 $4:$5 $6')
         return regEx
     }
+
+
 
     approve(action) {
         let data = {
@@ -116,18 +120,18 @@ class TaskDetails extends Component {
     }
 
 
-    handleButton(action){	
-        switch(action.action){	
-            case 'recall':	
-                return <Button className="mr-1" color="danger" onClick={() => { this.postAction(action.action) }}><i className="icon-loop" /> Recall </Button>	
-                ; 	
-            case 'copy' :	
-                return <Button className="mr-1" color="light-blue" onClick={() => { this.postAction(action.action) }}><i className="fa fa-copy" /> Copy as Draft </Button> 	
-                ;	
-            case 'remind' :	
-                return <Button className="mr-1" color="warning" onClick={() => { this.postAction(action.action) }}><i className="icon-bell" />Remind Task Owner </Button>	
-                ;	
-        }	
+    handleButton(action) {
+        switch (action.action) {
+            case 'recall':
+                return <Button className="mr-1" color="danger" onClick={() => { this.approve(action.action) }}><i className="icon-loop" /> Recall </Button>
+                    ;
+            case 'copy':
+                return <Button className="mr-1" color="light-blue" onClick={() => { this.approve(action.action) }}><i className="fa fa-copy" /> Copy as Draft </Button>
+                    ;
+            case 'remind':
+                return <Button className="mr-1" color="warning" onClick={() => { this.approve(action.action) }}><i className="icon-bell" />Remind Task Owner </Button>
+                    ;
+        }
     }
 
     render() {
@@ -140,51 +144,89 @@ class TaskDetails extends Component {
                     <Card className="animated fadeIn" >
                         <CardHeader>
                             {/* <Button onClick={this.goBack} > Back &nbsp; </Button>  {taskDetails.requestNum} */}
-                            <Row className="align-items-left">	
-                        <Button className="ml-1 mr-1" color="primary" onClick={() => this.goBack(this.state.updated)}><i className="fa fa-angle-left" /> Back </Button>	
-                        {taskDetails.actions.map(((action, index) =>	
-                        <span key={index}>	
-                            {this.handleButton(action)}	
-                        </span>	
-                        ))}	
-                    </Row>
+                            <Row className="align-items-left">
+                                <Button className="ml-1 mr-1" color="primary" onClick={() => this.goBack(this.state.updated)}><i className="fa fa-angle-left" /> Back </Button>
+                                {taskDetails.actions.map(((action, index) =>
+                                    <span key={index}>
+                                        {this.handleButton(action)}
+                                    </span>
+                                ))}
+                            </Row>
                         </CardHeader>
+                        <Row>
+                            {/* <Col> */}
+                            {/* <div className="container" >
+                            {this.state.demo.map(dem =>
+                                <div>TESTING</div>
+                            )}
+                        </div> */}
+                            {/* </Col> */}
+                            <Col>
+                                <Progress multi>
+                                    {taskDetails.allStages.map((stage, index) =>
+                                        <React.Fragment key={index}>
+                                            <Progress
+
+                                                bar
+                                                animated={stage.state === "CURRENT" ? true : false}
+                                                color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
+                                                value={100 / taskDetails.allStages.length}> <div style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
+                                            </Progress> &nbsp;
+                                        </React.Fragment>
+                                    )}
+                                </Progress>
+                            </Col>
+                        </Row>
+
                         <CardBody color="dark">
-                        <Row className="mb-3">	
-                        <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>	
-                        <Col sm="12 py-2" md lg>	
-                            <Progress multi>	
-                                <Progress bar color="green" value="50">{taskDetails.currentStatusName}</Progress>	
-                                <Progress bar animated striped color="warning" value="50">{taskDetails.nextStatusName}</Progress>	
-                            </Progress>	
-                                </Col>	
-                            </Row>	
-                            <Row className="mb-4">	
-                                <Col xs="12" sm="12" md lg className="text-md-left text-center">	
-                                    <Row>	
-                                        <Col xs={12} sm={12} md={4} lg={2}>	
-                                            <img src={'../../assets/img/avatars/5.jpg'} className="img-avaa img-responsive center-block" alt="admin@bootstrapmaster.com" />	
-                                        </Col>	
-                                        <Col md><h5> {taskDetails.employeeName} </h5>	
-                                            <Row>	
-                                                <Col md><h6> DFS/CN, MBAFC </h6></Col>	
-                                            </Row>	
-                                            <Row>	
-                                                <Col xs={12} sm={12} md={6} lg={6}>	
-                                                    <h6><center className="boxs">Applicant</center></h6>	
-                                                </Col>	
-                                            </Row>	
-                                        </Col>	
-                                    </Row>	
-                                </Col>	
-                                <Col xs="12" sm="12" md lg className="text-md-left text-center">	
-                                    <Row>	
-                                        <Col md><h5><i className="fa fa-tablet mr-2" /> +86 10 {taskDetails.telephoneNum} </h5></Col>	
-                                    </Row>	
-                                    <Row>	
-                                        <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.email}</h5></Col>	
-                                    </Row>	
-                                </Col>	
+                            {/* <Row className="mb-3">
+                                <Col>
+                                    <div >
+                                        <Progress multi>
+                                            {taskDetails.allStages.map((stage, index) =>
+
+                                                <Progress
+                                                    key={index}
+                                                    bar
+                                                    animated={stage.state === "CURRENT" ? true : false}
+                                                    color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : ""}
+                                                    value="50"> {stage.statusName}
+                                                </Progress>
+                                            )}
+                                        </Progress>
+                                    </div>
+                                </Col>
+                            </Row> */}
+                            <Row className="mb-3">
+                                <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
+
+                            </Row>
+                            <Row className="mb-4">
+                                <Col xs="12" sm="12" md lg className="text-md-left text-center">
+                                    <Row>
+                                        <Col xs={12} sm={12} md={4} lg={2}>
+                                            <img src={'../../assets/img/avatars/5.jpg'} className="img-avaa img-responsive center-block" alt="admin@bootstrapmaster.com" />
+                                        </Col>
+                                        <Col md><h5> {taskDetails.employeeName} </h5>
+                                            <Row>
+                                                <Col md><h6> DFS/CN, MBAFC </h6></Col>
+                                            </Row>
+                                            <Row>
+                                                <Col xs={12} sm={12} md={6} lg={6}>
+                                                    <h6><center className="boxs">Applicant</center></h6>
+                                                </Col>
+                                            </Row>
+                                        </Col>
+                                    </Row>
+                                </Col>
+                                <Col xs="12" sm="12" md lg className="text-md-left text-center">
+                                    <Row>
+                                        <Col md><h5><i className="fa fa-tablet mr-2" /> +86 10 {taskDetails.telephoneNum} </h5></Col>
+                                    </Row>
+                                    <Row>
+                                        <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.email}</h5></Col>
+                                    </Row>
+                                </Col>
                             </Row>
                             <Row>
                                 <Col>
@@ -575,8 +617,43 @@ class TaskDetails extends Component {
                             )}
 
                         </CardBody>
+                        <CardFooter>
+                            <Row>
+                                <Col xs="1" >
+                                    <div style={{ width: "10px", height: "10px", background: "#c8ced3" }} ></div>
+                                </Col>
+                                <Col>
+                                    <div>Finished Stage</div>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col xs="1" >
+                                    <div style={{ width: "10px", height: "10px", background: "#4dbd74" }} >  </div>
+                                </Col>
+                                <Col>
+                                    <div>Current Stage</div>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col xs="1" >
+                                    <div style={{ width: "10px", height: "10px", background: "#ffc107" }} >  </div>
+                                </Col>
+                                <Col>
+                                    <div>Next Stage</div>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col xs="1" >
+                                    <div style={{ width: "10px", height: "10px", background: "#20a8d8" }} >  </div>
+                                </Col>
+                                <Col >
+                                    <div>Pending Stages</div>
+                                </Col>
+                            </Row>
+                        </CardFooter>
                     </Card>
-                    : null}
+                    : null
+                }
             </div>
         )
     }
