@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { findDOMNode } from 'react-dom';
 import { AppSwitch } from '@coreui/react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -31,12 +32,16 @@ import {
   CardHeader,
   Col,
   Collapse,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
   Form,
   FormGroup,
   Input,
   InputGroup,
-  InputGroupAddon,
   InputGroupText,
+  InputGroupAddon,
+  InputGroupButtonDropdown,
   Label,
   Modal,
   ModalHeader,
@@ -84,6 +89,7 @@ class Create extends Component {
       deptHead: [],
       teams: [],
       branches: [],
+      viewContract: false,
       collapse: true,
       modal: false,
       valid: false,
@@ -124,13 +130,15 @@ class Create extends Component {
 
       documentTableLTI: [],
       documentTableLTU: [],
+      documentTableCNIPS: [],
       selectedDocs: [],
       documents: [],
 
       agreeTerms: false,
       showBranches: false,
 
-      conNum: "",
+      contractNumber:"",
+      conNum: [],
       engName: "",
       cnName: "",
       docSelected: null,
@@ -200,9 +208,9 @@ class Create extends Component {
 
   }
 
-  componentWillReceiveProps() {
-    this.forceUpdate()
-  }
+  // componentWillReceiveProps() {
+  //   this.forceUpdate()
+  // }
 
   validate() {
     for (let i = 0; i < this.state.reqInfo.length; i++) {
@@ -401,9 +409,9 @@ class Create extends Component {
   }
 
   //toggle useInOffice
-  toggle() {
+  toggle = name => event => {
     this.setState({
-      collapse: !this.state.collapse,
+      [name]: !this.state[name],
     });
 
   }
@@ -560,7 +568,7 @@ class Create extends Component {
     if (name === "appTypeSelected") {
 
       //Clear Doc Table and agreeTerms
-      this.setState({ documentTableLTI: [], documentTableLTU: [], agreeTerms: false })
+      this.setState({ documentTableCNIPS:[], documentTableLTI: [], documentTableLTU: [], agreeTerms: false })
 
       //Update Chop Types
       this.getChopTypes(this.props.legalName, event.target.value)
@@ -700,23 +708,17 @@ class Create extends Component {
     this.setState({
         inputMask: mask
       });
-
-    // if (/^.[I]/.test(value)) {
-    //   this.setState({
-    //     inputMask: "I-a-*-9999-9999",
-    //   });
-    // }else {
-    //   this.setState({
-    //     contractNum: value
-    //   });
-    // }
-    // if (/^..[ALRalr]/.test(event.target.value)) {
-    //   this.setState({
-    //     inputMask: "*-a-*-9999-9999",
-    //   });
-    // }
   }
 
+  async addContract(event){
+    console.log(event)
+    console.log(event.target.value)
+      await this.setState(state => ({
+       conNum:[...state.conNum, this.state.contractNumber]
+      })
+    )
+    this.setState({contractNumber: ""})
+  }
 
   deleteDocument(table, i) {
     this.setState(state => {
@@ -740,7 +742,6 @@ class Create extends Component {
     var rand = Math.floor((Math.random() * maxNumber) + 1);
     let valid = true
     let doc = this.state.documentTableLTI
-    this.setState({contractNum: this.state.conNum})
     if (this.state.docSelected !== null) {
 
       for (let i = 0; i < doc.length; i++) {
@@ -771,7 +772,56 @@ class Create extends Component {
             documentTableLTI
           }
         })
-        this.setState({ conNum: "", engName: "", cnName: "", docSelected: null, docAttachedName: "" })
+        this.setState({ engName: "", cnName: "", docSelected: null, docAttachedName: "" })
+      }
+      else {
+        Swal.fire({
+          title: "Document Exists",
+          html: 'The selected document already exists!',
+          type: "warning"
+        })
+      }
+
+    }
+  }
+
+  addDocumentCNIPS = () => {
+    var maxNumber = 45;
+    var rand = Math.floor((Math.random() * maxNumber) + 1);
+    let valid = true
+    let doc = this.state.documentTableCNIPS
+    if (this.state.docSelected !== null) {
+
+      for (let i = 0; i < doc.length; i++) {
+        console.log(doc[i].engName, doc[i].cnName, doc[i].docName)
+        if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
+          valid = false
+          break
+        }
+        else {
+          valid = true
+        }
+      }
+
+      if (valid) {
+        const obj = {
+          id: rand,
+          conNum: this.state.conNum,
+          engName: this.state.engName,
+          cnName: this.state.cnName,
+          docSelected: this.state.docSelected,
+          docName: this.state.docAttachedName,
+          docURL: URL.createObjectURL(this.state.docSelected),
+        }
+
+        this.setState(state => {
+          const documentTableCNIPS = state.documentTableCNIPS.concat(obj)
+
+          return {
+            documentTableCNIPS
+          }
+        })
+        this.setState({ conNum: [], engName: "", cnName: "", docSelected: null, docAttachedName: "" })
       }
       else {
         Swal.fire({
@@ -1000,7 +1050,7 @@ class Create extends Component {
       </tr>
     </thead>
     <tbody>
-      {this.state.documentTableLTI.map((document, index) =>
+      {this.state.documentTableCNIPS.map((document, index) =>
         <tr key={index}>
           <td className="smallTd">{index + 1}</td>
           <td><div>{document.conNum}</div></td>
@@ -1009,7 +1059,7 @@ class Create extends Component {
           <td id="viewDoc">
             <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
           </td>
-          <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
+          <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableCNIPS", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
         </tr>
       )}
     </tbody>
@@ -1023,11 +1073,36 @@ class Create extends Component {
           {this.state.isCNIPS
             ? <Col ><FormGroup>
               {/* <Tooltip placement="top" isOpen={this.state.} target="contractNum" toggle={toggle}></Tooltip> */}
-              <InputMask id="contractNum" placeholder="enter contract number" mask={this.state.inputMask} className="form-control" 
+              {/* <InputMask id="contractNum" placeholder="enter contract number" mask={this.state.inputMask} className="form-control" 
               onChange={this.handleChange('conNum')} value={this.state.conNum}
+              onClick={this.handleInputMask}></InputMask> */}
+              <InputGroup>
+              <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} onClick={this.toggle('viewContract')}>
+                <DropdownToggle><i className="fa fa-list-ul"/></DropdownToggle>
+                <DropdownMenu>
+                <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
+                  {this.state.conNum !== "" 
+                  ? this.state.conNum.map((
+                    (conNum,index) => (
+                    <span key={index}>
+                      <DropdownItem >{conNum}</DropdownItem>
+                    </span>
+                  )))
+                  : <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
+                  }
+                  {/* <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
+                  <DropdownItem disabled>S-A-P-2019-1035</DropdownItem>
+                  <DropdownItem disabled>I-A-O-2019-1035</DropdownItem>
+                  <DropdownItem disabled>S-A-P-2019-1035</DropdownItem>
+                  <DropdownItem disabled>S-A-S-2019-1035</DropdownItem> */}
+                </DropdownMenu>
+              </InputGroupButtonDropdown>
+              <InputMask inputref={this.contractNumber} 
+              placeholder="enter contract number" mask={this.state.inputMask} name="contractNum" className="form-control" 
+              onChange={this.handleChange('contractNumber')} value={this.state.contractNumber}
               onClick={this.handleInputMask}></InputMask>
-              {/* ></InputMask> */}
-
+              <InputGroupAddon onClick={(event)=>this.addContract(event)} name="addContract" addonType="append"><Button color="secondary"><i className="fa fa-plus "/></Button></InputGroupAddon>
+            </InputGroup>
             </FormGroup></Col>
             : ""}
 
@@ -1051,12 +1126,14 @@ class Create extends Component {
           </Col>
           <Col xl={1}>
             <FormGroup>
-              {/* <Label></Label> */}
-              <Button id="addDocs" block onClick={this.addDocumentLTI}>Add</Button>
+              {this.state.isCNIPS
+               ? <Button id="addDocs" block onMouseEnter={this.toggle('viewContract')} onMouseLeave={this.toggle('viewContract')} onClick={this.addDocumentCNIPS}>Add</Button>
+               : <Button id="addDocs" block onClick={this.addDocumentLTI}>Add</Button>
+              }
             </FormGroup>
           </Col>
         </Row>
-        <Collapse isOpen={this.state.documentTableLTI.length !== 0}>
+        <Collapse isOpen={this.state.documentTableLTI.length !== 0 || this.state.documentTableCNIPS.length !== 0}>
           {this.state.isCNIPS ? CNIPSTable : DocTable}
         </Collapse>
       </div>
@@ -1164,7 +1241,7 @@ class Create extends Component {
     return (
       <LegalEntity.Consumer>{
         ContextValue => (
-          <div className="animated fadeIn">
+          <div style={{fontFamily: "sans-serif"}} className="animated fadeIn">
             <h4>Create</h4>
             <Card>
               <CardHeader>CREATE NEW REQUEST</CardHeader>
@@ -1322,7 +1399,7 @@ class Create extends Component {
                     <FormGroup>
                       <Label>Use in Office</Label>
                       <Row />
-                      <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
+                      <AppSwitch onChange={this.toggle('collapse')} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
                     </FormGroup>
                   </Collapse>
 
@@ -1484,7 +1561,7 @@ class Create extends Component {
                         ? <Button className="mr-2" id="submit" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
                         : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
                           >Submit</Button>}
-                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen})} target="submitTooltip">please confirm the agree terms</Tooltip>
+                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={this.toggle('tooltipOpen')} target="submitTooltip">please confirm the agree terms</Tooltip>
                       <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
                       <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
                     </Col>
