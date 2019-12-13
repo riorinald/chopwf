@@ -128,8 +128,10 @@ class EditRequest extends Component {
             showDoc: false,
             selectedDocs: [],
 
+            docCheckBy: [],
             deptHeads: [],
             selectedDeptHeads: [],
+            selectedDocCheckBy: [],
             dateView1: new Date(),
             dateView2: new Date(),
             departments: [],
@@ -164,10 +166,22 @@ class EditRequest extends Component {
         this.validator = new SimpleReactValidator();
     }
 
+    async getDocCheckBy(deptId, teamId) {
+        const res = await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`)
+        for (let i = 0; i < res.data.length; i++) {
+            const obj = { value: res.data[i].userId, label: res.data[i].displayName }
+            this.setState(state => {
+                const docCheckBy = this.state.docCheckBy.concat(obj)
+                return {
+                    docCheckBy
+                }
+            })
+        }
+    }
 
     async getDeptHeads() {
         this.setState({ deptHeads: [] })
-        await Axios.get(`${config.url}/users?companyid=${this.props.legalName}&excludeuserid=${localStorage.getItem('userId')}`)
+        await Axios.get(`${config.url}/users?category=depthead&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`)
             .then(res => {
                 for (let i = 0; i < res.data.length; i++) {
                     const obj = { value: res.data[i].userId, label: res.data[i].displayName }
@@ -225,6 +239,23 @@ class EditRequest extends Component {
         return new Date(regEx);
     }
 
+    getDocCheckByOption(person) {
+        let i = 0
+        if (person.length !== 0) {
+
+            this.state.docCheckBy.map((head, index) => {
+                if (head.value === person[0]) {
+                    i = index
+                }
+            })
+        }
+        else {
+
+            i = null
+        }
+        return i
+    }
+
     getOption(person) {
         let i = 0
         if (person !== "") {
@@ -263,8 +294,17 @@ class EditRequest extends Component {
 
         //LTU
         else if (temporary.applicationTypeId === "LTU") {
+            if (temporary.teamId !== "") {
+                this.getDocCheckBy(temporary.departmentId, temporary.teamId)
+            }
             temporary.effectivePeriod = temporary.effectivePeriod !== "" ? this.convertDate(temporary.effectivePeriod, 'dateView1') : null
-            temporary.documentCheckByOption = this.getOption(temporary.documentCheckBy)
+            temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
+        }
+
+        else if (temporary.applicationTypeId === "LTI") {
+
+            this.setSelectedDocCheckBy(temporary.documentCheckBy)
+
         }
 
         this.setState(state => {
@@ -272,6 +312,7 @@ class EditRequest extends Component {
             editRequestForm.collapseUIO = temporary.isUseInOffice === "Y" ? true : false
         })
         this.setSelectedDeptHead(temporary.departmentHeads)
+
 
         await this.getData("departments", `${config.url}/departments`)
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
@@ -289,7 +330,7 @@ class EditRequest extends Component {
         let details = Object.keys(this.state.taskDetails)
         let apptypeId = this.state.taskDetails.applicationTypeId
         details = details.filter(function (item) {
-            return item !== "taskId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice"
+            return item !== "taskId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption"
         })
 
         if (apptypeId === "STU") {
@@ -299,7 +340,7 @@ class EditRequest extends Component {
         }
         else if (apptypeId === "LTI") {
             details = details.filter(function (item) {
-                return item !== "teamId" && item !== "documentCheckBy" && item !== "contractSignedByFirstPerson" && item !== "contractSignedBySecondPerson" && item !== "branchId" && item !== "connectChop"
+                return item !== "teamId" && item !== "contractSignedByFirstPerson" && item !== "contractSignedBySecondPerson" && item !== "branchId" && item !== "connectChop"
             })
         }
         else if (apptypeId === "CNIPS") {
@@ -351,10 +392,42 @@ class EditRequest extends Component {
         );
     };
 
+    filterDocCheck = (inputValue) => {
+        return this.state.docCheckBy.filter(i =>
+            i.label.toLowerCase().includes(inputValue.toLowerCase())
+        );
+    };
+
     loadOptionsDept = (inputValue, callback) => {
         callback(this.filterColors(inputValue));
 
     }
+
+    loadOptionsDocCheck = (inputValue, callback) => {
+        callback(this.filterDocCheck(inputValue));
+    }
+
+
+    setSelectedDocCheckBy(docCheck) {
+        let selected = docCheck
+        selected.map(select => {
+            let temp = ""
+            let l = this.state.deptHeads.length
+            for (let i = 0; i < l; i++) {
+                if (select === this.state.deptHeads[i].value) {
+                    temp = this.state.deptHeads[i]
+                    this.setState(state => {
+                        const selectedDocCheckBy = this.state.selectedDocCheckBy.concat(temp)
+                        return {
+                            selectedDocCheckBy
+                        }
+                    })
+                    break;
+                }
+            }
+        })
+    }
+
 
     setSelectedDeptHead(deptHeads) {
         let selected = deptHeads
@@ -378,6 +451,9 @@ class EditRequest extends Component {
     handleChange = name => event => {
         if (name === "departmentId") {
             this.getTeams(event.target.value)
+        }
+        else if (name === "teamId") {
+            this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value)
         }
         if (event.target.value) {
 
@@ -542,15 +618,27 @@ class EditRequest extends Component {
 
 
     handleSelectOption = sname => newValue => {
+        if (sname === "documentCheckBy1") {
+            var element = document.getElementById("documentCheckBy")
+            element.classList.contains("form-control")
+                ? element.className = "is-valid form-control"
+                : element.className = "isValid"
+        }
+        else {
+            var element = document.getElementById(sname)
+            element.classList.contains("form-control")
+                ? element.className = "is-valid form-control"
+                : element.className = "isValid"
+        }
 
-        var element = document.getElementById(sname)
-        element.classList.contains("form-control")
-            ? element.className = "is-valid form-control"
-            : element.className = "isValid"
-
-        if (sname === "departmentHeads") {
+        if (sname === "departmentHeads" || sname === "documentCheckBy") {
             let value = []
-            this.setState({ selectedDeptHeads: newValue })
+            if (sname === "departmentHeads") {
+                this.setState({ selectedDeptHeads: newValue })
+            }
+            else {
+                this.setState({ selectedDocCheckBy: newValue })
+            }
             if (newValue) {
                 newValue.map(val => {
                     value.push(val.value)
@@ -562,7 +650,22 @@ class EditRequest extends Component {
                 return { taskDetails }
             })
         }
+
+        else if (sname === "documentCheckBy1") {
+            let value = []
+            if (newValue) {
+                value.push(newValue.value)
+            }
+            console.log(value)
+            this.setState(state => {
+                let taskDetails = this.state.taskDetails
+                taskDetails.documentCheckBy = value
+                return { taskDetails }
+            })
+        }
+
         else {
+
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
                 this.state.deptHeads.map((head, index) => {
@@ -714,11 +817,17 @@ class EditRequest extends Component {
                 let stat = error.response.data.status !== "failed" && error.response.data.status !== "error"
                 let msg = ""
                 if (stat) {
-                    let keys = Object.keys(error.response.data.errors)
-                    keys.map((key, index) => {
-                        msg = index + 1 + '.' + ' ' + msg + error.response.data.errors[key]
-                    })
+                    if (error.response.data.errors) {
+                        let keys = Object.keys(error.response.data.errors)
+                        keys.map((key, index) => {
+                            msg = index + 1 + '.' + ' ' + msg + error.response.data.errors[key]
+                        })
+                    }
+                    else if (error.response.data.message) {
+                        msg = error.response.data.message
+                    }
                 }
+
                 else {
                     msg = "Validation Errors occured"
                 }
@@ -736,7 +845,7 @@ class EditRequest extends Component {
             details = details.filter(item => item !== "responsiblePerson" && item !== "returnDate")
         }
         for (let i = 0; i < details.length; i++) {
-            // console.log(details[i])
+            console.log(details[i])
             // console.log(this.state.taskDetails[details[i]])
             var element = document.getElementById(details[i])
             if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
@@ -811,7 +920,15 @@ class EditRequest extends Component {
         postReq.append("IsSubmitted", isSubmitted);
         postReq.append("isConnectChop", this.state.taskDetails.connectChop);
         postReq.append("BranchId", this.state.taskDetails.branchId)
-        postReq.append("DocumentCheckBy", this.state.taskDetails.documentCheckBy)
+
+        if(this.state.taskDetails.documentCheckBy.length === 0){
+            postReq.append(`DocumentCheckBy[0]`, "");
+        }
+
+        for (let i = 0; i < this.state.taskDetails.documentCheckBy.length; i++) {
+            postReq.append(`DocumentCheckBy[${i}]`, this.state.taskDetails.documentCheckBy[i]);
+        }
+
 
 
         if (this.state.taskDetails.applicationTypeId === "LTU") {
@@ -863,7 +980,7 @@ class EditRequest extends Component {
 
 
     render() {
-        const { taskDetails, dateView1, deptHeads, selectedDeptHeads, editRequestForm } = this.state
+        const { taskDetails, dateView1, deptHeads, docCheckBy, selectedDeptHeads, selectedDocCheckBy, editRequestForm } = this.state
 
         this.validator.purgeFields();
 
@@ -933,7 +1050,7 @@ class EditRequest extends Component {
                                     </Input>
                                 </FormGroup>
 
-                                {taskDetails.applicationTypeId === "LTU"
+                                {taskDetails.applicationTypeId === "LTI"
                                     ? <FormGroup>
                                         <Label>Effective Period</Label>
                                         {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
@@ -1259,6 +1376,21 @@ class EditRequest extends Component {
                                     </InputGroup>
                                 </FormGroup>
 
+                                {taskDetails.applicationTypeId === "LTI"
+                                    ? <FormGroup>
+                                        <Label>Document Check By <i className="fa fa-user" /></Label>
+                                        <AsyncSelect
+                                            id="documentCheckBy"
+                                            loadOptions={this.loadOptionsDept}
+                                            isMulti
+                                            value={selectedDocCheckBy}
+                                            onChange={this.handleSelectOption("documentCheckBy")}
+                                            menuPortalTarget={document.body}
+                                            components={animatedComponents}
+                                            styles={this.state.deptHeadSelected === null ? reactSelectControl : ""}
+                                        /> </FormGroup>
+                                    : null}
+
                                 {taskDetails.applicationTypeId === "CNIPS"
                                     ? <FormGroup>
                                         <Label>Contract Signed By: <i className="fa fa-user" /></Label>
@@ -1299,9 +1431,9 @@ class EditRequest extends Component {
                                             <AsyncSelect
                                                 id="documentCheckBy"
                                                 menuPortalTarget={document.body}
-                                                onChange={this.handleSelectOption("documentCheckBy")}
-                                                loadOptions={this.loadOptionsDept}
-                                                value={deptHeads[taskDetails.documentCheckByOption]}
+                                                onChange={this.handleSelectOption("documentCheckBy1")}
+                                                loadOptions={this.loadOptionsDocCheck}
+                                                value={docCheckBy[taskDetails.docCheckByOption]}
                                                 styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
                                             <InputGroup>
                                                 <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Check By', taskDetails.documentCheckBy, 'required')}</small>

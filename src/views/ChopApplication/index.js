@@ -21,6 +21,7 @@ import Axios from 'axios';
 import config from '../../config';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { CSVLink, CSVDownload } from "react-csv";
 
 class ChopApplication extends Component {
   constructor(props) {
@@ -85,7 +86,7 @@ class ChopApplication extends Component {
         "Pending Chop Owner Approval for extension",
         "Chop request expired after 30 days",
         "Pending Requestor Return"
-    ]
+      ]
 
     }
     this.getApplications = this.getApplications.bind(this);
@@ -180,6 +181,12 @@ class ChopApplication extends Component {
     return regEx
   }
 
+  getCurrentDate() {
+    var tempDate = new Date();
+    var date = tempDate.getFullYear() + '' + (tempDate.getMonth() + 1) + '' + tempDate.getDate();
+    return date
+  }
+
   onFilteredChangeCustom = (value, accessor) => {
     this.setState(state => {
       const searchOption = state.searchOption
@@ -271,9 +278,12 @@ class ChopApplication extends Component {
       console.log(`Exporting Logs from ${this.convertDate(from)} to ${this.convertDate(to)}`)
       this.toggleModal()
       this.setState({ validDate: true })
+      return true;
+
     }
     else {
       this.setState({ validDate: false })
+      return false;
     }
   }
 
@@ -419,14 +429,14 @@ class ChopApplication extends Component {
                   style: { textAlign: "center" },
                   Filter: ({ filter, onChange }) => {
                     return (
-                        <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
-                            <option value="" >Please Select a status</option>
-                            {this.state.status.map((stat, index) =>
-                                <option key={index} value={stat} >{stat}</option>
-                            )}
-                        </Input>
+                      <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
+                        <option value="" >Please Select a status</option>
+                        {this.state.status.map((stat, index) =>
+                          <option key={index} value={stat} >{stat}</option>
+                        )}
+                      </Input>
                     )
-                },
+                  },
                 },
                 {
                   Header: "Date of Creation",
@@ -560,7 +570,17 @@ class ChopApplication extends Component {
               </div>
               : null
             }
-            <Button color="primary" onClick={this.exportLogs}>Export Logs</Button>{' '}
+            <CSVLink
+              data={applications}
+              filename={`CHOP${this.props.legalName}${this.getCurrentDate()}.csv`}
+              className="btn btn-primary"
+              target="_blank"
+              onClick={() => {
+                return this.exportLogs()
+              }}
+            >
+              Export Logs </CSVLink>
+            {/* <Button color="primary" onClick={this.exportLogs}>Export Logs</Button>{' '} */}
             <Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
           </ModalFooter>
         </Modal>

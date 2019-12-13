@@ -342,7 +342,14 @@ class Create extends Component {
     postReq.append("IsSubmitted", isSubmitted);
     postReq.append("isConnectChop", isConnectChop);
     postReq.append("BranchId", this.state.branchSelected)
-    postReq.append("DocumentCheckBy", this.state.docCheckBySelected)
+    if (this.state.isLTU) {
+      postReq.append("DocumentCheckBy[0]", this.state.docCheckBySelected)
+    }
+    else if (this.state.isLTI) {
+      for (let i = 0; i < this.state.docCheckByLTI.length; i++) {
+        postReq.append(`DocumentCheckBy[${i}]`, this.state.docCheckByLTI[i].value);
+      }
+    }
 
     for (let i = 0; i < this.state.documentTableLTI.length; i++) {
       postReq.append(`Documents[${i}].Attachment.File`, this.state.documentTableLTI[i].docSelected);
@@ -361,9 +368,6 @@ class Create extends Component {
       postReq.append(`DepartmentHeads[${i}]`, this.state.deptHeadSelected[i].value);
     }
 
-    for (let i = 0; i < this.state.docCheckByLTI.length; i++) {
-      postReq.append(`DocumentCheckBy[${i}]`, this.state.docCheckByLTI[i].value);
-    }
 
 
     for (var pair of postReq.entries()) {
@@ -524,14 +528,14 @@ class Create extends Component {
 
   async getDeptHead(companyId) {
 
-    await axios.get(`${config.url}/users?companyid=` + companyId + '&displayname=&excludeuserid=' + this.state.userId)
+    await axios.get(`${config.url}/users?category=depthead&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
       .then(res => {
         this.setState({ deptHead: res.data })
       })
   }
 
-  async getDocCheckBy(displayName) {
-    await axios.get(`${config.url}/users?displayname=` + displayName + '&excludeuserid=' + this.state.userId)
+  async getDocCheckBy(teamId) {
+    await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`)
       .then(res => {
         this.setState({ docCheckBy: res.data })
       })
@@ -586,7 +590,6 @@ class Create extends Component {
           isCNIPS: false,
           reqInfo: LTU
         })
-        this.getDocCheckBy("")
 
         if (this.state.deptSelected !== "") {
           this.getTeams(this.state.deptSelected)
@@ -654,6 +657,7 @@ class Create extends Component {
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
+      this.getDocCheckBy(event.target.value)
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value)
       }
@@ -684,7 +688,7 @@ class Create extends Component {
       this.setState({
         inputMasak: "I-a-*-9999-9999",
       });
-    } 
+    }
     if (/^.[Ss]/.test(event.target.value)) {
       this.setState({
         inputMasak: "S-aa-*-9999-9999",
@@ -1340,7 +1344,7 @@ class Create extends Component {
                         id="docCheckByLTI"
                         loadOptions={loadOptions}
                         isMulti
-                        onChange={this.handleSelectOption("docCheckBySelected")}
+                        onChange={this.handleSelectOption("docCheckByLTI")}
                         menuPortalTarget={document.body}
                         components={animatedComponents}
                         styles={this.state.deptHeadSelected === null ? reactSelectControl : ""}
@@ -1435,8 +1439,8 @@ class Create extends Component {
                       {this.state.agreeTerms
                         ? <Button className="mr-2" id="submit" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
                         : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
-                          >Submit</Button>}
-                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen})} target="submitTooltip">please confirm the agree terms</Tooltip>
+                        >Submit</Button>}
+                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} target="submitTooltip">please confirm the agree terms</Tooltip>
                       <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
                       <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
                     </Col>
