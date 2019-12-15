@@ -192,8 +192,9 @@ class Create extends Component {
     this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
-    this.toggleConnection = this.toggleConnection.bind(this)
-    this.getDocuments = this.getDocuments.bind(this)
+    this.toggleConnection = this.toggleConnection.bind(this);
+    this.getDocuments = this.getDocuments.bind(this);
+    this.addContract = this.addContract.bind(this);
   };
 
   componentDidMount() {
@@ -708,6 +709,9 @@ class Create extends Component {
         case 'CAR2GO': 
           mask = [first, "-", "R", "-",third, "-", digit,digit,digit,digit, "-", digit,digit,digit,digit ];
           break;
+        default :
+          mask = [first, "-", "IA", "-",third, "-", digit,digit,digit,digit, "-", digit,digit,digit,digit ];
+          break;
       }
     this.setState({
         inputMask: mask
@@ -721,7 +725,7 @@ class Create extends Component {
        conNum:[...state.conNum, this.state.contractNumber]
       })
     )
-    this.setState({contractNumber: ""})
+    this.setState({contractNumber: ""}, this.toggle('viewContract'))
   }
 
   deleteDocument(table, i) {
@@ -1057,7 +1061,7 @@ class Create extends Component {
       {this.state.documentTableCNIPS.map((document, index) =>
         <tr key={index}>
           <td className="smallTd">{index + 1}</td>
-          <td><div>{document.conNum}</div></td>
+          <td><div>{document.conNum.map(((item,index) => (<div key={index}>{item};</div>)))}</div></td>
           <td><div>{document.engName}</div></td>
           <td><div>{document.cnName}</div></td>
           <td id="viewDoc">
@@ -1081,7 +1085,7 @@ class Create extends Component {
               onChange={this.handleChange('conNum')} value={this.state.conNum}
               onClick={this.handleInputMask}></InputMask> */}
               <InputGroup>
-              <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} onClick={this.toggle('viewContract')}>
+              <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
                 <DropdownToggle><i className="fa fa-list-ul"/></DropdownToggle>
                 <DropdownMenu>
                 <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
@@ -1101,11 +1105,10 @@ class Create extends Component {
                   <DropdownItem disabled>S-A-S-2019-1035</DropdownItem> */}
                 </DropdownMenu>
               </InputGroupButtonDropdown>
-              <InputMask inputref={this.contractNumber} 
-              placeholder="enter contract number" mask={this.state.inputMask} name="contractNum" className="form-control" 
+              <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control" 
               onChange={this.handleChange('contractNumber')} value={this.state.contractNumber}
               onClick={this.handleInputMask}></InputMask>
-              <InputGroupAddon onClick={(event)=>this.addContract(event)} name="addContract" addonType="append"><Button color="secondary"><i className="fa fa-plus "/></Button></InputGroupAddon>
+              <InputGroupAddon onClick={this.addContract} name="addContract" addonType="append"><Button color="secondary"><i className="fa fa-plus "/></Button></InputGroupAddon>
             </InputGroup>
             </FormGroup></Col>
             : ""}
