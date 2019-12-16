@@ -114,6 +114,9 @@ class EditRequest extends Component {
 
             validateForm: [],
 
+            conNum: "",
+            inputMask: [],
+
             isValid: false,
             editRequestForm: {
                 engName: "",
@@ -122,6 +125,7 @@ class EditRequest extends Component {
                 docAttachedName: "",
                 collapseUIO: true,
                 isConnect: false,
+                contractNumbers: []
             },
 
 
@@ -141,6 +145,7 @@ class EditRequest extends Component {
         }
         this.getTaskDetails = this.getTaskDetails.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.handleContractNumber = this.handleContractNumber.bind(this);
         this.goBack = this.goBack.bind(this)
         this.handleDocumentChange = this.handleDocumentChange.bind(this);
         this.toggleConnection = this.toggleConnection.bind(this);
@@ -448,6 +453,13 @@ class EditRequest extends Component {
         })
     }
 
+    handleContractNumber = name => event => {
+        let value = event.target.value
+        this.setState({
+            [name]: value
+        })
+    }
+
     handleChange = name => event => {
         if (name === "departmentId") {
             this.getTeams(event.target.value)
@@ -512,6 +524,16 @@ class EditRequest extends Component {
         }
     }
 
+    deleteContractNumber(i) {
+        this.setState(state => {
+            const editRequestForm = this.state.editRequestForm
+            editRequestForm.contractNumbers = editRequestForm.contractNumbers.filter((item, index) => i !== index)
+            return {
+                editRequestForm
+            }
+        })
+    }
+
     addDocumentLTI() {
         var maxNumber = 45;
         var rand = Math.floor((Math.random() * maxNumber) + 1);
@@ -547,7 +569,8 @@ class EditRequest extends Component {
                     documentId: rand,
                     documentNameEnglish: this.state.editRequestForm.engName,
                     documentNameChinese: this.state.editRequestForm.cnName,
-                    docSelected: this.state.editRequestForm.docSelected
+                    docSelected: this.state.editRequestForm.docSelected,
+                    contractNumbers: this.state.editRequestForm.contractNumbers
                 }
 
                 this.setState(state => {
@@ -582,6 +605,31 @@ class EditRequest extends Component {
                 return { taskDetails }
             })
         })
+    }
+
+    handleInputMask = () => {
+        // let value = ("" + event.target.value).toUpperCase();
+        let first = /(?!.*[A-HJ-QT-Z])[IS]/;
+        let third = /(?!.*[A-NQRT-Z])[PSO]/;
+        let digit = /[0-9]/;
+        let mask = []
+        switch (this.props.match.params.company) {
+            case 'MBIA':
+                mask = [first, "-", "IA", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+                break;
+            case 'MBLC':
+                mask = [first, "-", "L", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+                break;
+            case 'MBAFC':
+                mask = [first, "-", "A", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+                break;
+            case 'CAR2GO':
+                mask = [first, "-", "R", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+                break;
+        }
+        this.setState({
+            inputMask: mask
+        });
     }
 
 
@@ -782,6 +830,107 @@ class EditRequest extends Component {
         };
     };
 
+    validateConNum() {
+        let first = /(?!.*[A-HJ-QT-Z])[IS]/;
+        let third = /(?!.*[A-NQRT-Z])[PSO]/;
+        let digit = /[0-9]/;
+        var isFirst = false
+        var isThird = false
+        var isDigit = false
+        let valid = false
+        isFirst = first.test(this.state.conNum[0])
+        if (this.props.match.params.company === "MBIA") {
+            isThird = third.test(this.state.conNum[5])
+            for (let i = 7; i < 11; i++) {
+                isDigit = digit.test(this.state.conNum[i])
+                if (!isDigit) {
+                    break;
+                }
+            }
+            if (isDigit) {
+                for (let i = 12; i < 15; i++) {
+                    isDigit = digit.test(this.state.conNum[i])
+                    if (!isDigit) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        else {
+            isThird = third.test(this.state.conNum[4])
+            for (let i = 6; i < 10; i++) {
+                isDigit = digit.test(this.state.conNum[i])
+                if (!isDigit) {
+                    break;
+                }
+            }
+            if (isDigit) {
+                for (let i = 11; i < 14; i++) {
+                    isDigit = digit.test(this.state.conNum[i])
+                    if (!isDigit) {
+                        break;
+                    }
+                }
+            }
+
+        }
+        if (isFirst && isThird && isDigit) {
+            if (this.state.contractNumbers.length !== 0) {
+                for (let i = 0; i < this.state.contractNumbers.length; i++) {
+                    if (this.state.contractNumbers[i] === this.state.conNum) {
+                        valid = false
+                        // this.setState({ conNum: "" })
+                        // console.log("Contract Number Already Exists") //show error
+                        Swal.fire({
+                            title: "Contract Number Exists",
+                            html: 'Please input a new Contract Number!',
+                            type: "warning"
+                        })
+                        break;
+                    }
+                    else {
+                        valid = true
+                    }
+
+                }
+            }
+            else {
+                valid = true
+            }
+        }
+        else {
+            valid = false
+        }
+        return valid
+    }
+
+    addContractNumber() {
+        let validContract = this.validateConNum()
+        let contractNums = this.state.editRequestForm.contractNumbers
+        if (validContract) {
+            contractNums.push(this.state.conNum)
+            this.setState(state => {
+                const editRequestForm = this.state.editRequestForm
+                editRequestForm.contractNumbers = contractNums
+                return editRequestForm
+            })
+            this.setState(state => {
+                const editRequestForm = this.state.editRequestForm
+                editRequestForm.contractNumbers = []
+                return editRequestForm
+            })
+            // console.log(contractNums)
+        }
+        else {
+            Swal.fire({
+                title: "Invalid Contract Number ",
+                html: 'Please input a new Contract Number in the valid format!',
+                type: "warning"
+            })
+        }
+    }
+
     async postData(formData, isSubmitted) {
         let url = `${config.url}/tasks/${this.props.location.state.id}`
         await Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -921,7 +1070,7 @@ class EditRequest extends Component {
         postReq.append("isConnectChop", this.state.taskDetails.connectChop);
         postReq.append("BranchId", this.state.taskDetails.branchId)
 
-        if(this.state.taskDetails.documentCheckBy.length === 0){
+        if (this.state.taskDetails.documentCheckBy.length === 0) {
             postReq.append(`DocumentCheckBy[0]`, "");
         }
 
@@ -1203,9 +1352,12 @@ class EditRequest extends Component {
                                             <Row form>
 
                                                 {taskDetails.applicationTypeId === "CNIPS"
-                                                    ? <Col ><FormGroup>
-                                                        <InputMask placeholder="enter contract number" mask="*-*-*-9999-9999" className="form-control" defaultValue={taskDetails.contractNum} onChange={this.handleDocumentChange("contractNum")}></InputMask>
-                                                    </FormGroup></Col>
+                                                    ? <Col  ><FormGroup style={{ display: "flex" }}>
+                                                        <InputMask id="conNum" placeholder="enter contract number" mask={this.state.inputMask} className="form-control"
+                                                            onChange={this.handleContractNumber('conNum')} value={this.state.conNum}
+                                                            onClick={this.handleInputMask} /><Button onClick={() => this.addContractNumber()} >Add</Button>
+                                                    </FormGroup>
+                                                    </Col>
                                                     : ""}
 
                                                 <Col md>
@@ -1233,6 +1385,28 @@ class EditRequest extends Component {
                                                     </FormGroup>
                                                 </Col>
                                             </Row>
+                                            <Collapse isOpen={editRequestForm.contractNumbers.length !== 0}>
+                                                <div className="tableWrap" >
+                                                    <Table hover bordered responsive size="sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th>Contract Number</th>
+                                                                <th className="smallTd"></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {editRequestForm.contractNumbers.map((number, index) =>
+                                                                <tr key={index}>
+                                                                    <td> {index + 1} </td>
+                                                                    <td> {number} </td>
+                                                                    <td className="smallTd"><img width="25px" onClick={() => this.deleteContractNumber(index)} src={deleteBin} /></td>
+                                                                </tr>
+                                                            )}
+                                                        </tbody>
+                                                    </Table>
+                                                </div>
+                                            </Collapse>
                                             <Collapse isOpen={taskDetails.documentNames.length !== 0}>
                                                 <div>
                                                     <table>
@@ -1250,7 +1424,9 @@ class EditRequest extends Component {
                                                             {taskDetails.documentNames.map((document, index) =>
                                                                 <tr key={index}>
                                                                     <td className="smallTd">{index + 1}</td>
-                                                                    {taskDetails.applicationTypeId === "CNIPS" ? <td> {document.contractNum} </td> : null}
+                                                                    {taskDetails.applicationTypeId === "CNIPS"
+                                                                        ? <td> {document.contractNum} </td>
+                                                                        : null}
                                                                     <td>{document.documentNameEnglish}</td>
                                                                     <td>{document.documentNameChinese}</td>
                                                                     <td id="viewDoc">
