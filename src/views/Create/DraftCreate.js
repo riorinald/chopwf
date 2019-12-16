@@ -137,8 +137,8 @@ class Create extends Component {
       agreeTerms: false,
       showBranches: false,
 
-      contractNumber: "",
-      conNum: [],
+      contractNumbers: [],
+      conNum: "",
       engName: "",
       cnName: "",
       docSelected: null,
@@ -576,7 +576,7 @@ class Create extends Component {
     if (name === "appTypeSelected") {
 
       //Clear Doc Table and agreeTerms
-      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [], agreeTerms: false })
+      this.setState({ documentTableCNIPS:[], documentTableLTI: [], documentTableLTU: [], agreeTerms: false })
 
       //Update Chop Types
       this.getChopTypes(this.props.legalName, event.target.value)
@@ -712,23 +712,34 @@ class Create extends Component {
       case 'CAR2GO':
         mask = [first, "-", "R", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
         break;
-      default:
-        mask = [first, "-", "IA", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
     }
     this.setState({
       inputMask: mask
     });
+
+    // if (/^.[I]/.test(value)) {
+    //   this.setState({
+    //     inputMask: "I-a-*-9999-9999",
+    //   });
+    // }else {
+    //   this.setState({
+    //     contractNum: value
+    //   });
+    // }
+    // if (/^..[ALRalr]/.test(event.target.value)) {
+    //   this.setState({
+    //     inputMask: "*-a-*-9999-9999",
+    //   });
+    // }
   }
 
-  async addContract(event) {
-    console.log(event)
-    console.log(event.target.value)
-    await this.setState(state => ({
-      conNum: [...state.conNum, this.state.contractNumber]
+  deleteContractNumber(i) {
+    this.setState(state => {
+      const contractNumbers = state.contractNumbers.filter((item, index) => i !== index)
+      return {
+        contractNumbers
+      }
     })
-    )
-    this.setState({ contractNumber: "" }, this.toggle('viewContract'))
   }
 
   deleteDocument(table, i) {
@@ -846,6 +857,7 @@ class Create extends Component {
     let valid = true
     let typeValid = false
     let doc = this.state.documentTableLTI
+    // this.setState({contractNum: this.state.conNum})
     if (this.state.docSelected !== null) {
       if (this.state.appTypeSelected !== "CNIPS") {
         if (this.state.engName !== "" && this.state.cnName !== "") {
@@ -885,57 +897,23 @@ class Create extends Component {
             docURL: URL.createObjectURL(this.state.docSelected),
             contractNumbers: this.state.contractNumbers
           }
-        }
-        this.setState({ engName: "", cnName: "", docSelected: null, docAttachedName: "" })
-      }
-      else {
-        Swal.fire({
-          title: "Document Exists",
-          html: 'The selected document already exists!',
-          type: "warning"
-        })
-      }
 
-    }
-  }
+          this.setState(state => {
+            const documentTableLTI = state.documentTableLTI.concat(obj)
 
-  addDocumentCNIPS = () => {
-    var maxNumber = 45;
-    var rand = Math.floor((Math.random() * maxNumber) + 1);
-    let valid = true
-    let doc = this.state.documentTableCNIPS
-    if (this.state.docSelected !== null) {
-
-      for (let i = 0; i < doc.length; i++) {
-        console.log(doc[i].engName, doc[i].cnName, doc[i].docName)
-        if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
-          valid = false
-          break
+            return {
+              documentTableLTI
+            }
+          })
+          this.setState({ conNum: "", engName: "", cnName: "", docSelected: null, docAttachedName: "", contractNumbers: [] })
         }
         else {
-          valid = true
+          Swal.fire({
+            title: "Document Exists",
+            html: 'Document Already Exists!',
+            type: "warning"
+          })
         }
-      }
-
-      if (valid) {
-        const obj = {
-          id: rand,
-          conNum: this.state.conNum,
-          engName: this.state.engName,
-          cnName: this.state.cnName,
-          docSelected: this.state.docSelected,
-          docName: this.state.docAttachedName,
-          docURL: URL.createObjectURL(this.state.docSelected),
-        }
-
-        this.setState(state => {
-          const documentTableCNIPS = state.documentTableCNIPS.concat(obj)
-
-          return {
-            documentTableCNIPS
-          }
-        })
-        this.setState({ conNum: [], engName: "", cnName: "", docSelected: null, docAttachedName: "" })
       }
       else {
         Swal.fire({
@@ -1162,7 +1140,7 @@ class Create extends Component {
         <thead>
           <tr>
             <th className="smallTd" >No.</th>
-            <th className="mediumTd">Contract Number</th>
+            <th className="mediumTd">Contract Numbers</th>
             <th>Document Name in English</th>
             <th>Document Name in Chinese</th>
             <th>Attached File</th>
@@ -1170,16 +1148,20 @@ class Create extends Component {
           </tr>
         </thead>
         <tbody>
-          {this.state.documentTableCNIPS.map((document, index) =>
+          {this.state.documentTableLTI.map((document, index) =>
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
-              <td><div>{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</div></td>
+              <td>
+                {document.contractNumbers.map((number, index) =>
+                  <div key={index} >{number}</div>
+                )}
+              </td>
               <td><div>{document.engName}</div></td>
               <td><div>{document.cnName}</div></td>
               <td id="viewDoc">
                 <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
               </td>
-              <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableCNIPS", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
+              <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
           )}
         </tbody>
@@ -1191,38 +1173,17 @@ class Create extends Component {
         <Row form>
 
           {this.state.isCNIPS
-            ? <Col ><FormGroup>
-              {/* <Tooltip placement="top" isOpen={this.state.} target="contractNum" toggle={toggle}></Tooltip> */}
-              {/* <InputMask id="contractNum" placeholder="enter contract number" mask={this.state.inputMask} className="form-control" 
-              onChange={this.handleChange('conNum')} value={this.state.conNum}
-              onClick={this.handleInputMask}></InputMask> */}
-              <InputGroup>
-                <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
-                  <DropdownToggle><i className="fa fa-list-ul" /></DropdownToggle>
-                  <DropdownMenu>
-                    <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
-                    {this.state.conNum !== ""
-                      ? this.state.conNum.map((
-                        (conNum, index) => (
-                          <span key={index}>
-                            <DropdownItem >{conNum}</DropdownItem>
-                          </span>
-                        )))
-                      : <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
-                    }
-                    {/* <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
-                  <DropdownItem disabled>S-A-P-2019-1035</DropdownItem>
-                  <DropdownItem disabled>I-A-O-2019-1035</DropdownItem>
-                  <DropdownItem disabled>S-A-P-2019-1035</DropdownItem>
-                  <DropdownItem disabled>S-A-S-2019-1035</DropdownItem> */}
-                  </DropdownMenu>
-                </InputGroupButtonDropdown>
-                <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
-                  onChange={this.handleChange('contractNumber')} value={this.state.contractNumber}
-                  onClick={this.handleInputMask}></InputMask>
-                <InputGroupAddon onClick={this.addContract} name="addContract" addonType="append"><Button color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
-              </InputGroup>
-            </FormGroup></Col>
+            ? <Col >
+              <FormGroup style={{ display: "flex" }} >
+
+                <InputMask id="conNum" placeholder="enter contract number" mask={this.state.inputMask} className="form-control"
+                  onChange={this.handleChange('conNum')} value={this.state.conNum}
+                  onClick={this.handleInputMask} />
+                <Button name="addContractNumber" onClick={() => this.addContractNumber()} >Add</Button>
+
+              </FormGroup>
+            </Col>
+
             : ""}
 
           <Col md>
@@ -1246,13 +1207,35 @@ class Create extends Component {
           <Col xl={1}>
             <FormGroup>
               {this.state.isCNIPS
-                ? <Button id="addDocs" block onMouseEnter={this.toggle('viewContract')} onMouseLeave={this.toggle('viewContract')} onClick={this.addDocumentCNIPS}>Add</Button>
-                : <Button id="addDocs" block onClick={this.addDocumentLTI}>Add</Button>
+               ? <Button id="addDocs" block onMouseEnter={this.toggle('viewContract')} onMouseLeave={this.toggle('viewContract')} onClick={this.addDocumentCNIPS}>Add</Button>
+               : <Button id="addDocs" block onClick={this.addDocumentLTI}>Add</Button>
               }
             </FormGroup>
           </Col>
         </Row>
-        <Collapse isOpen={this.state.documentTableLTI.length !== 0 || this.state.documentTableCNIPS.length !== 0}>
+        <Collapse isOpen={this.state.contractNumbers.length !== 0}>
+          <div className="tableWrap" >
+            <Table hover bordered responsive size="sm">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Contract Number</th>
+                  <th className="smallTd"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.contractNumbers.map((number, index) =>
+                  <tr key={index}>
+                    <td> {index + 1} </td>
+                    <td> {number} </td>
+                    <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteContractNumber(index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </div>
+        </Collapse>
+        <Collapse isOpen={this.state.documentTableLTI.length !== 0}>
           {this.state.isCNIPS ? CNIPSTable : DocTable}
         </Collapse>
       </div>
@@ -1360,7 +1343,7 @@ class Create extends Component {
     return (
       <LegalEntity.Consumer>{
         ContextValue => (
-          <div style={{ fontFamily: "sans-serif" }} className="animated fadeIn">
+          <div style={{fontFamily: "sans-serif"}} className="animated fadeIn">
             <h4>Create</h4>
             <Card>
               <CardHeader>CREATE NEW REQUEST</CardHeader>
