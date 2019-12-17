@@ -170,7 +170,6 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       noteInfo: [],
-      // inputMask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", "A", "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
       inputMask: [],
       selectInfo: ''
 
@@ -366,8 +365,15 @@ class Create extends Component {
       postReq.append(`Documents[${i}].Attachment.File`, this.state.documentTableLTI[i].docSelected);
       postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.documentTableLTI[i].engName);
       postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.documentTableLTI[i].cnName);
-      for (let j = 0; j < this.state.documentTableLTI[i].contractNumbers.length; j++) {
-        postReq.append(`Documents[${i}].ContractNumber[${j}]`, this.state.documentTableLTI[i].contractNumbers[j]);
+    }
+
+
+    for (let i = 0; i < this.state.documentTableCNIPS.length; i++) {
+      postReq.append(`Documents[${i}].Attachment.File`, this.state.documentTableCNIPS[i].docSelected);
+      postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.documentTableCNIPS[i].engName);
+      postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.documentTableCNIPS[i].cnName);
+      for (let j = 0; j < this.state.documentTableCNIPS[i].contractNumbers.length; j++) {
+        postReq.append(`Documents[${i}].ContractNumber[${j}]`, this.state.documentTableCNIPS[i].contractNumbers[j]);
       }
 
     }
@@ -721,33 +727,6 @@ class Create extends Component {
     });
   }
 
-  async addContract(event) {
-    console.log(event)
-    console.log(event.target.value)
-    await this.setState(state => ({
-      conNum: [...state.conNum, this.state.contractNumber]
-    })
-    )
-    this.setState({ contractNumber: "" }, this.toggle('viewContract'))
-  }
-
-  deleteDocument(table, i) {
-    this.setState(state => {
-      if (table === "documentTableLTU") {
-        const documentTableLTU = state.documentTableLTU.filter((item, index) => i !== index)
-        return {
-          documentTableLTU
-        }
-      }
-      else if (table === "documentTableLTI") {
-        const documentTableLTI = state.documentTableLTI.filter((item, index) => i !== index)
-        return {
-          documentTableLTI
-        }
-      }
-    })
-  }
-
   validateConNum() {
     let first = /(?!.*[A-HJ-QT-Z])[IS]/;
     let third = /(?!.*[A-NQRT-Z])[PSO]/;
@@ -756,18 +735,18 @@ class Create extends Component {
     var isThird = false
     var isDigit = false
     let valid = false
-    isFirst = first.test(this.state.conNum[0])
+    isFirst = first.test(this.state.contractNumber[0])
     if (this.props.match.params.company === "MBIA") {
-      isThird = third.test(this.state.conNum[5])
+      isThird = third.test(this.state.contractNumber[5])
       for (let i = 7; i < 11; i++) {
-        isDigit = digit.test(this.state.conNum[i])
+        isDigit = digit.test(this.state.contractNumber[i])
         if (!isDigit) {
           break;
         }
       }
       if (isDigit) {
         for (let i = 12; i < 15; i++) {
-          isDigit = digit.test(this.state.conNum[i])
+          isDigit = digit.test(this.state.contractNumber[i])
           if (!isDigit) {
             break;
           }
@@ -776,16 +755,16 @@ class Create extends Component {
     }
 
     else {
-      isThird = third.test(this.state.conNum[4])
+      isThird = third.test(this.state.contractNumber[4])
       for (let i = 6; i < 10; i++) {
-        isDigit = digit.test(this.state.conNum[i])
+        isDigit = digit.test(this.state.contractNumber[i])
         if (!isDigit) {
           break;
         }
       }
       if (isDigit) {
         for (let i = 11; i < 14; i++) {
-          isDigit = digit.test(this.state.conNum[i])
+          isDigit = digit.test(this.state.contractNumber[i])
           if (!isDigit) {
             break;
           }
@@ -794,9 +773,20 @@ class Create extends Component {
 
     }
     if (isFirst && isThird && isDigit) {
-      if (this.state.contractNumbers.length !== 0) {
-        for (let i = 0; i < this.state.contractNumbers.length; i++) {
-          if (this.state.contractNumbers[i] === this.state.conNum) {
+      if (this.state.conNum.length !== 0) {
+        for (let i = 0; i < this.state.conNum.length; i++) {
+          let value = this.state.contractNumber
+          if (this.props.match.params.company === "MBIA") {
+            if (!digit.test(value[15])) {
+              value = value.substr(0, 15)
+            }
+          }
+          else {
+            if (!digit.test(value[14])) {
+              value = value.substr(0, 14)
+            }
+          }
+          if (this.state.conNum[i] === value) {
             valid = false
             // this.setState({ conNum: "" })
             // console.log("Contract Number Already Exists") //show error
@@ -823,21 +813,54 @@ class Create extends Component {
     return valid
   }
 
-  addContractNumber() {
-    let validContract = this.validateConNum()
-    let contractNums = this.state.contractNumbers
-    if (validContract) {
-      contractNums.push(this.state.conNum)
-      this.setState({ contractNumbers: contractNums })
-      this.setState({ conNum: "" })
+  addContract(event) {
+    let valid = this.validateConNum()
+    let digit = /[0-9]/;
+    let value = this.state.contractNumber
+    if (valid) {
+      if (this.props.match.params.company === "MBIA") {
+        if (!digit.test(this.state.contractNumber[15])) {
+          value = this.state.contractNumber.substr(0, 15)
+        }
+      }
+      else {
+        if (!digit.test(this.state.contractNumber[14])) {
+          value = this.state.contractNumber.substr(0, 14)
+        }
+
+      }
+
+      this.setState(state => ({
+        conNum: [...state.conNum, value]
+      })
+      )
+      this.setState({ contractNumber: "" }, this.toggle('viewContract'))
     }
     else {
       Swal.fire({
-        title: "Invalid Contract Number ",
-        html: 'Please input a new Contract Number in the valid format!',
+        title: "Invalid Contract Number",
+        html: 'Please input a new valid Contract Number!',
         type: "warning"
       })
     }
+  }
+
+
+  deleteDocument(table, i) {
+    this.setState(state => {
+      if (table === "documentTableLTU") {
+        const documentTableLTU = state.documentTableLTU.filter((item, index) => i !== index)
+        return {
+          documentTableLTU
+        }
+      }
+      else if (table === "documentTableLTI") {
+        const documentTableLTI = state.documentTableLTI.filter((item, index) => i !== index)
+        return {
+          documentTableLTI
+        }
+      }
+    })
   }
 
   addDocumentLTI() {
@@ -847,25 +870,16 @@ class Create extends Component {
     let typeValid = false
     let doc = this.state.documentTableLTI
     if (this.state.docSelected !== null) {
-      if (this.state.appTypeSelected !== "CNIPS") {
-        if (this.state.engName !== "" && this.state.cnName !== "") {
-          typeValid = true
-        }
-        else {
-          typeValid = false
-        }
+      if (this.state.engName !== "" && this.state.cnName !== "") {
+        typeValid = true
       }
       else {
-        if (this.state.engName !== "" && this.state.cnName !== "" && this.state.contractNumbers.length !== 0) {
-          typeValid = true
-        }
-        else {
-          typeValid = false
-        }
+        typeValid = false
       }
+
       if (typeValid) {
         for (let i = 0; i < doc.length; i++) {
-          if (doc[i].conNum === this.state.conNum && doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
+          if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
             valid = false
             break
           }
@@ -883,15 +897,22 @@ class Create extends Component {
             docSelected: this.state.docSelected,
             docName: this.state.docAttachedName,
             docURL: URL.createObjectURL(this.state.docSelected),
-            contractNumbers: this.state.contractNumbers
+            // contractNumbers: this.state.contractNumbers
           }
+        }
+        else {
+          Swal.fire({
+            title: "Document Exists",
+            html: 'The selected document already exists!',
+            type: "warning"
+          })
         }
         this.setState({ engName: "", cnName: "", docSelected: null, docAttachedName: "" })
       }
       else {
         Swal.fire({
-          title: "Document Exists",
-          html: 'The selected document already exists!',
+          title: "Invalid Data",
+          html: 'The input valid data!',
           type: "warning"
         })
       }
@@ -905,37 +926,46 @@ class Create extends Component {
     let valid = true
     let doc = this.state.documentTableCNIPS
     if (this.state.docSelected !== null) {
+      if (this.state.engName !== "" && this.state.cnName !== "" && this.state.conNum.length !== 0) {
+        for (let i = 0; i < doc.length; i++) {
+          if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
+            valid = false
+            break
+          }
+          else {
+            valid = true
+          }
+        }
 
-      for (let i = 0; i < doc.length; i++) {
-        console.log(doc[i].engName, doc[i].cnName, doc[i].docName)
-        if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
-          valid = false
-          break
+        if (valid) {
+          const obj = {
+            id: rand,
+            conNum: this.state.conNum,
+            engName: this.state.engName,
+            cnName: this.state.cnName,
+            docSelected: this.state.docSelected,
+            docName: this.state.docAttachedName,
+            docURL: URL.createObjectURL(this.state.docSelected),
+            contractNumbers: this.state.conNum
+          }
+
+          this.setState(state => {
+            const documentTableCNIPS = state.documentTableCNIPS.concat(obj)
+
+            return {
+              documentTableCNIPS
+            }
+          })
+          this.setState({ conNum: [], engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
         }
         else {
-          valid = true
-        }
-      }
-
-      if (valid) {
-        const obj = {
-          id: rand,
-          conNum: this.state.conNum,
-          engName: this.state.engName,
-          cnName: this.state.cnName,
-          docSelected: this.state.docSelected,
-          docName: this.state.docAttachedName,
-          docURL: URL.createObjectURL(this.state.docSelected),
+          Swal.fire({
+            title: "Document Exists",
+            html: 'DOcument already exists in the list!',
+            type: "warning"
+          })
         }
 
-        this.setState(state => {
-          const documentTableCNIPS = state.documentTableCNIPS.concat(obj)
-
-          return {
-            documentTableCNIPS
-          }
-        })
-        this.setState({ conNum: [], engName: "", cnName: "", docSelected: null, docAttachedName: "" })
       }
       else {
         Swal.fire({
@@ -1220,7 +1250,7 @@ class Create extends Component {
                 <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
                   onChange={this.handleChange('contractNumber')} value={this.state.contractNumber}
                   onClick={this.handleInputMask}></InputMask>
-                <InputGroupAddon onClick={this.addContract} name="addContract" addonType="append"><Button color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
+                <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
               </InputGroup>
             </FormGroup></Col>
             : ""}

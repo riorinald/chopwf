@@ -66,6 +66,10 @@
   background-color: #3187e0;
 }
 
+.custom-file{
+  overflow: hidden;
+}
+
 .custom-file-input:lang(en) ~ .custom-file-label::after {
     content: "Attach";
 }
