@@ -43,7 +43,7 @@ export const CNIPS = [
     { id: "deptSelected", valid: false },
     { id: "appTypeSelected", valid: false },
     { id: "chopTypeSelected", valid: false },
-    { id: "documentTableLTI", valid: false},
+    { id: "documentTableCNIPS", valid: false},
     { id: "purposeOfUse", valid: false },
     { id: "numOfPages", valid: false },
     { id: "addressTo", valid: false },

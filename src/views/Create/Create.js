@@ -373,7 +373,7 @@ class Create extends Component {
       postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.documentTableCNIPS[i].engName);
       postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.documentTableCNIPS[i].cnName);
       for (let j = 0; j < this.state.documentTableCNIPS[i].contractNumbers.length; j++) {
-        postReq.append(`Documents[${i}].ContractNumber[${j}]`, this.state.documentTableCNIPS[i].contractNumbers[j]);
+        postReq.append(`Documents[${i}].ContractNums[${j}]`, this.state.documentTableCNIPS[i].contractNumbers[j]);
       }
 
     }
@@ -723,7 +723,7 @@ class Create extends Component {
         break;
     }
     this.setState({
-      inputMask: mask
+      inputMask: mask, viewContract: true
     });
   }
 
@@ -1187,7 +1187,7 @@ class Create extends Component {
       </Table>
     </div>
 
-    const CNIPSTable = <div className="tableWrap">
+    const CNIPSTable = <div id="documentTableCNIPS" className="tableWrap">
       <Table hover bordered responsive size="sm">
         <thead>
           <tr>
