@@ -31,7 +31,6 @@ class TaskDetails extends Component {
             loading: true,
             page: "",
             appType: "",
-            demo: ["Card", "Card", "Card", "Card", "Card", "Card", "Card", "Card", "Card"],
         }
 
         this.goBack = this.goBack.bind(this)
@@ -61,7 +60,7 @@ class TaskDetails extends Component {
 
     }
 
-    async getUserDetails(){
+    async getUserDetails() {
         this.setState({ loading: true })
         await Axios.get(`${config.url}/users/${this.state.taskDetails.histories[0].approvedBy}`).then(res => {
             this.setState({ userDetails: res.data, loading: false })
@@ -69,6 +68,9 @@ class TaskDetails extends Component {
         })
     }
 
+    convertContractNums(nums) {
+        return nums.join(", ")
+    }
 
     setArray = () => {
         let result = this.state.taskDetails.departmentHeads
@@ -375,18 +377,18 @@ class TaskDetails extends Component {
                                             <Input disabled type="text" id="text-input" value={taskDetails.pickUpBy} name="text-input" placeholder="/" />
                                         </Col>
                                     </FormGroup>
-                                    {appType === 'CNIPS' 
-                                    ? <FormGroup row >
-                                                <Col md="4" className="d-flex align-items-center" >
-                                                    <Label htmlFor="text-input">Department Heads</Label>
-                                                </Col>
-                                                <Col id="deptHead" xs="12" md="8">
-                                                    <Input disabled type="text" value={this.setArray()} id="text-input" name="text-input" placeholder="/" />
-                                                    <UncontrolledTooltip placement="right" target="deptHead">{this.setArray()}</UncontrolledTooltip>
-                                                </Col>
-                                            </FormGroup>
-                                    : ''}
-                                    
+                                    {appType === 'CNIPS'
+                                        ? <FormGroup row >
+                                            <Col md="4" className="d-flex align-items-center" >
+                                                <Label htmlFor="text-input">Department Heads</Label>
+                                            </Col>
+                                            <Col id="deptHead" xs="12" md="8">
+                                                <Input disabled type="text" value={this.setArray()} id="text-input" name="text-input" placeholder="/" />
+                                                <UncontrolledTooltip placement="right" target="deptHead">{this.setArray()}</UncontrolledTooltip>
+                                            </Col>
+                                        </FormGroup>
+                                        : ''}
+
                                     {appType === "LTI"
                                         ? taskDetails.isUseInOffice === "N"
                                             ? <FormGroup row >
@@ -411,7 +413,7 @@ class TaskDetails extends Component {
                                             </FormGroup> : "" : ""}
                                 </Col>
                                 <Col>
-                                <FormGroup row >
+                                    <FormGroup row >
                                         <Col md="4" className="d-flex align-items-center" >
                                             <Label htmlFor="text-input">Tel</Label>
                                         </Col>
@@ -541,14 +543,14 @@ class TaskDetails extends Component {
                                                     <Input disabled type="text" value={taskDetails.documentCheckByName} id="text-input" name="text-input" placeholder="/" />
                                                 </Col>
                                             </FormGroup>
-                                            :<FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label htmlFor="text-input">Confirm</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" id="text-input" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="/" />
-                                            </Col>
-                                            </FormGroup> 
+                                            : <FormGroup row >
+                                                <Col md="4" className="d-flex align-items-center" >
+                                                    <Label htmlFor="text-input">Confirm</Label>
+                                                </Col>
+                                                <Col xs="12" md="8">
+                                                    <Input disabled type="text" id="text-input" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </FormGroup>
                                     }
 
 
@@ -573,6 +575,7 @@ class TaskDetails extends Component {
                                                     columns={[
                                                         {
                                                             Header: "#",
+                                                            acessor: "index",
                                                             Cell: row => (
                                                                 <div>{row.index + 1}</div>
                                                             ),
@@ -580,9 +583,20 @@ class TaskDetails extends Component {
                                                             // style: { textAlign: "center" }
                                                         },
                                                         {
+                                                            Header: "Contract Number",
+                                                            acessor: "contractNums",
+                                                            Cell: row => (
+                                                                <div> {this.convertContractNums(row.original.contractNums)} </div>
+                                                            ),
+                                                            style: { textAlign: "center", 'whiteSpace': 'unset' },
+                                                            width: 135,
+                                                            show: appType === "CNIPS"
+                                                        },
+                                                        {
                                                             Header: "Document Name (English)",
                                                             accessor: "documentNameEnglish",
                                                             width: 250,
+
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
