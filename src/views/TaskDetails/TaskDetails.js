@@ -31,7 +31,6 @@ class TaskDetails extends Component {
             loading: true,
             page: "",
             appType: "",
-            demo: ["Card", "Card", "Card", "Card", "Card", "Card", "Card", "Card", "Card"],
         }
 
         this.goBack = this.goBack.bind(this)
@@ -61,7 +60,7 @@ class TaskDetails extends Component {
 
     }
 
-    async getUserDetails(){
+    async getUserDetails() {
         this.setState({ loading: true })
         await Axios.get(`${config.url}/users/${this.state.taskDetails.histories[0].approvedBy}`).then(res => {
             this.setState({ userDetails: res.data, loading: false })
@@ -69,6 +68,9 @@ class TaskDetails extends Component {
         })
     }
 
+    convertContractNums(nums) {
+        return nums.join(", ")
+    }
 
     setArray = () => {
         let result = this.state.taskDetails.departmentHeads
@@ -165,57 +167,49 @@ class TaskDetails extends Component {
                             </Row>
                         </CardHeader>
                         <CardBody color="dark">
-                        <Row className="mb-3">
-                            <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
-                            <Col className="mb-4" onClick={()=> this.setState({ progressModal: !this.state.progressModal})}>
-                                <Progress multi>
-                                    {taskDetails.allStages.map((stage, index) => 
-                                        <React.Fragment key={index}>
-                                            <UncontrolledTooltip placement="top" target={"status"+index}>{stage.statusName}</UncontrolledTooltip>
-                                            <Progress 
-                                                className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
-                                                bar
-                                                animated={stage.state === "CURRENT" ? true : false}
-                                                striped={stage.state === "FINISHED"}
-                                                color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
-                                                value={100 / taskDetails.allStages.length}> <div id={"status"+index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >...</div>
-                                            </Progress>
-                                        </React.Fragment>
-                                    )}
-                                </Progress>
-                            </Col>
-                        </Row>
-                        <Row>
-                            {/* <Col> */}
-                            {/* <div className="container" >
-                            {this.state.demo.map(dem =>
-                                <div>TESTING</div>
-                            )}
-                        </div> */}
-                            {/* </Col> */}
-                            
-                        </Row>
-                        <Modal style={{maxWidth: 1500}} size="xl" color="info" toggle={()=> this.setState({ progressModal: !this.state.progressModal})} isOpen={this.state.progressModal} >
-                        <ModalBody>
-                        <Col style={{width:"100%"}} >
-                                <Progress multi style={{height:"5rem"}}>
-                                    {taskDetails.allStages.map((stage, index) => 
-                                        <React.Fragment key={index}>
-                                            <UncontrolledTooltip placement="top" target={"status"+index}>{stage.statusName}</UncontrolledTooltip>
-                                            <Progress style={{height:"5rem"}}
-                                                className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
-                                                bar
-                                                animated={stage.state === "CURRENT" ? true : false}
-                                                striped={stage.state === "FINISHED"}
-                                                color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
-                                                value={100 / taskDetails.allStages.length}> <div className="text-break" id={"status"+index} style={{ wordWrap:"break-word" , color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
-                                            </Progress>
-                                        </React.Fragment>
-                                    )}
-                                </Progress>
-                            </Col>
-                            </ModalBody>
-                        </Modal>
+                            <Row className="mb-3">
+                                <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
+                                <Col className="mb-4" onClick={() => this.setState({ progressModal: !this.state.progressModal })}>
+                                    <Progress multi>
+                                        {taskDetails.allStages.map((stage, index) =>
+                                            <React.Fragment key={index}>
+                                                <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
+                                                <Progress
+                                                    className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
+                                                    bar
+                                                    animated={stage.state === "CURRENT" ? true : false}
+                                                    striped={stage.state === "FINISHED"}
+                                                    color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
+                                                    value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >...</div>
+                                                </Progress>
+                                            </React.Fragment>
+                                        )}
+                                    </Progress>
+                                </Col>
+                            </Row>
+                            <Row>
+                            </Row>
+                            <Modal style={{ maxWidth: 1500 }} size="xl" color="info" toggle={() => this.setState({ progressModal: !this.state.progressModal })} isOpen={this.state.progressModal} >
+                                <ModalBody>
+                                    <Col style={{ width: "100%" }} >
+                                        <Progress multi style={{ height: "5rem" }}>
+                                            {taskDetails.allStages.map((stage, index) =>
+                                                <React.Fragment key={index}>
+                                                    <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
+                                                    <Progress style={{ height: "5rem" }}
+                                                        className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
+                                                        bar
+                                                        animated={stage.state === "CURRENT" ? true : false}
+                                                        striped={stage.state === "FINISHED"}
+                                                        color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
+                                                        value={100 / taskDetails.allStages.length}> <div className="text-break" id={"status" + index} style={{ wordWrap: "break-word", color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
+                                                    </Progress>
+                                                </React.Fragment>
+                                            )}
+                                        </Progress>
+                                    </Col>
+                                </ModalBody>
+                            </Modal>
 
                             {/* <Row className="mb-3">
                                 <Col>
@@ -375,18 +369,18 @@ class TaskDetails extends Component {
                                             <Input disabled type="text" id="text-input" value={taskDetails.pickUpBy} name="text-input" placeholder="/" />
                                         </Col>
                                     </FormGroup>
-                                    {appType === 'CNIPS' 
-                                    ? <FormGroup row >
-                                                <Col md="4" className="d-flex align-items-center" >
-                                                    <Label htmlFor="text-input">Department Heads</Label>
-                                                </Col>
-                                                <Col id="deptHead" xs="12" md="8">
-                                                    <Input disabled type="text" value={this.setArray()} id="text-input" name="text-input" placeholder="/" />
-                                                    <UncontrolledTooltip placement="right" target="deptHead">{this.setArray()}</UncontrolledTooltip>
-                                                </Col>
-                                            </FormGroup>
-                                    : ''}
-                                    
+                                    {appType === 'CNIPS'
+                                        ? <FormGroup row >
+                                            <Col md="4" className="d-flex align-items-center" >
+                                                <Label htmlFor="text-input">Department Heads</Label>
+                                            </Col>
+                                            <Col id="deptHead" xs="12" md="8">
+                                                <Input disabled type="text" value={this.setArray()} id="text-input" name="text-input" placeholder="/" />
+                                                <UncontrolledTooltip placement="right" target="deptHead">{this.setArray()}</UncontrolledTooltip>
+                                            </Col>
+                                        </FormGroup>
+                                        : ''}
+
                                     {appType === "LTI"
                                         ? taskDetails.isUseInOffice === "N"
                                             ? <FormGroup row >
@@ -411,7 +405,7 @@ class TaskDetails extends Component {
                                             </FormGroup> : "" : ""}
                                 </Col>
                                 <Col>
-                                <FormGroup row >
+                                    <FormGroup row >
                                         <Col md="4" className="d-flex align-items-center" >
                                             <Label htmlFor="text-input">Tel</Label>
                                         </Col>
@@ -541,14 +535,14 @@ class TaskDetails extends Component {
                                                     <Input disabled type="text" value={taskDetails.documentCheckByName} id="text-input" name="text-input" placeholder="/" />
                                                 </Col>
                                             </FormGroup>
-                                            :<FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label htmlFor="text-input">Confirm</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" id="text-input" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="/" />
-                                            </Col>
-                                            </FormGroup> 
+                                            : <FormGroup row >
+                                                <Col md="4" className="d-flex align-items-center" >
+                                                    <Label htmlFor="text-input">Confirm</Label>
+                                                </Col>
+                                                <Col xs="12" md="8">
+                                                    <Input disabled type="text" id="text-input" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </FormGroup>
                                     }
 
 
@@ -568,11 +562,12 @@ class TaskDetails extends Component {
                                             <ModalHeader className="center"> Documents </ModalHeader>
                                             <ModalBody>
                                                 <ReactTable
-                                                    data={taskDetails.documentNames}
+                                                    data={taskDetails.documents}
                                                     sortable
                                                     columns={[
                                                         {
                                                             Header: "#",
+                                                            acessor: "index",
                                                             Cell: row => (
                                                                 <div>{row.index + 1}</div>
                                                             ),
@@ -580,9 +575,20 @@ class TaskDetails extends Component {
                                                             // style: { textAlign: "center" }
                                                         },
                                                         {
+                                                            Header: "Contract Number",
+                                                            acessor: "contractNums",
+                                                            Cell: row => (
+                                                                <div> {this.convertContractNums(row.original.contractNums)} </div>
+                                                            ),
+                                                            style: { textAlign: "center", 'whiteSpace': 'unset' },
+                                                            width: 135,
+                                                            show: appType === "CNIPS"
+                                                        },
+                                                        {
                                                             Header: "Document Name (English)",
                                                             accessor: "documentNameEnglish",
                                                             width: 250,
+
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {

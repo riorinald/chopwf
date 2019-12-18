@@ -87,7 +87,7 @@ class EditRequest extends Component {
                 branchName: "",
                 applicationTypeId: "",
                 applicationTypeName: " ",
-                documentNames: [],
+                documents: [],
                 purposeOfUse: "",
                 connectChop: "",
                 numOfPages: "",
@@ -302,11 +302,6 @@ class EditRequest extends Component {
         if (temporary.applicationTypeId === "CNIPS") {
             temporary.contractSignedByFirstPersonOption = this.getOption(temporary.contractSignedByFirstPerson)
             temporary.contractSignedBySecondPersonOption = this.getOption(temporary.contractSignedBySecondPerson)
-
-            // can delete after adding contract numbers field to task details
-            temporary.documentNames.map(doc => {
-                doc.contractNumbers = []
-            })
         }
 
         //LTU
@@ -347,28 +342,32 @@ class EditRequest extends Component {
         let details = Object.keys(this.state.taskDetails)
         let apptypeId = this.state.taskDetails.applicationTypeId
         details = details.filter(function (item) {
-            return item !== "taskId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption"
+            return item !== "taskId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption" && item !== "createdBy" && item !== "createdByPhotoUrl"
         })
 
-        if (apptypeId === "STU") {
-            details = details.filter(function (item) {
-                return item !== "effectivePeriod" && item !== "teamId" && item !== "documentCheckBy" && item !== "contractSignedByFirstPerson" && item !== "contractSignedBySecondPerson" && item !== "branchId"
-            })
-        }
-        else if (apptypeId === "LTI") {
-            details = details.filter(function (item) {
-                return item !== "teamId" && item !== "contractSignedByFirstPerson" && item !== "contractSignedBySecondPerson" && item !== "branchId" && item !== "connectChop"
-            })
-        }
-        else if (apptypeId === "CNIPS") {
-            details = details.filter(function (item) {
-                return item !== "effectivePeriod" && item !== "teamId" && item !== "documentCheckBy" && item !== "contractSignedByFirstPerson" && item !== "contractSignedBySecondPerson" && item !== "branchId"
-            })
-        }
-        else {
-            details = details.filter(function (item) {
-                return item !== "effectivePeriod" && item !== "departmentHeads" && item !== "branchId" && item !== "contractSignedByFirstPerson" && item !== "contractSignedBySecondPerson"
-            })
+        switch (apptypeId) {
+            case "STU":
+                details = details.filter(function (item) {
+                    return item !== "effectivePeriod" && item !== "teamId" && item !== "documentCheckBy" && item !== "contractSignedByFirstPerson" && item !== "contractSignedBySecondPerson" && item !== "branchId"
+                })
+                break;
+            case "LTI":
+                details = details.filter(function (item) {
+                    return item !== "teamId" && item !== "contractSignedByFirstPerson" && item !== "contractSignedBySecondPerson" && item !== "branchId" && item !== "connectChop"
+                })
+                break;
+            case "LTU":
+                details = details.filter(function (item) {
+                    return item !== "effectivePeriod" && item !== "departmentHeads" && item !== "branchId" && item !== "contractSignedByFirstPerson" && item !== "contractSignedBySecondPerson"
+                })
+                break;
+            case "CNIPS":
+                details = details.filter(function (item) {
+                    return item !== "effectivePeriod" && item !== "teamId" && item !== "documentCheckBy" && item !== "contractSignedByFirstPerson" && item !== "contractSignedBySecondPerson" && item !== "branchId"
+                })
+                break;
+            default:
+                break;
         }
 
         this.setState({ validateForm: details })
@@ -559,7 +558,7 @@ class EditRequest extends Component {
         var date = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear() + ' ' + tempDate.getHours() + ':' + tempDate.getMinutes() + ':' + tempDate.getSeconds();
         // console.log(this.state.editRequestForm.docSelected)
         let valid = true
-        let doc = this.state.taskDetails.documentNames
+        let doc = this.state.taskDetails.documents
         let typeValid = false
 
         if (this.state.editRequestForm.docSelected !== null) {
@@ -608,12 +607,12 @@ class EditRequest extends Component {
                         documentNameEnglish: this.state.editRequestForm.engName,
                         documentNameChinese: this.state.editRequestForm.cnName,
                         docSelected: this.state.editRequestForm.docSelected,
-                        contractNumbers: this.state.conNum
+                        contractNums: this.state.conNum
                     }
 
                     this.setState(state => {
                         let taskDetails = this.state.taskDetails
-                        taskDetails.documentNames.push(obj)
+                        taskDetails.documents.push(obj)
                         return { taskDetails }
                     })
                 }
@@ -656,7 +655,7 @@ class EditRequest extends Component {
         this.state.selectedDocs.map(doc => {
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
-                taskDetails.documentNames = taskDetails.documentNames.concat(doc)
+                taskDetails.documents = taskDetails.documents.concat(doc)
                 return { taskDetails }
             })
         })
@@ -693,12 +692,12 @@ class EditRequest extends Component {
         this.setState(state => {
             if (table === "documentTableLTU") {
                 let taskDetails = this.state.taskDetails
-                taskDetails.documentNames = taskDetails.documentNames.filter((item, index) => i !== index)
+                taskDetails.documents = taskDetails.documents.filter((item, index) => i !== index)
                 return { taskDetails }
             }
             else if (table === "documentTableLTI") {
                 let taskDetails = this.state.taskDetails
-                taskDetails.documentNames = taskDetails.documentNames.filter((item, index) => i !== index)
+                taskDetails.documents = taskDetails.documents.filter((item, index) => i !== index)
                 return { taskDetails }
             }
         })
@@ -1073,6 +1072,7 @@ class EditRequest extends Component {
         for (let i = 0; i < details.length; i++) {
             console.log(details[i])
             // console.log(this.state.taskDetails[details[i]])
+            console.log(details[i])
             var element = document.getElementById(details[i])
             if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
                 element.classList.contains("form-control")
@@ -1158,17 +1158,17 @@ class EditRequest extends Component {
 
 
         if (this.state.taskDetails.applicationTypeId === "LTU") {
-            for (let i = 0; i < this.state.taskDetails.documentNames.length; i++) {
-                postReq.append(`DocumentIds[${i}]`, this.state.taskDetails.documentNames[i].documentId);
+            for (let i = 0; i < this.state.taskDetails.documents.length; i++) {
+                postReq.append(`DocumentIds[${i}]`, this.state.taskDetails.documents[i].documentId);
             }
         }
         else {
             let def = 0
             let temp = 0
             let exist = false
-            for (let i = 0; i < this.state.taskDetails.documentNames.length; i++) {
-                if (this.state.taskDetails.documentNames[i].documentId.length === 36) {
-                    postReq.append(`DocumentIds[${i}]`, this.state.taskDetails.documentNames[i].documentId)
+            for (let i = 0; i < this.state.taskDetails.documents.length; i++) {
+                if (this.state.taskDetails.documents[i].documentId.length === 36) {
+                    postReq.append(`DocumentIds[${i}]`, this.state.taskDetails.documents[i].documentId)
                     def = i
                     exist = true
                 }
@@ -1180,12 +1180,12 @@ class EditRequest extends Component {
                         temp = i
                     }
 
-                    let documentSelected = this.state.taskDetails.documentNames[i].docSelected !== undefined ? this.state.taskDetails.documentNames[i].docSelected : {}
+                    let documentSelected = this.state.taskDetails.documents[i].docSelected !== undefined ? this.state.taskDetails.documents[i].docSelected : {}
                     postReq.append(`Documents[${temp}].Attachment.File`, documentSelected);
-                    postReq.append(`Documents[${temp}].DocumentNameEnglish`, this.state.taskDetails.documentNames[i].documentNameEnglish);
-                    postReq.append(`Documents[${temp}].DocumentNameChinese`, this.state.taskDetails.documentNames[i].documentNameChinese);
-                    for (let j = 0; j < this.state.taskDetails.documentNames[i].contractNumbers.length; j++) {
-                        postReq.append(`Documents[${temp}].ContractNumber[${j}]`, this.state.taskDetails.documentNames[i].contractNumbers[j]);
+                    postReq.append(`Documents[${temp}].DocumentNameEnglish`, this.state.taskDetails.documents[i].documentNameEnglish);
+                    postReq.append(`Documents[${temp}].DocumentNameChinese`, this.state.taskDetails.documents[i].documentNameChinese);
+                    for (let j = 0; j < this.state.taskDetails.documents[i].contractNums.length; j++) {
+                        postReq.append(`Documents[${temp}].ContractNumber[${j}]`, this.state.taskDetails.documents[i].contractNums[j]);
                     }
                 }
             }
@@ -1342,7 +1342,7 @@ class EditRequest extends Component {
                                 <FormGroup check={false}>
                                     <Label>Document Name</Label>
                                     {taskDetails.applicationTypeId === "LTU"
-                                        ? <div id="documentNames">
+                                        ? <div id="documents">
                                             <InputGroup >
                                                 <InputGroupAddon addonType="prepend">
                                                     <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
@@ -1401,7 +1401,7 @@ class EditRequest extends Component {
                                                 </ModalFooter>
                                             </Modal>
 
-                                            <Collapse isOpen={taskDetails.documentNames.length !== 0}>
+                                            <Collapse isOpen={taskDetails.documents.length !== 0}>
                                                 <div>
                                                     <br />
                                                     <Label>Documents</Label>
@@ -1417,7 +1417,7 @@ class EditRequest extends Component {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {taskDetails.documentNames.map((document, index) =>
+                                                            {taskDetails.documents.map((document, index) =>
                                                                 <tr key={index}>
                                                                     <th>{index + 1}</th>
                                                                     <th>{document.documentNameEnglish}</th>
@@ -1436,7 +1436,7 @@ class EditRequest extends Component {
                                                 </div>
                                             </Collapse>
                                         </div>
-                                        : <div id="documentNames">
+                                        : <div id="documents">
                                             <Row form>
 
                                                 {taskDetails.applicationTypeId === "CNIPS"
@@ -1493,7 +1493,7 @@ class EditRequest extends Component {
                                                     </FormGroup>
                                                 </Col>
                                             </Row>
-                                            <Collapse isOpen={taskDetails.documentNames.length !== 0}>
+                                            <Collapse isOpen={taskDetails.documents.length !== 0}>
                                                 <div>
                                                     <table>
                                                         <thead>
@@ -1507,11 +1507,11 @@ class EditRequest extends Component {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {taskDetails.documentNames.map((document, index) =>
+                                                            {taskDetails.documents.map((document, index) =>
                                                                 <tr key={index}>
                                                                     <td className="smallTd">{index + 1}</td>
                                                                     {taskDetails.applicationTypeId === "CNIPS"
-                                                                        ? <td> {document.contractNumbers.map((number, index) =>
+                                                                        ? <td> {document.contractNums.map((number, index) =>
                                                                             <div key={index} > {number} </div>
                                                                         )} </td>
                                                                         : null}
@@ -1530,7 +1530,7 @@ class EditRequest extends Component {
                                         </div>}
                                 </FormGroup>
                                 <InputGroup>
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Names', taskDetails.documentNames, 'required')}</small>
+                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Names', taskDetails.documents, 'required')}</small>
                                 </InputGroup>
                                 <FormGroup>
                                     <Label>Purpose of Use</Label>
