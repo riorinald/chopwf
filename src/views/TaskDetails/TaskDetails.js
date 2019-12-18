@@ -165,9 +165,7 @@ class TaskDetails extends Component {
                             </Row>
                         </CardHeader>
                         <CardBody color="dark">
-                        <Row className="mb-3">
-                            <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
-                            <Col className="mb-4" onClick={()=> this.setState({ progressModal: !this.state.progressModal})}>
+                        <Col className="mb-4" onClick={()=> this.setState({ progressModal: !this.state.progressModal})}>
                                 <Progress multi>
                                     {taskDetails.allStages.map((stage, index) => 
                                         <React.Fragment key={index}>
@@ -178,12 +176,14 @@ class TaskDetails extends Component {
                                                 animated={stage.state === "CURRENT" ? true : false}
                                                 striped={stage.state === "FINISHED"}
                                                 color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
-                                                value={100 / taskDetails.allStages.length}> <div id={"status"+index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >...</div>
+                                    value={100 / taskDetails.allStages.length}> <div id={"status"+index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
                                             </Progress>
                                         </React.Fragment>
                                     )}
                                 </Progress>
                             </Col>
+                        <Row className="mb-3">
+                            <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
                         </Row>
                         <Row>
                             {/* <Col> */}
@@ -264,9 +264,9 @@ class TaskDetails extends Component {
                             </Row>
                             <Row>
                                 <Col>
-                                    <Label htmlFor="text-input">Employee Number</Label>
                                     <FormGroup row >
                                         <Col md="4" className="d-flex align-items-center" >
+                                            <Label htmlFor="text-input">Employee Number</Label>
                                         </Col>
                                         <Col xs="12" md="8">
                                             <Input disabled type="text" value={taskDetails.employeeNum} id="text-input" name="text-input" placeholder="/" />
@@ -568,7 +568,7 @@ class TaskDetails extends Component {
                                             <ModalHeader className="center"> Documents </ModalHeader>
                                             <ModalBody>
                                                 <ReactTable
-                                                    data={taskDetails.documentNames}
+                                                    data={taskDetails.documents}
                                                     sortable
                                                     columns={[
                                                         {
