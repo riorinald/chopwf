@@ -334,7 +334,8 @@ class EditRequest extends Component {
                 this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
             }
         }
-
+        temporary.departmentId = temporary.departmentId.toLowerCase()
+        console.log(temporary.departmentId)
         this.setState({ taskDetails: temporary, loading: false })
     }
 
@@ -1494,8 +1495,8 @@ class EditRequest extends Component {
                                                 </Col>
                                             </Row>
                                             <Collapse isOpen={taskDetails.documents.length !== 0}>
-                                                <div>
-                                                    <table>
+                                                <div className="tableWrap">
+                                                    <Table hover bordered responsive size="sm">
                                                         <thead>
                                                             <tr>
                                                                 <th className="smallTd" >No.</th>
@@ -1524,7 +1525,7 @@ class EditRequest extends Component {
                                                                 </tr>
                                                             )}
                                                         </tbody>
-                                                    </table>
+                                                    </Table>
                                                 </div>
                                             </Collapse>
                                         </div>}

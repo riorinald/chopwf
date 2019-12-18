@@ -16,6 +16,7 @@ import {
     Row,
     Collapse
 } from 'reactstrap';
+import config from '../../../config';
 
 class LicenseMyPendingTasks extends Component {
     constructor(props) {
@@ -25,14 +26,56 @@ class LicenseMyPendingTasks extends Component {
             taskDetails: [],
             approvalHistories: [],
             selectedRow: [],
-            searchOption: {},
+            searchOption: { licenseName: "", documentType: "", seniorManagerAbove: "", status: "" },
             loading: false,
             filtered: [],
+            seniorManagers: [],
+            departments: [],
+            licenseNames: [],
+            status: [
+                "Recall",
+                "Pending for Document check by (L4 or above) Approval ",
+                "Pending for Department Head Approval",
+                "Bring the Original Documents for Chop",
+                "Pending for Chop Owner Approval",
+                "Send Back to Requestor",
+                "Rejected",
+                "Pending for Chop Keeper Acknowledge Lend Out",
+                "Pending Chop Keeper Acknowledge Return",
+                "Completed",
+                "Draft",
+                "Pending Requestor Return/Extension",
+                "Pending Department Head Approval for Extension",
+                "Pending Chop Keeper Approval for extension",
+                "Pending Chop Owner Approval for extension",
+                "Chop request expired after 30 days",
+                "Pending Requestor Return"
+            ]
         }
+        this.onFilteredChangeCustom = this.onFilteredChangeCustom.bind(this)
+
     }
 
     componentDidMount() {
-        this.getPendingTasks()
+        this.getPendingTasks();
+        this.getData('licenseNames');
+        this.getData('seniorManagers');
+        // this.getSeniorManagers();
+        this.getData('departments');
+    }
+
+    async getData(name) {
+        let res = null
+        if (name === "departments") {
+            res = await Axios.get(`${config.url}/${name}`)
+        }
+        else if (name === "seniorManagers") {
+            res = await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+        }
+        else {
+            res = await Axios.get(`https://5dedc007b3d17b00146a1c5a.mockapi.io/details/${name}`)
+        }
+        this.setState({ [name]: res.data })
     }
 
     goToDetails(taskId, status) {
@@ -54,14 +97,40 @@ class LicenseMyPendingTasks extends Component {
 
     async getPendingTasks() {
         this.setState({ loading: true })
-        await Axios.get(`http://5de7307ab1ad690014a4e040.mockapi.io/licenseTask`)
+        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&category=pending`)
             .then(res => {
                 this.setState({ pendingTasks: res.data, loading: false })
             })
     }
 
 
+    onFilteredChangeCustom = (value, accessor) => {
+        this.setState(state => {
+            const searchOption = state.searchOption
+            searchOption[accessor] = value
+            return {
+                searchOption
+            }
+        })
+        let filtered = this.state.filtered;
+        let insertNewFilter = 1;
+        if (filtered.length) {
+            filtered.forEach((filter, i) => {
+                if (filter["id"] === accessor) {
+                    if (value === "" || !value.length) filtered.splice(i, 1);
+                    else filter["value"] = value;
 
+                    insertNewFilter = 0;
+                }
+            });
+        }
+
+        if (insertNewFilter) {
+            filtered.push({ id: accessor, value: value });
+        }
+
+        this.setState({ filtered: filtered });
+    };
 
     getColumnWidth = (accessor, headerText) => {
         let { pendingTasks } = this.state
@@ -97,13 +166,19 @@ class LicenseMyPendingTasks extends Component {
         this.getPendingTasks()
     }
 
+    handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            this.getPendingTasks()
+        }
+    }
+
     render() {
-        const { pendingTasks } = this.state
+        const { pendingTasks, licenseNames, seniorManagers, departments, status } = this.state
         return (
-            <div>
+            <div className="animated fadeIn">
                 <h4>My Pending Tasks</h4>
-                <Card className="animated fadeIn">
-                    <CardHeader>MY PENDING TASKS</CardHeader>
+                <Card onKeyDown={this.handleKeyDown}>
+                    <CardHeader>MY PENDING TASKS <Button className="float-right" onClick={this.getPendingTasks} >Search</Button></CardHeader>
                     <CardBody>
                         <ReactTable
                             data={pendingTasks}
@@ -119,23 +194,26 @@ class LicenseMyPendingTasks extends Component {
                             columns={[
                                 {
                                     Header: "Request Number",
-                                    accessor: "requestNumber",
+                                    accessor: "requestNum",
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" },
-                                    width: this.getColumnWidth('requestNumber', "Request Number")
+                                    width: this.getColumnWidth('requestNum', "Request Number")
                                 },
                                 {
-                                    Header: "Licese Name",
-                                    accessor: "licenseName",
+                                    Header: "License Name",
+                                    accessor: "plannedReturnDate",
                                     // Cell: this.renderEditable,
-                                    width: this.getColumnWidth('licenseName', "Licese Name"),
+                                    width: this.getColumnWidth('plannedReturnDate', "Licese Name"),
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;
                                     },
                                     Filter: ({ filter, onChange }) => {
                                         return (
-                                            <Input type="select" value={this.state.searchOption} onChange={this.handleSearch('licenseName')} >
-                                                <option value="">Please Select</option>
+                                            <Input type="select" value={this.state.searchOption.licenseName} onChange={this.handleSearch('licenseName')} >
+                                                <option disabled value="">Please Select a License Name</option>
+                                                {licenseNames.map((name, index) =>
+                                                    <option key={index} value={name.name}> {name.name} </option>
+                                                )}
                                             </Input>
 
                                         )
@@ -144,17 +222,17 @@ class LicenseMyPendingTasks extends Component {
                                 },
                                 {
                                     Header: "Document Type",
-                                    accessor: "documentType",
+                                    accessor: "documentTypeId",
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" },
-                                    width: this.getColumnWidth('documentType', "Document Type"),
+                                    width: this.getColumnWidth('documentTypeId', "Document Type"),
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;
                                     },
                                     Filter: ({ filter, onChange }) => {
                                         return (
-                                            <Input type="select" value={this.state.searchOption} onChange={this.handleSearch('documentType')} >
-                                                <option value="0">Please Select</option>
+                                            <Input type="select" value={this.state.searchOption.documentType} onChange={this.handleSearch('documentType')} >
+                                                <option disabled value="">Please Select a document Type</option>
                                                 <option value="1">Scanned Copy</option>
                                                 <option value="2">Original Copy</option>
                                             </Input>
@@ -163,19 +241,19 @@ class LicenseMyPendingTasks extends Component {
                                 },
                                 {
                                     Header: "Planned Return Date",
-                                    accessor: "returnDate",
-                                    width: this.getColumnWidth('returnDate', "Date Return Creation"),
+                                    accessor: "plannedReturnDate",
+                                    width: this.getColumnWidth('plannedReturnDate', "Date Return Creation"),
                                     Cell: row => (
-                                        <div> {this.convertDate(row.original.returnDate)} </div>
+                                        <div> {this.convertDate(row.original.plannedReturnDate)} </div>
                                     ),
                                     style: { textAlign: "center" }
                                 },
                                 {
                                     Header: "Senior Manager or above of Requestor Department",
-                                    accessor: `seniorManagerAbove`,
-                                    width: this.getColumnWidth('seniorManagerAbove', "Senior Manager or above of Requestor Department"),
+                                    accessor: `plannedReturnDate`,
+                                    width: this.getColumnWidth('plannedReturnDate', "Senior Manager or above of Requestor Department"),
                                     Cell: row => (
-                                        <div> {row.original.seniorManagerAbove} </div>
+                                        <div> {row.original.plannedReturnDate} </div>
                                     ),
                                     style: { textAlign: "center" },
                                     filterMethod: (filter, row) => {
@@ -183,30 +261,51 @@ class LicenseMyPendingTasks extends Component {
                                     },
                                     Filter: ({ filter, onChange }) => {
                                         return (
-                                            <Input type="select" value={this.state.searchOption} onChange={this.handleSearch('seniorManagerAbove')} >
-                                                <option value="0">Please Select</option>
+                                            <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('seniorManagerAbove')} >
+                                                <option disabled value="">Please Select a senior Manager</option>
+                                                {seniorManagers.map((mgr, index) =>
+                                                    <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
+                                                )}
+                                            </Input>
+                                        )
+                                    },
+                                },
+                                {
+                                    Header: "Status",
+                                    accessor: "statusName",
+                                    width: this.getColumnWidth('statusName', "Status"),
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('seniorManagerAbove')} >
+                                                <option disabled value="">Please Select a status</option>
+                                                {status.map((stat, index) =>
+                                                    <option key={index} value={stat} > {stat} </option>
+                                                )}
                                             </Input>
                                         )
                                     },
                                 },
                                 {
                                     Header: "Deliver Ways",
-                                    accessor: "deliverWays",
+                                    accessor: "deliveryWayId",
                                     width: this.getColumnWidth('deliverWays', "Deliver Ways"),
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" }
                                 },
                                 {
                                     Header: "Express Number",
-                                    accessor: "expressNumber",
-                                    width: this.getColumnWidth('expressNumber', "Express Number"),
+                                    accessor: "plannedReturnDate",
+                                    width: this.getColumnWidth('plannedReturnDate', "Express Number"),
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" }
                                 },
                                 {
                                     Header: "Return Ways",
-                                    accessor: "returnWays",
-                                    width: this.getColumnWidth('returnWays', "Return Ways"),
+                                    accessor: "plannedReturnDate",
+                                    width: this.getColumnWidth('plannedReturnDate', "Return Ways"),
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" }
                                 }

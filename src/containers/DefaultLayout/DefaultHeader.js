@@ -116,7 +116,7 @@ class DefaultHeader extends Component {
                     </Col>
                   </ModalBody>
                 </Modal>
-              </NavItem>`
+              </NavItem>
               <NavItem className="d-sm-down-none">
                 {username}
               </NavItem>

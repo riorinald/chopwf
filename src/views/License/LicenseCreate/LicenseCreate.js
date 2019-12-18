@@ -12,8 +12,7 @@ import axios from 'axios';
 import config from '../../../config';
 import SimpleReactValidator from 'simple-react-validator';
 import Select from 'react-select'
-
-
+import Swal from 'sweetalert2';
 
 class LicenseCreate extends Component {
     constructor(props) {
@@ -55,20 +54,26 @@ class LicenseCreate extends Component {
         this.handleAgreeTerms = this.handleAgreeTerms.bind(this);
         this.handleSelectOption = this.handleSelectOption.bind(this);
         this.submitRequest = this.submitRequest.bind(this);
-
-
+        this.formRef = React.createRef()
     }
 
     //Mount
     componentDidMount() {
         this.getUserData();
         this.getData('licenseNames');
-        this.getData('seniorManagers');
+        // this.getData('seniorManagers');
+        this.getSeniorManagers();
         this.getData('departments');
     }
 
     async getData(name) {
-        const res = await axios.get(`https://5dedc007b3d17b00146a1c5a.mockapi.io/details/${name}`)
+        let res = null
+        if (name === "departments") {
+            res = await axios.get(`${config.url}/${name}`)
+        }
+        else {
+            res = await axios.get(`https://5dedc007b3d17b00146a1c5a.mockapi.io/details/${name}`)
+        }
         this.setState({ [name]: res.data })
     }
 
@@ -86,13 +91,62 @@ class LicenseCreate extends Component {
         })
     }
 
+    async getSeniorManagers() {
+        console.log(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+            .then(res => {
+                let arr1 = []
+                res.data.map(mgr => {
+                    let obj = {
+                        value: mgr.userId,
+                        label: mgr.displayName
+                    }
+                    arr1.push(obj)
+                })
+                this.setState({ seniorManagers: arr1 })
+            })
+    }
+
+    async postData(formData, isSubmitted) {
+        await axios.post(`${config.url}/licenses`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+            .then(res => {
+                if (isSubmitted === "Y") {
+                    Swal.fire({
+                        title: res.data.status === 200 ? 'Request Submitted' : "",
+                        text: 'Request Number : ' + res.data.requestNum,
+                        footer: 'Your request is being processed and is waiting for the approval',
+                        type: 'success',
+                        onClose: () => { this.formReset() }
+                    })
+                }
+                else {
+                    Swal.fire({
+                        title: res.data.status === 200 ? 'Request Saved' : '',
+                        text: 'Request Number : ' + res.data.requestNum,
+                        footer: 'Your request is saved as draft.',
+                        type: 'info',
+                        onClose: () => { this.formReset() }
+                    })
+                }
+            })
+    }
+
 
     handleSelectOption(event) {
+        let value = event ? event.value : null
+        var element = document.getElementById("seniorManager")
+        if (value) {
+            element.className = "css-2b097c-container"
+        }
+        else {
+            element.className = "notValid css-2b097c-container"
+        }
         this.setState(state => {
             let formData = this.state.formData
-            formData.seniorManager = event.value
+            formData.seniorManager = value
             return formData
         })
+
     }
 
     //Updating Values onChange
@@ -249,37 +303,49 @@ class LicenseCreate extends Component {
                 else if (element.className === "custom-control-input") {
                     element.className = "is-invalid custom-control-input"
                 }
+                else {
+                    element.className = "notValid css-2b097c-container"
+                }
 
             }
         })
     }
 
-    submitRequest() {
-
+    submitRequest(isSubmitted) {
         //post to create request
         let postReq = new FormData();
         postReq.append("UserId", this.state.formData.userId);
-        postReq.append("employeeNum", this.state.formData.employeeNum);
-        postReq.append("telephoneNum", this.state.formData.telephoneNum);
-        postReq.append("department", this.state.formData.department);
-        postReq.append("licenseName", this.state.formData.licenseName);
-        postReq.append("licensePurpose", this.state.formData.licensePurpose);
-        postReq.append("specificPurpose", this.state.formData.specificPurpose);
-        postReq.append("documentType", this.state.formData.documentType);
-        postReq.append("isWatermark", this.state.formData.isWatermark);
-        postReq.append("watermark", this.state.formData.watermark);
-        postReq.append("returnDate", this.state.formData.returnDate);
-        postReq.append("deliverWay", this.state.formData.deliverWay);
-        postReq.append("address", this.state.formData.address);
-        postReq.append("reciever", this.state.formData.reciever);
-        postReq.append("recieverPhone", this.state.formData.recieverPhone);
-        postReq.append("seniorManager", this.state.formData.seniorManager);
+        postReq.append("EmployeeNumber", this.state.formData.employeeNum);
+        postReq.append("TelephoneNumber", this.state.formData.telephoneNum);
+        postReq.append("CompanyId", this.props.legalName);
+        postReq.append("DepartmentId", this.state.formData.department);
+        postReq.append("LicenseName", this.state.formData.licenseName);
+        postReq.append("PurposeType", this.state.formData.licensePurpose);
+        postReq.append("PurposeComment", this.state.formData.specificPurpose);
+        postReq.append("DocumentTypeId", this.state.formData.documentType);
+        postReq.append("NeedWatermark", this.state.formData.isWatermark);
+        postReq.append("Watermark", this.state.formData.watermark);
+        postReq.append("PlannedReturnDate", this.state.formData.returnDate);
+        postReq.append("DeliverWayId", this.state.formData.deliverWay);
+        postReq.append("isSubmitted", isSubmitted);
+        postReq.append("SeniorManager", this.state.formData.seniorManager);
+        // postReq.append("LicenseAdmin", "rio@otds.admin");
         postReq.append("isConfirm", this.state.formData.isConfirm);
+        postReq.append("ExpDeliveryAddress", this.state.formData.address);
+        postReq.append("ExpDeliveryReciever", this.state.formData.reciever);
+        postReq.append("ExpDeliveryMobileNo", this.state.formData.recieverPhone);
 
         for (var pair of postReq.entries()) {
             console.log(pair[0] + ', ' + pair[1]);
         }
 
+        this.postData(postReq, isSubmitted)
+
+    }
+
+    formReset() {
+        this.formRef.current.reset()
+        window.location.reload();
     }
 
     render() {
@@ -292,7 +358,7 @@ class LicenseCreate extends Component {
                 <Card>
                     <CardHeader>REQUEST LICENSE</CardHeader>
                     <CardBody>
-                        <Form className="form-horizontal">
+                        <Form className="form-horizontal" innerRef={this.formRef}>
                             <FormGroup>
                                 <Label>Employee Number</Label>
                                 <div className="controls">
@@ -316,7 +382,7 @@ class LicenseCreate extends Component {
                                     <Input id="department" onChange={this.handleChange("department")} defaultValue="0" type="select">
                                         <option value="0">Please selet a department</option>
                                         {departments.map((dept, index) =>
-                                            <option key={index} value={dept.id} > {dept.name} </option>
+                                            <option key={index} value={dept.deptId.toUpperCase()} > {dept.deptName} </option>
                                         )}
                                     </Input>
                                 </InputGroup>
@@ -427,7 +493,9 @@ class LicenseCreate extends Component {
                             <FormGroup>
                                 <Label>Senior Manager or above of requestor department</Label>
                                 <Select
+                                    id="seniorManager"
                                     options={seniorManagers}
+                                    isClearable
                                     onChange={this.handleSelectOption}
                                 />
                                 <small style={{ color: '#F86C6B' }} >{this.validator.message('Senior Manager', formData.seniorManager, 'required')}</small>
@@ -457,9 +525,10 @@ class LicenseCreate extends Component {
                             <Row noGutters className="float-left">
                                 <Col className="mr-2" >
                                     {formData.isConfirm === "Y"
-                                        ? <Button type="submit" onClick={this.submitRequest} color="success">Submit</Button>
-                                        : <Button type="submit" disabled color="secondary">Submit</Button>
+                                        ? <Button className="mr-2" type="submit" onClick={() => this.submitRequest("Y")} color="success">Submit</Button>
+                                        : <Button className="mr-2" type="submit" disabled color="secondary">Submit</Button>
                                     }
+                                    <Button type="submit" onClick={() => this.submitRequest("N")} color="primary" > Save </Button>
 
                                 </Col>
                             </Row>
