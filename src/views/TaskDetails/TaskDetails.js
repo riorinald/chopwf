@@ -167,49 +167,57 @@ class TaskDetails extends Component {
                             </Row>
                         </CardHeader>
                         <CardBody color="dark">
-                            <Row className="mb-3">
-                                <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
-                                <Col className="mb-4" onClick={() => this.setState({ progressModal: !this.state.progressModal })}>
-                                    <Progress multi>
-                                        {taskDetails.allStages.map((stage, index) =>
-                                            <React.Fragment key={index}>
-                                                <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
-                                                <Progress
-                                                    className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
-                                                    bar
-                                                    animated={stage.state === "CURRENT" ? true : false}
-                                                    striped={stage.state === "FINISHED"}
-                                                    color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
-                                                    value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >...</div>
-                                                </Progress>
-                                            </React.Fragment>
-                                        )}
-                                    </Progress>
-                                </Col>
-                            </Row>
-                            <Row>
-                            </Row>
-                            <Modal style={{ maxWidth: 1500 }} size="xl" color="info" toggle={() => this.setState({ progressModal: !this.state.progressModal })} isOpen={this.state.progressModal} >
-                                <ModalBody>
-                                    <Col style={{ width: "100%" }} >
-                                        <Progress multi style={{ height: "5rem" }}>
-                                            {taskDetails.allStages.map((stage, index) =>
-                                                <React.Fragment key={index}>
-                                                    <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
-                                                    <Progress style={{ height: "5rem" }}
-                                                        className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
-                                                        bar
-                                                        animated={stage.state === "CURRENT" ? true : false}
-                                                        striped={stage.state === "FINISHED"}
-                                                        color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
-                                                        value={100 / taskDetails.allStages.length}> <div className="text-break" id={"status" + index} style={{ wordWrap: "break-word", color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
-                                                    </Progress>
-                                                </React.Fragment>
-                                            )}
-                                        </Progress>
-                                    </Col>
-                                </ModalBody>
-                            </Modal>
+                        <Col className="mb-4" onClick={()=> this.setState({ progressModal: !this.state.progressModal})}>
+                                <Progress multi>
+                                    {taskDetails.allStages.map((stage, index) => 
+                                        <React.Fragment key={index}>
+                                            <UncontrolledTooltip placement="top" target={"status"+index}>{stage.statusName}</UncontrolledTooltip>
+                                            <Progress 
+                                                className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
+                                                bar
+                                                animated={stage.state === "CURRENT" ? true : false}
+                                                striped={stage.state === "FINISHED"}
+                                                color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
+                                    value={100 / taskDetails.allStages.length}> <div id={"status"+index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
+                                            </Progress>
+                                        </React.Fragment>
+                                    )}
+                                </Progress>
+                            </Col>
+                        <Row className="mb-3">
+                            <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
+                        </Row>
+                        <Row>
+                            {/* <Col> */}
+                            {/* <div className="container" >
+                            {this.state.demo.map(dem =>
+                                <div>TESTING</div>
+                            )}
+                        </div> */}
+                            {/* </Col> */}
+                            
+                        </Row>
+                        <Modal style={{maxWidth: 1500}} size="xl" color="info" toggle={()=> this.setState({ progressModal: !this.state.progressModal})} isOpen={this.state.progressModal} >
+                        <ModalBody>
+                        <Col style={{width:"100%"}} >
+                                <Progress multi style={{height:"5rem"}}>
+                                    {taskDetails.allStages.map((stage, index) => 
+                                        <React.Fragment key={index}>
+                                            <UncontrolledTooltip placement="top" target={"status"+index}>{stage.statusName}</UncontrolledTooltip>
+                                            <Progress style={{height:"5rem"}}
+                                                className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
+                                                bar
+                                                animated={stage.state === "CURRENT" ? true : false}
+                                                striped={stage.state === "FINISHED"}
+                                                color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
+                                                value={100 / taskDetails.allStages.length}> <div className="text-break" id={"status"+index} style={{ wordWrap:"break-word" , color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
+                                            </Progress>
+                                        </React.Fragment>
+                                    )}
+                                </Progress>
+                            </Col>
+                            </ModalBody>
+                        </Modal>
 
                             {/* <Row className="mb-3">
                                 <Col>
@@ -258,9 +266,9 @@ class TaskDetails extends Component {
                             </Row>
                             <Row>
                                 <Col>
-                                    <Label htmlFor="text-input">Employee Number</Label>
                                     <FormGroup row >
                                         <Col md="4" className="d-flex align-items-center" >
+                                            <Label htmlFor="text-input">Employee Number</Label>
                                         </Col>
                                         <Col xs="12" md="8">
                                             <Input disabled type="text" value={taskDetails.employeeNum} id="text-input" name="text-input" placeholder="/" />
