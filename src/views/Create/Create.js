@@ -899,6 +899,12 @@ class Create extends Component {
             docURL: URL.createObjectURL(this.state.docSelected),
             // contractNumbers: this.state.contractNumbers
           }
+          this.setState(state => {
+            const documentTableLTI = state.documentTableLTI.concat(obj)
+            return {
+              documentTableLTI
+            }
+          })
         }
         else {
           Swal.fire({
@@ -917,6 +923,13 @@ class Create extends Component {
         })
       }
 
+    }
+    else {
+      Swal.fire({
+        title: "No Document",
+        html: 'Please select a valid document!',
+        type: "warning"
+      })
     }
   }
 
@@ -1221,38 +1234,31 @@ class Create extends Component {
         <Row form>
 
           {this.state.isCNIPS
-            ? <Col ><FormGroup>
-              {/* <Tooltip placement="top" isOpen={this.state.} target="contractNum" toggle={toggle}></Tooltip> */}
-              {/* <InputMask id="contractNum" placeholder="enter contract number" mask={this.state.inputMask} className="form-control" 
-              onChange={this.handleChange('conNum')} value={this.state.conNum}
-              onClick={this.handleInputMask}></InputMask> */}
-              <InputGroup>
-                <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
-                  <DropdownToggle><i className="fa fa-list-ul" /></DropdownToggle>
-                  <DropdownMenu>
-                    <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
-                    {this.state.conNum !== ""
-                      ? this.state.conNum.map((
-                        (conNum, index) => (
-                          <span key={index}>
-                            <DropdownItem >{conNum}</DropdownItem>
-                          </span>
-                        )))
-                      : <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
-                    }
-                    {/* <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
-                  <DropdownItem disabled>S-A-P-2019-1035</DropdownItem>
-                  <DropdownItem disabled>I-A-O-2019-1035</DropdownItem>
-                  <DropdownItem disabled>S-A-P-2019-1035</DropdownItem>
-                  <DropdownItem disabled>S-A-S-2019-1035</DropdownItem> */}
-                  </DropdownMenu>
-                </InputGroupButtonDropdown>
-                <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
-                  onChange={this.handleChange('contractNumber')} value={this.state.contractNumber}
-                  onClick={this.handleInputMask}></InputMask>
-                <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
-              </InputGroup>
-            </FormGroup></Col>
+            ? <Col >
+              <FormGroup>
+                <InputGroup>
+                  <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
+                    <DropdownToggle><i className="fa fa-list-ul" /></DropdownToggle>
+                    <DropdownMenu>
+                      <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
+                      {this.state.conNum !== ""
+                        ? this.state.conNum.map((
+                          (conNum, index) => (
+                            <span key={index}>
+                              <DropdownItem >{conNum}</DropdownItem>
+                            </span>
+                          )))
+                        : <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
+                      }
+
+                    </DropdownMenu>
+                  </InputGroupButtonDropdown>
+                  <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
+                    onChange={this.handleChange('contractNumber')} value={this.state.contractNumber}
+                    onClick={this.handleInputMask}></InputMask>
+                  <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
+                </InputGroup>
+              </FormGroup></Col>
             : ""}
 
           <Col md>
