@@ -252,18 +252,30 @@ class LicenseCreate extends Component {
             keys = keys.filter(key => key !== "licensePurpose1" && key !== "licensePurpose2" && key !== "licensePurpose3")
             keys = keys.concat("specificPurpose")
         }
-        if (data.documentType === "OC") {
+        if (data.documentType === "ORIGINAL") {
             keys = keys.concat("returnDate")
         }
-        if (data.documentType === "SC") {
+        else {
+            keys = keys.filter(key => key !== "returnDate")
+        }
+        if (data.documentType === "SCANCOPY") {
             keys = keys.concat("watermark1")
             keys = keys.concat("watermark2")
+        }
+        else {
+            keys = keys.filter(key => key !== "watermark1" || key !== "watermark2")
         }
         if (data.isWatermark === "Y") {
             keys = keys.concat("inputWatermark1")
         }
+        else {
+            keys = keys.filter(key => key !== "inputWatermark1")
+        }
         if (data.isWatermark === "N") {
             keys = keys.concat("inputWatermark2")
+        }
+        else {
+            keys = keys.filter(key => key !== "inputWatermark2")
         }
         keys.map(key => {
             var element = document.getElementById(key)
@@ -297,10 +309,10 @@ class LicenseCreate extends Component {
                 }
             }
             else if (!data[key]) {
-                if (element.className === "form-control") {
+                if (element.className === "form-control" || element.className === "is-invalid form-control") {
                     element.className = "is-invalid form-control"
                 }
-                else if (element.className === "custom-control-input") {
+                else if (element.className === "custom-control-input" || element.className === "is-invalid custom-control-input") {
                     element.className = "is-invalid custom-control-input"
                 }
                 else {
@@ -323,7 +335,7 @@ class LicenseCreate extends Component {
         postReq.append("PurposeType", this.state.formData.licensePurpose);
         postReq.append("PurposeComment", this.state.formData.specificPurpose);
         postReq.append("DocumentTypeId", this.state.formData.documentType);
-        postReq.append("NeedWatermark", this.state.formData.isWatermark);
+        postReq.append("NeedWatermark", this.state.formData.isWatermark === "" ? "N" : this.state.formData.isWatermark);
         postReq.append("Watermark", this.state.formData.watermark);
         postReq.append("PlannedReturnDate", this.state.formData.returnDate);
         postReq.append("DeliverWayId", this.state.formData.deliverWay);
@@ -418,13 +430,13 @@ class LicenseCreate extends Component {
 
                             <FormGroup onChange={this.handleChange("documentType")} >
                                 <Label>Select Document Type</Label>
-                                <CustomInput type="radio" id="documentType1" name="documentType" value="SC" label="城电子版 Scan Copy" />
-                                <CustomInput type="radio" id="documentType2" name="documentType" value="OC" label="城原件 Original Copy" />
+                                <CustomInput type="radio" id="documentType1" name="documentType" value="SCANCOPY" label="城电子版 Scan Copy" />
+                                <CustomInput type="radio" id="documentType2" name="documentType" value="ORIGINAL" label="城原件 Original Copy" />
                                 <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Type', formData.documentType, 'required')}</small>
                             </FormGroup>
 
 
-                            <Collapse isOpen={formData.documentType === "SC"}>
+                            <Collapse isOpen={formData.documentType === "SCANCOPY"}>
                                 <FormGroup onChange={this.handleRadio("isWatermark")}>
                                     <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
                                     <CustomInput type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="城电. Please specify watermark here:">
@@ -443,13 +455,13 @@ class LicenseCreate extends Component {
                                                 : null}
                                         </Collapse>
                                     </CustomInput>
-                                    {formData.documentType === "SC"
+                                    {formData.documentType === "SCANCOPY"
                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', formData.isWatermark, 'required')}</small>
                                         : null}
                                 </FormGroup>
                             </Collapse>
 
-                            <Collapse isOpen={formData.documentType === "OC"}>
+                            <Collapse isOpen={formData.documentType === "ORIGINAL"}>
                                 <FormGroup>
                                     <Label>Planned Return Date:</Label>
                                     <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
@@ -458,7 +470,7 @@ class LicenseCreate extends Component {
                                         showYearDropdown
                                         selected={returnDateView}
                                         onChange={this.dateChange("returnDate", "returnDateView")} />
-                                    {formData.documentType === "OC"
+                                    {formData.documentType === "ORIGINAL"
                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', formData.returnDate, 'required')}</small>
                                         : null}
                                 </FormGroup>

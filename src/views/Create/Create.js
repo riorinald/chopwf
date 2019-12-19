@@ -197,7 +197,6 @@ class Create extends Component {
   };
 
   componentDidMount() {
-    console.log(this.props.legalName)
     this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
     this.getUserData();
     this.getData("department", `${config.url}/departments`);
@@ -464,8 +463,9 @@ class Create extends Component {
 
   async getDocuments(companyId, deptId, chopTypeId, teamId) {
     // let url = `${config.url}/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit`
-    let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
 
+    let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
+    console.log(url)
     try {
       await axios.get(url).then(res => {
         this.setState({ documents: res.data })
@@ -555,6 +555,7 @@ class Create extends Component {
   }
 
   async getDocCheckBy(teamId) {
+    console.log(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`)
     await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`)
       .then(res => {
         this.setState({ docCheckBy: res.data })
@@ -569,7 +570,6 @@ class Create extends Component {
   }
 
   async getChopTypes(companyId, appTypeId) {
-    console.log(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`)
     await axios.get(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`)
       .then(res => {
         this.setState({ chopTypes: res.data })
@@ -1471,17 +1471,19 @@ class Create extends Component {
                         <FormFeedback>Invalid Entitled Team Selected</FormFeedback>
                       </InputGroup>
                     </FormGroup>
-                    <Label>Effective Period</Label>
-                    {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
-                    <DatePicker id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                      className="form-control" required dateFormat="yyyy/MM/dd" withPortal
-                      peekNextMonth
-                      showMonthDropdown
-                      showYearDropdown
-                      selected={this.state.dateView1}
-                      onChange={this.dateChange("effectivePeriod", "dateView1")}
-                      minDate={new Date()} maxDate={addDays(new Date(), 365)} />
-                    <FormFeedback>Invalid Date Selected</FormFeedback>
+                    <FormGroup>
+                      <Label>Effective Period</Label>
+                      {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
+                      <DatePicker id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                        className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        peekNextMonth
+                        showMonthDropdown
+                        showYearDropdown
+                        selected={this.state.dateView1}
+                        onChange={this.dateChange("effectivePeriod", "dateView1")}
+                        minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                      <FormFeedback>Invalid Date Selected</FormFeedback>
+                    </FormGroup>
                   </Collapse>
 
                   <Collapse isOpen={this.state.isLTU}>
@@ -1543,14 +1545,15 @@ class Create extends Component {
                       <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
                     </FormGroup>
                     : ""}
-
-                  <FormGroup>
-                    <Label>Number of Pages to Be Chopped</Label>
-                    <InputGroup>
-                      <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
-                      <FormFeedback>Invalid Number of pages </FormFeedback>
-                    </InputGroup>
-                  </FormGroup>
+                  <Collapse isOpen={!this.state.isLTI}>
+                    <FormGroup>
+                      <Label>Number of Pages to Be Chopped</Label>
+                      <InputGroup>
+                        <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
+                        <FormFeedback>Invalid Number of pages </FormFeedback>
+                      </InputGroup>
+                    </FormGroup>
+                  </Collapse>
                   <Collapse isOpen={!this.state.isLTI && !this.state.isLTU}>
                     <FormGroup>
                       <Label>Use in Office</Label>
@@ -1590,21 +1593,23 @@ class Create extends Component {
                       <FormFeedback>Invalid person to address to</FormFeedback>
                     </InputGroup>
                   </FormGroup>
-                  <FormGroup>
-                    <Label>Pick Up By <i className="fa fa-user" /> </Label>
-                    <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-                    <AsyncSelect
-                      id="pickUpBy"
-                      loadOptions={loadOptions}
-                      onBlur={this.checkDepartment}
-                      onChange={this.handleSelectOption("pickUpBy")}
-                      menuPortalTarget={document.body}
-                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                    />
-                    <InputGroup>
-                      <FormFeedback>Please enter a valid name to search</FormFeedback>
-                    </InputGroup>
-                  </FormGroup>
+                  <Collapse isOpen={!this.state.isLTI} >
+                    < FormGroup >
+                      <Label>Pick Up By <i className="fa fa-user" /> </Label>
+                      <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                      <AsyncSelect
+                        id="pickUpBy"
+                        loadOptions={loadOptions}
+                        onBlur={this.checkDepartment}
+                        onChange={this.handleSelectOption("pickUpBy")}
+                        menuPortalTarget={document.body}
+                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                      />
+                      <InputGroup>
+                        <FormFeedback>Please enter a valid name to search</FormFeedback>
+                      </InputGroup>
+                    </FormGroup>
+                  </Collapse>
                   <FormGroup>
                     <Label>Remark</Label>
                     <InputGroup>
@@ -1741,7 +1746,8 @@ class Create extends Component {
               </ModalFooter>
             </Modal>
           </div >
-        )}
+        )
+      }
       </LegalEntity.Consumer>
     );
   }

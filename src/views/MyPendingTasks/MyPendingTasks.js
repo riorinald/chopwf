@@ -399,7 +399,9 @@ class MyPendingTasks extends Component {
                                     Header: "Document Check By",
                                     accessor: "documentCheckByName",
                                     width: this.getColumnWidth('documentCheckByName', "Document Check By"),
-                                    Cell: this.renderEditable,
+                                    Cell: row => (
+                                        <div> {this.getDeptHeads(row.original.documentCheckByName)} </div>
+                                    ),
                                     style: { textAlign: "center" }
                                 },
                                 {
