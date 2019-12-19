@@ -38,7 +38,7 @@ class ChopApplication extends Component {
 
       loading: false,
       page: 1,
-      limit: 10,
+      limit: 20,
 
       collapse: true,
       modal: false,

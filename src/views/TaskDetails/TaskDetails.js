@@ -179,7 +179,7 @@ class TaskDetails extends Component {
                                                 bar
                                                 animated={stage.state === "CURRENT" ? true : false}
                                                 striped={stage.state === "FINISHED"}
-                                                color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
+                                                color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : "warning"}
                                                 value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
                                             </Progress>
                                         </React.Fragment>
@@ -691,14 +691,6 @@ class TaskDetails extends Component {
                                 </Col>
                                 <Col>
                                     <div>Next Stage</div>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col xs="1" >
-                                    <div style={{ width: "10px", height: "10px", background: "#20a8d8" }} >  </div>
-                                </Col>
-                                <Col >
-                                    <div>Pending Stages</div>
                                 </Col>
                             </Row>
                         </CardFooter>
