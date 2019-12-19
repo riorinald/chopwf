@@ -63,7 +63,6 @@ class DefaultHeader extends Component {
     }
     this.setState({
       application: value,
-      modal: !this.state.modal,
     },
       localStorage.setItem("application", value));
   }
@@ -96,26 +95,24 @@ class DefaultHeader extends Component {
             <h2 className="h5 d-sm-down-none"><b>{this.state.application} Use WORKFLOW for {this.state.legalEntity}</b></h2>
             <Nav className="ml-auto" navbar>
               <NavItem >
-                <Button color="ghost" onClick={this.toggle} to="#"><i className="fa fa-exchange" /> Entity/Workflow </Button>
+                <Button color="ghost" onClick={this.toggle} to="#"><i className="fa fa-exchange" /> Entity</Button>
                 <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
-                  <ModalHeader className="center" toggle={this.toggle}> Switch Entity/Workflow </ModalHeader>
+                  <ModalHeader className="center" toggle={this.toggle}> Switch Entity </ModalHeader>
                   <ModalBody>
                     <Col>
-                    <h6> Entity :</h6>
                     <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBAFC" ? true : false} color="secondary" value="MBAFC" size="lg" block> MBAFC </Button>
                     <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBLC" ? true : false} color="secondary" value="MBLC" size="lg" block> MBLC </Button>
                     <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBIA" ? true : false} color="secondary" value="MBIA" size="lg" block > MBIA </Button>
                     <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "CAR2GO" ? true : false} color="secondary" value="CAR2GO" size="lg" block > CAR2GO </Button>
                     </Col>
-                    <Col className="px-2 py-2">
-                      <h6> Switch Workflow to :</h6>
-                      {this.state.application === "LICENSE"
-                      ? <Button block onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</Button>
-                      : <Button block onClick={() => this.changeWorkflow('LICENSE')} >LICENSE WORKFLOW</Button>
-                      }
-                    </Col>
                   </ModalBody>
                 </Modal>
+              </NavItem>
+              <NavItem className="px-1 mr-1">
+              {this.state.application === "LICENSE"
+                  ? <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</Button>
+                  : <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('LICENSE')} >LICENSE WORKFLOW</Button>
+                }
               </NavItem>
               <NavItem className="d-sm-down-none">
                 {username}
