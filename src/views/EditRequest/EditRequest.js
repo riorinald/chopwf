@@ -328,6 +328,9 @@ class EditRequest extends Component {
 
         await this.getData("departments", `${config.url}/departments`)
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
+        if (temporary.chopTypeId === "BCSCHOP") {
+            await this.getData("branches", `${config.url}/branches?companyid=mblc`)
+        }     
 
         if (temporary.applicationTypeId === "LTU") {
             if (temporary.departmentId !== "" && temporary.chopTypeId !== "" && temporary.teamId !== "") {
@@ -1338,6 +1341,18 @@ class EditRequest extends Component {
                                     </InputGroup>
                                     {/* <FormFeedback>Invalid Chop Type Selected</FormFeedback> */}
                                 </FormGroup>
+                                {taskDetails.chopTypeId === "BCSCHOP"
+                                    ? <FormGroup>
+                                        <Label>Branch Company Chop</Label>
+                                        <Input onChange={this.handleChange("branchId")} type="select" value={taskDetails.branchId}>
+                                            <option value="0" disabled>Please specify your Brand Company Chop</option>
+                                            {this.state.branches.map((branch, index) =>
+                                                <option value={branch.branchId} key={index}>{branch.branchName}</option>
+                                            )}
+                                        </Input>
+                                    </FormGroup>
+                                    : ""
+                                }
 
 
                                 <FormGroup check={false}>

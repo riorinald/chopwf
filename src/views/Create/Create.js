@@ -197,7 +197,7 @@ class Create extends Component {
   };
 
   componentDidMount() {
-
+    console.log(this.props.legalName)
     this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
     this.getUserData();
     this.getData("department", `${config.url}/departments`);
@@ -569,7 +569,8 @@ class Create extends Component {
   }
 
   async getChopTypes(companyId, appTypeId) {
-    await axios.get(`${config.url}/choptypes?companyid=` + companyId + '&apptypeid=' + appTypeId)
+    console.log(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`)
+    await axios.get(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`)
       .then(res => {
         this.setState({ chopTypes: res.data })
       })
@@ -1514,8 +1515,8 @@ class Create extends Component {
                   {this.state.showBranches
                     ? <FormGroup>
                       <Label>Branch Company Chop</Label>
-                      <Input type="select" defaultValue="0">
-                        <option onChange={this.handleChange("branchSelected")} value="0" disabled>Please specify your Brand Company Chop</option>
+                      <Input onChange={this.handleChange("branchSelected")} type="select" defaultValue="0">
+                        <option value="0" disabled>Please specify your Brand Company Chop</option>
                         {this.state.branches.map((branch, index) =>
                           <option value={branch.branchId} key={index}>{branch.branchName}</option>
                         )}

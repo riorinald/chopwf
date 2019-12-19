@@ -8,7 +8,8 @@ import {
     Button,
     FormGroup,
     Label,
-    Progress, Badge, Spinner
+    Progress, Badge, Spinner,
+    UncontrolledTooltip
 } from 'reactstrap';
 
 class LicenseApplicationDetail extends Component {
@@ -18,7 +19,7 @@ class LicenseApplicationDetail extends Component {
             taskDetails: {},
             approvalHistories: [],
             redirect: false,
-            loading: false,
+            loading: true,
             page: ""
         }
         this.goBack = this.goBack.bind(this)
@@ -37,21 +38,22 @@ class LicenseApplicationDetail extends Component {
 
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
-        await Axios.get(`http://5de7307ab1ad690014a4e040.mockapi.io/licenseTask/${taskId}`)
+        await Axios.get(`http://192.168.1.47/echopx/api/v1/licenses/${taskId}?userId=${localStorage.getItem("userId")}`)
             .then(res => {
+                console.log(res.data)
                 this.setState({ taskDetails: res.data, loading: false })
-            })
-        await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application/2e4fb172-1eca-47d2-92fb-51fa4068a4b0/approval`)
-            .then(res => {
-                this.setState({ approvalHistories: res.data })
             })
     }
 
     goBack() {
-        console.log(`/license/${this.state.page}`)
+        console.log(`/license/${this.props.match.params.page}`)
         this.props.history.push({
-            pathname: `/license/${this.state.page}`
+            pathname: `/license/${this.props.match.params.page}`
         })
+    }
+
+    capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     updated(action) {
@@ -69,21 +71,41 @@ class LicenseApplicationDetail extends Component {
                             <Row className="align-items-left">
                                 <Button className="mr-1" color="primary" onClick={() => this.goBack()}><i className="fa fa-angle-left" /> Back </Button>
                                 {page === "myapplication" ? <div>
-                                    <Button className="mr-1" color="danger" onClick={() => { this.updated('Recalled') }}><i className="icon-loop" /> Recall </Button>
-                                    <Button className="mr-1" color="light-blue" onClick={() => { this.updated('Copy As Draft') }}><i className="fa fa-copy" /> Copy as Draft </Button>
-                                    <Button className="mr-1" color="warning" onClick={() => { this.updated('Reminded to Owner') }}><i className="icon-bell" />Remind Task Owner </Button>
+                                    {taskDetails.actions.map((action, index) =>
+                                        <Button
+                                            key={index}
+                                            className="mr-1"
+                                            color={action.action === "recall" ? "danger" : action.action === "copy" ? "light-blue" : "warning"}
+                                        >
+                                            <i className={action.action === " recall" ? "icon-loop" : action.action === "copy" ? "fa fa-copy" : "icon-bell"} />
+                                            {action.actionName}
+                                        </Button>
+                                    )}
                                 </div>
                                     : null}
                             </Row></CardHeader>
                         <CardBody>
-                            <Row className="mb-3">
-                                <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNumber}</span></Col>
-                                <Col sm="12 py-2" md lg>
+                            <Row className="mb-3" >
+                                <Col className="mb-4">
                                     <Progress multi>
-                                        <Progress bar color="green" value="50">{taskDetails.currentStatusName}</Progress>
-                                        <Progress bar animated striped color="warning" value="50">{taskDetails.nextStatusName}</Progress>
+                                        {taskDetails.allStages.map((stage, index) =>
+                                            <React.Fragment key={index}>
+                                                <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
+                                                <Progress
+                                                    className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
+                                                    bar
+                                                    animated={stage.state === "CURRENT" ? true : false}
+                                                    striped={stage.state === "FINISHED"}
+                                                    color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
+                                                    value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
+                                                </Progress>
+                                            </React.Fragment>
+                                        )}
                                     </Progress>
                                 </Col>
+                            </Row>
+                            <Row className="mb-3">
+                                <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
                             </Row>
                             <Row className="mb-4">
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
@@ -118,13 +140,13 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Employee Number</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.employeeNumber} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="Text" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Department</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.department} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.departmentName} name="text-input" placeholder="Text" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -132,13 +154,14 @@ class LicenseApplicationDetail extends Component {
                                         <Label>License Name</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.licenseName} name="text-input" placeholder="Text" />
+                                        {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
+                                        <Input disabled type="text" name="text-input" placeholder="Text" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Purpose</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.licensePurpose} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.purposeType} name="text-input" placeholder="Text" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -146,27 +169,39 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Document Type</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.documentType} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.documentTypeId === "OC" ? "Original Copy" : "Scanned Copy"} name="text-input" placeholder="Text" />
                                     </Col>
-                                    <Col md lg>
-                                        <Label>Planned Return Date</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.returnDate} name="text-input" placeholder="Text" />
-                                    </Col>
+                                    {taskDetails.documentTypeId === "OC"
+                                        ? <>
+                                            <Col md lg>
+                                                <Label>Planned Return Date</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <Input disabled type="text" defaultValue={taskDetails.plannedReturnDate} name="text-input" placeholder="Text" />
+                                            </Col>
+                                        </>
+                                        : <>
+                                            <Col md lg>
+                                                <Label> Watermark </Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <Input disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="Text" />
+                                            </Col>
+                                        </>
+                                    }
                                 </FormGroup>
                                 <FormGroup row>
                                     <Col md lg>
                                         <Label>Deliver Ways</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.deliverWays} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.deliverWayId} name="text-input" placeholder="Text" />
                                     </Col>
                                     <Col md lg>
-                                        <Label>Deliver to Address</Label>
+                                        <Label>Delivery Address</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.address} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="Text" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -174,13 +209,14 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Receiver</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.receiver} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="Text" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Return Ways</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.returnWays} name="text-input" placeholder="Text" />
+                                        {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
+                                        <Input disabled type="text" name="text-input" placeholder="Text" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -188,13 +224,14 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Receiver Mobile Number</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.receiverPhone} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="Text" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Deliver Express Number</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expressNumber} name="text-input" placeholder="Text" />
+                                        {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
+                                        <Input disabled type="text" name="text-input" placeholder="Text" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -202,13 +239,15 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Senior Manager or above of Requestor Department</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.seniorManagerAbove} name="text-input" placeholder="Text" />
+                                        {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
+                                        <Input disabled type="text" name="text-input" placeholder="Text" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Return Express Number</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.returnExpressNumber} name="text-input" placeholder="Text" />
+                                        {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
+                                        <Input disabled type="text" name="text-input" placeholder="Text" />
                                     </Col>
                                 </FormGroup>
                             </Col>
@@ -226,19 +265,17 @@ class LicenseApplicationDetail extends Component {
                                         <Col>&nbsp;</Col>
                                     </Row>
                                     <Row>
-                                        <Col md="1">
-                                            <Button color="success" >Approve</Button>
-                                        </Col>
-                                        <Col>
-                                            <Button color="danger" >Reject</Button>
-                                        </Col>
+                                        {taskDetails.actions.map((action, index) =>
+                                            <Button className="mx-1" key={index} color={action.action === "approve" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
+                                        )}
+
                                     </Row>
                                 </div>
                                 : null}
                         </CardBody>
                         <CardFooter>
                             <Row><Col><h4>Approval History</h4></Col></Row>
-                            {approvalHistories.map((history, index) =>
+                            {taskDetails.histories.map((history, index) =>
                                 <div key={index}>
                                     <Row className="bottom-border"></Row>
                                     <Row>

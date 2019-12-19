@@ -313,7 +313,7 @@ class LicenseMyApplications extends Component {
                                         onClick: e => {
                                             // console.log(rowInfo.original, rowInfo)
                                             // this.getTaskDetails(rowInfo.original.id)
-                                            this.goToDetails(rowInfo.original.id)
+                                            this.goToDetails(rowInfo.original.licenseId)
                                         },
                                         style: {
                                             background:

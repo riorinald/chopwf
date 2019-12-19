@@ -26,7 +26,7 @@ class TaskDetails extends Component {
             showModal: false,
             progressModal: false,
             taskDetails: null,
-            userDetails: [],
+            userDetails: {},
             comments: "",
             loading: true,
             page: "",
@@ -56,7 +56,7 @@ class TaskDetails extends Component {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
             this.setState({ taskDetails: res.data, loading: false })
         })
-        this.getUserDetails()
+        // this.getUserDetails()
 
     }
 
@@ -167,57 +167,57 @@ class TaskDetails extends Component {
                             </Row>
                         </CardHeader>
                         <CardBody color="dark">
-                        <Col className="mb-4" onClick={()=> this.setState({ progressModal: !this.state.progressModal})}>
+                            <Col className="mb-4" onClick={() => this.setState({ progressModal: !this.state.progressModal })}>
                                 <Progress multi>
-                                    {taskDetails.allStages.map((stage, index) => 
+                                    {taskDetails.allStages.map((stage, index) =>
                                         <React.Fragment key={index}>
-                                            <UncontrolledTooltip placement="top" target={"status"+index}>{stage.statusName}</UncontrolledTooltip>
-                                            <Progress 
+                                            <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
+                                            <Progress
                                                 className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
                                                 bar
                                                 animated={stage.state === "CURRENT" ? true : false}
                                                 striped={stage.state === "FINISHED"}
                                                 color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
-                                    value={100 / taskDetails.allStages.length}> <div id={"status"+index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
+                                                value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
                                             </Progress>
                                         </React.Fragment>
                                     )}
                                 </Progress>
                             </Col>
-                        <Row className="mb-3">
-                            <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
-                        </Row>
-                        <Row>
-                            {/* <Col> */}
-                            {/* <div className="container" >
+                            <Row className="mb-3">
+                                <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
+                            </Row>
+                            <Row>
+                                {/* <Col> */}
+                                {/* <div className="container" >
                             {this.state.demo.map(dem =>
                                 <div>TESTING</div>
                             )}
                         </div> */}
-                            {/* </Col> */}
-                            
-                        </Row>
-                        <Modal style={{maxWidth: 1500}} size="xl" color="info" toggle={()=> this.setState({ progressModal: !this.state.progressModal})} isOpen={this.state.progressModal} >
-                        <ModalBody>
-                        <Col style={{width:"100%"}} >
-                                <Progress multi style={{height:"5rem"}}>
-                                    {taskDetails.allStages.map((stage, index) => 
-                                        <React.Fragment key={index}>
-                                            <UncontrolledTooltip placement="top" target={"status"+index}>{stage.statusName}</UncontrolledTooltip>
-                                            <Progress style={{height:"5rem"}}
-                                                className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
-                                                bar
-                                                animated={stage.state === "CURRENT" ? true : false}
-                                                striped={stage.state === "FINISHED"}
-                                                color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
-                                                value={100 / taskDetails.allStages.length}> <div className="text-break" id={"status"+index} style={{ wordWrap:"break-word" , color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
-                                            </Progress>
-                                        </React.Fragment>
-                                    )}
-                                </Progress>
-                            </Col>
-                            </ModalBody>
-                        </Modal>
+                                {/* </Col> */}
+
+                            </Row>
+                            <Modal style={{ maxWidth: 1500 }} size="xl" color="info" toggle={() => this.setState({ progressModal: !this.state.progressModal })} isOpen={this.state.progressModal} >
+                                <ModalBody>
+                                    <Col style={{ width: "100%" }} >
+                                        <Progress multi style={{ height: "5rem" }}>
+                                            {taskDetails.allStages.map((stage, index) =>
+                                                <React.Fragment key={index}>
+                                                    <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
+                                                    <Progress style={{ height: "5rem" }}
+                                                        className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
+                                                        bar
+                                                        animated={stage.state === "CURRENT" ? true : false}
+                                                        striped={stage.state === "FINISHED"}
+                                                        color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
+                                                        value={100 / taskDetails.allStages.length}> <div className="text-break" id={"status" + index} style={{ wordWrap: "break-word", color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
+                                                    </Progress>
+                                                </React.Fragment>
+                                            )}
+                                        </Progress>
+                                    </Col>
+                                </ModalBody>
+                            </Modal>
 
                             {/* <Row className="mb-3">
                                 <Col>
@@ -241,15 +241,15 @@ class TaskDetails extends Component {
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
                                         <Col xs={12} sm={12} md={4} lg={2}>
-                                            <img src={userDetails.photoUrl} className="img-avaa img-responsive center-block" alt="admin@bootstrapmaster.com" />
+                                            <img src={taskDetails.createdByPhotoUrl} className="img-avaa img-responsive center-block" alt="admin@bootstrapmaster.com" />
                                         </Col>
                                         <Col md><h5> {taskDetails.employeeName} </h5>
                                             <Row>
-                                                <Col md><h6> DFS/CN, {userDetails.companyId} </h6></Col>
+                                                {/* <Col md><h6> DFS/CN, {userDetails.companyId} </h6></Col> */}
                                             </Row>
                                             <Row>
                                                 <Col xs={12} sm={12} md={6} lg={6}>
-                                                    <h6><center className="boxs">{userDetails.roleId}</center></h6>
+                                                    {/* <h6><center className="boxs">{userDetails.roleId}</center></h6> */}
                                                 </Col>
                                             </Row>
                                         </Col>

@@ -22,7 +22,7 @@ import LicenseNav from '../../_LicenseNav';
 // routes config
 import routes from '../../routes';
 import LegalEntity from '../../context';
-import {label} from '../../context';
+import { label } from '../../context';
 
 const DefaultAside = React.lazy(() => import('./DefaultAside'));
 const DefaultFooter = React.lazy(() => import('./DefaultFooter'));
@@ -40,7 +40,7 @@ class DefaultLayout extends Component {
   constructor() {
     super();
     this.state = {
-      legalEntity: "MBAFC",
+      legalEntity: localStorage.getItem('legalEntity'),
       roleId: localStorage.getItem("roleId")
     }
     this.handleLegalEntity = this.handleLegalEntity.bind(this)
@@ -52,14 +52,14 @@ class DefaultLayout extends Component {
     })
   }
 
-  handleSideBarNav(application){
-    switch(application) {
+  handleSideBarNav(application) {
+    switch (application) {
       case 'CHOP':
-        if(this.state.roleId === 'REQUESTOR')
+        if (this.state.roleId === 'REQUESTOR')
           return RequestorNav;
-        if(this.state.roleId === 'CHOPKEEPER'||'CHOPOWNER')
+        if (this.state.roleId === 'CHOPKEEPER' || 'CHOPOWNER')
           return ChopKeeperNav;
-        else  return console.log('error! Roles not match, no sideBarNav');
+        else return console.log('error! Roles not match, no sideBarNav');
 
       case 'LICENSE':
         return LicenseNav;
@@ -73,59 +73,59 @@ class DefaultLayout extends Component {
   render() {
     return (
       <div className="app">
-      <LegalEntity.Provider value={{ legalEntity: label[this.state.legalEntity]}}>
-        <AppHeader fixed>
-          <Suspense fallback={this.loading()}>
-            <DefaultHeader handleLegalEntity={this.handleLegalEntity} onLogout={e => this.signOut(e)} />
-          </Suspense>
-        </AppHeader>
-        <div className="app-body">
-          <AppSidebar fixed display="lg">
-            <AppSidebarHeader />
-            <AppSidebarForm />
-            <Suspense>
-              <AppSidebarNav navConfig={this.handleSideBarNav(localStorage.getItem('application'))} {...this.props} router={router} />
+        <LegalEntity.Provider value={{ legalEntity: label[this.state.legalEntity] }}>
+          <AppHeader fixed>
+            <Suspense fallback={this.loading()}>
+              <DefaultHeader handleLegalEntity={this.handleLegalEntity} onLogout={e => this.signOut(e)} />
             </Suspense>
-            <AppSidebarFooter />
-            <AppSidebarMinimizer />
-          </AppSidebar>
-          <main className="main">
-            {/* <AppBreadcrumb appRoutes={routes} router={router}/> */}
-            <div className="mt-3"></div>
-            <Container fluid >
-              <Suspense fallback={this.loading()}>
-                <Switch>
-                  {routes.map((route, idx) => {
-                    return route.component ? (
-                      <Route
-                        key={idx}
-                        path={route.path}
-                        exact={route.exact}
-                        name={route.name}
-                        render={props => (
-                          <route.component 
-                          legalName={this.state.legalEntity}
-                          roleId={this.state.roleId}
-                          {...props} routes={route.routes}/>
-                        )} />
-                    ) : (null);
-                  })}
-                  <Redirect from="/" to={{ pathname: "/404" }} />
-                </Switch>
+          </AppHeader>
+          <div className="app-body">
+            <AppSidebar fixed display="lg">
+              <AppSidebarHeader />
+              <AppSidebarForm />
+              <Suspense>
+                <AppSidebarNav navConfig={this.handleSideBarNav(localStorage.getItem('application'))} {...this.props} router={router} />
               </Suspense>
-            </Container> 
-          </main>
-          {/* <AppAside fixed>
+              <AppSidebarFooter />
+              <AppSidebarMinimizer />
+            </AppSidebar>
+            <main className="main">
+              {/* <AppBreadcrumb appRoutes={routes} router={router}/> */}
+              <div className="mt-3"></div>
+              <Container fluid >
+                <Suspense fallback={this.loading()}>
+                  <Switch>
+                    {routes.map((route, idx) => {
+                      return route.component ? (
+                        <Route
+                          key={idx}
+                          path={route.path}
+                          exact={route.exact}
+                          name={route.name}
+                          render={props => (
+                            <route.component
+                              legalName={this.state.legalEntity}
+                              roleId={this.state.roleId}
+                              {...props} routes={route.routes} />
+                          )} />
+                      ) : (null);
+                    })}
+                    <Redirect from="/" to={{ pathname: "/404" }} />
+                  </Switch>
+                </Suspense>
+              </Container>
+            </main>
+            {/* <AppAside fixed>
             <Suspense fallback={this.loading()}>
               <DefaultAside />
             </Suspense>
           </AppAside> */}
-        </div>
-        <AppFooter>
-          <Suspense fallback={this.loading()}>
-            <DefaultFooter />
-          </Suspense>
-        </AppFooter>
+          </div>
+          <AppFooter>
+            <Suspense fallback={this.loading()}>
+              <DefaultFooter />
+            </Suspense>
+          </AppFooter>
         </LegalEntity.Provider>
       </div>
     );
