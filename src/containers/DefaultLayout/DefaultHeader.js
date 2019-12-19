@@ -108,11 +108,31 @@ class DefaultHeader extends Component {
                   </ModalBody>
                 </Modal>
               </NavItem>
+              <UncontrolledDropdown nav direction="down" >
+                <DropdownToggle nav caret>
+                    <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</Button>
+                </DropdownToggle>
+                  <DropdownMenu down>
+                    <DropdownItem onClick={this.changeEntity} value="MBAFC">
+                       MBAFC 
+                    </DropdownItem>
+                    <DropdownItem onClick={this.changeEntity} value="MBLC">
+                      MBLC
+                    </DropdownItem>
+                    <DropdownItem onClick={this.changeEntity} value="MBIA">
+                       MBIA
+                    </DropdownItem>
+                    <DropdownItem onClick={this.changeEntity} value="CAR2GO">
+                       CAR2GO
+                    </DropdownItem>
+                  </DropdownMenu>
+              </UncontrolledDropdown>
               <NavItem className="px-1 mr-1">
-              {this.state.application === "LICENSE"
+              {/* {this.state.application === "LICENSE"
                   ? <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</Button>
                   : <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('LICENSE')} >LICENSE WORKFLOW</Button>
-                }
+                } */}
+                <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('LICENSE')} >LICENSE WORKFLOW</Button>
               </NavItem>
               <NavItem className="d-sm-down-none">
                 {username}
