@@ -9,8 +9,10 @@ import {
     FormGroup,
     Label,
     Progress, Badge, Spinner,
-    UncontrolledTooltip
+    UncontrolledTooltip, CustomInput
 } from 'reactstrap';
+import config from '../../../config';
+import Swal from 'sweetalert2';
 
 class LicenseApplicationDetail extends Component {
     constructor(props) {
@@ -20,7 +22,9 @@ class LicenseApplicationDetail extends Component {
             approvalHistories: [],
             redirect: false,
             loading: true,
-            page: ""
+            page: "",
+            comments: "",
+            currentStatus: ""
         }
         this.goBack = this.goBack.bind(this)
     }
@@ -41,7 +45,8 @@ class LicenseApplicationDetail extends Component {
         await Axios.get(`http://192.168.1.47/echopx/api/v1/licenses/${taskId}?userId=${localStorage.getItem("userId")}`)
             .then(res => {
                 console.log(res.data)
-                this.setState({ taskDetails: res.data, loading: false })
+                let currentStatusArr = res.data.allStages.filter(stage => stage.state === "CURRENT")
+                this.setState({ taskDetails: res.data, currentStatus: currentStatusArr[0].statusId, loading: false, })
             })
     }
 
@@ -57,12 +62,34 @@ class LicenseApplicationDetail extends Component {
     }
 
     updated(action) {
-        console.log(action)
+        let data = {
+            userId: localStorage.getItem('userId'),
+            comments: this.state.comments
+        }
+
+        Axios.post(`${config.url}/licenses/${this.props.match.params.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
+            .then(res => {
+                Swal.fire({
+                    title: res.data.message,
+                    html: `The request has been ${res.data.message}`,
+                    type: "success",
+                    onClose: () => { this.goBack(true) }
+                })
+            })
+            .catch(error => {
+                Swal.fire({
+                    title: "ERROR",
+                    html: error.response.data.message,
+                    type: "error"
+                })
+            })
+
+
     }
 
 
     render() {
-        const { taskDetails, redirect, approvalHistories, loading, page } = this.state
+        const { taskDetails, redirect, approvalHistories, loading, page, currentStatus } = this.state
         return (
             <div>
                 {!loading ?
@@ -76,6 +103,7 @@ class LicenseApplicationDetail extends Component {
                                             key={index}
                                             className="mr-1"
                                             color={action.action === "recall" ? "danger" : action.action === "copy" ? "light-blue" : "warning"}
+                                            onClick={() => this.updated(action.action)}
                                         >
                                             <i className={action.action === " recall" ? "icon-loop" : action.action === "copy" ? "fa fa-copy" : "icon-bell"} />
                                             {action.actionName}
@@ -140,13 +168,13 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Employee Number</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Department</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.departmentName} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.departmentName} name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -155,13 +183,13 @@ class LicenseApplicationDetail extends Component {
                                     </Col>
                                     <Col md lg>
                                         {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
-                                        <Input disabled type="text" name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Purpose</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.purposeType} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.purposeTypeName} name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -169,15 +197,15 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Document Type</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.documentTypeId === "OC" ? "Original Copy" : "Scanned Copy"} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.documentTypeName} name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
-                                    {taskDetails.documentTypeId === "OC"
+                                    {taskDetails.documentTypeId === "ORIGINAL"
                                         ? <>
                                             <Col md lg>
                                                 <Label>Planned Return Date</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={taskDetails.plannedReturnDate} name="text-input" placeholder="Text" />
+                                                <Input disabled type="text" defaultValue={taskDetails.plannedReturnDate} name="text-input" placeholder="EMPTY DATA" />
                                             </Col>
                                         </>
                                         : <>
@@ -185,7 +213,7 @@ class LicenseApplicationDetail extends Component {
                                                 <Label> Watermark </Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="Text" />
+                                                <Input disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="EMPTY DATA" />
                                             </Col>
                                         </>
                                     }
@@ -195,13 +223,13 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Deliver Ways</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.deliverWayId} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Delivery Address</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -209,14 +237,14 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Receiver</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Return Ways</Label>
                                     </Col>
                                     <Col md lg>
                                         {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
-                                        <Input disabled type="text" name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" name="text-input" placeholder="NO VALUE FROM API" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -224,14 +252,14 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Receiver Mobile Number</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Deliver Express Number</Label>
                                     </Col>
                                     <Col md lg>
                                         {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
-                                        <Input disabled type="text" name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" name="text-input" placeholder="NO VALUE FROM API" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -239,20 +267,36 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Senior Manager or above of Requestor Department</Label>
                                     </Col>
                                     <Col md lg>
-                                        {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
-                                        <Input disabled type="text" name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" defaultValue={taskDetails.seniorManager} name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Return Express Number</Label>
                                     </Col>
                                     <Col md lg>
                                         {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
-                                        <Input disabled type="text" name="text-input" placeholder="Text" />
+                                        <Input disabled type="text" name="text-input" placeholder="NO VALUE FROM API" />
                                     </Col>
                                 </FormGroup>
                             </Col>
                             {page === "mypendingtask"
                                 ? <div>
+                                    {currentStatus === "PENDINGLICENSEADMIN"
+                                        ? <Row>
+                                            <FormGroup >
+                                                <Label>快递 Express: Express Number</Label>
+                                                <Input type="text"></Input>
+                                            </FormGroup>
+                                        </Row>
+                                        : currentStatus === "PENDINGREQUESTORRETURN"
+                                            ? <Row>
+                                                <FormGroup >
+                                                    <Label>Deliver Way</Label>
+                                                    <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                                    <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number" />
+                                                </FormGroup>
+                                            </Row>
+                                            : null
+                                    }
                                     <Row>
                                         <Col> <h4>Comments</h4></Col>
                                     </Row>
@@ -268,7 +312,6 @@ class LicenseApplicationDetail extends Component {
                                         {taskDetails.actions.map((action, index) =>
                                             <Button className="mx-1" key={index} color={action.action === "approve" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
                                         )}
-
                                     </Row>
                                 </div>
                                 : null}

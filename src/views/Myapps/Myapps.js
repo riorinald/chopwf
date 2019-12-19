@@ -337,7 +337,9 @@ class Myapps extends Component {
                   Header: "Document Check By",
                   accessor: " ",
                   width: this.getColumnWidth('documentCheckByName', "Document Check By"),
-                  Cell: this.renderEditable,
+                  Cell: row => (
+                    <div> {this.getDeptHeads(row.original.documentCheckByName)} </div>
+                  ),
                   style: { textAlign: "center" }
                 },
                 {

@@ -191,9 +191,9 @@ class LicenseMyApplications extends Component {
                                 },
                                 {
                                     Header: "License Name",
-                                    accessor: "plannedReturnDate",
+                                    accessor: "licenseName",
                                     // Cell: this.renderEditable,
-                                    width: this.getColumnWidth('plannedReturnDate', "Licese Name"),
+                                    width: this.getColumnWidth('licenseName', "Licese Name"),
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;
                                     },
@@ -212,10 +212,10 @@ class LicenseMyApplications extends Component {
                                 },
                                 {
                                     Header: "Document Type",
-                                    accessor: "documentTypeId",
+                                    accessor: "documentTypeName",
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" },
-                                    width: this.getColumnWidth('documentTypeId', "Document Type"),
+                                    width: this.getColumnWidth('documentTypeName', "Document Type"),
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;
                                     },
@@ -240,11 +240,11 @@ class LicenseMyApplications extends Component {
                                 },
                                 {
                                     Header: "Senior Manager or above of Requestor Department",
-                                    accessor: `plannedReturnDate`,
-                                    width: this.getColumnWidth('plannedReturnDate', "Senior Manager or above of Requestor Department"),
-                                    Cell: row => (
-                                        <div> {row.original.plannedReturnDate} </div>
-                                    ),
+                                    accessor: `seniorManager`,
+                                    width: this.getColumnWidth('seniorManager', "Senior Manager or above of Requestor Department"),
+                                    // Cell: row => (
+                                    //     <div> {row.original.seniorManager} </div>
+                                    // ),
                                     style: { textAlign: "center" },
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;
@@ -280,8 +280,8 @@ class LicenseMyApplications extends Component {
                                 },
                                 {
                                     Header: "Deliver Ways",
-                                    accessor: "deliveryWayId",
-                                    width: this.getColumnWidth('deliverWays', "Deliver Ways"),
+                                    accessor: "deliveryWayName",
+                                    width: this.getColumnWidth('deliveryWayName', "Deliver Ways"),
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" }
                                 },

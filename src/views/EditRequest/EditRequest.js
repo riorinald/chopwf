@@ -330,7 +330,7 @@ class EditRequest extends Component {
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
         if (temporary.chopTypeId === "BCSCHOP") {
             await this.getData("branches", `${config.url}/branches?companyid=mblc`)
-        }     
+        }
 
         if (temporary.applicationTypeId === "LTU") {
             if (temporary.departmentId !== "" && temporary.chopTypeId !== "" && temporary.teamId !== "") {
@@ -1569,16 +1569,18 @@ class EditRequest extends Component {
                                         </InputGroup>
                                     </FormGroup>
                                     : ""}
-                                <FormGroup>
-                                    <Label>Number of Pages to Be Chopped</Label>
-                                    <InputGroup>
-                                        <Input onChange={this.handleChange("numOfPages")} value={taskDetails.numOfPages} id="numOfPages" size="16" type="number" min="0" />
-                                        {/* <FormFeedback>Invalid Number of pages </FormFeedback> */}
-                                    </InputGroup>
-                                    <InputGroup>
-                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages', taskDetails.numOfPages, 'required')}</small>
-                                    </InputGroup>
-                                </FormGroup>
+                                <Collapse isOpen={!taskDetails.applicationTypeId === "LTI"}>
+                                    <FormGroup>
+                                        <Label>Number of Pages to Be Chopped</Label>
+                                        <InputGroup>
+                                            <Input onChange={this.handleChange("numOfPages")} value={taskDetails.numOfPages} id="numOfPages" size="16" type="number" min="0" />
+                                            {/* <FormFeedback>Invalid Number of pages </FormFeedback> */}
+                                        </InputGroup>
+                                        <InputGroup>
+                                            <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages', taskDetails.numOfPages, 'required')}</small>
+                                        </InputGroup>
+                                    </FormGroup>
+                                </Collapse>
 
                                 {taskDetails.applicationTypeId !== "LTU" && taskDetails.applicationTypeId !== "LTI"
                                     ? <FormGroup>
@@ -1628,23 +1630,25 @@ class EditRequest extends Component {
                                         <small style={{ color: '#F86C6B' }} >{this.validator.message('Address To', taskDetails.addressTo, 'required')}</small>
                                     </InputGroup>
                                 </FormGroup>
-                                <FormGroup>
-                                    <Label>Pick Up By <i className="fa fa-user" /> </Label>
-                                    <AsyncSelect
-                                        id="pickUpBy"
-                                        loadOptions={this.loadOptionsDept}
-                                        value={deptHeads[taskDetails.pickUpByOption]}
-                                        onChange={this.handleSelectOption("pickUpBy")}
-                                        menuPortalTarget={document.body}
-                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                    />
-                                    <InputGroup>
-                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Pick Up By', taskDetails.pickUpBy, 'required')}</small>
-                                    </InputGroup>
-                                    <InputGroup>
-                                        {/* <FormFeedback>Please enter a valid name to search</FormFeedback> */}
-                                    </InputGroup>
-                                </FormGroup>
+                                <Collapse isOpen={!taskDetails.applicationTypeId === "LTI"}>
+                                    <FormGroup>
+                                        <Label>Pick Up By <i className="fa fa-user" /> </Label>
+                                        <AsyncSelect
+                                            id="pickUpBy"
+                                            loadOptions={this.loadOptionsDept}
+                                            value={deptHeads[taskDetails.pickUpByOption]}
+                                            onChange={this.handleSelectOption("pickUpBy")}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        />
+                                        <InputGroup>
+                                            <small style={{ color: '#F86C6B' }} >{this.validator.message('Pick Up By', taskDetails.pickUpBy, 'required')}</small>
+                                        </InputGroup>
+                                        <InputGroup>
+                                            {/* <FormFeedback>Please enter a valid name to search</FormFeedback> */}
+                                        </InputGroup>
+                                    </FormGroup>
+                                </Collapse>
                                 <FormGroup>
                                     <Label>Remark</Label>
                                     <InputGroup>
@@ -1721,7 +1725,7 @@ class EditRequest extends Component {
                                         </FormGroup>
                                         : <FormGroup>
                                             <Label>Department Heads <i className="fa fa-user" /></Label>
-                                            <small> &ensp; If you apply for {this.legalName} Company Chop, then Department Head shall be from {this.legalName} entity</small>
+                                            <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.legalName} entity</small>
                                             <AsyncSelect
                                                 id="departmentHeads"
                                                 loadOptions={this.loadOptionsDept}
