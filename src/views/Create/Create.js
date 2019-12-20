@@ -22,6 +22,7 @@ import PropTypes from "prop-types";
 import LegalEntity from '../../context';
 // import Skeleton from 'react-loading-skeleton';
 
+
 import {
   Badge,
   Button,
@@ -188,6 +189,7 @@ class Create extends Component {
     this.handleSelectOption = this.handleSelectOption.bind(this);
     this.isValid = this.isValid.bind(this);
     this.checkDept = this.checkDept.bind(this);
+
     this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
