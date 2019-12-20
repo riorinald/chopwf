@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import { fakeAuth } from '../../App';
 import config from '../../config';
+import {GoogleAPI,GoogleLogin,GoogleLogout} from 'react-google-oauth'
 
 import {
     Form,
@@ -141,7 +142,16 @@ class Login extends Component {
             console.log("redirect")
             return <Redirect to='/portal' />
         }
-
+        
+        const googleOauth = <GoogleAPI clientId="877545934462-i1ap0krecmv6qqsema0ch6n5l4mndk21.apps.googleusercontent.com"
+        // onUpdateSigninStatus= {console.log()}
+        // onInitFailure={CALLBACK}
+         >
+        <div>
+              <div><GoogleLogin /></div>
+              {/* <div><GoogleLogout /></div> */}
+        </div>
+    </GoogleAPI>
 
         return (
             <div>
@@ -183,6 +193,7 @@ class Login extends Component {
                             </FormGroup>
                         </Form>
 
+                        {googleOauth}
 
                         {/* </CardBody> */}
                         {/* </Card> */}
