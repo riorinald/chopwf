@@ -40,7 +40,7 @@ class MyPendingTasks extends Component {
             chopTypes: [],
 
             filtered: [],
-
+            limit: 20,
             dateView1: "",
 
             show: true,
@@ -314,6 +314,7 @@ class MyPendingTasks extends Component {
                                 this.setFilter(filtered)
                                 this.onFilteredChangeCustom(value, column.id || column.accessor);
                             }}
+                            defaultPageSize={this.state.limit}
                             defaultFilterMethod={(filter, row, column) => {
 
                                 const id = filter.pivotId || filter.id;
@@ -488,8 +489,6 @@ class MyPendingTasks extends Component {
                                     style: { textAlign: "center" }
                                 },
                             ]}
-
-                            defaultPageSize={10}
 
                             getTrProps={(state, rowInfo) => {
                                 if (rowInfo && rowInfo.row) {

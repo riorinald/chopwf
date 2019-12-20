@@ -693,14 +693,6 @@ class TaskDetails extends Component {
                                     <div>Next Stage</div>
                                 </Col>
                             </Row>
-                            <Row>
-                                <Col xs="1" >
-                                    <div style={{ width: "10px", height: "10px", background: "#20a8d8" }} >  </div>
-                                </Col>
-                                <Col >
-                                    <div>Pending Stages</div>
-                                </Col>
-                            </Row>
                         </CardFooter>
                     </Card>
                     : null
