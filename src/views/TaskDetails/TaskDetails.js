@@ -503,7 +503,7 @@ class TaskDetails extends Component {
                                     }
                                     <FormGroup row >
                                         <Col md="4" className="d-flex align-items-center" >
-                                            <Label htmlFor="text-input">Number of Pages to Be Chopped </Label>
+                                            <Label htmlFor="text-input">No. of Pages to Be Chopped </Label>
                                         </Col>
                                         <Col xs="12" md="8">
                                             <Input disabled type="text" value={taskDetails.numOfPages} id="text-input" name="text-input" placeholder="/" />

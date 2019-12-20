@@ -259,14 +259,14 @@ class ChopApplication extends Component {
   };
 
   dateChange = (name, view) => date => {
-    let dates = date.toISOString().substr(0, 10);
-    // console.log(date)
-    // console.log(dates)
+    let dates = ""
+    if (date) {
+      dates = `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`
+    }
     this.setState({ [view]: date, validDate: true });
     this.setState(state => {
       let exportDate = this.state.exportDate
-      exportDate[name] = dates.replace(/-/g, "")
-      // editData[name] = dates.replace(/-/g, "")
+      exportDate[name] = dates
       return { exportDate }
     })
   };

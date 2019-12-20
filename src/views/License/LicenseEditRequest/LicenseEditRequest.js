@@ -146,12 +146,14 @@ class LicenseEditRequest extends Component {
 
     //convert Date
     dateChange = (name, view) => date => {
-        let dates = date.toISOString().substr(0, 10);
-        // console.log(dates.replace(/-/g, ""))
+        let dates = ""
+        if (date) {
+            dates = `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`
+        }
         this.setState({ [view]: date });
         this.setState(state => {
             let taskDetails = this.state.taskDetails
-            taskDetails[name] = dates.replace(/-/g, "")
+            taskDetails[name] = dates
             return taskDetails
         })
     };

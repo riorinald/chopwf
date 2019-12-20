@@ -60,20 +60,20 @@ class LicenseCreate extends Component {
     //Mount
     componentDidMount() {
         this.getUserData();
-        this.getData('licenseNames');
+        // this.getData('licenseNames');
         // this.getData('seniorManagers');
+        this.getLicenseNames();
         this.getSeniorManagers();
         this.getData('departments');
     }
 
+    async getLicenseNames() {
+        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`)
+        this.setState({ licenseNames: res.data })
+    }
+
     async getData(name) {
-        let res = null
-        if (name === "departments") {
-            res = await axios.get(`${config.url}/${name}`)
-        }
-        else {
-            res = await axios.get(`https://5dedc007b3d17b00146a1c5a.mockapi.io/details/${name}`)
-        }
+        let res = await axios.get(`${config.url}/${name}`)
         this.setState({ [name]: res.data })
     }
 
@@ -216,12 +216,14 @@ class LicenseCreate extends Component {
 
     //convert Date
     dateChange = (name, view) => date => {
-        let dates = date.toISOString().substr(0, 10);
-        // console.log(dates.replace(/-/g, ""))
+        let dates = ""
+        if (date) {
+            dates = `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`
+        }
         this.setState({ [view]: date });
         this.setState(state => {
             let formData = this.state.formData
-            formData[name] = dates.replace(/-/g, "")
+            formData[name] = dates
             return formData
         })
     };
@@ -341,7 +343,7 @@ class LicenseCreate extends Component {
         postReq.append("DeliverWayId", this.state.formData.deliverWay);
         postReq.append("isSubmitted", isSubmitted);
         postReq.append("SeniorManager", this.state.formData.seniorManager);
-        // postReq.append("LicenseAdmin", "rio@otds.admin");
+        postReq.append("LicenseAdmin", "quincy@otds.admin");
         postReq.append("isConfirm", this.state.formData.isConfirm);
         postReq.append("ExpDeliveryAddress", this.state.formData.address);
         postReq.append("ExpDeliveryReciever", this.state.formData.reciever);
@@ -406,7 +408,7 @@ class LicenseCreate extends Component {
                                     <Input id="licenseName" onChange={this.handleChange("licenseName")} defaultValue="0" type="select">
                                         <option value="0" >Please select a License Name</option>
                                         {licenseNames.map((license, index) =>
-                                            <option key={index} value={license.id} > {license.name} </option>
+                                            <option key={index} value={license.licenseNameId} > {license.name} </option>
                                         )}
                                     </Input>
                                 </InputGroup>

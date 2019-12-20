@@ -145,6 +145,7 @@ class EditRequest extends Component {
             dateView1: new Date(),
             dateView2: new Date(),
             departments: [],
+            appTypes: [],
             chopTypes: [],
             documents: [],
             teams: [],
@@ -327,6 +328,7 @@ class EditRequest extends Component {
 
 
         await this.getData("departments", `${config.url}/departments`)
+        await this.getData("appTypes", `${config.url}/appTypes`)
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
         if (temporary.chopTypeId === "BCSCHOP") {
             await this.getData("branches", `${config.url}/branches?companyid=mblc`)
@@ -338,15 +340,15 @@ class EditRequest extends Component {
             }
         }
         temporary.departmentId = temporary.departmentId.toLowerCase()
-        console.log(temporary.departmentId)
         this.setState({ taskDetails: temporary, loading: false })
     }
 
     setValidForm() {
         let details = Object.keys(this.state.taskDetails)
+
         let apptypeId = this.state.taskDetails.applicationTypeId
         details = details.filter(function (item) {
-            return item !== "taskId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption" && item !== "createdBy" && item !== "createdByPhotoUrl"
+            return item !== "taskId" && item !== "telephoneNum" && item !== "companyId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption" && item !== "createdBy" && item !== "createdByPhotoUrl" && item !== "contractSignedByFirstPersonOption" && item !== "contractSignedBySecondPersonOption"
         })
 
         switch (apptypeId) {
@@ -367,22 +369,17 @@ class EditRequest extends Component {
                 break;
             case "CNIPS":
                 details = details.filter(function (item) {
-                    return item !== "effectivePeriod" && item !== "teamId" && item !== "documentCheckBy" && item !== "contractSignedByFirstPerson" && item !== "contractSignedBySecondPerson" && item !== "branchId"
+                    return item !== "effectivePeriod" && item !== "teamId" && item !== "documentCheckBy" && item !== "branchId" && item !== "departmentHeads"
                 })
                 break;
             default:
                 break;
         }
-
         this.setState({ validateForm: details })
     }
 
     changeDeptHeads(heads) {
-        let dh = ""
-        heads.map(head => {
-            dh = dh + head + "; "
-        })
-        return dh
+        return heads.join("; ")
     }
 
 
@@ -488,9 +485,16 @@ class EditRequest extends Component {
         else if (name === "teamId") {
             this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value)
         }
+        else if (name === "applicationTypeId") {
+            this.setState(state => {
+                let taskDetails = this.state.taskDetails
+                taskDetails.documents = []
+                return taskDetails
+            })
+        }
         if (event.target.value) {
 
-            event.target.className = "is-valid form-control"
+            event.target.className = "form-control"
         }
         else {
             event.target.className = "is-invalid form-control"
@@ -619,6 +623,7 @@ class EditRequest extends Component {
                         taskDetails.documents.push(obj)
                         return { taskDetails }
                     })
+                    document.getElementById("documents").className = ""
                 }
                 else {
                     Swal.fire({
@@ -656,6 +661,9 @@ class EditRequest extends Component {
         }
     }
     addDocumentLTU() {
+        if (this.state.selectedDocs.length !== 0) {
+            document.getElementById("documentTableLTU").className = "form-control"
+        }
         this.state.selectedDocs.map(doc => {
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
@@ -720,10 +728,6 @@ class EditRequest extends Component {
             }
             return { editRequestForm, taskDetails }
         })
-    }
-
-    validateContractNumber() {
-        console.log("working")
     }
 
     validateConNum() {
@@ -909,13 +913,16 @@ class EditRequest extends Component {
     }
 
     dateChange = (name, view) => date => {
-        let dates = date.toISOString().substr(0, 10);
+        let dates = ""
+        if (date) {
+            dates = `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`
+        }
         this.setState({
             [view]: date
         });
         this.setState(state => {
             let taskDetails = this.state.taskDetails
-            taskDetails[name] = dates.replace(/-/g, "")
+            taskDetails[name] = dates
             return { taskDetails }
         })
     };
@@ -1073,10 +1080,8 @@ class EditRequest extends Component {
         if (this.state.taskDetails.isUseInOffice === "Y") {
             details = details.filter(item => item !== "responsiblePerson" && item !== "returnDate")
         }
+        console.log(details)
         for (let i = 0; i < details.length; i++) {
-            console.log(details[i])
-            // console.log(this.state.taskDetails[details[i]])
-            console.log(details[i])
             var element = document.getElementById(details[i])
             if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
                 element.classList.contains("form-control")
@@ -1089,15 +1094,15 @@ class EditRequest extends Component {
                     : element.className = "isValid"
             }
         }
-        for (let i = 0; i < details.length; i++) {
-            if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
-                this.setState({ isValid: false })
-                break;
-            }
-            else {
-                this.setState({ isValid: true })
-            }
-        }
+        // for (let i = 0; i < details.length; i++) {
+        //     if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
+        //         this.setState({ isValid: false })
+        //         break;
+        //     }
+        //     else {
+        //         this.setState({ isValid: true })
+        //     }
+        // }
     }
 
     async handleAgreeTerm(event) {
@@ -1106,7 +1111,7 @@ class EditRequest extends Component {
         await this.validate()
         // console.log(this.state.isValid)
         // console.log(this.validator.allValid())
-        if (this.state.isValid && this.validator.allValid()) {
+        if (this.validator.allValid()) {
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
                 if (checked) { taskDetails.isConfirm = "Y" }
@@ -1221,7 +1226,7 @@ class EditRequest extends Component {
 
 
     render() {
-        const { taskDetails, dateView1, deptHeads, docCheckBy, selectedDeptHeads, selectedDocCheckBy, editRequestForm } = this.state
+        const { taskDetails, appTypes, dateView1, deptHeads, docCheckBy, selectedDeptHeads, selectedDocCheckBy, editRequestForm } = this.state
 
         this.validator.purgeFields();
 
@@ -1286,13 +1291,15 @@ class EditRequest extends Component {
                                 </FormGroup>
                                 <FormGroup>
                                     <Label>Application Type</Label>
-                                    <Input disabled type="text"
-                                        id="appTypeSelected" value={taskDetails.applicationTypeName} name="appType">
+                                    <Input type="select" id="appTypeSelected" onChange={this.handleChange("applicationTypeId")} value={taskDetails.applicationTypeId} name="appType">
+                                        {appTypes.map((type, index) =>
+                                            <option key={index} value={type.appTypeId} > {type.appTypeName} </option>
+                                        )}
                                     </Input>
                                 </FormGroup>
 
-                                {taskDetails.applicationTypeId === "LTI"
-                                    ? <FormGroup>
+                                <Collapse isOpen={taskDetails.applicationTypeId === "LTI"}>
+                                    <FormGroup>
                                         <Label>Effective Period</Label>
                                         {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
                                         <DatePicker id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
@@ -1305,13 +1312,14 @@ class EditRequest extends Component {
                                             minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                                         {/* <FormFeedback>Invalid Date Selected</FormFeedback> */}
                                         <InputGroup>
-                                            <small style={{ color: '#F86C6B' }} >{this.validator.message('Effective Period', taskDetails.effectivePeriod, 'required')}</small>
+                                            {taskDetails.applicationTypeId === "LTI"
+                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Effective Period', taskDetails.effectivePeriod, 'required')}</small>
+                                                : null}
                                         </InputGroup>
                                     </FormGroup>
-                                    : null
-                                }
-                                {taskDetails.applicationTypeId === "LTU"
-                                    ? <FormGroup>
+                                </Collapse>
+                                <Collapse isOpen={taskDetails.applicationTypeId === "LTU" || taskDetails.applicationTypeId === "LTI"} >
+                                    <FormGroup>
                                         <Label>Entitled Team</Label>
                                         <InputGroup>
                                             <Input id="teamId" onChange={this.handleChange("teamId")} value={taskDetails.teamId} type="select">
@@ -1322,9 +1330,13 @@ class EditRequest extends Component {
                                             </Input>
                                             {/* <FormFeedback>Invalid Entitled Team Selected</FormFeedback> */}
                                         </InputGroup>
+                                        <InputGroup>
+                                            {taskDetails.applicationTypeId === "LTI"
+                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Entitled Team', taskDetails.teamId, 'required')}</small>
+                                                : null}
+                                        </InputGroup>
                                     </FormGroup>
-                                    : null
-                                }
+                                </Collapse>
                                 <FormGroup>
                                     <Label>Chop Type</Label>
                                     <Input type="select" id="chopTypeId"
@@ -1365,6 +1377,11 @@ class EditRequest extends Component {
                                                 </InputGroupAddon>
                                                 <Input id="documentTableLTU" disabled />
                                                 {/* <FormFeedback>Invalid Input a valid Document Name</FormFeedback> */}
+                                            </InputGroup>
+                                            <InputGroup>
+                                                {taskDetails.applicationTypeId === "LTU"
+                                                    ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Documents', taskDetails.documents, 'required')}</small>
+                                                    : null}
                                             </InputGroup>
                                             <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
                                                 <ModalHeader className="center"> Select Documents </ModalHeader>
@@ -1509,6 +1526,11 @@ class EditRequest extends Component {
                                                     </FormGroup>
                                                 </Col>
                                             </Row>
+                                            <InputGroup>
+                                                {taskDetails.applicationTypeId !== "LTU"
+                                                    ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Documents', taskDetails.documents, 'required')}</small>
+                                                    : null}
+                                            </InputGroup>
                                             <Collapse isOpen={taskDetails.documents.length !== 0}>
                                                 <div className="tableWrap">
                                                     <Table hover bordered responsive size="sm">
@@ -1545,9 +1567,7 @@ class EditRequest extends Component {
                                             </Collapse>
                                         </div>}
                                 </FormGroup>
-                                <InputGroup>
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Names', taskDetails.documents, 'required')}</small>
-                                </InputGroup>
+
                                 <FormGroup>
                                     <Label>Purpose of Use</Label>
                                     <InputGroup>
@@ -1559,17 +1579,18 @@ class EditRequest extends Component {
                                     </InputGroup>
                                 </FormGroup>
 
-                                {!taskDetails.applicationTypeId === "LTI"
-                                    ? <FormGroup>
+                                <Collapse isOpen={taskDetails.applicationTypeId !== "LTI"}>
+                                    <FormGroup>
                                         <Label>Connecting Chop (骑缝章) </Label>
                                         <Row />
                                         <AppSwitch id="connectChop" dataOn={'yes'} onChange={this.toggleConnection} checked={taskDetails.connectChop === "Y"} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
-                                        <InputGroup>
+                                        {/* <InputGroup>
                                             <small style={{ color: '#F86C6B' }} >{this.validator.message('Connecting Chop', taskDetails.connectChop, 'required')}</small>
-                                        </InputGroup>
+                                        </InputGroup> */}
                                     </FormGroup>
-                                    : ""}
-                                <Collapse isOpen={!taskDetails.applicationTypeId === "LTI"}>
+                                    {/* </Collapse>
+
+                                <Collapse isOpen={!taskDetails.applicationTypeId === "LTI"}> */}
                                     <FormGroup>
                                         <Label>Number of Pages to Be Chopped</Label>
                                         <InputGroup>
@@ -1577,19 +1598,21 @@ class EditRequest extends Component {
                                             {/* <FormFeedback>Invalid Number of pages </FormFeedback> */}
                                         </InputGroup>
                                         <InputGroup>
-                                            <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages', taskDetails.numOfPages, 'required')}</small>
+                                            {taskDetails.applicationTypeId !== "LTI"
+                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages to be Chopped', taskDetails.numOfPages, 'required')}</small>
+                                                : null}
                                         </InputGroup>
                                     </FormGroup>
                                 </Collapse>
 
-                                {taskDetails.applicationTypeId !== "LTU" && taskDetails.applicationTypeId !== "LTI"
-                                    ? <FormGroup>
+                                <Collapse isOpen={taskDetails.applicationTypeId !== "LTU" && taskDetails.applicationTypeId !== "LTI"}>
+                                    <FormGroup>
                                         <Label>Use in Office</Label>
                                         <Row />
                                         <AppSwitch onChange={this.toggleUIO} checked={taskDetails.isUseInOffice === "Y"} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label dataOn={'yes'} dataOff={'no'} />
                                     </FormGroup>
-                                    : null
-                                }
+                                </Collapse>
+
                                 <Collapse isOpen={!editRequestForm.collapseUIO}>
                                     <FormGroup visibelity="false" >
                                         <Label>Return Date</Label>
@@ -1600,9 +1623,10 @@ class EditRequest extends Component {
                                             onChange={this.dateChange("returnDate", "dateView2")}
                                             minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                                     </FormGroup>
-                                    {!editRequestForm.collapseUIO ? <InputGroup>
-                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', taskDetails.returnDate, 'required')}</small>
-                                    </InputGroup> : null}
+                                    {!editRequestForm.collapseUIO
+                                        ? <InputGroup>
+                                            <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', taskDetails.returnDate, 'required')}</small>
+                                        </InputGroup> : null}
 
                                     <FormGroup>
                                         <Label>Responsible Person <i className="fa fa-user" /></Label>
@@ -1620,6 +1644,7 @@ class EditRequest extends Component {
                                             <small style={{ color: '#F86C6B' }} >{this.validator.message('Responsible Person', taskDetails.responsiblePerson, 'required')}</small>
                                         </InputGroup> : null}
                                 </Collapse>
+
                                 <FormGroup>
                                     <Label>Address to</Label>
                                     <InputGroup>
@@ -1630,7 +1655,8 @@ class EditRequest extends Component {
                                         <small style={{ color: '#F86C6B' }} >{this.validator.message('Address To', taskDetails.addressTo, 'required')}</small>
                                     </InputGroup>
                                 </FormGroup>
-                                <Collapse isOpen={!taskDetails.applicationTypeId === "LTI"}>
+
+                                <Collapse isOpen={taskDetails.applicationTypeId !== "LTI"}>
                                     <FormGroup>
                                         <Label>Pick Up By <i className="fa fa-user" /> </Label>
                                         <AsyncSelect
@@ -1642,13 +1668,14 @@ class EditRequest extends Component {
                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         />
                                         <InputGroup>
-                                            <small style={{ color: '#F86C6B' }} >{this.validator.message('Pick Up By', taskDetails.pickUpBy, 'required')}</small>
+                                            {taskDetails.applicationTypeId !== "LTI"
+                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Pick Up By', taskDetails.pickUpBy, 'required')}</small>
+                                                : null}
                                         </InputGroup>
-                                        <InputGroup>
-                                            {/* <FormFeedback>Please enter a valid name to search</FormFeedback> */}
-                                        </InputGroup>
+
                                     </FormGroup>
                                 </Collapse>
+
                                 <FormGroup>
                                     <Label>Remark</Label>
                                     <InputGroup>
@@ -1660,23 +1687,29 @@ class EditRequest extends Component {
                                     </InputGroup>
                                 </FormGroup>
 
-                                {taskDetails.applicationTypeId === "LTI"
-                                    ? <FormGroup>
+                                <Collapse isOpen={taskDetails.applicationTypeId === "LTI" || taskDetails.applicationTypeId === "LTU"}>
+                                    <FormGroup>
                                         <Label>Document Check By <i className="fa fa-user" /></Label>
                                         <AsyncSelect
                                             id="documentCheckBy"
-                                            loadOptions={this.loadOptionsDept}
-                                            isMulti
-                                            value={selectedDocCheckBy}
-                                            onChange={this.handleSelectOption("documentCheckBy")}
+                                            loadOptions={taskDetails.applicationTypeId === "LTI" ? this.loadOptionsDept : this.loadOptionsDocCheck}
+                                            isMulti={taskDetails.applicationTypeId === "LTI" ? true : false}
+                                            value={taskDetails.applicationTypeId === "LTI" ? selectedDocCheckBy : docCheckBy[taskDetails.docCheckByOption]}
+                                            onChange={this.handleSelectOption(taskDetails.applicationTypeId === "LTI" ? "documentCheckBy" : "documentCheckBy1")}
                                             menuPortalTarget={document.body}
                                             components={animatedComponents}
-                                            styles={this.state.deptHeadSelected === null ? reactSelectControl : ""}
-                                        /> </FormGroup>
-                                    : null}
+                                            styles={taskDetails.applicationTypeId === "LTI" ? this.state.deptHeadSelected === null ? reactSelectControl : "" : { menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        />
+                                        <InputGroup>
+                                            {taskDetails.applicationTypeId === "LTI" || taskDetails.applicationTypeId === "LTU"
+                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Check By', taskDetails.documentCheckBy, 'required')}</small>
+                                                : null}
+                                        </InputGroup>
+                                    </FormGroup>
+                                </Collapse>
 
-                                {taskDetails.applicationTypeId === "CNIPS"
-                                    ? <FormGroup>
+                                <Collapse isOpen={taskDetails.applicationTypeId === "CNIPS"}>
+                                    <FormGroup>
                                         <Label>Contract Signed By: <i className="fa fa-user" /></Label>
                                         <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
                                         <Row>
@@ -1690,7 +1723,9 @@ class EditRequest extends Component {
                                                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                                 />
                                                 <InputGroup>
-                                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Contract Signed By ', taskDetails.contractSignedByFirstPerson, 'required')}</small>
+                                                    {taskDetails.applicationTypeId === "CNIPS"
+                                                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Contract Signed By: ', taskDetails.contractSignedByFirstPerson, 'required')}</small>
+                                                        : null}
                                                 </InputGroup>
                                             </Col>
                                             <Col>
@@ -1703,47 +1738,51 @@ class EditRequest extends Component {
                                                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                                 />
                                                 <InputGroup>
-                                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Contract Signed By', taskDetails.contractSignedBySecondPerson, 'required')}</small>
+                                                    {taskDetails.applicationTypeId === "CNIPS"
+                                                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Contract Signed By: ', taskDetails.contractSignedBySecondPerson, 'required')}</small>
+                                                        : null}
                                                 </InputGroup>
                                             </Col>
                                         </Row>
                                     </FormGroup>
+                                </Collapse>
 
-                                    : taskDetails.applicationTypeId === "LTU"
-                                        ? <FormGroup>
-                                            <Label>Document Check By <i className="fa fa-user" /></Label>
-                                            <AsyncSelect
-                                                id="documentCheckBy"
-                                                menuPortalTarget={document.body}
-                                                onChange={this.handleSelectOption("documentCheckBy1")}
-                                                loadOptions={this.loadOptionsDocCheck}
-                                                value={docCheckBy[taskDetails.docCheckByOption]}
-                                                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
-                                            <InputGroup>
-                                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Check By', taskDetails.documentCheckBy, 'required')}</small>
-                                            </InputGroup>
-                                        </FormGroup>
-                                        : <FormGroup>
-                                            <Label>Department Heads <i className="fa fa-user" /></Label>
-                                            <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.legalName} entity</small>
-                                            <AsyncSelect
-                                                id="departmentHeads"
-                                                loadOptions={this.loadOptionsDept}
-                                                isMulti
-                                                value={selectedDeptHeads}
-                                                onChange={this.handleSelectOption("departmentHeads")}
-                                                menuPortalTarget={document.body}
-                                                components={animatedComponents}
-                                                styles={taskDetails.deptHeadSelected === null ? reactSelectControl : ""} />
-                                            <InputGroup>
-                                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Department Head', taskDetails.departmentHeads, 'required')}</small>
-                                            </InputGroup>
-                                            {taskDetails.deptHeadSelected === null
-                                                ? <small style={{ color: '#F86C6B' }}>Please select a Department Head</small>
-                                                : ""
-                                            }
-                                        </FormGroup>
-                                }
+                                {/* <Collapse isOpen={taskDetails.applicationTypeId === "LTU"}>
+                                    <FormGroup>
+                                        <Label>Document Check By <i className="fa fa-user" /></Label>
+                                        <AsyncSelect
+                                            id="documentCheckBy"
+                                            menuPortalTarget={document.body}
+                                            onChange={this.handleSelectOption("documentCheckBy1")}
+                                            loadOptions={this.loadOptionsDocCheck}
+                                            value={docCheckBy[taskDetails.docCheckByOption]}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
+                                        <InputGroup>
+                                            <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Check By', taskDetails.documentCheckBy, 'required')}</small>
+                                        </InputGroup>
+                                    </FormGroup>
+                                </Collapse> */}
+
+                                <Collapse isOpen={taskDetails.applicationTypeId === "STU" || taskDetails.applicationTypeId === "LTI"}>
+                                    <FormGroup>
+                                        <Label>Department Heads <i className="fa fa-user" /></Label>
+                                        <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.legalName} entity</small>
+                                        <AsyncSelect
+                                            id="departmentHeads"
+                                            loadOptions={this.loadOptionsDept}
+                                            isMulti
+                                            value={selectedDeptHeads}
+                                            onChange={this.handleSelectOption("departmentHeads")}
+                                            menuPortalTarget={document.body}
+                                            components={animatedComponents}
+                                            styles={taskDetails.deptHeadSelected === null ? reactSelectControl : ""} />
+                                        <InputGroup>
+                                            {taskDetails.applicationTypeId === "STU" || taskDetails.applicationTypeId === "LTI"
+                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Department Heads', taskDetails.departmentHeads, 'required')}</small>
+                                                : null}
+                                        </InputGroup>
+                                    </FormGroup>
+                                </Collapse>
 
                                 <Col md="16">
                                     <FormGroup check>
