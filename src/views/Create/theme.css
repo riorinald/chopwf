@@ -9,6 +9,11 @@
   width: 1200px;
 }
 
+.css-1pahdxg-control{
+  border-color: #F86C6B;
+
+}
+
 .react-autosuggest__input {
   width: 240px;
   height: 100%;
@@ -59,6 +64,10 @@
 
 .react-autosuggest__suggestion--highlighted {
   background-color: #3187e0;
+}
+
+.custom-file{
+  overflow: hidden;
 }
 
 .custom-file-input:lang(en) ~ .custom-file-label::after {

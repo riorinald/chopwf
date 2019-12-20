@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import carImg from "../../assets/img/carousel.png";
+// import carImg from "../../assets/img/carousel.png";
 import editIcon from "../../assets/img/edit.png";
 import {
     Card,
@@ -17,48 +17,23 @@ import {
     CarouselCaption,
     CardHeader,
     ListGroup,
-    ListGroupItem
+    ListGroupItem,
+    CustomInput
 
 } from 'reactstrap';
 import { tsExpressionWithTypeArguments } from '@babel/types';
+import Axios from 'axios';
 
-const test = (
-    <h5> another example </h5>
-);
 class Instruction extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            workflow: "MBAFC WORKFLOWS USER INSTRUCTIONS",
-            summary: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse in dolor sapien./ Sed vitae massa eu ex finibus bibendum non id eros. Donec commodo facilisis luctus. Fusce mi sem, condimentum in diam et, ultrices malesuada lorem. Fusce vitae elit elit. Maecenas eu mi at tellus consequat scelerisque ac vitae mi. Nullam rutrum finibus sodales. Donec egestas aliquet dui, et laoreet lorem tempus eget. Duis cursus lacus quis venenatis venenatis. Proin luctus lacus ac tincidunt gravida. Praesent cursus at odio quis mattis. Nulla facilisi. Integer suscipit efficitur pulvinar. Nunc lacinia commodo neque at mollis. Aenean turpis arcu, pellentesque eget metus nec, ullamcorper congue felis.",
-            applicantInstructions: ["Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                "Nulla nec sem accumsan lorem posuere euismod non vel nulla.",
-                "Cras suscipit tortor quis vestibulum ullamcorper.",
-                "Fusce nec mi et turpis molestie facilisis vel id odio.",
-                "Nunc non mauris sit amet ipsum varius facilisis eu ut enim."],
-            approverInstructions: ["Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                "Nulla nec sem accumsan lorem posuere euismod non vel nulla.",
-                "Cras suscipit tortor quis vestibulum ullamcorper.",
-                "Fusce nec mi et turpis molestie facilisis vel id odio.",
-                "Nunc non mauris sit amet ipsum varius facilisis eu ut enim."],
-            screenshots: [
-                {
-                    src: carImg,
-                    altText: 'Slide 1',
-                    caption: 'Slide 1'
-                },
-                {
-                    src: 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22800%22%20height%3D%22400%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20800%20400%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_15ba800aa20%20text%20%7B%20fill%3A%23444%3Bfont-weight%3Anormal%3Bfont-family%3AHelvetica%2C%20monospace%3Bfont-size%3A40pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_15ba800aa20%22%3E%3Crect%20width%3D%22800%22%20height%3D%22400%22%20fill%3D%22%23666%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22247.3203125%22%20y%3D%22218.3%22%3ESecond%20slide%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E',
-                    altText: 'Slide 2',
-                    caption: 'Slide 2'
-                },
-                {
-                    src: 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22800%22%20height%3D%22400%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20800%20400%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_15ba800aa21%20text%20%7B%20fill%3A%23333%3Bfont-weight%3Anormal%3Bfont-family%3AHelvetica%2C%20monospace%3Bfont-size%3A40pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_15ba800aa21%22%3E%3Crect%20width%3D%22800%22%20height%3D%22400%22%20fill%3D%22%23555%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22277%22%20y%3D%22218.3%22%3EThird%20slide%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E',
-                    altText: 'Slide 3',
-                    caption: 'Slide 3'
-                }
-
-            ],
+            instructions: {},
+            workflow: `${this.props.legalName} WORKFLOWS USER INSTRUCTIONS`,
+            summary: "",
+            applicantInstructions: [],
+            approverInstructions: [],
+            screenshots: [],
             activeIndex: 0,
             height: 0,
             width: 0,
@@ -72,9 +47,13 @@ class Instruction extends Component {
         this.onExiting = this.onExiting.bind(this);
         this.onExited = this.onExited.bind(this);
         this.makeEditable = this.makeEditable.bind(this);
+        this.getInstructions = this.getInstructions.bind(this);
+        this.handleChange = this.handleChange.bind(this);
+        this.handleFileUpload = this.handleFileUpload.bind(this);
     };
 
     componentDidMount() {
+        this.getInstructions()
         this.updateWindowDimensions();
         window.addEventListener("resize", this.updateWindowDimensions.bind(this));
     }
@@ -83,6 +62,27 @@ class Instruction extends Component {
     }
     updateWindowDimensions() {
         this.setState({ width: window.innerWidth, height: window.innerHeight });
+    }
+
+    async getInstructions() {
+        const response = await Axios.get('http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/2')
+        let instructions = response.data
+        this.setState({ summary: instructions.summary, applicantInstructions: instructions.section1, approverInstructions: instructions.section2 })
+        instructions.screenshot.map((shot, index) => {
+            let obj = {
+                name: `Screenshot ${index + 1}`,
+                src: shot,
+                altText: `Slide ${index + 1}`,
+                caption: `Slide ${index + 1}`
+            }
+            this.setState(state => {
+                const screenshots = state.screenshots.concat(obj)
+                return {
+                    screenshots
+                }
+            })
+
+        })
     }
 
     onExiting() {
@@ -151,17 +151,61 @@ class Instruction extends Component {
         })
     }
 
+    handleChange(event) {
+        let name = event.target.name
+        this.setState({ [name]: event.target.value })
+    }
+
+    handleList = index => event => {
+        let name = event.target.name
+        let value = event.target.value
+        if (name === "applicantInstructions") {
+            this.setState(state => {
+                const applicantInstructions = this.state.applicantInstructions
+                applicantInstructions[index] = value
+                return applicantInstructions
+            })
+
+        }
+        else {
+            this.setState(state => {
+                const approverInstructions = this.state.approverInstructions
+                approverInstructions[index] = value
+                return approverInstructions
+            })
+        }
+    }
+
+    handleFileUpload(event) {
+        let file = null
+        if (event.target.files[0]) {
+            file = URL.createObjectURL(event.target.files[0])
+        }
+        let length = this.state.screenshots.length + 1
+        const obj = {
+            name: `Screenshot ${length}`,
+            src: file,
+            altText: `Slide ${length}`,
+            caption: `Slide ${length}`
+        }
+        this.setState(state => {
+            const screenshots = this.state.screenshots.concat(obj)
+            return {
+                screenshots
+            }
+        })
+    }
 
     render() {
         const applicantInstructions = this.state.applicantInstructions.map((instruction, index) =>
-            <li key={index}>{instruction}</li>)
+            <li key={index + "applicant"}>{instruction}</li>)
         const applicantInstructionsEditable = <div>{this.state.applicantInstructions.map((instruction, index) =>
-            <li key={index}><Form style={{ display: "flex" }}><Input type="text" name="applicantInstructions" defaultValue={instruction}></Input><Button color="danger " onClick={() => this.deleteApplicantInstruction(index)}>Delete</Button></Form><br /></li>)}<Button onClick={this.addApplicantInstruction}>Add new instruction for applicants</Button></div>
+            <li key={index + "applicant"}><Form style={{ display: "flex" }}><Input onChange={this.handleList(index)} type="text" name="applicantInstructions" value={instruction}></Input><Button color="danger " onClick={() => this.deleteApplicantInstruction(index)}>Delete</Button></Form><br /></li>)}<Button onClick={this.addApplicantInstruction}>Add new instruction for applicants</Button></div>
         // <img onClick={() => this.deleteApplicantInstruction(index)} width="17px" height="17px" src={deleteIcon} />
         const approverInstructions = this.state.approverInstructions.map((instruction, index) =>
-            <li key={index}>{instruction}</li>)
+            <li key={index + "approver"}>{instruction}</li>)
         const approverInstructionsEditable = <div>{this.state.approverInstructions.map((instruction, index) =>
-            <li key={index}><Form style={{ display: "flex" }}><Input type="text" name="approverInstructions" defaultValue={instruction}></Input><Button color="danger " onClick={() => this.deleteApproverInstruction(index)}>Delete</Button></Form><br /></li>)}<Button onClick={this.addApproverInstruction}>Add new instruction for Approvers</Button></div>
+            <li key={index + "approver"}><Form style={{ display: "flex" }}><Input type="text" name="approverInstructions" defaultValue={instruction}></Input><Button color="danger " onClick={() => this.deleteApproverInstruction(index)}>Delete</Button></Form><br /></li>)}<Button onClick={this.addApproverInstruction}>Add new instruction for Approvers</Button></div>
         // const { activeIndex } = this.state;
         const slides = this.state.screenshots.map((item) => {
             return (
@@ -178,7 +222,7 @@ class Instruction extends Component {
         const summary = this.state.summary;
         const summaryEditable = <Form>
             <Label>Edit User Instructions</Label>
-            <Input style={{ height: "150px" }} type="textarea" name="summary" defaultValue={this.state.summary}></Input>
+            <Input style={{ height: "150px" }} type="textarea" onChange={this.handleChange} name="summary" value={this.state.summary}></Input>
         </Form>
         const Edit = <img onClick={this.makeEditable} width="20px" src={editIcon} />
         const Apply = <Button color="success" onClick={this.makeEditable}>APPLY</Button>
@@ -193,15 +237,17 @@ class Instruction extends Component {
             <CarouselControl direction="next" directionText="Next" onClickHandler={this.next} />
         </Carousel>
         const editScreenShots =
-            <div><ListGroup>
-                <ListGroupItem>Screenshot 1</ListGroupItem>
-                <ListGroupItem>Screenshot 2</ListGroupItem>
-                <ListGroupItem>Screenshot 3</ListGroupItem></ListGroup><br/>
-                <Input type="file"></Input>
+            <div>
+                <ListGroup>
+                    {this.state.screenshots.map((shot, index) =>
+                        <ListGroupItem key={index} > {shot.name} </ListGroupItem>
+                    )}
+                </ListGroup><br />
+                <CustomInput id="screenshot" type="file" onChange={this.handleFileUpload} ></CustomInput>
             </div>
 
         return (
-            <div>
+            <div className="animated fadeIn">
                 <h2>User Instructions</h2>
                 <Card >
                     <CardHeader><h5 style={{ float: "left" }}>{this.state.workflow}</h5>

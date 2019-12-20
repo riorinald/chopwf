@@ -12,13 +12,15 @@
 .boxs {
     background-color: #4dbd74;
     border-color: #4dbd74;
+    border-radius: 3px;
+    padding: 2px;
 }
 .bottom-border{
     margin: 25px 0;
     height: 1px;
     border: 0;
     background: black;
-    background: -webkit-gradient(linear, 0 0, 100% 0, from(white), to(white), color-stop(50%, black));
+    background: -webkit-gradient(linear, 0 0, 100% 0, from(white), to(white), color-stop(50%,#ababab ));
 }
 .btn-outline-white {
     color: #fcfcfc;
@@ -30,21 +32,97 @@
     border-color: #ffc107;
 }
 .img-avaa {
-    width: 100%;
-    height: auto;
-    margin-left: 1em;
+    width: 90%;
+    // height: auto;
     border-radius: 50%;
+    margin-left: 1em;
 }
-@media only screen and (max-width: 720px) {
+@media only screen and (max-width: 780px) {
     .img-avaa {
-        width: 40%;
+        width: 20%;
         height: auto;
-        margin-left: 1em;
         border-radius: 50%;
+        margin-left: 0em;
     }
   }
 
 .suggestBox {
     border-spacing: 0px;
     margin:0px
+}
+
+.notValid {
+    border-color: #f86c6b;
+    border-radius: 4px;
+    border-width: 1px;
+    border-style: solid;
+    padding: 2px;
+}
+
+.isValid {
+    border-color: #4dbd74;
+    border-radius: 4px;
+    border-width: 1px;
+    border-style: solid;
+    padding: 2px;
+   }
+
+.customMT {
+    margin-bottom: 11px;
+}
+
+.transparentBg {
+    background-color: transparent
+}
+
+.blurredBg {
+    // background: url('');
+     background-size:cover;
+    -webkit-filter: blur(13px);
+    -moz-filter: blur(13px);
+    -o-filter: blur(13px);
+    -ms-filter: blur(13px);
+    filter: blur(13px);
+    position:absolute;
+    width:100%;
+    height:100%;
+}
+
+.ReactTable .rt-tr .action {
+    transition: all .2s ease;
+    text-align: center;
+    transform: scale(0);
+}
+
+.ReactTable .rt-tr:hover .action {
+    transform: scale(1.3)
+}
+
+.ReactTable .rt-tr:hover .rt-td {
+    background: skyblue 
+}
+
+
+table {
+    border: 1px solid black;
+    table-layout: auto; 
+    width: 100% !important
+}
+
+th, td {
+    border: 1px solid black;
+    min-width: 1px;
+    max-width: 50px;
+}
+
+.smallTd{
+    width: 1px;
+    text-align: center; 
+    vertical-align: middle;
+}
+
+.mediumTd{
+    width: 8rem;
+    text-align: center; 
+    vertical-align: middle;
 }

@@ -1,11 +1,11 @@
 {
-  "name": "@coreui/coreui-free-react-admin-template",
-  "version": "2.6.0",
-  "description": "CoreUI React Open Source Bootstrap 4 Admin Template",
-  "author": "Łukasz Holeczek",
-  "homepage": "https://coreui.io",
-  "copyright": "Copyright 2017-2019 creativeLabs Łukasz Holeczek",
-  "license": "MIT",
+  "name": "chop-workflow",
+  "version": "0.0.0",
+  "description": "Workflow system for request chop",
+  "author": "",
+  "homepage": "",
+  "copyright": "",
+  "license": "",
   "private": true,
   "repository": {
     "type": "git",
@@ -27,14 +27,16 @@
     "font-awesome": "^4.7.0",
     "jwt-decode": "^2.2.0",
     "node-sass": "^4.12.0",
+    "papaparse": "^5.1.0",
     "prop-types": "^15.7.2",
     "react": "^16.10.2",
     "react-app-polyfill": "^1.0.4",
     "react-autosuggest": "^9.4.3",
     "react-chartjs-2": "^2.8.0",
     "react-cookie": "^4.0.1",
-    "react-datepicker": "^2.9.6",
+    "react-csv": "^1.1.2",
     "react-data-grid": "^6.1.0",
+    "react-datepicker": "^2.9.6",
     "react-dom": "^16.10.2",
     "react-file-viewer": "^1.1.0",
     "react-input-mask": "^3.0.0-alpha.0",
@@ -60,7 +62,7 @@
     "eject": "react-scripts eject"
   },
   "bugs": {
-    "url": "https://github.com/coreui/coreui-free-react-admin-template/issues"
+    "url": "https://github.com/riorinald/chopwf"
   },
   "eslintConfig": {
     "extends": "react-app"

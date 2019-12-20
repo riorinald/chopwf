@@ -11,7 +11,7 @@ export default {
     },
     {
       name: 'My Application',
-      url: '/Myapps',
+      url: '/myapps',
       icon: 'icon-layers'
     },
     {
@@ -23,7 +23,7 @@ export default {
       name: 'User Instruction',
       url: '/instruction',
       icon: 'fa fa-info-circle',
-      class: 'mt-auto',
+      class: 'mt-auto IE-margin-top',
       // variant: 'success',
       // attributes: { target: '_blank', rel: "noopener" },
     },

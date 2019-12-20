@@ -1,20 +1,30 @@
 import React, { Component } from 'react';
+import { findDOMNode } from 'react-dom';
 import { AppSwitch } from '@coreui/react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import FileViewer from 'react-file-viewer';
-import Autosuggest from 'react-autosuggest';
 import theme from './theme.css'
 import deleteBin from '../../assets/img/deletebin.png'
 import InputMask from "react-input-mask";
 import AsyncSelect from 'react-select/async';
+import makeAnimated from 'react-select/animated';
 import SimpleReactValidator from 'simple-react-validator';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import ReactDataGrid from 'react-data-grid';
-import {LTI} from './AppType'
+import { addDays } from 'date-fns';
+import config from '../../config';
+import { STU, LTU, LTI, CNIPS } from '../../config/validation';
+import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
+import ReactTable from "react-table";
+import "react-table/react-table.css"
+import selectTableHOC from "react-table/lib/hoc/selectTable";
+import PropTypes from "prop-types";
+import LegalEntity from '../../context';
+// import Skeleton from 'react-loading-skeleton';
+
 
 import {
+  Badge,
   Button,
   CustomInput,
   Card,
@@ -23,37 +33,51 @@ import {
   CardHeader,
   Col,
   Collapse,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
   Form,
   FormGroup,
   Input,
   InputGroup,
-  InputGroupAddon,
   InputGroupText,
+  InputGroupAddon,
+  InputGroupButtonDropdown,
   Label,
   Modal,
   ModalHeader,
   ModalBody,
   ModalFooter,
   Row,
-  FormFeedback,
   Table,
-  Spinner
+  Tooltip,
+  UncontrolledTooltip,
 } from 'reactstrap';
-import { file, thisExpression } from '@babel/types';
-import { string } from 'prop-types';
 
-//notes can be updated by text only or editable in HTML editor
-const notes = <p>如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。
-  For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly.
-  If you have any questions regarding the application process, please feel free to contact HR. </p>;
+
+const SelectTable = selectTableHOC(ReactTable);
+
+const animatedComponents = makeAnimated();
+
 
 class Create extends Component {
+
+  static defaultProps = {
+    keyField: "documentId"
+  };
+
+  static propTypes = {
+    keyField: PropTypes.string
+  };
+
   constructor(props) {
     super(props);
     this.state = {
 
-      // legalEntity: this.props.legalName,
+      selectAll: false,
+      selection: [],
 
+      legalName: this.props.legalName,
       //retrieve from department Types Table
       department: [],
       //retrieve from application types table
@@ -65,16 +89,14 @@ class Create extends Component {
       deptHead: [],
       teams: [],
       branches: [],
+      viewContract: false,
       collapse: true,
-      fadeIn: true,
       modal: false,
-      timeout: 300,
       valid: false,
       inOffice: false,
-      dropdownOpen: false,
-      setDropdownOpen: false,
 
       users: [],
+      docCheckBy: [],
 
       CNIPS: false,
 
@@ -87,16 +109,15 @@ class Create extends Component {
       deptSelected: "",
       appTypeSelected: "",
       chopTypeSelected: "",
-      docName: "",
       returnDate: "",
       resPerson: "",
       purposeOfUse: "",
-      numOfPages: 0,
+      numOfPages: "",
       addressTo: "",
       pickUpBy: "",
       remarks: "",
       deptHeadSelected: [],
-      contractSignedBy: "",
+      docCheckByLTI: [],
       contractSign1: "",
       contractSign2: "",
       effectivePeriod: "",
@@ -104,352 +125,203 @@ class Create extends Component {
       fileName: "Choose File",
       teamSelected: "",
       connectingChop: false,
+      docCheckBySelected: "",
+      branchSelected: "",
 
       documentTableLTI: [],
       documentTableLTU: [],
+      documentTableCNIPS: [],
       selectedDocs: [],
       documents: [],
 
       agreeTerms: false,
-      showDocAttach: false,
-      showDocDropdown: false,
-      showTeams: false,
       showBranches: false,
 
+      contractNumber: "",
+      conNum: [],
       engName: "",
       cnName: "",
       docSelected: null,
       docAttachedName: "Choose File",
 
-      refNum: 0,
-
       showDoc: false,
-
-      docSelectedLTU: "",
-
-      docPreview: null,
-      fileURL: "",
-      fileType: "",
-
       hover: false,
+
+      isSTU: false,
+      isLTU: false,
+      isLTI: false,
+      isCNIPS: false,
+
+      tooltipOpen: false,
+
+      dateView1: "",
+      dateView2: "",
 
       reqInfo: [
         { id: "deptSelected", valid: false },
         { id: "appTypeSelected", valid: false },
-        // { id: "contractNum", valid: false },
         { id: "chopTypeSelected", valid: false },
-        // { id: "docName", valid: false },
-        // { id: "returnDate", valid: false },
-        // { id: "resPerson", valid: false },
         { id: "purposeOfUse", valid: false },
-        // { id: "numOfPages", valid: false },
         { id: "addressTo", valid: false },
         { id: "pickUpBy", valid: false },
+        { id: "numOfPages", valid: false },
         { id: "remarks", valid: false },
-        // { id: "deptHeadSelected", valid: false },
-        // { id: "contractSign1", valid: false },
-        // { id: "contractSign2", valid: false },
-        // { id: "selectedFile", valid: false }
+        { id: "deptHeadSelected", valid: false },
+        { id: "documentTableLTI", valid: false },
       ],
-      suggestions: [],
-      isLoading: false,
-      lastReq: ""
+      validateForm: [],
+      noteInfo: [],
+      inputMask: [],
+      selectInfo: ''
+
     };
 
 
     //binding method for button
     this.toggle = this.toggle.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
-    this.agreeTerm = this.agreeTerm.bind(this);
+    this.handleAgreeTerm = this.handleAgreeTerm.bind(this);
     this.submitRequest = this.submitRequest.bind(this);
     this.validate = this.validate.bind(this);
     this.addDocumentLTI = this.addDocumentLTI.bind(this);
     this.addDocumentLTU = this.addDocumentLTU.bind(this);
-    this.saveRequest = this.saveRequest.bind(this);
     this.toggleHover = this.toggleHover.bind(this);
-    this.addDocCheck = this.addDocCheck.bind(this);
-    // this.selectAll = this.selectAll.bind(this);
-    this.handleDeptHead = this.handleDeptHead.bind(this);
+    this.handleSelectOption = this.handleSelectOption.bind(this);
     this.isValid = this.isValid.bind(this);
     this.checkDept = this.checkDept.bind(this);
-    this.deleteDocument = this.deleteDocument.bind(this);
 
-    this.validator = new SimpleReactValidator({autoForceUpdate: this});
+    this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
-    this.toggleConnection = this.toggleConnection.bind(this)
-    this.getDocuments = this.getDocuments.bind(this)
+    this.toggleConnection = this.toggleConnection.bind(this);
+    this.getDocuments = this.getDocuments.bind(this);
+    this.addContract = this.addContract.bind(this);
   };
 
   componentDidMount() {
-    //Get User Details
-
+    this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
     this.getUserData();
-    this.getData("department", 'http://192.168.1.47/echopx/api/v1/departments');
-    this.getData("applicationTypes", 'http://192.168.1.47/echopx/api/v1/apptypes');
-    this.getData("chopTypes", 'http://192.168.1.47/echopx/api/v1/choptypes?companyid=' + this.props.legalName);
-    this.getDeptHead(this.props.legalName)
-    this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, this.state.teamSelected)
+    this.getData("department", `${config.url}/departments`);
+    this.getData("applicationTypes", `${config.url}/apptypes`);
+    this.getData("chopTypes", `${config.url}/choptypes?companyid=` + this.props.legalName);
+    resetMounted.setMounted()
 
-    
+
   }
 
-  // toggle = () => setDropdownOpen(prevState => !prevState);
+  // componentWillReceiveProps() {
+  //   this.forceUpdate()
+  // }
 
   validate() {
-    // let currentDate = new Date().getDate() + "/" + new Date().getMonth() + "/" + new Date().getFullYear();
-    // console.log(currentDate)
-    // console.log(this.state.returnDate)
-    for (let i = 0; i < this.state.reqInfo.length; i++) {
-      if (this.state[this.state.reqInfo[i].id].length !== 1 && this.state[this.state.reqInfo[i].id] !== "") {
-        this.setState(state => {
-          const reqInfo = state.reqInfo.map((item, j) => {
-            if (j === i) {
-              var valid = document.getElementById(this.state.reqInfo[i].id)
-              valid.className = "form-control"
-              return { id: item.id, valid: true }
-            }
-            else {
-              return item
-            }
-          })
-          return {
-            reqInfo
-          }
-        })
-      }
-      else {
-        this.setState(state => {
-          const reqInfo = state.reqInfo.map((item, j) => {
-            if (j === i) {
-              var invalid = document.getElementById(item.id)
-              invalid.className = "is-invalid form-control"
-              return { id: item.id, name: item.name, valid: false }
-            }
-            else {
-              return item
-            }
-          })
-          return {
-            reqInfo
-          }
-        })
-      }
+    let { validateForm } = this.state
+    if (validateForm.length === 0) {
+      Swal.fire({
+        type: 'info',
+        label: 'required',
+        text: 'Please select an Application Type to get started !'
+      })
     }
-    if (!this.state.collapse) {
-      let dateValid = false;
-      let resValid = false;
-      if (this.state.returnDate !== "") {
-        document.getElementById("returnDate").className = "form-control"
-        dateValid = true
+    for (let i = 0; i < validateForm.length; i++) {
+      let field = this.state[validateForm[i]]
+      var element = document.getElementById(validateForm[i])
+
+      //add any conditions for validation below
+      if (field.length !== 0 && field !== "") {
+        element.classList.contains("form-control")
+          ? element.className = "is-valid form-control"
+          : element.className = "isValid"
+        // console.log(`${validateForm[i]} is Valid`)
       }
       else {
-        document.getElementById("returnDate").className = "is-invalid form-control"
-        dateValid = false
+        element.classList.contains("form-control")
+          ? element.className = "is-invalid form-control"
+          : element.className = "notValid"
+        console.log(`${validateForm[i]} is INVALID`)
       }
-      if (this.state.resPerson !== "") {
-        document.getElementById("resPerson").className = "form-control"
-        resValid = true
-      }
-      else {
-        document.getElementById("resPerson").className = "is-invalid form-control"
-        resValid = false
-      }
-      if (dateValid && resValid) {
-        this.setState({ inOffice: true })
-      }
-      else {
-        this.setState({ inOffice: false })
-      }
-    }
-    else {
-      this.setState({ inOffice: true })
+
     }
   }
+  // validate() {
+  //   console.log(this.state.reqInfo)
+  //   for (let i = 0; i < this.state.reqInfo.length; i++) {
+  //     // console.log(this.state.reqInfo[i])
+  //     if (this.state[this.state.reqInfo[i].id].length >= 1 && this.state[this.state.reqInfo[i].id] !== "") {
+  //       // console.log(this.state.reqInfo[i].id)
+  //       this.setState(state => {
+  //         const reqInfo = state.reqInfo.map((item, j) => {
+  //           if (j === i) {
+  //             var element = document.getElementById(this.state.reqInfo[i].id)
+  //             element.classList.contains("form-control")
+  //               ? element.className = "is-valid form-control"
+  //               : element.className = "isValid"
+  //             return { id: item.id, valid: true }
+  //           }
+  //           else { return item }
+  //         })
+  //         return { reqInfo }
+  //       })
+  //     }
+  //     else {
+  //       this.setState(state => {
+  //         console.log(this.state.reqInfo[i])
+  //         const reqInfo = state.reqInfo.map((item, j) => {
+  //           if (j === i) {
+  //             var element = document.getElementById(item.id)
+  //             element.classList.contains("form-control")
+  //               ? element.className = "is-invalid form-control"
+  //               : element.className = "notValid"
+  //             return { id: item.id, name: item.name, valid: false }
+  //           }
+  //           else { return item }
+  //         })
+  //         return { reqInfo }
+  //       })
+  //     }
+  //   }
+  //   if (!this.state.collapse) {
+  //     let dateValid = false;
+  //     let resValid = false;
+  //     if (this.state.returnDate !== "") {
+  //       document.getElementById("returnDate").className = "is-valid form-control"
+  //       dateValid = true
+  //     }
+  //     else {
+  //       document.getElementById("returnDate").className = "is-invalid form-control"
+  //       dateValid = false
+  //     }
+  //     if (this.state.resPerson !== "") {
+  //       document.getElementById("resPerson").className = "isValid"
+  //       resValid = true
+  //     }
+  //     else {
+  //       document.getElementById("resPerson").className = "notValid"
+  //       resValid = false
+  //     }
+  //     if (dateValid && resValid) {
+  //       this.setState({ inOffice: true })
+  //     }
+  //     else {
+  //       this.setState({ inOffice: false })
+  //     }
+  //   }
+  //   else {
+  //     this.setState({ inOffice: true })
+  //   }
+  // }
 
   checkDept() {
-    if(this.state.deptSelected === ""){
+    if (this.state.deptSelected === "") {
       Swal.fire({
-        type:'info',
-        label:'required',
-        text:'department is required to show list of department Head'
+        type: 'info',
+        label: 'required',
+        text: 'department is required to show list of department Head'
       })
     }
   }
 
-  async agreeTerm(event) {
+  async handleAgreeTerm(event) {
     await this.validate()
-    for (let i = 0; i < this.state.reqInfo.length; i++) {
-      if (this.state.reqInfo[i].valid) {
-        this.setState({ valid: true })
-      }
-      else {
-        this.setState({ valid: false })
-        break;
-      }
-    }
-    if (this.state.valid && this.state.inOffice) {
-      this.setState({ agreeTerms: true })
-    }
-  }
-
-  async isValid(){
-    await this.validate()
-    for (let i = 0; i < this.state.reqInfo.length; i++) {
-      if (this.state.reqInfo[i].valid) {
-        this.setState({ valid: true })
-      }
-      else {
-        this.setState({ valid: false, agreeTerms:false })
-        break;
-      }
-    }
-    if (this.state.valid && this.state.inOffice) {
-      this.setState({ agreeTerms:true })
-    }
-  }
-
-  saveRequest() {
-    let Submitted = "N"
-    let useInOffice = "Y"
-    if (this.state.collapse) {
-      useInOffice = "Y"
-    }
-    else {
-      useInOffice = "N"
-    }
-    let isConnectChop = "N"
-    if (this.state.connectingChop) {
-      isConnectChop = "Y"
-    }
-    else {
-      isConnectChop = "N"
-    }
-
-    let postReq = new FormData();
-    postReq.append("UserId", this.state.userId);
-    postReq.append("CompanyId", this.props.legalName);
-    postReq.append("DepartmentId", this.state.deptSelected);
-    postReq.append("ApplicationTypeId", this.state.appTypeSelected);
-    postReq.append("ContractNum", this.state.contractNum);
-    postReq.append("ChopTypeId", this.state.chopTypeSelected);
-    postReq.append("PurposeOfUse", this.state.purposeOfUse);
-    postReq.append("NumOfPages", this.state.numOfPages);
-    postReq.append("UseInOffice", useInOffice);
-    // postReq.append("DocumentDescription", "lorem ipsum");
-    postReq.append("AddressTo", this.state.addressTo);
-    postReq.append("PickUpBy", this.state.pickUpBy);
-    postReq.append("Remark", this.state.remarks);
-    postReq.append("IsConfirmed", "");
-    postReq.append("ReturnDate", "");
-    postReq.append("ResponsiblePerson", this.state.resPerson);
-    postReq.append("ContracySignedByFirstPerson", this.state.contractSign1);
-    postReq.append("ContractSignedBySecondPerson", this.state.contractSign2);
-    postReq.append("EffectivePeriod", this.state.effectivePeriod);
-    postReq.append("IsSubmitted", Submitted);
-    postReq.append("isConnectChop", isConnectChop);
-
-    for (let i = 0; i < this.state.documentTableLTI.length; i++) {
-      postReq.append("Documents[" + i + "].Attachment.File", this.state.documentTableLTI[i].docSelected);
-      postReq.append("Documents[" + i + "].DocumentNameEnglish", this.state.documentTableLTI[i].engName);
-      postReq.append("Documents[" + i + "].DocumentNameChinese", this.state.documentTableLTI[i].cnName);
-    }
-
-    for (let i = 0; i < this.state.documentTableLTU.length; i++) {
-      postReq.append("Documents[" + i + "].id", this.state.documentTableLTI[i].documentId);
-    }
-
-
-    for (let i = 0; i < this.state.selectedFiles.length; i++) {
-      postReq.append("Attachments[" + i + "].Attachment.File", this.state.selectedFiles[i]);
-      postReq.append("Attachments[" + i + "].Remark", "Y");
-    }
-    for (let i = 0; i < this.state.deptHeadSelected.length; i++) {
-      postReq.append("DepartmentHeads[" + i + "]", this.state.deptHeadSelected[i].value);
-
-
-    }
-    this.postData(postReq)
-  }
-
-  async submitRequest(isSubmitted) {
-    let Submitted = isSubmitted
-    let useInOffice = "Y"
-    if (this.state.collapse) {
-      useInOffice = "Y"
-    }
-    else {
-      useInOffice = "N"
-    }
-
-    let isConnectChop = "N"
-    if (this.state.connectingChop) {
-      isConnectChop = "Y"
-    }
-    else {
-      isConnectChop = "N"
-    }
-
-    let postReq = new FormData();
-    postReq.append("UserId", this.state.userId);
-    postReq.append("CompanyId", this.props.legalName);
-    postReq.append("DepartmentId", this.state.deptSelected);
-    postReq.append("ApplicationTypeId", this.state.appTypeSelected);
-    postReq.append("ContractNum", this.state.contractNum);
-    postReq.append("ChopTypeId", this.state.chopTypeSelected);
-    postReq.append("PurposeOfUse", this.state.purposeOfUse);
-    postReq.append("NumOfPages", this.state.numOfPages);
-    postReq.append("UseInOffice", useInOffice);
-    postReq.append("TeamId", "TEAMA");
-    postReq.append("DocumentDescription", "lorem ipsum");
-    postReq.append("AddressTo", this.state.addressTo);
-    postReq.append("PickUpBy", this.state.pickUpBy);
-    postReq.append("Remark", this.state.remarks);
-    postReq.append("IsConfirmed", "");
-    postReq.append("ReturnDate", "");
-    postReq.append("ResponsiblePerson", this.state.resPerson);
-    postReq.append("ContracySignedByFirstPerson", this.state.contractSign1);
-    postReq.append("ContractSignedBySecondPerson", this.state.contractSign2);
-    postReq.append("EffectivePeriod", this.state.effectivePeriod);
-    postReq.append("IsSubmitted", Submitted);
-    postReq.append("isConnectChop", isConnectChop);
-
-    for (let i = 0; i < this.state.documentTableLTI.length; i++) {
-      postReq.append("Documents[" + i + "].Attachment.File", this.state.documentTableLTI[i].docSelected);
-      postReq.append("Documents[" + i + "].DocumentNameEnglish", this.state.documentTableLTI[i].engName);
-      postReq.append("Documents[" + i + "].DocumentNameChinese", this.state.documentTableLTI[i].cnName);
-
-    }
-
-    for (let i = 0; i < this.state.documentTableLTU.length; i++) {
-      postReq.append("Documents[" + i + "].id", this.state.documentTableLTI[i].documentId);
-    }
-
-    for (let i = 0; i < this.state.selectedFiles.length; i++) {
-      postReq.append("Attachments[" + i + "].Attachment.File", this.state.selectedFiles[i]);
-      postReq.append("Attachments[" + i + "].Remark", "Y");
-    }
-    for (let i = 0; i < this.state.deptHeadSelected.length; i++) {
-      postReq.append("DepartmentHeads[" + i + "]", this.state.deptHeadSelected[i].value);
-
-
-    }
-    for (var pair of postReq.entries()) {
-      console.log(pair[0] + ', ' + pair[1]);
-    }
-    if(isSubmitted === 'N' && this.validator.allValid()){
-        this.postData(postReq, isSubmitted)
-    }
-    if(this.validator.allValid() === false) {
-        Swal.fire({
-          type: 'info',
-          title: 'required',
-          text:  'The application type field is required'
-        // Object.values(JSON.parse(JSON.stringify(this.validator.getErrorMessages())))
-        })
-        this.validator.showMessages();
-    }
-    // await this.validate()
     // for (let i = 0; i < this.state.reqInfo.length; i++) {
     //   if (this.state.reqInfo[i].valid) {
     //     this.setState({ valid: true })
@@ -459,16 +331,163 @@ class Create extends Component {
     //     break;
     //   }
     // }
-    if (this.state.valid && this.state.inOffice) {
-      this.postData(postReq, isSubmitted)
+    if (this.state.validateForm.length !== 0) {
+      if (this.validator.allValid()) {
+        console.log("All Valid")
+        this.setState({ agreeTerms: true })
+      }
+      else {
+        // alert("Invalid Fields")
+        this.validator.showMessages()
+        this.forceUpdate()
+      }
     }
+    // if (this.state.valid && this.state.inOffice) {
+
+    // }
+  }
+
+  async isValid() {
+    await this.validate()
+    for (let i = 0; i < this.state.reqInfo.length; i++) {
+      if (this.state.reqInfo[i].valid) {
+        this.setState({ valid: true })
+      }
+      else {
+        this.setState({ valid: false, agreeTerms: false })
+        break;
+      }
+    }
+    if (this.state.valid && this.state.inOffice) {
+      this.setState({ agreeTerms: true })
+    }
+  }
+
+  async submitRequest(isSubmitted) {
+    let useInOffice = "Y"
+    let isConnectChop = "N"
+    let IsConfirmed = "N"
+
+    useInOffice = this.state.collapse ? "Y" : "N"
+    isConnectChop = this.state.connectingChop ? "Y" : "N"
+    IsConfirmed = this.state.agreeTerms ? "Y" : "N"
+
+    let postReq = new FormData();
+    postReq.append("UserId", this.state.userId);
+    postReq.append("EmployeeNum", this.state.employeeId);
+    postReq.append("TelephoneNum", this.state.telNumber);
+    postReq.append("CompanyId", this.props.legalName);
+    postReq.append("DepartmentId", this.state.deptSelected);
+    postReq.append("ApplicationTypeId", this.state.appTypeSelected);
+    postReq.append("ChopTypeId", this.state.chopTypeSelected);
+    postReq.append("TeamId", this.state.teamSelected);
+    postReq.append("PurposeOfUse", this.state.purposeOfUse);
+    postReq.append("NumOfPages", this.state.numOfPages);
+    postReq.append("IsUseInOffice", useInOffice);
+    postReq.append("AddressTo", this.state.addressTo);
+    postReq.append("PickUpBy", this.state.pickUpBy);
+    postReq.append("Remark", this.state.remarks);
+    postReq.append("IsConfirmed", IsConfirmed);
+    postReq.append("ReturnDate", this.state.returnDate);
+    postReq.append("ResponsiblePerson", this.state.resPerson);
+    postReq.append("ContractSignedByFirstPerson", this.state.contractSign1);
+    postReq.append("ContractSignedBySecondPerson", this.state.contractSign2);
+    postReq.append("EffectivePeriod", this.state.effectivePeriod);
+    postReq.append("IsSubmitted", isSubmitted);
+    postReq.append("isConnectChop", isConnectChop);
+    postReq.append("BranchId", this.state.branchSelected)
+
+    //Single Document Check By in LTU
+    if (this.state.isLTU) {
+      postReq.append("DocumentCheckBy[0]", this.state.docCheckBySelected)
+    }
+    //Multiple Document CHeck By in LTI
+    else if (this.state.isLTI) {
+      for (let i = 0; i < this.state.docCheckByLTI.length; i++) {
+        postReq.append(`DocumentCheckBy[${i}]`, this.state.docCheckByLTI[i].value);
+      }
+    }
+
+    //for newly added documents in STU and LTI
+    for (let i = 0; i < this.state.documentTableLTI.length; i++) {
+      postReq.append(`Documents[${i}].Attachment.File`, this.state.documentTableLTI[i].docSelected);
+      postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.documentTableLTI[i].engName);
+      postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.documentTableLTI[i].cnName);
+    }
+
+
+    //for newly added documents in CNIPS
+    for (let i = 0; i < this.state.documentTableCNIPS.length; i++) {
+      postReq.append(`Documents[${i}].Attachment.File`, this.state.documentTableCNIPS[i].docSelected);
+      postReq.append(`Documents[${i}].DocumentNameEnglish`, this.state.documentTableCNIPS[i].engName);
+      postReq.append(`Documents[${i}].DocumentNameChinese`, this.state.documentTableCNIPS[i].cnName);
+      for (let j = 0; j < this.state.documentTableCNIPS[i].contractNumbers.length; j++) {
+        postReq.append(`Documents[${i}].ContractNums[${j}]`, this.state.documentTableCNIPS[i].contractNumbers[j]);
+      }
+
+    }
+
+    //for existing documents in LTU
+    for (let i = 0; i < this.state.documentTableLTU.length; i++) {
+      postReq.append(`DocumentIds[${i}]`, this.state.documentTableLTU[i].documentId);
+    }
+
+
+    //multiple dept. Heads
+    for (let i = 0; i < this.state.deptHeadSelected.length; i++) {
+      postReq.append(`DepartmentHeads[${i}]`, this.state.deptHeadSelected[i].value);
+    }
+
+    //console for dev
+    for (var pair of postReq.entries()) {
+      console.log(pair[0] + ', ' + pair[1]);
+    }
+
+
+    // if (isSubmitted === 'N' && this.validator.allValid()) {
+    this.postData(postReq, isSubmitted)
+    // }
+    // else if (this.validator.allValid() === false) {
+    // console.log("Some fields are empty")
+    // Swal.fire({
+    //   type: 'info',
+    //   title: 'required',
+    //   text: 'The application type field is required'
+    // Object.values(JSON.parse(JSON.stringify(this.validator.getErrorMessages())))
+    // })
+    // this.validator.showMessages();
+    // }
+
+    // else if (this.state.valid && this.state.inOffice) {
+    // this.postData(postReq, isSubmitted)
+    // }
 
   }
 
+  checkDepartment = () => {
+    if (this.state.deptSelected === "") {
+      this.setState({ selectInfo: 'please select the Department' })
+    } else {
+      this.setState({ selectInfo: '' })
+    }
+  }
+
   //toggle useInOffice
-  toggle() {
+  toggle = name => event => {
+    if (name === "collapse") {
+      let form = this.state.validateForm
+      if (!this.state.collapse) {
+        form = form.filter(id => id !== "resPerson" && id !== "returnDate")
+      }
+      else {
+        form = form.concat("resPerson")
+        form = form.concat("returnDate")
+      }
+      this.setState({ validateForm: form })
+      // console.log(form)
+    }
     this.setState({
-      collapse: !this.state.collapse,
+      [name]: !this.state[name],
     });
 
   }
@@ -486,7 +505,7 @@ class Create extends Component {
     this.setState({ hover: !this.state.hover })
   }
 
-  changeSelect() {
+  changeSelect = () => {
     this.setState({
       modal: !this.state.modal,
     });
@@ -506,92 +525,85 @@ class Create extends Component {
   }
 
   async getDocuments(companyId, deptId, chopTypeId, teamId) {
-    let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=mbafc&departmentid=itafc&choptypeid=conchop&teamid=mbafcit'
-    let tempDocs = []
+    // let url = `${config.url}/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit`
 
-    // let url = 'http://192.168.1.47/echopx/api/v1/documents?companyid=' + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
+    let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
+    console.log(url)
     try {
       await axios.get(url).then(res => {
-        tempDocs = res.data
+        this.setState({ documents: res.data })
       })
     } catch (error) {
       console.error(error)
     }
-    tempDocs.map((doc, index) => {
-      const keys = Object.keys(doc)
-      const obj = {}
-      obj.id = index
-      for (let i = 0; i < keys.length; i++) {
-        if (keys[i] === "departmentHeads") {
-          let dhApproved = ""
-          doc.departmentHeads.map(dh => {
-            dhApproved = dhApproved + dh.displayName + '; '
-          })
-          obj.dhApproved = dhApproved
-        }
-        else if (keys[i] === "expiryDate") {
-          let tempDate = doc[keys[i]]
-          let expiryDate = ""
-          for (let p = 0; p < tempDate.length; p++) {
-            if (p === 4 || p === 6) {
-              expiryDate = expiryDate + '/'
-            }
-            expiryDate = expiryDate + tempDate[p]
-
-          }
-          obj[keys[i]] = expiryDate
-        }
-        else {
-          obj[keys[i]] = doc[keys[i]]
-        }
-      }
-      this.setState(state => {
-        const documents = state.documents.concat(obj)
-
-        return {
-          documents
-        }
-      })
-    })
   }
 
   async postData(formData, isSubmitted) {
     try {
-      await axios.post('http://192.168.1.47/echopx/api/v1/tasks', formData, { headers: { 'Content-Type': '  application/json' } })
+      await axios.post(`${config.url}/tasks`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then(res => {
-          if(isSubmitted === 'N'){
+          if (isSubmitted === 'N') {
             Swal.fire({
-              title: res.data.status,
-              text: 'Request Saved ',
-              footer: 'youre request saved as draft',
+              title: res.data.status === 200 ? 'Request Saved' : '',
+              text: 'Request Number : ' + res.data.requestNum,
+              footer: 'Your request is saved as draft.',
               type: 'info',
-              onClose: ()=> {this.formReset()}
-          })
-        }
-          if(isSubmitted === 'Y'){
+              onClose: () => { this.formReset() }
+            })
+          }
+          if (isSubmitted === 'Y') {
             Swal.fire({
-              title: res.data.status,
-              text: 'Request Submitted',
-              footer: 'your request is being processed and waiting for approval',
+              title: res.data.status === 200 ? 'Request Submitted' : "",
+              text: 'Request Number : ' + res.data.requestNum,
+              footer: 'Your request is being processed and is waiting for the approval',
               type: 'success',
-              onClose: ()=> {this.formReset()}
-          })
+              onClose: () => { this.formReset() }
+            })
           }
         })
     } catch (error) {
-      console.error(error);
+      if (error.response && isSubmitted === 'N') {
+        Swal.fire({
+          title: error.response.statusText,
+          text: error.response.data.message,
+          footer: JSON.stringify(error.response.data),
+          type: 'error',
+        })
+      }
+      if (error.response && isSubmitted === 'Y') {
+        Swal.fire({
+          title: error.response.statusText,
+          text: JSON.stringify(error.response.data),
+          footer: 'traceId : ' + error.response.data.traceId,
+          type: 'error',
+        })
+      }
+      console.error(error.response);
     }
   }
 
   formReset() {
     this.formRef.current.reset()
-    }
+    window.location.reload();
+  }
+  convertExpDate(dateValue) {
+    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+    return regEx;
+  }
+  changeDeptHeads(heads) {
+    let dh = ""
+    heads.map(head => {
+      dh = dh + head + "; "
+    })
+    return dh
+  }
 
   async getUserData() {
-    let token = localStorage.getItem('token')
     let ticket = localStorage.getItem('ticket')
     let userId = localStorage.getItem('userId')
-    await axios.get('http://192.168.1.47/echopx/api/v1/users/' + userId, { headers: { 'ticket': ticket } })
+    // let userId = "josh@otds.admin"
+    // let userId = "daniel@otds.admin"
+    await axios.get(`${config.url}/users/` + userId, { headers: { 'ticket': ticket } })
       .then(res => {
         this.setState({ employeeId: res.data.employeeNum, telNumber: res.data.telephoneNum, userId: userId })
       })
@@ -599,58 +611,97 @@ class Create extends Component {
 
   async getDeptHead(companyId) {
 
-    await axios.get('http://192.168.1.47/echopx/api/v1/users?roleid=dh&companyid=' + companyId)
+    await axios.get(`${config.url}/users?category=depthead&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
       .then(res => {
         this.setState({ deptHead: res.data })
       })
   }
 
+  async getDocCheckBy(teamId) {
+    console.log(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`)
+    await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`)
+      .then(res => {
+        this.setState({ docCheckBy: res.data })
+      })
+  }
+
   async getTeams(deptId) {
-    let url = "http://192.168.1.47/echopx/api/v1/teams?companyid=" + this.props.legalName + "&departmentId=" + deptId
+    let url = `${config.url}/teams?companyid=` + this.props.legalName + "&departmentId=" + deptId
     await axios.get(url).then(res => {
       this.setState({ teams: res.data })
     })
   }
 
   async getChopTypes(companyId, appTypeId) {
-    await axios.get('http://192.168.1.47/echopx/api/v1/choptypes?companyid=' + companyId + '&apptypeid=' + appTypeId)
+    await axios.get(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`)
       .then(res => {
         this.setState({ chopTypes: res.data })
       })
   }
 
+  setValidateForm(appType) {
+    let form = [
+      "deptSelected", "appTypeSelected", "effectivePeriod", "chopTypeSelected",
+      "purposeOfUse", "addressTo", "pickUpBy", "numOfPages", "remarks", "deptHeadSelected",
+      "documentTableLTI", "teamSelected", "docCheckBySelected", "contractSign1", "contractSign2",
+      "documentTableLTU", "docCheckByLTI", "documentTableCNIPS"
+    ]
+    switch (appType) {
+      case "STU":
+        form = form.filter(id => id !== "effectivePeriod" && id !== "teamSelected" && id !== "docCheckBySelected" && id !== "contractSign1" && id !== "contractSign2" && id !== "documentTableLTU" && id !== "docCheckByLTI" && id !== "documentTableCNIPS")
+        break;
+      case "LTU":
+        form = form.filter(id =>  id !== "effectivePeriod" && id !== "contractSign1" && id !== "contractSign2" && id !== "documentTableLTI" && id !== "deptHeadSelected" && id !== "docCheckByLTI" && id !== "documentTableCNIPS")
+        break;
+      case "LTI":
+        form = form.filter(id => id !== "numOfPages" && id !== "pickUpBy" && id !== "contractSign1" && id !== "contractSign2" && id !== "documentTableLTU" && id !== "docCheckBySelected" && id !== "documentTableCNIPS")
+        break;
+      case "CNIPS":
+        form = form.filter(id => id !== "effectivePeriod" && id !== "teamSelected" && id !== "docCheckBySelected" && id !== "deptHeadSelected" && id !== "documentTableLTU" && id !== "docCheckByLTI" && id !== "documentTableLTI")
+        break;
+
+      default:
+        break;
+    }
+    this.setState({ validateForm: form })
+    // console.log(form)
+  }
+
   //handle value on changes
   handleChange = name => event => {
-    if (event.target.value === "CONCHOP") {
-      this.toggleModal();
-    }
-    // if (event.target.name === "deptHead") {
-    //   if (event.target.value === this.state.deptHeadSelected || event.target.value === this.state.deptHeadSelected2) {
-    //     event.target.value = ""
-
-    //   }
-    // }
-
-    if (name === "returnDate") {
-      console.log(event.target.value)
-    }
-    if (event.target.value === "BRCCHOP") {
-      this.setState({ showBranches: true })
-      this.getData("branches", 'http://192.168.1.47/echopx/api/v1/branches?companyid=mblc')
-    }
-    else {
-      this.setState({ showBranches: false })
-    }
-
+    //APPLICATION TYPE
     if (name === "appTypeSelected") {
+      this.setValidateForm(event.target.value)
+      //Clear Doc Table and agreeTerms
+      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [], agreeTerms: false })
+
+      //Update Chop Types
+      this.getChopTypes(this.props.legalName, event.target.value)
+
+      //LONG TERM INITIATION
       if (event.target.value === "LTI") {
-        this.setState({ showDocAttach: true, showDocDropdown: false, showTeams: true })
+        this.setState({
+          isSTU: false,
+          isLTU: false,
+          isLTI: true,
+          isCNIPS: false,
+          reqInfo: LTI
+        })
         if (this.state.deptSelected !== "") {
           this.getTeams(this.state.deptSelected)
         }
       }
+
+      //LONG TERM USE
       else if (event.target.value === "LTU") {
-        this.setState({ showDocDropdown: true, showDocAttach: false, showTeams: true })
+        this.setState({
+          isSTU: false,
+          isLTU: true,
+          isLTI: false,
+          isCNIPS: false,
+          reqInfo: LTU
+        })
+
         if (this.state.deptSelected !== "") {
           this.getTeams(this.state.deptSelected)
           if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.deptSelected !== "") {
@@ -658,57 +709,233 @@ class Create extends Component {
           }
         }
       }
-      else {
-        this.setState({ showDocAttach: false, showDocDropdown: false, showTeams: false })
-      }
-      if (event.target.value === "CNIPS") {
-        // this.getData("chopTypes", 'http://192.168.1.47/echopx/api/v1/apptypes/CNIPS/choptypes')
-        this.setState({ CNIPS: true })
 
+      //SHORT - TERM USE
+      else if (event.target.value === "STU") {
+        this.setState({
+          isSTU: true,
+          isLTU: false,
+          isLTI: false,
+          isCNIPS: false,
+          reqInfo: STU
+        })
       }
-      else {
-        this.setState({ CNIPS: false })
+
+      //CONTRACT NON - IPS
+      else if (event.target.value === "CNIPS") {
+        this.setState({
+          isSTU: false,
+          isLTU: false,
+          isLTI: false,
+          isCNIPS: true,
+          reqInfo: CNIPS
+        })
       }
-      this.getChopTypes(this.props.legalName, event.target.value)
     }
+
+    //CHOP TYPE
     else if (name === "chopTypeSelected") {
-      if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.appTypeSelected === "LTU") {
+      if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected)
       }
+
+      if (event.target.value === "BCSCHOP") {
+        this.setState({ showBranches: true })
+        this.getData("branches", `${config.url}/branches?companyid=mblc`)
+      }
+
+      else {
+        this.setState({ showBranches: false })
+      }
+
+      if (event.target.value === "CONCHOP") {
+        this.toggleModal();
+      }
+
+
     }
+
+    //DEPARTMENT
     else if (name === "deptSelected") {
-      if (this.state.appTypeSelected === "LTU" || this.state.appTypeSelected === "LTI") {
+      this.getDeptHead(this.props.legalName)
+      if (this.state.isLTU || this.state.isLTI) {
         this.getTeams(event.target.value)
       }
-      if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.appTypeSelected === "LTU") {
+      if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, event.target.value, this.state.chopTypeSelected, this.state.teamSelected)
       }
     }
+
+    //ENTITLED TEAM
     else if (name === "teamSelected") {
-      if (this.state.chopTypeSelected !== "" && this.state.appTypeSelected === "LTU") {
+      this.getDocCheckBy(event.target.value)
+      if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value)
       }
     }
+
     this.setState({
       [name]: event.target.value
-    });
+    },
+      () => { this.checkDepartment() }
+    );
+
     if (event.target.value) {
       event.target.className = "form-control"
-
     }
     else {
       event.target.className = "is-invalid form-control"
     }
   };
 
-  deleteAttachment(i) {
-    this.setState(state => {
-      const selectedFiles = state.selectedFiles.filter((item, index) => i !== index);
-      return {
-        selectedFiles
-      }
-    })
+
+  handleInputMask = () => {
+    // let value = ("" + event.target.value).toUpperCase();
+    let first = /(?!.*[A-HJ-QT-Z])[IS]/;
+    let third = /(?!.*[A-NQRT-Z])[PSO]/;
+    let digit = /[0-9]/;
+    let mask = []
+    switch (this.props.match.params.company) {
+      case 'MBIA':
+        mask = [first, "-", "IA", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+        break;
+      case 'MBLC':
+        mask = [first, "-", "L", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+        break;
+      case 'MBAFC':
+        mask = [first, "-", "A", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+        break;
+      case 'CAR2GO':
+        mask = [first, "-", "R", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+        break;
+      default:
+        mask = [first, "-", "IA", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+        break;
+    }
+    this.setState({
+      inputMask: mask, viewContract: true
+    });
   }
+
+  validateConNum() {
+    let first = /(?!.*[A-HJ-QT-Z])[IS]/;
+    let third = /(?!.*[A-NQRT-Z])[PSO]/;
+    let digit = /[0-9]/;
+    var isFirst = false
+    var isThird = false
+    var isDigit = false
+    let valid = false
+    isFirst = first.test(this.state.contractNumber[0])
+    if (this.props.match.params.company === "MBIA") {
+      isThird = third.test(this.state.contractNumber[5])
+      for (let i = 7; i < 11; i++) {
+        isDigit = digit.test(this.state.contractNumber[i])
+        if (!isDigit) {
+          break;
+        }
+      }
+      if (isDigit) {
+        for (let i = 12; i < 15; i++) {
+          isDigit = digit.test(this.state.contractNumber[i])
+          if (!isDigit) {
+            break;
+          }
+        }
+      }
+    }
+
+    else {
+      isThird = third.test(this.state.contractNumber[4])
+      for (let i = 6; i < 10; i++) {
+        isDigit = digit.test(this.state.contractNumber[i])
+        if (!isDigit) {
+          break;
+        }
+      }
+      if (isDigit) {
+        for (let i = 11; i < 14; i++) {
+          isDigit = digit.test(this.state.contractNumber[i])
+          if (!isDigit) {
+            break;
+          }
+        }
+      }
+
+    }
+    if (isFirst && isThird && isDigit) {
+      if (this.state.conNum.length !== 0) {
+        for (let i = 0; i < this.state.conNum.length; i++) {
+          let value = this.state.contractNumber
+          if (this.props.match.params.company === "MBIA") {
+            if (!digit.test(value[15])) {
+              value = value.substr(0, 15)
+            }
+          }
+          else {
+            if (!digit.test(value[14])) {
+              value = value.substr(0, 14)
+            }
+          }
+          if (this.state.conNum[i] === value) {
+            valid = false
+            // this.setState({ conNum: "" })
+            // console.log("Contract Number Already Exists") //show error
+            Swal.fire({
+              title: "Contract Number Exists",
+              html: 'Please input a new Contract Number!',
+              type: "warning"
+            })
+            break;
+          }
+          else {
+            valid = true
+          }
+
+        }
+      }
+      else {
+        valid = true
+      }
+    }
+    else {
+      valid = false
+    }
+    return valid
+  }
+
+  addContract(event) {
+    let valid = this.validateConNum()
+    let digit = /[0-9]/;
+    let value = this.state.contractNumber
+    if (valid) {
+      if (this.props.match.params.company === "MBIA") {
+        if (!digit.test(this.state.contractNumber[15])) {
+          value = this.state.contractNumber.substr(0, 15)
+        }
+      }
+      else {
+        if (!digit.test(this.state.contractNumber[14])) {
+          value = this.state.contractNumber.substr(0, 14)
+        }
+
+      }
+
+      this.setState(state => ({
+        conNum: [...state.conNum, value]
+      })
+      )
+      this.setState({ contractNumber: "" }, this.toggle('viewContract'))
+    }
+    else {
+      Swal.fire({
+        title: "Invalid Contract Number",
+        html: 'Please input a new valid Contract Number!',
+        type: "warning"
+      })
+    }
+  }
+
+
   deleteDocument(table, i) {
     this.setState(state => {
       if (table === "documentTableLTU") {
@@ -729,23 +956,135 @@ class Create extends Component {
   addDocumentLTI() {
     var maxNumber = 45;
     var rand = Math.floor((Math.random() * maxNumber) + 1);
-    console.log(this.state.docSelected)
+    let valid = true
+    let typeValid = false
+    let doc = this.state.documentTableLTI
     if (this.state.docSelected !== null) {
-      const obj = {
-        id: rand,
-        engName: this.state.engName,
-        cnName: this.state.cnName,
-        docSelected: this.state.docSelected,
-        docName: this.state.docAttachedName,
-        docURL: URL.createObjectURL(this.state.docSelected),
+      if (this.state.engName !== "" && this.state.cnName !== "") {
+        typeValid = true
+      }
+      else {
+        typeValid = false
       }
 
-      this.setState(state => {
-        const documentTableLTI = state.documentTableLTI.concat(obj)
-
-        return {
-          documentTableLTI
+      if (typeValid) {
+        for (let i = 0; i < doc.length; i++) {
+          if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
+            valid = false
+            break
+          }
+          else {
+            valid = true
+          }
         }
+
+        if (valid) {
+          const obj = {
+            id: rand,
+            conNum: this.state.conNum,
+            engName: this.state.engName,
+            cnName: this.state.cnName,
+            docSelected: this.state.docSelected,
+            docName: this.state.docAttachedName,
+            docURL: URL.createObjectURL(this.state.docSelected),
+            // contractNumbers: this.state.contractNumbers
+          }
+          this.setState(state => {
+            const documentTableLTI = state.documentTableLTI.concat(obj)
+            return {
+              documentTableLTI
+            }
+          })
+          document.getElementById("documentTableLTI").className = ""
+        }
+        else {
+          Swal.fire({
+            title: "Document Exists",
+            html: 'The selected document already exists!',
+            type: "warning"
+          })
+        }
+        this.setState({ engName: "", cnName: "", docSelected: null, docAttachedName: "" })
+      }
+      else {
+        Swal.fire({
+          title: "Invalid Data",
+          html: 'The input valid data!',
+          type: "warning"
+        })
+      }
+
+    }
+    else {
+      Swal.fire({
+        title: "No Document",
+        html: 'Please select a valid document!',
+        type: "warning"
+      })
+    }
+  }
+
+  addDocumentCNIPS = () => {
+    var maxNumber = 45;
+    var rand = Math.floor((Math.random() * maxNumber) + 1);
+    let valid = true
+    let doc = this.state.documentTableCNIPS
+    if (this.state.docSelected !== null) {
+      if (this.state.engName !== "" && this.state.cnName !== "" && this.state.conNum.length !== 0) {
+        for (let i = 0; i < doc.length; i++) {
+          if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
+            valid = false
+            break
+          }
+          else {
+            valid = true
+          }
+        }
+
+        if (valid) {
+          const obj = {
+            id: rand,
+            conNum: this.state.conNum,
+            engName: this.state.engName,
+            cnName: this.state.cnName,
+            docSelected: this.state.docSelected,
+            docName: this.state.docAttachedName,
+            docURL: URL.createObjectURL(this.state.docSelected),
+            contractNumbers: this.state.conNum
+          }
+
+          this.setState(state => {
+            const documentTableCNIPS = state.documentTableCNIPS.concat(obj)
+
+            return {
+              documentTableCNIPS
+            }
+          })
+          this.setState({ conNum: [], engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
+          document.getElementById("documentTableCNIPS").className = ""
+        }
+        else {
+          Swal.fire({
+            title: "Document Exists",
+            html: 'DOcument already exists in the list!',
+            type: "warning"
+          })
+        }
+
+      }
+      else {
+        Swal.fire({
+          title: "Invalid Data",
+          html: 'Please input valid data!',
+          type: "warning"
+        })
+      }
+    }
+    else {
+      Swal.fire({
+        title: "Document Not Selected",
+        html: 'Please select a valid document!',
+        type: "warning"
       })
     }
   }
@@ -753,101 +1092,81 @@ class Create extends Component {
   addDocumentLTU() {
     if (this.state.selectedDocs.length !== 0) {
       this.setState({ documentTableLTU: this.state.selectedDocs })
+      document.getElementById("documentTableLTU").className = ""
     }
   }
 
-  getSuggestions(value) {
-    this.setState({
-      isLoading: !this.isLoading
-    });
-    const thisReq = this.lastReq =
-      axios.get(`http://192.168.1.47/echopx/api/v1/users?displayName=%${value}`)
-        .then(response => {
-          if (thisReq !== this.lastReq) {
-            return;
-          }
-          this.setState({
-            suggestions: response.data,
-            isLoading: false
-          });
-        })
-  }
 
-  getSuggestionValue = suggestion => suggestion.displayName
+  toggleSelection = (key, shift, row) => {
+    // start off with the existing state
+    let selection = [...this.state.selection];
+    let selectedDocs = [...this.state.selectedDocs];
+    const keyIndex = selection.indexOf(key);
 
-  renderSuggestion = suggestion => (
-    <Table className="suggestBox">
-      <tbody>
-        <tr>
-          <td>{suggestion.displayName}</td>
-        </tr>
-      </tbody>
-    </Table>
-  )
-
-  renderInputComponent = inputProps => (
-    <div className="input-group-prepend">
-      {this.state.isLoading ? <Spinner className="input-group-text" color="primary" /> : <i className="input-group-text cui-magnifying-glass" />}
-      <input {...inputProps} />
-    </div>
-  );
-
-
-  suggestionChange = (event, { newValue }) => {
-    this.setState({ pickUpBy: newValue })
-  }
-  suggestionChangeRes = (event, { newValue }) => {
-    this.setState({ resPerson: newValue })
-  }
-  suggestionChangeContract1 = (event, { newValue }) => {
-    this.setState({ contractSign1: newValue })
-  }
-  suggestionChangeContract2 = (event, { newValue }) => {
-    this.setState({ contractSign2: newValue })
-  }
-
-  onSuggestionsFetchRequested = ({ value }) => {
-    this.setState(this.getSuggestions(value))
-  }
-
-  onSuggestionsClearRequested = () => {
-    this.setState({ suggestion: [] })
-  }
-
-
-
-
-  uploadFile = event => {
-    if (event.target.files.length !== 0) {
-      if (event.target.files.length === 1) {
-        const obj = [
-          event.target.files[0]
-        ]
-        this.setState(state => {
-          const selectedFiles = state.selectedFiles.concat(obj)
-
-          return {
-            selectedFiles
-          }
-        })
-      }
-      else {
-
-        for (let i = 0; i < event.target.files.length; i++) {
-          const obj = []
-          obj.push(event.target.files[i])
-          this.setState(state => {
-            const selectedFiles = state.selectedFiles.concat(obj)
-
-            return {
-              selectedFiles
-            }
-          })
-        }
-      }
+    // check to see if the key exists
+    if (keyIndex >= 0) {
+      // it does exist so we will remove it using destructing
+      selection = [
+        ...selection.slice(0, keyIndex),
+        ...selection.slice(keyIndex + 1)
+      ];
+      selectedDocs = [
+        ...selectedDocs.slice(0, keyIndex),
+        ...selectedDocs.slice(keyIndex + 1)
+      ];
+    } else {
+      // it does not exist so add it
+      selectedDocs.push(row)
+      selection.push(key);
     }
-    console.log(this.state.selectedFiles)
-  }
+    // update the state
+    this.setState({ selection, selectedDocs });
+  };
+
+  /**
+   * Toggle all checkboxes for select table
+   */
+  toggleAll = () => {
+    const { keyField } = this.props;
+    const selectAll = !this.state.selectAll;
+    const selection = [];
+    const selectedDocs = [];
+
+    if (selectAll) {
+      // we need to get at the internals of ReactTable
+      const wrappedInstance = this.checkboxTable.getWrappedInstance();
+      // the 'sortedData' property contains the currently accessible records based on the filter and sort
+      const currentRecords = wrappedInstance.getResolvedState().sortedData;
+      // we just push all the IDs onto the selection array
+      currentRecords.forEach(item => {
+        selection.push(`select-${item._original[keyField]}`);
+        selectedDocs.push(item._original)
+      });
+    }
+    this.setState({ selectAll, selection, selectedDocs }, console.log(this.state.selectedDocs));
+  };
+
+  /**
+   * Whether or not a row is selected for select table
+   */
+  isSelected = key => {
+    return this.state.selection.includes(`select-${key}`);
+  };
+
+  rowFn = (state, rowInfo, column, instance) => {
+    const { selection } = this.state;
+
+    return {
+      onClick: (e) => {
+        console.log("It was in this row:", rowInfo);
+      },
+      style: {
+        background:
+          rowInfo &&
+          selection.includes(`select-${rowInfo.original.documentId}`)
+      }
+    };
+  };
 
   uploadDocument = event => {
     if (event.target.files[0]) {
@@ -859,13 +1178,29 @@ class Create extends Component {
     }
   }
 
-  handleDeptHead(newValue) {
-    this.setState({ deptHeadSelected: newValue }, console.log(this.state.deptHeadSelected))
+  handleSelectOption = sname => newValue => {
+    if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
+      if (newValue) {
+        this.setState({ [sname]: newValue })
+        document.getElementById(sname).className = "css-2b097c-container"
+      }
+      else {
+        this.setState({ [sname]: [] })
+      }
+
+    }
+    else {
+      if (newValue.value) {
+        document.getElementById(sname).className = "css-2b097c-container"
+      }
+      this.setState({ [sname]: newValue.value })
+    }
+
   }
 
-  addDocCheck(row) {
-    this.setState({ selectedDocs: row })
-  }
+  // addDocCheck(row) {
+  //   this.setState({ selectedDocs: row })
+  // }
 
   selectDocument() {
     if (this.state.documents.length === 0) {
@@ -881,9 +1216,15 @@ class Create extends Component {
     }
   }
 
-  dateChange = date => {
+  dateChange = (name, view) => date => {
+    let dates = ""
+    if (date) {
+      dates = `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`
+    }
+    console.log(dates)
     this.setState({
-      [name]: date
+      [name]: dates,
+      [view]: date
     });
   };
 
@@ -891,18 +1232,30 @@ class Create extends Component {
   // scrollToRef = (ref) => window.scrollTo(0, ref)
 
   render() {
+    this.validator.purgeFields();
     const deptHeads = []
+    const docCheckByUsers = []
     var pointer;
-    const { pickUpBy, suggestions, resPerson, contractSign1, contractSign2, hover, CNIPS, deptHead } = this.state;
+    const { hover, docCheckBy, deptHead } = this.state;
     for (let i = 0; i < deptHead.length; i++) {
       const obj = { value: deptHead[i].userId, label: deptHead[i].displayName }
       deptHeads.push(obj)
     }
+    docCheckBy.map(doc => {
+      const obj = { value: doc.userId, label: doc.displayName }
+      docCheckByUsers.push(obj)
+    })
+
     if (hover) {
       pointer = { cursor: 'pointer' }
     }
     else {
       pointer = {}
+    }
+
+    const reactSelectControl = {
+      control: styles => ({ ...styles, borderColor: '#F86C6B', boxShadow: '0 0 0 0px #F86C6B', ':hover': { ...styles[':hover'], borderColor: '#F86C6B' } }),
+      menuPortal: base => ({ ...base, zIndex: 9999 })
     }
 
     const filterColors = (inputValue) => {
@@ -911,146 +1264,208 @@ class Create extends Component {
       );
     };
 
+    const filterDocCheck = (inputValue) => {
+      return docCheckByUsers.filter(i =>
+        i.label.toLowerCase().includes(inputValue.toLowerCase())
+      );
+    }
+
     const loadOptions = (inputValue, callback) => {
-      setTimeout(() => {
-        callback(filterColors(inputValue));
-      }, 100);
+
+      callback(filterColors(inputValue));
+
     }
 
-    const status = (this.state.isLoading ? <Spinner size="sm" color="primary" /> : '');
-    const inputProps = {
-      id: "pickUpBy",
-      className: "form-control",
-      placeholder: 'Enter person to pick up by',
-      value: pickUpBy,
-      onChange: this.suggestionChange,
-      type: 'search'
+    const loadDocCheckBy = (inputValue, callback) => {
+      callback(filterDocCheck(inputValue));
     }
 
-    const inputResPerson = {
-      id: "resPerson",
-      className: "form-control",
-      placeholder: 'Enter person to pick up by',
-      value: resPerson,
-      onChange: this.suggestionChangeRes,
-      type: 'search'
-    }
-    const inputContract1 = {
-      id: "contractSign1",
-      className: "form-control",
-      placeholder: 'Enter name of First Person',
-      value: contractSign1,
-      onChange: this.suggestionChangeContract1,
-      type: 'search'
-    }
-    const inputContract2 = {
-      id: "contractSign2",
-      className: "form-control",
-      placeholder: 'Enter name of Second Person',
-      value: contractSign2,
-      onChange: this.suggestionChangeContract2,
-      type: 'search'
-    }
 
-    const defaultColumnProperties = {
-      resizable: true
-    };
-
-    const docHeaders = [
-      { key: 'documentNameEnglish', name: 'Document Name (English)' },
-      { key: 'documentNameChinese', name: 'Document Name (Chinese)' },
-      { key: 'expiryDate', name: 'Expiry Date' },
-      { key: 'dhApproved', name: 'DH Approved' },
-    ].map(c => ({ ...c, ...defaultColumnProperties }))
-
-    const DocTable = <div>
-      <Table bordered>
+    const DocTable = <div className="tableWrap">
+      <Table hover bordered responsive size="sm">
         <thead>
           <tr>
-            <th>No.</th>
+            <th className="smallTd" >No.</th>
             <th>Document Name in English</th>
             <th>Document Name in Chinese</th>
             <th>Attached File</th>
-            <th></th>
+            <th className="smallTd"></th>
           </tr>
         </thead>
         <tbody>
           {this.state.documentTableLTI.map((document, index) =>
             <tr key={index}>
-              <th>{index + 1}</th>
-              <th>{document.engName}</th>
-              <th>{document.cnName}</th>
-              <th id="viewDoc">
+              <td className="smallTd">{index + 1}</td>
+              <td><div>{document.engName}</div></td>
+              <td><div>{document.cnName}</div></td>
+              <td id="viewDoc">
                 <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
-              </th>
-              <th><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></th>
+              </td>
+              <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
           )}
         </tbody>
-      </Table></div>
+      </Table>
+    </div>
+
+    const CNIPSTable = <div id="documentTableCNIPS" className="tableWrap">
+      <Table hover bordered responsive size="sm">
+        <thead>
+          <tr>
+            <th className="smallTd" >No.</th>
+            <th className="mediumTd">Contract Number</th>
+            <th>Document Name in English</th>
+            <th>Document Name in Chinese</th>
+            <th>Attached File</th>
+            <th className="smallTd"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {this.state.documentTableCNIPS.map((document, index) =>
+            <tr key={index}>
+              <td className="smallTd">{index + 1}</td>
+              <td><div>{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</div></td>
+              <td><div>{document.engName}</div></td>
+              <td><div>{document.cnName}</div></td>
+              <td id="viewDoc">
+                <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+              </td>
+              <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableCNIPS", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
+            </tr>
+          )}
+        </tbody>
+      </Table>
+    </div>
 
     const documentForLTI =
-      <div>
-        <Row form>
+      <>
+        <div id={this.state.isCNIPS ? "documentTableCNIPS" : "documentTableLTI"}>
+          <Row form>
 
-          {this.state.CNIPS
-            ? <Col ><FormGroup>
-              <InputMask mask="*-*-*-9999-9999" className="form-control" defaultValue={this.state.contractNum} onChange={this.handleChange("contractNum")}></InputMask>
-            </FormGroup></Col>
-            // <Col ><FormGroup>
-            //   <Input onChange={this.handleChange("contractNum")} placeholder="Please enter the contract Number"></Input>
-            // </FormGroup></Col>
-            : ""}
+            {this.state.isCNIPS
+              ? <Col >
+                <FormGroup>
+                  <InputGroup>
+                    <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
+                      <DropdownToggle><i className="fa fa-list-ul" /></DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
+                        {this.state.conNum !== ""
+                          ? this.state.conNum.map((
+                            (conNum, index) => (
+                              <span key={index}>
+                                <DropdownItem >{conNum}</DropdownItem>
+                              </span>
+                            )))
+                          : <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
+                        }
 
-          <Col >
-            <FormGroup>
-              {/* <Label>English Name</Label> */}
-              <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
-            </FormGroup>
-          </Col>
-          <Col >
-            <FormGroup>
-              {/* <Label>Chinese Name</Label> */}
-              <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
-            </FormGroup>
-          </Col>
-          <Col >
-            <FormGroup>
-              {/* <Label>File Name</Label> */}
-              <CustomInput id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
-            </FormGroup>
-          </Col>
-          <Col md={1}>
-            <FormGroup>
-              {/* <Label></Label> */}
-              <Button block onClick={this.addDocumentLTI}>Add</Button>
-            </FormGroup>
-          </Col>
-        </Row>
-        <Collapse isOpen={this.state.documentTableLTI.length !== 0}>
-          {DocTable}
-        </Collapse>
-      </div>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown>
+                    <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
+                      onChange={this.handleChange('contractNumber')} value={this.state.contractNumber}
+                      onClick={this.handleInputMask}></InputMask>
+                    <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
+                  </InputGroup>
+                </FormGroup></Col>
+              : ""}
+
+            <Col md>
+              <FormGroup>
+                {/* <Label>English Name</Label> */}
+                <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
+              </FormGroup>
+            </Col>
+            <Col md>
+              <FormGroup>
+                {/* <Label>Chinese Name</Label> */}
+                <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
+              </FormGroup>
+            </Col>
+            <Col md>
+              <FormGroup>
+                {/* <Label>File Name</Label> */}
+                <CustomInput id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
+              </FormGroup>
+            </Col>
+            <Col xl={1}>
+              <FormGroup>
+                {this.state.isCNIPS
+                  ? <Button id="addDocs" block onMouseEnter={this.toggle('viewContract')} onMouseLeave={this.toggle('viewContract')} onClick={this.addDocumentCNIPS}>Add</Button>
+                  : <Button id="addDocs" block onClick={this.addDocumentLTI}>Add</Button>
+                }
+              </FormGroup>
+            </Col>
+          </Row>
+          <Collapse isOpen={this.state.documentTableLTI.length !== 0 || this.state.documentTableCNIPS.length !== 0}>
+            {this.state.isCNIPS ? CNIPSTable : DocTable}
+          </Collapse>
+        </div>
+        {this.state.isCNIPS
+          ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Documents', this.state.documentTableCNIPS, 'required')}</small>
+          : this.state.isLTI || this.state.isSTU
+            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Documents', this.state.documentTableLTI, 'required')}</small>
+            : null
+        }
+      </>
 
 
 
     const documentForLTU =
       <div>
-        <Button onClick={this.selectDocument}>Select Documents</Button>
+        <InputGroup >
+          <InputGroupAddon addonType="prepend">
+            <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
+          </InputGroupAddon>
+          <Input id="documentTableLTU" disabled />
+        </InputGroup>
+        <InputGroup>
+          {this.state.isLTU
+            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Documents', this.state.documentTableLTU, 'required')}</small>
+            : null}
+        </InputGroup>
         <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
           <ModalHeader className="center"> Select Documents </ModalHeader>
           <ModalBody>
-            <ReactDataGrid
-              columns={docHeaders}
-              rowGetter={i => this.state.documents[i]}
-              rowsCount={this.state.documents.length}
-              minWidth={1100}
-              enableRowSelect
-              onRowSelect={this.addDocCheck}
-              onColumnResize={(idx, width) =>
-                console.log('Column' + idx + ' has been resized to ' + width)}
-              minColumnWidth={100}
-
+            <SelectTable
+              {...this.props}
+              data={this.state.documents}
+              ref={r => (this.checkboxTable = r)}
+              toggleSelection={this.toggleSelection}
+              selectAll={this.state.selectAll}
+              toggleAll={this.toggleAll}
+              isSelected={this.isSelected}
+              getTrProps={this.rowFn}
+              defaultPageSize={5}
+              columns={[
+                {
+                  Header: 'Document Name (English)',
+                  accessor: 'documentNameEnglish',
+                  style: { textAlign: "center" },
+                },
+                {
+                  Header: 'Document Name (Chinese)',
+                  accessor: 'documentNameChinese',
+                  style: { textAlign: "center" },
+                },
+                {
+                  Header: 'Expiry Date',
+                  accessor: 'expiryDate',
+                  Cell: row => (
+                    <div> {this.convertExpDate(row.original.expiryDate)} </div>
+                  ),
+                  style: { textAlign: "center" },
+                },
+                {
+                  Header: 'DH Approved',
+                  accessor: 'departmentHeads',
+                  Cell: row => (
+                    <div> {this.changeDeptHeads(row.original.departmentHeads)} </div>
+                  ),
+                  style: { textAlign: "center" },
+                },
+              ]}
+              keyField="documentId"
 
             />
           </ModalBody>
@@ -1060,18 +1475,19 @@ class Create extends Component {
         </Modal>
 
         <Collapse isOpen={this.state.documentTableLTU.length !== 0}>
-          <div>
-            <br />
-            <Label>Documents</Label>
-            <Table bordered>
+          {/* <div> */}
+          <br />
+
+          <div className="tableWrap">
+            <Table hover bordered responsive size="sm">
               <thead>
                 <tr>
-                  <th>No.</th>
+                  <th className="smallTd" >No.</th>
                   <th>Document Name (English)</th>
                   <th>Document Name (Chinese)</th>
                   <th>Expiry Date</th>
                   <th>DH Approved</th>
-                  <th></th>
+                  <th className="smallTd"></th>
                 </tr>
               </thead>
               <tbody>
@@ -1091,367 +1507,407 @@ class Create extends Component {
                 )}
               </tbody>
             </Table>
+
           </div>
+
         </Collapse>
       </div>
 
     return (
-      <div>
-        <h3>Create</h3>
-        <Card>
-          <CardHeader>CREATE NEW REQUEST</CardHeader>
-          <CardBody>
-            <FormGroup>
-              <h5>NOTES :</h5>
-              {notes}
-            </FormGroup>
-            <Form className="form-horizontal" innerRef={this.formRef}>
-              <FormGroup>
-                <Label>Employee Number
-                        <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted</i> </span>
-                </Label>
-                <div className="controls">
-                  <InputGroup className="input-prepend">
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText>ID</InputGroupText>
-                    </InputGroupAddon>
-                    <Input disabled ref={this.employeeId} onChange={this.handleChange("employeeId")} value={this.state.employeeId} id="prependedInput" size="16" type="text" />
-                  </InputGroup>
-                  {/* <p className="help-block">Here's some help text</p> */}
-                </div>
-              </FormGroup>
-              <FormGroup>
-                <Label>Tel. </Label>
-                <InputGroup>
-                  <Input ref={this.telNumber} value={this.state.telNumber} onChange={this.handleChange("telNumber")} id="appendedInput" size="16" type="text" />
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <Label>Dept</Label>
-                <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
-                  <option disabled value="0">Please Select . . .</option>
-
-                  {this.state.department.map((option, index) => (
-                    <option value={option.deptId} key={option.deptId}>
-                      {option.deptName}
-
-                    </option>
-                  ))}
-                </Input>
-                <FormFeedback>Invalid Departement Selected</FormFeedback>
-              </FormGroup>
-              <FormGroup>
-                <Label>Application Type</Label>
-                <Input ref={this.appTypeSelected} type="select" 
-                onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" defaultValue="0" name="select"
-                onBlur={() => this.validator.showMessageFor('aplicationType')}>
-                  <option disabled value="0">Please Select . . .</option>
-                  {this.state.applicationTypes.map((option, id) => (
-
-                    <option value={option.appTypeId} key={option.appTypeId}>{option.appTypeName}</option>
-
-                  ))}
-                </Input>
-               
-                <FormFeedback valid={this.validator.fieldValid('aplicationType')}>
-                 {this.validator.message('aplicationType', this.state.appTypeSelected, 'required')}</FormFeedback>
-
-              </FormGroup>
-              {this.state.showDocAttach
-                ? <FormGroup>
-                  <Label>Effective Period</Label>
-                  <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input>
-                  <FormFeedback>Invalid Date Selected</FormFeedback>
-                </FormGroup>
-                : ""
-              }
-              {this.state.showTeams
-                ? <FormGroup>
-                  <Label>Entitled Team</Label>
-                  <InputGroup>
-                    <Input onChange={this.handleChange("teamSelected")} onClick={() => { this.getTeams(this.state.deptSelected) }} defaultValue="0" type="select">
-                      <option value="0" disabled>Please select a team</option>
-                      {this.state.teams.map((team, index) =>
-                        <option key={index} value={team.teamId}>{team.teamName}</option>
-                      )}
-                    </Input>
-                  </InputGroup>
-                </FormGroup>
-                : ""
-              }
-              <FormGroup>
-                <Label>Chop Type</Label>
-                <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected"
-                  onClick={() => { this.getChopTypes(this.props.legalName, this.state.appTypeSelected) }}
-                  onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
-                  <option disabled value="0">Please Select ..</option>
-                  {this.state.chopTypes.map((option, id) => (
-                    <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
-                  ))}
-
-                </Input>
-                <FormFeedback>Invalid Chop Type Selected</FormFeedback>
-              </FormGroup>
-              {this.state.showBranches
-                ? <FormGroup>
-                  <Label>Branch Company Chop</Label>
-                  <Input type="select" defaultValue="0">
-                    <option value="0" disabled>Please specify your Brand Company Chop</option>
-                    {this.state.branches.map((branch, index) =>
-                      <option value={branch.branchId} key={index}>{branch.branchName}</option>
-                    )}
-                  </Input>
-                </FormGroup>
-                : ""
-              }
-
-              <FormGroup check={false}>
-                <Label>Document Name</Label>
-                {!this.state.showDocAttach && !this.state.showDocDropdown ? documentForLTI : ""}
-                {this.state.showDocDropdown ? documentForLTU : ""}
-                {this.state.showDocAttach ? documentForLTI : ""}
-                <FormFeedback>Invalid Input a valid Document Name</FormFeedback>
-              </FormGroup>
-              <FormGroup>
-                <Label>Purpose of Use</Label>
-                <InputGroup>
-                  <Input ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
-                  <FormFeedback>Please input the purpose of use</FormFeedback>
-                </InputGroup>
-              </FormGroup>
-              {!this.state.showDocAttach
-                ? <FormGroup>
-                  {/* <Row> */}
-                  {/* <Col sm={2}> */}
-                  <Label>Connecting Chop (骑缝章) </Label>
-                  <Row />
-                  {/* </Col> */}
-                  {/* <Col> */}
-                  <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
-
-                  {/* </Col> */}
-                  {/* </Row> */}
-                </FormGroup>
-                : ""}
-
-              <FormGroup>
-                <Label>Number of Pages to Be Chopped</Label>
-                <InputGroup>
-                  <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" />
-                  <FormFeedback>Invalid Number of pages </FormFeedback>
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <Label>Use in Office or Not</Label>
-                <Row />
-                <AppSwitch onChange={this.toggle} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
-              </FormGroup>
-              <Collapse isOpen={!this.state.collapse}>
-                <FormGroup visibelity="false" >
-                  <Label>Return Date</Label>
-                  <Row />
-                  <InputGroup >
-                  <DatePicker placeholderText="Select the date"  popperPlacement="auto-center"
-                  className="form-control" dateFormat="yyyy/MM/dd" selected={this.state.returnDate} onChange={this.dateChange} />
-                  </InputGroup>
-                  {/* <Input onClickOutside type="date" id="returnDate" onChange={this.handleChange("returnDate")} name="date-input" /> */}
-                </FormGroup>
+      <LegalEntity.Consumer>{
+        ContextValue => (
+          <div style={{ fontFamily: "sans-serif" }} className="animated fadeIn">
+            <h4>Create</h4>
+            <Card>
+              <CardHeader>CREATE NEW REQUEST</CardHeader>
+              <CardBody>
                 <FormGroup>
-                  <Label>Responsible Person <i className="fa fa-user" /></Label>
-                  <Autosuggest
-                    id="resPerson"
-                    suggestions={suggestions}
-                    onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-                    onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-                    getSuggestionValue={this.getSuggestionValue}
-                    renderSuggestion={this.renderSuggestion}
-                    inputProps={inputResPerson}
-                  />
-                  {/* <Input type="text" id="resPerson" onChange={this.handleChange("resPerson")} placeholder="responsible person" /> */}
+                  <h5>NOTES :</h5>
+                  {/* {this.state.noteInfo.notes || <Skeleton count={3}/>} */}
+                  {this.state.noteInfo.notes}
                 </FormGroup>
-              </Collapse>
-              <FormGroup>
-                <Label>Address to</Label>
-                <InputGroup>
-                  <Input ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
-                  <FormFeedback>Invalid person to address to</FormFeedback>
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <Label>Pick Up By <i className="fa fa-user" /> </Label>
-                <InputGroup>
-                  <Autosuggest
-                    id="pickUpBy"
-                    suggestions={suggestions}
-                    onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-                    onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-                    getSuggestionValue={this.getSuggestionValue}
-                    renderSuggestion={this.renderSuggestion}
-                    inputProps={inputProps}
-                    renderInputComponent={this.renderInputComponent}
-                  />
-                  {/* <FormFeedback>Please select a person  to pick up by</FormFeedback> */}
+                <Form className="form-horizontal" innerRef={this.formRef}>
+                  <FormGroup>
+                    <Label>Employee Number
+                        <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted</i> </span>
+                    </Label>
+                    <div className="controls">
+                      <InputGroup className="input-prepend">
+                        <InputGroupAddon addonType="prepend">
+                          <InputGroupText>ID</InputGroupText>
+                        </InputGroupAddon>
+                        <Input disabled ref={this.employeeId} onChange={this.handleChange("employeeId")} value={this.state.employeeId} id="prependedInput" size="16" type="text" />
+                      </InputGroup>
+                    </div>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label>Tel. </Label>
+                    <InputGroup>
+                      <Input ref={this.telNumber} value={this.state.telNumber} onChange={this.handleChange("telNumber")} id="appendedInput" size="16" type="text" />
+                    </InputGroup>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label>Dept</Label>
+                    <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
+                      <option disabled value="0">Please Select . . .</option>
 
-                  {/* <Input ref={this.pickUpBy} onChange={this.handleChange("pickUpBy")} id="pickUpBy" size="16" type="text" placeholder="enter name to search ..." /> */}
-                  <FormFeedback>Please enter a valid name to search</FormFeedback>
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <Label>Remark (e.g. tel.) </Label>
-                <InputGroup>
-                  <Input ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="pick up presons's phone number" />
-                  <FormFeedback>Please enter valid remarks</FormFeedback>
-                </InputGroup>
-              </FormGroup>
-              {this.state.CNIPS
-                ? <FormGroup>
-                  <Label>Contract Signed By: <i className="fa fa-user" /></Label>
-                  <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
-                  <Row>
-                    <Col>
+                      {this.state.department.map((option, index) => (
+                        <option value={option.deptId} key={option.deptId}>
+                          {option.deptName}
+
+                        </option>
+                      ))}
+                    </Input>
+                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Department', this.state.deptSelected, 'required')}</small>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label>Application Type</Label>
+                    <Input ref={this.appTypeSelected} type="select"
+                      onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" defaultValue="0" name="select"
+                      onBlur={() => this.validator.showMessageFor('aplicationType')}>
+                      <option disabled value="0">Please Select . . .</option>
+                      {this.state.applicationTypes.map((option, id) => (
+
+                        <option value={option.appTypeId} key={option.appTypeId}>{option.appTypeName}</option>
+
+                      ))}
+                    </Input>
+                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Application Type', this.state.appTypeSelected, 'required')}</small>
+                  </FormGroup>
+
+                  <Collapse isOpen={this.state.isLTI || this.state.isLTU}>
+                    <FormGroup>
+                      <Label>Entitled Team</Label>
+                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
+                        <option value="0" disabled>Please select a team</option>
+                        {this.state.teams.map((team, index) =>
+                          <option key={index} value={team.teamId}>{team.teamName}</option>
+                        )}
+                      </Input>
+                      {this.state.isLTI || this.state.isLTU
+                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Entitled Team', this.state.teamSelected, 'required')}</small>
+                        : null}
+                    </FormGroup>
+                  </Collapse>
+
+                  <Collapse isOpen={this.state.isLTI}>
+                    <FormGroup>
+                      <Label>Effective Period</Label>
+                      {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
+                      <DatePicker id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                        className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        peekNextMonth
+                        showMonthDropdown
+                        showYearDropdown
+                        selected={this.state.dateView1}
+                        onChange={this.dateChange("effectivePeriod", "dateView1")}
+                        minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                      {this.state.isLTI
+                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Effective Period', this.state.effectivePeriod, 'required')}</small>
+                        : null}
+                    </FormGroup>
+                  </Collapse>
+                  {/* 
+                  <Collapse isOpen={this.state.isLTU}>
+                    <FormGroup>
+                      <Label>Entitled Team</Label>
+                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
+                        <option value="0" disabled>Please select a team</option>
+                        {this.state.teams.map((team, index) =>
+                          <option key={index} value={team.teamId}>{team.teamName}</option>
+                        )}
+                      </Input>
+                      {this.state.isLTU
+                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Entitled Team', this.state.teamSelected, 'required')}</small>
+                        : null}
+                    </FormGroup>
+                  </Collapse> */}
+
+                  <FormGroup>
+                    <Label>Chop Type</Label>
+                    <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected"
+                      onClick={() => { this.getChopTypes(this.props.legalName, this.state.appTypeSelected) }}
+                      onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
+                      <option disabled value="0">Please Select ..</option>
+                      {this.state.chopTypes.map((option, id) => (
+                        <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
+                      ))}
+
+                    </Input>
+                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Chop Type', this.state.chopTypeSelected, 'required')}</small>
+                  </FormGroup>
+
+                  {this.state.showBranches
+                    ? <FormGroup>
+                      <Label>Branch Company Chop</Label>
+                      <Input onChange={this.handleChange("branchSelected")} type="select" defaultValue="0">
+                        <option value="0" disabled>Please specify your Brand Company Chop</option>
+                        {this.state.branches.map((branch, index) =>
+                          <option value={branch.branchId} key={index}>{branch.branchName}</option>
+                        )}
+                      </Input>
+                      <small style={{ color: '#F86C6B' }} >{this.validator.message('Branch Company Chop', this.state.branchSelected, 'required')}</small>
+                    </FormGroup>
+                    : ""
+                  }
+
+                  <FormGroup check={false}>
+                    <Label>Document Name</Label>
+                    {this.state.isLTU ? documentForLTU : documentForLTI}
+
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label>Purpose of Use</Label>
+                    <InputGroup>
+                      <Input maxLength={500} ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                    </InputGroup>
+                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of Use', this.state.purposeOfUse, 'required')}</small>
+                  </FormGroup>
+
+                  {!this.state.isLTI
+                    ? <FormGroup>
+                      <Label>Connecting Chop (骑缝章) </Label>
+                      <Row />
+                      <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
+                    </FormGroup>
+                    : ""}
+                  <Collapse isOpen={!this.state.isLTI}>
+                    <FormGroup>
+                      <Label>Number of Pages to Be Chopped</Label>
                       <InputGroup>
-                        <Autosuggest
-                          id="contractSign1"
-                          suggestions={suggestions}
-                          onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-                          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-                          getSuggestionValue={this.getSuggestionValue}
-                          renderSuggestion={this.renderSuggestion}
-                          inputProps={inputContract1}
-                        />
-                        {/* <Input typew="text" placeholder="Enter name of First Person" onChange={this.handleChange("contractSign1")}></Input> */}
+                        <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
                       </InputGroup>
-                    </Col>
-                    <Col>
+                      {!this.state.isLTI
+                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages to Be Chopped', this.state.numOfPages, 'required')}</small>
+                        : null}
+                    </FormGroup>
+                  </Collapse>
+                  <Collapse isOpen={!this.state.isLTI && !this.state.isLTU}>
+                    <FormGroup>
+                      <Label>Use in Office</Label>
+                      <Row />
+                      <AppSwitch onChange={this.toggle('collapse')} checked={this.state.collapse} id="useOff" className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} defaultChecked label dataOn={'yes'} dataOff={'no'} />
+                    </FormGroup>
+                  </Collapse>
+
+                  <Collapse isOpen={!this.state.collapse}>
+                    <FormGroup visibelity="false" >
+                      <Label>Return Date</Label>
+                      <Row />
+                      <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                        className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        selected={this.state.dateView2}
+                        onChange={this.dateChange("returnDate", "dateView2")}
+                        minDate={new Date()} maxDate={addDays(new Date(), 30)} />
+                      {!this.state.collapse
+                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', this.state.returnDate, 'required')}</small>
+                        : null}
+                    </FormGroup>
+
+                    <FormGroup>
+                      <Label>Responsible Person <i className="fa fa-user" /></Label>
+                      <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                      <AsyncSelect id="resPerson"
+                        onBlur={this.checkDepartment}
+                        classNamePrefix="rs"
+                        loadOptions={loadOptions}
+                        onChange={this.handleSelectOption("resPerson")}
+                        menuPortalTarget={document.body}
+                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                      />
+                      {!this.state.collapse
+                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Responsible Person', this.state.resPerson, 'required')}</small>
+                        : null}
+                    </FormGroup>
+                  </Collapse>
+
+                  <FormGroup>
+                    <Label>Address to</Label>
+                    <InputGroup>
+                      <Input maxLength={200} ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
+                    </InputGroup>
+                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Address To', this.state.addressTo, 'required')}</small>
+                  </FormGroup>
+
+                  <Collapse isOpen={!this.state.isLTI} >
+                    < FormGroup >
+                      <Label>Pick Up By <i className="fa fa-user" /> </Label>
+                      <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                      <AsyncSelect
+                        id="pickUpBy"
+                        loadOptions={loadOptions}
+                        onBlur={this.checkDepartment}
+                        onChange={this.handleSelectOption("pickUpBy")}
+                        menuPortalTarget={document.body}
+                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                      />
                       <InputGroup>
-                        <Autosuggest
-                          id="contractSign2"
-                          suggestions={suggestions}
-                          onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-                          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-                          getSuggestionValue={this.getSuggestionValue}
-                          renderSuggestion={this.renderSuggestion}
-                          inputProps={inputContract2}
-                        />
-                        {/* <Input type="text" placeholder="Enter name of Second Person" onChange={this.handleChange("contractSign2")} ></Input> */}
+                        {!this.state.isLTI
+                          ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Pick Up By', this.state.pickUpBy, 'required')}</small>
+                          : null}
                       </InputGroup>
+                    </FormGroup>
+                  </Collapse>
+
+                  <FormGroup>
+                    <Label>Remark</Label>
+                    <InputGroup>
+                      <Input maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
+                    </InputGroup>
+                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Remark', this.state.remarks, 'required')}</small>
+                  </FormGroup>
+
+                  {this.state.isLTI
+                    ? <FormGroup>
+                      <Label>Document Check By <i className="fa fa-user" /></Label>
+                      <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                      <AsyncSelect
+                        id="docCheckByLTI"
+                        loadOptions={loadOptions}
+                        isMulti
+                        onChange={this.handleSelectOption("docCheckByLTI")}
+                        menuPortalTarget={document.body}
+                        components={animatedComponents}
+                        styles={this.state.deptHeadSelected === null ? reactSelectControl : ""}
+                      />
+                      <InputGroup>
+                        {this.state.isLTI
+                          ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Department', this.state.deptSelected, 'required')}</small>
+                          : null}
+                      </InputGroup>
+                    </FormGroup>
+                    : null}
+
+                  {this.state.isCNIPS
+                    ? <FormGroup>
+                      <Label>Contract Signed By: <i className="fa fa-user" /></Label>
+                      <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
+                      <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                      <Row>
+                        <Col>
+                          <AsyncSelect
+                            id="contractSign1"
+                            onBlur={this.checkDepartment}
+                            loadOptions={loadOptions}
+                            onChange={this.handleSelectOption("contractSign1")}
+                            menuPortalTarget={document.body}
+                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                          />
+                          <InputGroup>
+                            {this.state.isCNIPS
+                              ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Contract Signed By ', this.state.contractSign1, 'required')}</small>
+                              : null}
+                          </InputGroup>
+                        </Col>
+                        <Col>
+                          <AsyncSelect
+                            id="contractSign2"
+                            onBlur={this.checkDepartment}
+                            loadOptions={loadOptions}
+                            onChange={this.handleSelectOption("contractSign2")}
+                            menuPortalTarget={document.body}
+                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                          />
+                          <InputGroup>
+                            {this.state.isCNIPS
+                              ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Contract Signed By ', this.state.contractSign2, 'required')}</small>
+                              : null}
+                          </InputGroup>
+                        </Col>
+                      </Row>
+                    </FormGroup>
+
+                    : this.state.isLTU
+                      ? <FormGroup>
+                        <Label>Document Check By <i className="fa fa-user" /></Label>
+                        <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                        <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
+                          loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
+                        <InputGroup>
+                          {this.state.isLTU
+                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Check By ', this.state.docCheckBySelected, 'required')}</small>
+                            : null}
+                        </InputGroup>
+                      </FormGroup>
+                      : <FormGroup>
+                        <Label>Department Heads <i className="fa fa-user" /></Label>
+                        <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity</small>
+                        <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                        <AsyncSelect
+                          id="deptHeadSelected"
+                          loadOptions={loadOptions}
+                          isMulti
+                          onBlur={this.checkDepartment}
+                          onChange={this.handleSelectOption("deptHeadSelected")}
+                          menuPortalTarget={document.body}
+                          components={animatedComponents}
+                          styles={this.state.deptHeadSelected === null ? reactSelectControl : ""} />
+                        <InputGroup>
+                          {this.state.isLTI || this.state.isSTU
+                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Department Heads ', this.state.deptHeadSelected, 'required')}</small>
+                            : null}
+                        </InputGroup>
+
+                      </FormGroup>
+                  }
+
+                  <Col md="16">
+                    <FormGroup check>
+                      <FormGroup>
+                        <CustomInput
+                          className="form-check-input"
+                          type="checkbox"
+                          checked={this.state.agreeTerms}
+                          onChange={this.handleAgreeTerm}
+                          // onClick={this.isValid}
+                          id="confirm" value="option1">
+                          <Label className="form-check-label" check >
+                            By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
+                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
+                      </Label>
+                        </CustomInput>
+                      </FormGroup>
+                    </FormGroup>
+                  </Col>
+                </Form>
+              </CardBody>
+              <CardFooter id="submitTooltip">
+                <div className="form-actions" >
+                  <Row className="align-items-left">
+                    <Col>
+                      {this.state.agreeTerms
+                        ? <Button className="mr-2" id="submit" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
+                        : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
+                        >Submit</Button>}
+                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} target="submitTooltip">please confirm the agree terms</Tooltip>
+                      <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
+                      <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
                     </Col>
                   </Row>
-
-
-                </FormGroup>
-                : <FormGroup>
-                  <Label>Department Heads <i className="fa fa-user" /></Label>
-                  <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity</small>
-                  {/* <InputGroup> */}
-                  <AsyncSelect loadOptions={loadOptions} isMulti onChange={this.handleDeptHead} 
-                  menuPortalTarget={document.body} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                  onBlur={this.checkDept}
-                  />
-                  {/* <Input id="deptHeadSelected" onChange={this.handleChange("deptHeadSelected")} name="deptHead" defaultValue="0" type="select">
-                      <option value="0" disabled> Please select first Department Head</option>
-                      {this.state.deptHead.map((head, index) =>
-                        <option value={head.employeeNum} key={index}>{head.displayName}</option>
-                      )}
-                    </Input>
-                    <FormFeedback>Please select a department head</FormFeedback> */}
-                  {/* </InputGroup> */}
-                </FormGroup>
-              }
-
-              <Col md="16">
-                <FormGroup check>
-                  <FormGroup>
-                    <CustomInput
-                      className="form-check-input"
-                      type="checkbox"
-                      checked={this.state.agreeTerms}
-                      onChange= {this.agreeTerm}
-                      // onClick={this.isValid}
-                      id="confirm" value="option1">
-                      <Label className="form-check-label" check >
-                        By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
-                        regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
-                      </Label>
-                    </CustomInput>
-                  </FormGroup>
-                </FormGroup>
-              </Col>
-              <FormGroup>
-                <Label >Attachments</Label>
-                &emsp;
-                <small>Please upload Sign-off Sheet and Contract</small>
-                <Row />
-                <CustomInput multiple id="selectedFile" type="file" color="primary" label={this.state.fileName} onChange={this.uploadFile} />
-                <FormFeedback>Please upload a file</FormFeedback>
-                <Collapse isOpen={this.state.selectedFiles.length !== 0}>
-                  {/* <Table hover>
-                    <thead>
-
-                    </thead>
-                    <tbody>
-                      {this.state.selectedFiles.map((file, index) =>
-                        <tr key={index}>
-                          <th> {file.name}</th>
-                          <th onClick={()=> this.deleteAttachment(index)}>Delete</th>
-                        </tr>
-                      )}
-                    </tbody>
-                  </Table> */}
-                  <Card>
-                    <CardBody>
-
-                      {this.state.selectedFiles.map((file, index) =>
-                        <div key={index}>
-                          <Row>
-                            <Col lg={11}>{file.name}</Col>
-                            <Col> <img style={pointer} width="30px" onMouseOver={this.toggleHover} onClick={() => this.deleteAttachment(index)} src={deleteBin} /> </Col>
-                            {/* <Col >Delete</Col> */}
-
-                          </Row>
-                          <hr />
-                        </div>
-                      )}
-                    </CardBody>
-                  </Card>
-
-
-                </Collapse>
-                <Row />
-              </FormGroup>
-            </Form>
-          </CardBody>
-          <CardFooter>
-            <div className="form-actions">
-              <Row>
-                {this.state.agreeTerms ? <Button type="submit" color="success" onClick={()=> {this.submitRequest('Y')}}>Submit</Button> : <Button disabled type="submit" color="success">Submit</Button>}
-                <span>&nbsp;</span>
-                <Button type="submit" color="primary" onClick={() => {this.submitRequest('N')}}>Save</Button>
-              </Row>
-
-              {/* </div>
+                  {/* </div>
             <div className="form-actions"> */}
-            </div>
-          </CardFooter>
-        </Card>
-        <Modal color="info" isOpen={this.state.modal} toggle={this.toggleModal} className={'modal-info ' + this.props.className} >
-          <ModalHeader className="center" toggle={this.toggleModal}> Contract Chop </ModalHeader>
-          <ModalBody>
-            <div><p>
-              <b>MBAFC</b> Contract Chop is only used for <b>Mortgage Loan Contract</b> and <b>Mortgage Filling Business</b>.
-                 For any other contracts (e.g. purchase orders/release orders) and agreements, please select company chop.
-                  </p>
-              <p className="h6">Do you confirm to apply Contract Chop for your documents?</p>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="success" onClick={this.toggleModal} size="md"> Yes </Button>
-            <Button color="secondary" onClick={() => this.changeSelect("No")} size="md"> No </Button>
-          </ModalFooter>
-        </Modal>
-      </div >
+                </div>
+              </CardFooter>
+            </Card>
+            <Modal backdrop="static" color="info" isOpen={this.state.modal} toggle={this.toggleModal} className={'modal-info ' + this.props.className} >
+              <ModalHeader className="center" toggle={this.changeSelect}> Contract Chop </ModalHeader>
+              <ModalBody>
+                <div>
+                  {ContextValue.legalEntity.contractChop}
+                  <p className="h6">Do you confirm to apply Contract Chop for your documents?</p>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="success" onClick={this.toggleModal} size="md"> Yes </Button>
+                <Button color="secondary" onClick={this.changeSelect} size="md"> No </Button>
+              </ModalFooter>
+            </Modal>
+          </div >
+        )
+      }
+      </LegalEntity.Consumer>
     );
-
   }
 }
 

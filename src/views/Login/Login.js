@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import { fakeAuth } from '../../App';
+import config from '../../config';
 
 import {
     Form,
@@ -84,10 +85,10 @@ class Login extends Component {
 
     async validate(loginCredentials) {
         try {
-            await axios.post('http://192.168.1.47/echopx/api/v1/login', loginCredentials
+            await axios.post(`${config.url}/login`, loginCredentials
                 , { headers: { 'Content-Type': '  application/json' } })
                 .then(res => {
-                    console.log(res);
+                    let info = "LOGIN " + res.data.status.toUpperCase()
                     localStorage.setItem('authenticate', true)
                     localStorage.setItem('legalEntity', 'MBAFC')
                     localStorage.setItem('ticket', res.data.ticket)
@@ -95,13 +96,16 @@ class Login extends Component {
                     localStorage.setItem('roleId', res.data.roleId)
                     localStorage.setItem('token', res.data.token)
                     if (res.data.status === "success") {
-                        this.setState({ fade: !this.state.fade,info: "login " + res.data.status})
+                        this.setState({ info: info})
                         setTimeout(this.redirect, 1000);
                     }
                 })
         } catch (error) {
-            this.setState({ fade: !this.state.fade,info: error.status});
-            console.error(error);
+            if (error.response){
+            this.setState({ info: error.response.statusText});
+            } else {
+            this.setState({ info: "server unreachable"});
+            }   
         }
     }
 
@@ -122,7 +126,7 @@ class Login extends Component {
             username: this.state.username,
             password: this.state.password
         }
-
+        this.setState({ fade: true,info: "Loading ... " })
         this.validate(loginCredentials);
     }
 
@@ -135,7 +139,7 @@ class Login extends Component {
 
         if (redirectToReferrer) {
             console.log("redirect")
-            return <Redirect to='/create' />
+            return <Redirect to='/portal' />
         }
 
 
@@ -163,13 +167,18 @@ class Login extends Component {
                             <FormGroup row>
                                 <Label for="exampleEmail" sm={3}>Username</Label>
                                 <Col sm={9}>
-                                    <Input onChange={this.handleChange} value={this.state.username} type="text" name="username" id="username" placeholder="Please enter Username" />
+                                    <Input onChange={this.handleChange} 
+                                    value={this.state.username} type="text" name="username" 
+                                    id="username" placeholder="Please enter Username" />
                                 </Col>
                             </FormGroup>
                             <FormGroup row>
                                 <Label for="password" sm={3}>Password</Label>
                                 <Col sm={9}>
-                                    <Input onChange={this.handleChange} name="password" value={this.state.password} type="password" name="password" id="password" placeholder="Please enter your Password" />
+                                    <Input onChange={this.handleChange} 
+                                    value={this.state.password} type="password" name="password"
+                                    id="password" placeholder="Please enter your Password" 
+                                    onKeyPress={(e) => {if (e.key === 'Enter'){this.loginCheck()}}}/>
                                 </Col>
                             </FormGroup>
                         </Form>
@@ -179,9 +188,9 @@ class Login extends Component {
                         {/* </Card> */}
                     </ModalBody>
                     <ModalFooter>
-                        <Button block color="primary" style={{ justifyContent: "center" }} onClick={this.loginCheck}>Login </Button>
+                        <Button id="login" block color="primary" style={{ justifyContent: "center" }} onClick={this.loginCheck}>Login </Button>
                         <br />
-                        <Button block color="success" style={{ justifyContent: "center" }} onClick={this.WindowsLogin}>Login With Windows </Button>
+                        <Button id="loginWindows" block color="success" style={{ justifyContent: "center" }} onClick={this.WindowsLogin}>Login With Windows </Button>
                     </ModalFooter>
                 <Fade in={this.state.fade}>
                     <Alert color="info"><center>{this.state.info}</center></Alert>
