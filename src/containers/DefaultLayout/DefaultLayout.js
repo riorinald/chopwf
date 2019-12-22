@@ -87,7 +87,6 @@ class DefaultLayout extends Component {
     this.setState({
       [name]: !this.state[name],
     });
-    console.log(name)
   }
 
   handleSideBarNav(application) {
