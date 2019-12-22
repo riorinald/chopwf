@@ -13,6 +13,15 @@ import config from '../../../config';
 import SimpleReactValidator from 'simple-react-validator';
 import Select from 'react-select'
 import Swal from 'sweetalert2';
+import AsyncSelect from 'react-select/async';
+import makeAnimated from 'react-select/animated';
+
+
+const animatedComponents = makeAnimated();
+const reactSelectControl = {
+    control: styles => ({ ...styles, borderColor: '#F86C6B', boxShadow: '0 0 0 0px #F86C6B', ':hover': { ...styles[':hover'], borderColor: '#F86C6B' } }),
+    menuPortal: base => ({ ...base, zIndex: 9999 })
+}
 
 class LicenseCreate extends Component {
     constructor(props) {
@@ -133,7 +142,8 @@ class LicenseCreate extends Component {
 
 
     handleSelectOption(event) {
-        let value = event ? event.value : null
+        // console.log(event)
+        let value = event ? event : null
         var element = document.getElementById("seniorManager")
         if (value) {
             element.className = "css-2b097c-container"
@@ -342,12 +352,16 @@ class LicenseCreate extends Component {
         postReq.append("PlannedReturnDate", this.state.formData.returnDate);
         postReq.append("DeliverWayId", this.state.formData.deliverWay);
         postReq.append("isSubmitted", isSubmitted);
-        postReq.append("SeniorManager", this.state.formData.seniorManager);
+        // postReq.append("SeniorManager", this.state.formData.seniorManager);
         postReq.append("LicenseAdmin", "quincy@otds.admin");
         postReq.append("isConfirm", this.state.formData.isConfirm);
         postReq.append("ExpDeliveryAddress", this.state.formData.address);
         postReq.append("ExpDeliveryReciever", this.state.formData.reciever);
         postReq.append("ExpDeliveryMobileNo", this.state.formData.recieverPhone);
+
+        for (let i = 0; i < this.state.formData.seniorManager.length; i++) {
+            postReq.append(`SeniorManagers[${i}]`, this.state.formData.seniorManager[i].value);
+        }
 
         for (var pair of postReq.entries()) {
             console.log(pair[0] + ', ' + pair[1]);
@@ -365,6 +379,19 @@ class LicenseCreate extends Component {
     render() {
         const { formData, licenseNames, returnDateView, seniorManagers, departments } = this.state
         this.validator.purgeFields();
+
+
+        const filterColors = (inputValue) => {
+            return seniorManagers.filter(i =>
+                i.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        };
+
+
+        const loadOptions = (inputValue, callback) => {
+
+            callback(filterColors(inputValue));
+        }
 
         return (
             <div className="animated fadeIn">
@@ -506,12 +533,21 @@ class LicenseCreate extends Component {
 
                             <FormGroup>
                                 <Label>Senior Manager or above of requestor department</Label>
-                                <Select
+                                <AsyncSelect
+                                    id="seniorManager"
+                                    loadOptions={loadOptions}
+                                    isMulti
+                                    // onBlur={this.checkDepartment}
+                                    onChange={this.handleSelectOption}
+                                    menuPortalTarget={document.body}
+                                    components={animatedComponents}
+                                    styles={formData.seniorManager === null ? reactSelectControl : ""} />
+                                {/* <Select
                                     id="seniorManager"
                                     options={seniorManagers}
                                     isClearable
                                     onChange={this.handleSelectOption}
-                                />
+                                /> */}
                                 <small style={{ color: '#F86C6B' }} >{this.validator.message('Senior Manager', formData.seniorManager, 'required')}</small>
                             </FormGroup>
 

@@ -408,6 +408,17 @@ class EditRequest extends Component {
             i.label.toLowerCase().includes(inputValue.toLowerCase())
         );
     };
+    filterColors1 = (inputValue) => {
+        return this.state.deptHeads.filter(i =>
+            i.value!== this.state.taskDetails.contractSignedByFirstPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
+        );
+    };
+    
+    filterColors2 = (inputValue) => {
+        return this.state.deptHeads.filter(i =>
+            i.value!== this.state.taskDetails.contractSignedBySecondPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
+        );
+    };
 
     filterDocCheck = (inputValue) => {
         return this.state.docCheckBy.filter(i =>
@@ -417,6 +428,14 @@ class EditRequest extends Component {
 
     loadOptionsDept = (inputValue, callback) => {
         callback(this.filterColors(inputValue));
+
+    }
+    loadOptionsDeptContract1 = (inputValue, callback) => {
+        callback(this.filterColors1(inputValue));
+
+    }
+    loadOptionsDeptContract2 = (inputValue, callback) => {
+        callback(this.filterColors2(inputValue));
 
     }
 
@@ -1716,7 +1735,7 @@ class EditRequest extends Component {
                                             <Col>
                                                 <AsyncSelect
                                                     id="contractSignedByFirstPerson"
-                                                    loadOptions={this.loadOptionsDept}
+                                                    loadOptions={this.loadOptionsDeptContract1}
                                                     value={deptHeads[taskDetails.contractSignedByFirstPersonOption]}
                                                     onChange={this.handleSelectOption("contractSignedByFirstPerson")}
                                                     menuPortalTarget={document.body}
@@ -1731,7 +1750,7 @@ class EditRequest extends Component {
                                             <Col>
                                                 <AsyncSelect
                                                     id="contractSignedBySecondPerson"
-                                                    loadOptions={this.loadOptionsDept}
+                                                    loadOptions={this.loadOptionsDeptContract2}
                                                     value={deptHeads[taskDetails.contractSignedBySecondPersonOption]}
                                                     onChange={this.handleSelectOption("contractSignedBySecondPerson")}
                                                     menuPortalTarget={document.body}

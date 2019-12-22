@@ -514,7 +514,7 @@ class TaskDetails extends Component {
                                             <Label htmlFor="text-input">Address to</Label>
                                         </Col>
                                         <Col xs="12" md="8">
-                                            <Input disabled type="textarea" value={taskDetails.addressTo} id="text-input" name="text-input" placeholder="/" />
+                                            <Input disabled type="text" value={taskDetails.addressTo} id="text-input" name="text-input" placeholder="/" />
                                         </Col>
                                     </FormGroup>
                                     <FormGroup row >

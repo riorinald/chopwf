@@ -651,7 +651,7 @@ class Create extends Component {
         form = form.filter(id => id !== "effectivePeriod" && id !== "teamSelected" && id !== "docCheckBySelected" && id !== "contractSign1" && id !== "contractSign2" && id !== "documentTableLTU" && id !== "docCheckByLTI" && id !== "documentTableCNIPS")
         break;
       case "LTU":
-        form = form.filter(id =>  id !== "effectivePeriod" && id !== "contractSign1" && id !== "contractSign2" && id !== "documentTableLTI" && id !== "deptHeadSelected" && id !== "docCheckByLTI" && id !== "documentTableCNIPS")
+        form = form.filter(id => id !== "effectivePeriod" && id !== "contractSign1" && id !== "contractSign2" && id !== "documentTableLTI" && id !== "deptHeadSelected" && id !== "docCheckByLTI" && id !== "documentTableCNIPS")
         break;
       case "LTI":
         form = form.filter(id => id !== "numOfPages" && id !== "pickUpBy" && id !== "contractSign1" && id !== "contractSign2" && id !== "documentTableLTU" && id !== "docCheckBySelected" && id !== "documentTableCNIPS")
@@ -1265,10 +1265,30 @@ class Create extends Component {
     };
 
     const filterDocCheck = (inputValue) => {
-      return docCheckByUsers.filter(i =>
-        i.label.toLowerCase().includes(inputValue.toLowerCase())
+      return docCheckByUsers.filter(i => i.label.toLowerCase().includes(inputValue.toLowerCase())
       );
     }
+
+    const filterContract1 = (inputValue) => {
+      return deptHeads.filter(i => 
+        i.value !== this.state.contractSign2 && i.label.toLowerCase().includes(inputValue.toLowerCase())
+      );
+    }
+
+    const filterContract2 = (inputValue) => {
+      return deptHeads.filter(i => 
+        i.value !== this.state.contractSign1 && i.label.toLowerCase().includes(inputValue.toLowerCase())
+      );
+    }
+
+    const loadOptionsContract2 = (inputValue, callback) => {
+      callback(filterContract2(inputValue));
+    }
+
+    const loadOptionsContract1 = (inputValue, callback) => {
+      callback(filterContract1(inputValue));
+    }
+
 
     const loadOptions = (inputValue, callback) => {
 
@@ -1789,9 +1809,10 @@ class Create extends Component {
                           <AsyncSelect
                             id="contractSign1"
                             onBlur={this.checkDepartment}
-                            loadOptions={loadOptions}
+                            loadOptions={loadOptionsContract1}
                             onChange={this.handleSelectOption("contractSign1")}
                             menuPortalTarget={document.body}
+                            isClearable
                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                           />
                           <InputGroup>
@@ -1804,9 +1825,10 @@ class Create extends Component {
                           <AsyncSelect
                             id="contractSign2"
                             onBlur={this.checkDepartment}
-                            loadOptions={loadOptions}
+                            loadOptions={loadOptionsContract2}
                             onChange={this.handleSelectOption("contractSign2")}
                             menuPortalTarget={document.body}
+                            isClearable
                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                           />
                           <InputGroup>
