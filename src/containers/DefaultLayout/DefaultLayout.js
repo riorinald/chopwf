@@ -110,7 +110,7 @@ class DefaultLayout extends Component {
                           )} />
                       ) : (null);
                     })}
-                    <Redirect from="/" to={{ pathname: "/404" }} />
+                    {/* <Redirect from="/" to={{ pathname: "/404" }} /> */}
                   </Switch>
                 </Suspense>
               </Container>

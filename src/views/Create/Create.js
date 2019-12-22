@@ -190,7 +190,7 @@ class Create extends Component {
     this.isValid = this.isValid.bind(this);
     this.checkDept = this.checkDept.bind(this);
 
-    this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
+    this.validator = new SimpleReactValidator({autoForceUpdate: this, locale: 'en'});
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
     this.toggleConnection = this.toggleConnection.bind(this);

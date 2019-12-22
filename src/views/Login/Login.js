@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Redirect } from 'react-router-dom';
+import { Redirect,NavLink } from 'react-router-dom';
 import { fakeAuth } from '../../App';
 import config from '../../config';
 import {GoogleAPI,GoogleLogin,GoogleLogout} from 'react-google-oauth'
@@ -9,7 +9,7 @@ import {
     Form,
     FormGroup,
     Input,
-    Button,
+    Button, Row,
     Label, Col, Alert, Fade,
     Navbar, NavbarBrand, Nav, NavItem,
     Modal, ModalHeader, ModalBody, ModalFooter
@@ -25,7 +25,9 @@ class Login extends Component {
             password: "",
             info: "",
             second: 5,
-            fade: false
+            fade: false,
+            redirectOuth: false,
+            pathname: ""
         }
 
         this.handleChange = this.handleChange.bind(this);
@@ -131,8 +133,53 @@ class Login extends Component {
         this.validate(loginCredentials);
     }
 
+    loginWithGoogle = () =>{
+        const scope="openid&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly";
+        const client_id="414328176448-a8id4cjtkim0f3ag4nli28hjbcqte4su.apps.googleusercontent.com";
+        const redirect_uri="http%3A%2F%2Flocalhost/authenticated"
+        const pathname = `https://accounts.google.com/o/oauth2/v2/auth?scope=${scope}&state=state_parameter_passthrough_value&redirect_uri=${redirect_uri}&response_type=token&client_id=${client_id}&authuser=1`;
+        console.log(pathname)
+        var windowpop = window.open(pathname,null, 'height=600,width=450')
+        windowpop.focus()
+        var newThis = this;
+        var timer = setInterval(()=> {   
+                    if(windowpop.closed) {  
+                        clearInterval(timer);
+                        newThis.setState({
+                          redirectToReferrer: true,
+                          success: true
+                        });
+                        localStorage.setItem('authenticate', true)
+                        console.log('closed');  
+                    }  
+                }, 1000); 
+        // axios.get(pathname).then(response => {
+        //     console.log(response);
+        //     var strWindowFeatures = "width=1000,height=800,resizable,scrollbars=yes,status=1";
+        //     var windowpop = window.open(response.data.href, null, strWindowFeatures)
+        //     this.setState({
+        //       authUrl: response.data.href
+        //     })
+        //     windowpop.focus()
+        //     var newThis = this; 
+        //     var timer = setInterval(function() {   
+        //         if(windowpop.closed) {  
+        //             clearInterval(timer);
+        //             newThis.setState({
+        //               redirectToReferrer: true,
+        //               success: true
+        //             });
+        //             localStorage.setItem('authenticate', true)
+        //             console.log('closed');  
+        //         }  
+        //     }, 1000); 
+        //   })
+        //   .catch(error => {
+        //     console.log('Error fetching and parsing data', error);
+        //   });
 
-    
+        // this.setState({ redirectOuth:true, pathname: pathname})
+    }
 
 
     render() {
@@ -140,10 +187,16 @@ class Login extends Component {
 
         if (redirectToReferrer) {
             console.log("redirect")
-            return <Redirect to='/portal' />
+            return <Redirect to={'/portal'} />
+        }
+
+        if (this.state.redirectOuth) {
+            console.log("redirect oauth google")
+            return <Redirect to={{pathname: this.state.pathname}} />
         }
         
         const googleOauth = <GoogleAPI clientId="877545934462-i1ap0krecmv6qqsema0ch6n5l4mndk21.apps.googleusercontent.com"
+         redirectUri="http%3A%2F%2Flocalhost/authenticated"
         // onUpdateSigninStatus= {console.log()}
         // onInitFailure={CALLBACK}
          >
@@ -192,9 +245,14 @@ class Login extends Component {
                                 </Col>
                             </FormGroup>
                         </Form>
-
-                        {googleOauth}
-
+                        <Row>
+                        <Col md={6}>
+                        <Button block onClick={this.loginWithGoogle}>login with Google</Button>
+                        </Col>
+                        <Col md={6}>
+                        <Button block onClick= {event =>  window.location.href="https://accounts.google.com/o/oauth2/v2/auth?scope=openid&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly&state=state_parameter_passthrough_value&redirect_uri=http%3A%2F%2Flocalhost/authenticated&response_type=token&client_id=414328176448-a8id4cjtkim0f3ag4nli28hjbcqte4su.apps.googleusercontent.com&authuser=1"} >Click to login </Button>
+                        </Col>
+                        </Row>
                         {/* </CardBody> */}
                         {/* </Card> */}
                     </ModalBody>

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import {Spinner} from 'reactstrap';
 
 // import { renderRoutes } from 'react-router-config';
@@ -30,6 +30,7 @@ const DefaultLayout = React.lazy(() => import('./containers/DefaultLayout'));
 // Pages
 const Page404 = React.lazy(() => import('./views/Pages/Page404'));
 const Portal = React.lazy(() => import('./views/Portal/Portal'))
+const AuthPage = React.lazy(() => import('./views/Login/Auth'))
 
 const PrivateRoute = ({component: Component, ...rest}) => (
   <Route {...rest} render={props => (
@@ -44,9 +45,10 @@ class App extends Component {
 
   render() {
     return (
-      <HashRouter>
+      <Router>
         <React.Suspense fallback={loading()}>
           <Switch>
+            <Route path="/authenticated" name="auth" render={props => <AuthPage {...props} />} />
             <Route exact path="/page404" name="Page 404" render={props => <Page404 {...props} />} />
             <Route exact path="/portal" name="Portal" render={props => <Portal {...props} />} />
             <Route path='/login' component={Login} />  
@@ -57,7 +59,7 @@ class App extends Component {
             <PrivateRoute path='/' component={DefaultLayout}/>
           </Switch>
         </React.Suspense>
-      </HashRouter>
+      </Router>
     );
   }
 }
