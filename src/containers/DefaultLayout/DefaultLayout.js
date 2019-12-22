@@ -37,11 +37,12 @@ class DefaultLayout extends Component {
     this.props.history.push('/login')
   }
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       legalEntity: localStorage.getItem('legalEntity'),
-      roleId: localStorage.getItem("roleId")
+      roleId: localStorage.getItem("roleId"),
+      application: localStorage.getItem('application'),
     }
     this.handleLegalEntity = this.handleLegalEntity.bind(this)
   }
@@ -50,6 +51,43 @@ class DefaultLayout extends Component {
     this.setState({
       legalEntity: _State.legalEntity
     })
+  }
+
+  changeWorkflow = (value) => {
+    if (value === "LICENSE") {
+      this.props.history.push(`/${value.toLowerCase()}/create`)
+    }
+    else{
+      this.props.history.push('/create')
+    }
+    this.setState({
+      application: value,
+    },
+      localStorage.setItem("application", value));
+  }
+  
+  changeEntity = workflow => event => {
+    if (workflow === "LICENSE") {
+      this.props.history.push(`/${workflow.toLowerCase()}/create`)
+      }
+      else{
+      this.props.history.push(`/create/${event.target.value}`)
+      }
+
+    this.setState({
+      legalEntity: event.target.value,
+      application: workflow,
+      },
+        localStorage.setItem("application", workflow),
+        localStorage.setItem("legalEntity", event.target.value)
+        )
+  }
+
+  toggle = (name) => () => {
+    this.setState({
+      [name]: !this.state[name],
+    });
+    console.log(name)
   }
 
   handleSideBarNav(application) {
@@ -76,7 +114,7 @@ class DefaultLayout extends Component {
         <LegalEntity.Provider value={{ legalEntity: label[this.state.legalEntity] }}>
           <AppHeader fixed>
             <Suspense fallback={this.loading()}>
-              <DefaultHeader handleLegalEntity={this.handleLegalEntity} onLogout={e => this.signOut(e)} />
+              <DefaultHeader state={this.state} toggle={this.toggle} changeEntity={this.changeEntity} changeWorkflow={this.changeWorkflow} onLogout={e => this.signOut(e)} />
             </Suspense>
           </AppHeader>
           <div className="app-body">

@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Col, UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem } from 'reactstrap';
+import { Col, UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem, Dropdown } from 'reactstrap';
 import PropTypes from 'prop-types';
 import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
 import { fakeAuth } from '../../App';
 import { withRouter } from 'react-router-dom';
 import LegalEntity from '../../context';
+
 
 const propTypes = {
   children: PropTypes.node,
@@ -26,47 +27,13 @@ class DefaultHeader extends Component {
     super(props);
     this.state = {
       modal: false,
+      viewChop: false,
+      viewLicense: false,
       legalEntity: localStorage.getItem('legalEntity'),
       application: localStorage.getItem('application'),
       disabled: true
     };
-    this.toggle = this.toggle.bind(this);
-    this.updateLegalEntity = this.updateLegalEntity.bind(this)
   }
-
-  toggle() {
-    this.setState({
-      modal: !this.state.modal,
-    });
-  }
-
-  changeEntity = event => {
-    this.props.history.push(`/create/${event.target.value}`)
-    this.setState({
-      legalEntity: event.target.value,
-      modal: !this.state.modal,
-    },
-      this.updateLegalEntity,
-      localStorage.setItem("legalEntity", event.target.value));
-  }
-
-  updateLegalEntity() {
-    this.props.handleLegalEntity(this.state)
-  }
-
-  changeWorkflow = (value) => {
-    if (value === "LICENSE") {
-      this.props.history.push(`/${value.toLowerCase()}/create`)
-    }
-    else{
-      this.props.history.push('/create')
-    }
-    this.setState({
-      application: value,
-    },
-      localStorage.setItem("application", value));
-  }
-
   logout() {
     console.log("logout")
     fakeAuth.signOut()
@@ -94,7 +61,7 @@ class DefaultHeader extends Component {
             <AppSidebarMinimizer className="customMT d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
             <h2 className="h5 d-sm-down-none"><b>{this.state.application} Use WORKFLOW for {this.state.legalEntity}</b></h2>
             <Nav className="ml-auto" navbar>
-              <NavItem >
+              {/* <NavItem >
                 <Button color="ghost" onClick={this.toggle} to="#"><i className="fa fa-exchange" /> Entity</Button>
                 <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
                   <ModalHeader className="center" toggle={this.toggle}> Switch Entity </ModalHeader>
@@ -107,33 +74,53 @@ class DefaultHeader extends Component {
                     </Col>
                   </ModalBody>
                 </Modal>
-              </NavItem>
-              <UncontrolledDropdown nav direction="down" >
-                <DropdownToggle nav caret>
-                    <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</Button>
+              </NavItem> */}
+              <Dropdown isOpen={this.props.state.viewChop} toggle={this.props.toggle('viewChop')} nav direction="down" >
+                <DropdownToggle color="ghost" className="btn-pill" caret>
+                    CHOP WF
                 </DropdownToggle>
-                  <DropdownMenu down>
-                    <DropdownItem onClick={this.changeEntity} value="MBAFC">
+                  <DropdownMenu className="mt-2">
+                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBAFC"
+                    active={this.props.state.legalEntity === "MBAFC" && this.props.state.application === "CHOP" ? true : false}> 
                        MBAFC 
                     </DropdownItem>
-                    <DropdownItem onClick={this.changeEntity} value="MBLC">
+                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBLC"
+                    active={this.props.state.legalEntity === "MBLC" && this.props.state.application === "CHOP" ? true : false}> 
                       MBLC
                     </DropdownItem>
-                    <DropdownItem onClick={this.changeEntity} value="MBIA">
+                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBIA"
+                      active={this.props.state.legalEntity === "MBIA" && this.props.state.application === "CHOP" ? true : false}> 
                        MBIA
                     </DropdownItem>
-                    <DropdownItem onClick={this.changeEntity} value="CAR2GO">
+                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="CAR2GO"
+                      active={this.props.state.legalEntity === "CAR2GO" && this.props.state.application === "CHOP" ? true : false}> 
                        CAR2GO
                     </DropdownItem>
                   </DropdownMenu>
-              </UncontrolledDropdown>
-              <NavItem className="px-1 mr-1">
-              {/* {this.state.application === "LICENSE"
-                  ? <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</Button>
-                  : <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('LICENSE')} >LICENSE WORKFLOW</Button>
-                } */}
-                <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('LICENSE')} >LICENSE WORKFLOW</Button>
-              </NavItem>
+              </Dropdown>
+              <Dropdown className="mr-2" isOpen={this.props.state.viewLicense} toggle={this.props.toggle('viewLicense')} nav direction="down" >
+                <DropdownToggle color="ghost" className="btn-pill" caret>
+                    LICENSE WF
+                </DropdownToggle>
+                  <DropdownMenu className="mt-2">
+                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBAFC"
+                      active={this.props.state.legalEntity === "MBAFC" && this.props.state.application === "LICENSE" ? true : false}>
+                       MBAFC 
+                    </DropdownItem>
+                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBLC"
+                      active={this.props.state.legalEntity === "MBLC" && this.props.state.application === "LICENSE" ? true : false}>
+                      MBLC
+                    </DropdownItem>
+                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBIA"
+                      active={this.props.state.legalEntity === "MBIA" && this.props.state.application === "LICENSE" ? true : false}>
+                       MBIA
+                    </DropdownItem>
+                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="CAR2GO"
+                      active={this.props.state.legalEntity === "CAR2GO" && this.props.state.application === "LICENSE" ? true : false}>
+                       CAR2GO
+                    </DropdownItem>
+                  </DropdownMenu>
+              </Dropdown>
               <NavItem className="d-sm-down-none">
                 {username}
               </NavItem>
