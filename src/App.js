@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import {Spinner} from 'reactstrap';
 
 // import { renderRoutes } from 'react-router-config';
@@ -44,7 +44,7 @@ class App extends Component {
 
   render() {
     return (
-      <HashRouter>
+      <Router>
         <React.Suspense fallback={loading()}>
           <Switch>
             <Route exact path="/page404" name="Page 404" render={props => <Page404 {...props} />} />
@@ -57,7 +57,7 @@ class App extends Component {
             <PrivateRoute path='/' component={DefaultLayout}/>
           </Switch>
         </React.Suspense>
-      </HashRouter>
+      </Router>
     );
   }
 }
