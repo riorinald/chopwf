@@ -146,14 +146,16 @@ class Login extends Component {
         var windowpop = window.open(pathname,null, 'height=600,width=450')
         windowpop.focus()
         var newThis = this;
-        var timer = setInterval(()=> {   
+        var timer = setInterval(()=> {
+            if (windowpop.location.href === "http://localhost/portal" ) {
+                clearInterval(timer);
+                windowpop.close()
+            }   
                     if(windowpop.closed) {  
                         clearInterval(timer);
-                        newThis.setState({
-                          redirectToReferrer: true,
-                          success: true
-                        });
-                        setTimeout(windowpop.close(), 1500)
+                        fakeAuth.authenticate(() => {
+                            this.setState({ redirectToReferrer: true })
+                            });
                         console.log('closed');  
                     }  
                 }, 1000);
@@ -246,13 +248,13 @@ class Login extends Component {
                         </Form>
                         <Row noGutters>
                             <Col className="text-center">
-                                <Button className="btn-google-plus btn-brand" onClick= {this.loginWithGoogle}>
-                                    <i className="fa fa-google-plus"></i><span>with Google</span>
+                                <Button className="btn-openid btn-brand" onClick= {this.loginWithGoogle}>
+                                    <i className="fa fa-openid"></i><span>Google OpenID </span>
                                 </Button>
                             </Col>
                             <Col className="text-center">
-                                <Button className="btn-openid btn-brand" onClick= {event =>  window.location.href = pathname} >
-                                    <i className="fa fa-openid"></i><span>Google OpenID</span>
+                                <Button className="btn-google-plus btn-brand" onClick= {event =>  window.location.href = pathname} >
+                                    <i className="fa fa-google-plus"></i><span>Google Account</span>
                                 </Button>
                             </Col>
                         </Row>
