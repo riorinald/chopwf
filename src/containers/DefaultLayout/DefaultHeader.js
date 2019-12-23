@@ -5,6 +5,7 @@ import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
 import { fakeAuth } from '../../App';
 import { withRouter } from 'react-router-dom';
 import LegalEntity from '../../context';
+import Axios from 'axios';
 
 const propTypes = {
   children: PropTypes.node,
@@ -28,10 +29,15 @@ class DefaultHeader extends Component {
       modal: false,
       legalEntity: localStorage.getItem('legalEntity'),
       application: localStorage.getItem('application'),
+      userDetails:'',
       disabled: true
     };
     this.toggle = this.toggle.bind(this);
     this.updateLegalEntity = this.updateLegalEntity.bind(this)
+  }
+
+  componentDidMount(){
+    this.getUserDetails()
   }
 
   toggle() {
@@ -73,6 +79,13 @@ class DefaultHeader extends Component {
     // return <Redirect to='/login'/>
   }
 
+
+  async getUserDetails() {
+    this.setState({ loading: true })
+    await Axios.get(`https://www.googleapis.com/oauth2/v3/userinfo?alt=json&access_token=${localStorage.getItem('token')}`).then(res => {
+        this.setState({ userDetails: res.data, loading: false })
+    })
+}
   // logout = withRouter(({history}))
 
   render() {
@@ -112,7 +125,7 @@ class DefaultHeader extends Component {
                 <DropdownToggle nav caret>
                     <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</Button>
                 </DropdownToggle>
-                  <DropdownMenu down>
+                  <DropdownMenu>
                     <DropdownItem onClick={this.changeEntity} value="MBAFC">
                        MBAFC 
                     </DropdownItem>
@@ -127,19 +140,12 @@ class DefaultHeader extends Component {
                     </DropdownItem>
                   </DropdownMenu>
               </UncontrolledDropdown>
-              <NavItem className="px-1 mr-1">
-              {/* {this.state.application === "LICENSE"
-                  ? <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</Button>
-                  : <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('LICENSE')} >LICENSE WORKFLOW</Button>
-                } */}
-                <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('LICENSE')} >LICENSE WORKFLOW</Button>
-              </NavItem>
               <NavItem className="d-sm-down-none">
-                {username}
+                {this.state.userDetails.email}
               </NavItem>
               <UncontrolledDropdown nav direction="down" >
                 <DropdownToggle nav>
-                  <img src={'../../assets/img/avatars/6.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
+                  <img src={this.state.userDetails.picture} className="img-avatar" alt="admin@bootstrapmaster.com" />
                 </DropdownToggle>
                 <DropdownMenu right>
                   {/* <DropdownItem header tag="div" className="text-center"><strong>Account</strong></DropdownItem>

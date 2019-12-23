@@ -48,7 +48,7 @@ class App extends Component {
       <Router>
         <React.Suspense fallback={loading()}>
           <Switch>
-            <Route path="/authenticated" name="auth" render={props => <AuthPage {...props} />} />
+            <Route exact path="/authenticated" name="auth" render={props => <AuthPage {...props} />} />
             <Route exact path="/page404" name="Page 404" render={props => <Page404 {...props} />} />
             <Route exact path="/portal" name="Portal" render={props => <Portal {...props} />} />
             <Route path='/login' component={Login} />  

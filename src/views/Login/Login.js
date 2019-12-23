@@ -15,6 +15,11 @@ import {
     Modal, ModalHeader, ModalBody, ModalFooter
 } from 'reactstrap';
 
+const scope="email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly";
+const client_id="414328176448-a8id4cjtkim0f3ag4nli28hjbcqte4su.apps.googleusercontent.com";
+const redirect_uri="http%3A%2F%2Flocalhost/authenticated"
+const pathname = `https://accounts.google.com/o/oauth2/v2/auth?scope=${scope}&state=state_parameter_passthrough_value&redirect_uri=${redirect_uri}&response_type=token&client_id=${client_id}&authuser=1`;
+ 
 
 class Login extends Component {
     constructor(props) {
@@ -134,11 +139,10 @@ class Login extends Component {
     }
 
     loginWithGoogle = () =>{
-        const scope="openid&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly";
+        const scope="email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly";
         const client_id="414328176448-a8id4cjtkim0f3ag4nli28hjbcqte4su.apps.googleusercontent.com";
         const redirect_uri="http%3A%2F%2Flocalhost/authenticated"
         const pathname = `https://accounts.google.com/o/oauth2/v2/auth?scope=${scope}&state=state_parameter_passthrough_value&redirect_uri=${redirect_uri}&response_type=token&client_id=${client_id}&authuser=1`;
-        console.log(pathname)
         var windowpop = window.open(pathname,null, 'height=600,width=450')
         windowpop.focus()
         var newThis = this;
@@ -149,10 +153,10 @@ class Login extends Component {
                           redirectToReferrer: true,
                           success: true
                         });
-                        localStorage.setItem('authenticate', true)
+                        setTimeout(windowpop.close(), 1500)
                         console.log('closed');  
                     }  
-                }, 1000); 
+                }, 1000);
         // axios.get(pathname).then(response => {
         //     console.log(response);
         //     var strWindowFeatures = "width=1000,height=800,resizable,scrollbars=yes,status=1";
@@ -188,11 +192,6 @@ class Login extends Component {
         if (redirectToReferrer) {
             console.log("redirect")
             return <Redirect to={'/portal'} />
-        }
-
-        if (this.state.redirectOuth) {
-            console.log("redirect oauth google")
-            return <Redirect to={{pathname: this.state.pathname}} />
         }
         
         const googleOauth = <GoogleAPI clientId="877545934462-i1ap0krecmv6qqsema0ch6n5l4mndk21.apps.googleusercontent.com"
@@ -245,13 +244,17 @@ class Login extends Component {
                                 </Col>
                             </FormGroup>
                         </Form>
-                        <Row>
-                        <Col md={6}>
-                        <Button block onClick={this.loginWithGoogle}>login with Google</Button>
-                        </Col>
-                        <Col md={6}>
-                        <Button block onClick= {event =>  window.location.href="https://accounts.google.com/o/oauth2/v2/auth?scope=openid&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly&state=state_parameter_passthrough_value&redirect_uri=http%3A%2F%2Flocalhost/authenticated&response_type=token&client_id=414328176448-a8id4cjtkim0f3ag4nli28hjbcqte4su.apps.googleusercontent.com&authuser=1"} >Click to login </Button>
-                        </Col>
+                        <Row noGutters>
+                            <Col className="text-center">
+                                <Button className="btn-google-plus btn-brand" onClick= {this.loginWithGoogle}>
+                                    <i className="fa fa-google-plus"></i><span>with Google</span>
+                                </Button>
+                            </Col>
+                            <Col className="text-center">
+                                <Button className="btn-openid btn-brand" onClick= {event =>  window.location.href = pathname} >
+                                    <i className="fa fa-openid"></i><span>Google OpenID</span>
+                                </Button>
+                            </Col>
                         </Row>
                         {/* </CardBody> */}
                         {/* </Card> */}
