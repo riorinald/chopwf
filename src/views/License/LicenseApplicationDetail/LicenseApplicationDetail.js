@@ -97,7 +97,7 @@ class LicenseApplicationDetail extends Component {
                     })
                 }
             }
-            else if (this.state.deliverWay === "Scan copy") {
+            else if (this.state.taskDetails.documentTypeId === "SCANCOPY") {
                 if (this.state.documents.length !== 0) {
                     valid = true
                 }
@@ -111,14 +111,14 @@ class LicenseApplicationDetail extends Component {
                 }
             }
 
-            else {
-                valid = false
-                Swal.fire({
-                    title: "No Delivery Way Selected",
-                    html: "Please select a way of delivery !",
-                    type: "warning"
-                })
-            }
+            // else {
+            //     valid = false
+            //     Swal.fire({
+            //         title: "No Delivery Way Selected",
+            //         html: "Please select a way of delivery !",
+            //         type: "warning"
+            //     })
+            // }
         }
         else if (this.state.currentStatus === "PENDINGREQUESTORRETURN") {
             if (this.state.deliverWay === "Express") {
@@ -156,7 +156,10 @@ class LicenseApplicationDetail extends Component {
         postReq.append("UserId", localStorage.getItem("userId"));
         postReq.append("Comments", this.state.comments);
         postReq.append("ExpressNumber", this.state.expressNumber);
-        postReq.append("Address", this.state.taskDetails.expDeliveryAddress);
+        postReq.append("ExpressAddress", this.state.taskDetails.expDeliveryAddress);
+        for (let i = 0; i < this.state.documents.length; i++) {
+            postReq.append(`Documents[${i}].Attachment.File`, this.state.documents[i].file);
+        }
 
         for (var pair of postReq.entries()) {
             console.log(pair[0] + ', ' + pair[1]);

@@ -184,10 +184,11 @@ class MyPendingTasks extends Component {
     }
 
     dateChange = (name, view) => date => {
-        console.log(date)
+        let month = date.getMonth()
+
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`
+            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
         }
         this.setState({ [view]: date });
         this.setState(prevState => ({

@@ -528,7 +528,6 @@ class Create extends Component {
     // let url = `${config.url}/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit`
 
     let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
-    console.log(url)
     try {
       await axios.get(url).then(res => {
         this.setState({ documents: res.data })
@@ -593,7 +592,7 @@ class Create extends Component {
   changeDeptHeads(heads) {
     let dh = ""
     heads.map(head => {
-      dh = dh + head + "; "
+      dh = dh + head.displayName + "; "
     })
     return dh
   }
@@ -618,7 +617,6 @@ class Create extends Component {
   }
 
   async getDocCheckBy(teamId) {
-    console.log(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`)
     await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`)
       .then(res => {
         this.setState({ docCheckBy: res.data })
@@ -1217,9 +1215,11 @@ class Create extends Component {
   }
 
   dateChange = (name, view) => date => {
+    let month = date.getMonth()
+
     let dates = ""
     if (date) {
-      dates = `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`
+      dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
     }
     console.log(dates)
     this.setState({
@@ -1270,13 +1270,13 @@ class Create extends Component {
     }
 
     const filterContract1 = (inputValue) => {
-      return deptHeads.filter(i => 
+      return deptHeads.filter(i =>
         i.value !== this.state.contractSign2 && i.label.toLowerCase().includes(inputValue.toLowerCase())
       );
     }
 
     const filterContract2 = (inputValue) => {
-      return deptHeads.filter(i => 
+      return deptHeads.filter(i =>
         i.value !== this.state.contractSign1 && i.label.toLowerCase().includes(inputValue.toLowerCase())
       );
     }
@@ -1461,12 +1461,12 @@ class Create extends Component {
                 {
                   Header: 'Document Name (English)',
                   accessor: 'documentNameEnglish',
-                  style: { textAlign: "center" },
+                  // style: { textAlign: "center" },
                 },
                 {
                   Header: 'Document Name (Chinese)',
                   accessor: 'documentNameChinese',
-                  style: { textAlign: "center" },
+                  // style: { textAlign: "center" },
                 },
                 {
                   Header: 'Expiry Date',
@@ -1474,7 +1474,7 @@ class Create extends Component {
                   Cell: row => (
                     <div> {this.convertExpDate(row.original.expiryDate)} </div>
                   ),
-                  style: { textAlign: "center" },
+                  // style: { textAlign: "center" },
                 },
                 {
                   Header: 'DH Approved',
@@ -1482,7 +1482,7 @@ class Create extends Component {
                   Cell: row => (
                     <div> {this.changeDeptHeads(row.original.departmentHeads)} </div>
                   ),
-                  style: { textAlign: "center" },
+                  // style: { textAlign: "center" },
                 },
               ]}
               keyField="documentId"
@@ -1513,16 +1513,16 @@ class Create extends Component {
               <tbody>
                 {this.state.documentTableLTU.map((document, index) =>
                   <tr key={index}>
-                    <th>{index + 1}</th>
-                    <th>{document.documentNameEnglish}</th>
-                    <th>{document.documentNameChinese}</th>
-                    <th id="viewDoc">
-                      <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.expiryDate}</a>
-                    </th>
-                    <th id="viewDoc">
-                      <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.dhApproved}</a>
-                    </th>
-                    <th><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} onMouseOver={this.toggleHover} src={deleteBin} /></th>
+                    <td>{index + 1}</td>
+                    <td>{document.documentNameEnglish}</td>
+                    <td>{document.documentNameChinese}</td>
+                    <td id="viewDoc">
+                      <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a>
+                    </td>
+                    <td id="viewDoc">
+                      <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a>
+                    </td>
+                    <td><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
                   </tr>
                 )}
               </tbody>
