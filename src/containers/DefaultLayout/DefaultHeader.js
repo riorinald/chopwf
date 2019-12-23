@@ -5,7 +5,8 @@ import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
 import { fakeAuth } from '../../App';
 import { withRouter } from 'react-router-dom';
 import LegalEntity from '../../context';
-
+import axios from 'axios'
+import config from '../../config'
 const propTypes = {
   children: PropTypes.node,
 };
@@ -28,10 +29,27 @@ class DefaultHeader extends Component {
       modal: false,
       legalEntity: localStorage.getItem('legalEntity'),
       application: localStorage.getItem('application'),
-      disabled: true
+      disabled: true,
+      userData: {}
     };
     this.toggle = this.toggle.bind(this);
     this.updateLegalEntity = this.updateLegalEntity.bind(this)
+  }
+
+  componentDidMount() {
+    this.getUserData()
+  }
+
+  async getUserData() {
+    let ticket = localStorage.getItem('ticket')
+    let userId = localStorage.getItem('userId')
+    // let userId = "josh@otds.admin"
+    // let userId = "daniel@otds.admin"
+    await axios.get(`${config.url}/users/` + userId, { headers: { 'ticket': ticket } })
+      .then(res => {
+        console.log(res.data)
+        this.setState({ userData: res.data })
+      })
   }
 
   toggle() {
@@ -58,7 +76,7 @@ class DefaultHeader extends Component {
     if (value === "LICENSE") {
       this.props.history.push(`/${value.toLowerCase()}/create`)
     }
-    else{
+    else {
       this.props.history.push('/create')
     }
     this.setState({
@@ -76,7 +94,7 @@ class DefaultHeader extends Component {
   // logout = withRouter(({history}))
 
   render() {
-
+    const { userData } = this.state
     // eslint-disable-next-line
     const { children, ...attributes } = this.props;
     const username = localStorage.getItem('userId');
@@ -100,35 +118,35 @@ class DefaultHeader extends Component {
                   <ModalHeader className="center" toggle={this.toggle}> Switch Entity </ModalHeader>
                   <ModalBody>
                     <Col>
-                    <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBAFC" ? true : false} color="secondary" value="MBAFC" size="lg" block> MBAFC </Button>
-                    <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBLC" ? true : false} color="secondary" value="MBLC" size="lg" block> MBLC </Button>
-                    <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBIA" ? true : false} color="secondary" value="MBIA" size="lg" block > MBIA </Button>
-                    <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "CAR2GO" ? true : false} color="secondary" value="CAR2GO" size="lg" block > CAR2GO </Button>
+                      <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBAFC" ? true : false} color="secondary" value="MBAFC" size="lg" block> MBAFC </Button>
+                      <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBLC" ? true : false} color="secondary" value="MBLC" size="lg" block> MBLC </Button>
+                      <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "MBIA" ? true : false} color="secondary" value="MBIA" size="lg" block > MBIA </Button>
+                      <Button onClick={this.changeEntity} disabled={this.state.legalEntity === "CAR2GO" ? true : false} color="secondary" value="CAR2GO" size="lg" block > CAR2GO </Button>
                     </Col>
                   </ModalBody>
                 </Modal>
               </NavItem>
               <UncontrolledDropdown nav direction="down" >
                 <DropdownToggle nav caret>
-                    <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</Button>
+                  <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</Button>
                 </DropdownToggle>
-                  <DropdownMenu down>
-                    <DropdownItem onClick={this.changeEntity} value="MBAFC">
-                       MBAFC 
+                <DropdownMenu down>
+                  <DropdownItem onClick={this.changeEntity} value="MBAFC">
+                    MBAFC
                     </DropdownItem>
-                    <DropdownItem onClick={this.changeEntity} value="MBLC">
-                      MBLC
+                  <DropdownItem onClick={this.changeEntity} value="MBLC">
+                    MBLC
                     </DropdownItem>
-                    <DropdownItem onClick={this.changeEntity} value="MBIA">
-                       MBIA
+                  <DropdownItem onClick={this.changeEntity} value="MBIA">
+                    MBIA
                     </DropdownItem>
-                    <DropdownItem onClick={this.changeEntity} value="CAR2GO">
-                       CAR2GO
+                  <DropdownItem onClick={this.changeEntity} value="CAR2GO">
+                    CAR2GO
                     </DropdownItem>
-                  </DropdownMenu>
+                </DropdownMenu>
               </UncontrolledDropdown>
               <NavItem className="px-1 mr-1">
-              {/* {this.state.application === "LICENSE"
+                {/* {this.state.application === "LICENSE"
                   ? <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('CHOP')} >CHOP WORKFLOW</Button>
                   : <Button className="btn-pill" size="sm" color="secondary" onClick={() => this.changeWorkflow('LICENSE')} >LICENSE WORKFLOW</Button>
                 } */}
@@ -139,7 +157,7 @@ class DefaultHeader extends Component {
               </NavItem>
               <UncontrolledDropdown nav direction="down" >
                 <DropdownToggle nav>
-                  <img src={'../../assets/img/avatars/6.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
+                  <img src={userData.photoUrl} className="img-avatar" alt="admin@bootstrapmaster.com" />
                 </DropdownToggle>
                 <DropdownMenu right>
                   {/* <DropdownItem header tag="div" className="text-center"><strong>Account</strong></DropdownItem>

@@ -72,10 +72,14 @@ class TaskDetails extends Component {
         return nums.join(", ")
     }
 
-    setArray = () => {
-        let result = this.state.taskDetails.departmentHeads
-        return result.join("; ")
+    setArray(data) {
+        return data.join("; ")
     }
+
+    // setArray = () => {
+    //     let result = this.state.taskDetails.departmentHeads
+    //     return result.join("; ")
+    // }
 
     goBack(updated) {
         if (updated) {
@@ -525,6 +529,18 @@ class TaskDetails extends Component {
                                             <Input disabled type="text" value={taskDetails.remark} id="text-input" name="text-input" placeholder="/" />
                                         </Col>
                                     </FormGroup>
+                                    {appType === "LTI"
+                                        ? <FormGroup row >
+                                            <Col md="4" className="d-flex align-items-center" >
+                                                <Label htmlFor="text-input">Document Check By</Label>
+                                            </Col>
+                                            <Col id="docCheck" xs="12" md="8">
+                                                <Input disabled type="text" value={this.setArray(taskDetails.documentCheckByName)} id="text-input" name="text-input" placeholder="/" />
+                                                <UncontrolledTooltip placement="right" target="docCheck">{this.setArray(taskDetails.documentCheckByName)}</UncontrolledTooltip>
+                                            </Col>
+                                        </FormGroup>
+                                        : null
+                                    }
                                     {appType === "CNIPS"
                                         ? <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
@@ -549,11 +565,14 @@ class TaskDetails extends Component {
                                                     <Label htmlFor="text-input">Department Heads</Label>
                                                 </Col>
                                                 <Col id="deptHead" xs="12" md="8">
-                                                    <Input disabled type="text" value={this.setArray()} id="text-input" name="text-input" placeholder="/" />
-                                                    <UncontrolledTooltip placement="right" target="deptHead">{this.setArray()}</UncontrolledTooltip>
+                                                    <Input disabled type="text" value={this.setArray(taskDetails.departmentHeads)} id="text-input" name="text-input" placeholder="/" />
+                                                    <UncontrolledTooltip placement="right" target="deptHead">{this.setArray(taskDetails.departmentHeads)}</UncontrolledTooltip>
                                                 </Col>
                                             </FormGroup>
                                     }
+
+
+
 
 
 
