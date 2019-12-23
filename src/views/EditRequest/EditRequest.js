@@ -410,13 +410,13 @@ class EditRequest extends Component {
     };
     filterColors1 = (inputValue) => {
         return this.state.deptHeads.filter(i =>
-            i.value!== this.state.taskDetails.contractSignedByFirstPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
+            i.value !== this.state.taskDetails.contractSignedByFirstPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
         );
     };
-    
+
     filterColors2 = (inputValue) => {
         return this.state.deptHeads.filter(i =>
-            i.value!== this.state.taskDetails.contractSignedBySecondPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
+            i.value !== this.state.taskDetails.contractSignedBySecondPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
         );
     };
 
@@ -932,9 +932,11 @@ class EditRequest extends Component {
     }
 
     dateChange = (name, view) => date => {
+        let month = date.getMonth()
+
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`
+          dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
         }
         this.setState({
             [view]: date
@@ -1043,8 +1045,8 @@ class EditRequest extends Component {
             .then(res => {
                 if (isSubmitted === 'N') {
                     Swal.fire({
-                        title: "SAVED",
-                        text: 'Request Saved ',
+                        title: res.data.status === 200 ? 'Request Saved' : '',
+                        text: 'Request Number : ' + res.data.requestNum,
                         footer: 'Your request is saved as a draft',
                         type: 'info',
                         onClose: () => {
@@ -1055,8 +1057,8 @@ class EditRequest extends Component {
                 }
                 if (isSubmitted === 'Y') {
                     Swal.fire({
-                        title: "SUBMITTED",
-                        text: 'Request Submitted',
+                        title: res.data.status === 200 ? 'Request Submitted' : "",
+                        text: 'Request Number : ' + res.data.requestNum,
                         footer: 'Your request is being processed and is waiting for the approval',
                         type: 'success',
                         onClose: () => {
@@ -1156,7 +1158,7 @@ class EditRequest extends Component {
         postReq.append("CompanyId", this.props.legalName);
         postReq.append("DepartmentId", this.state.taskDetails.departmentId);
         postReq.append("ApplicationTypeId", this.state.taskDetails.applicationTypeId);
-        postReq.append("ContractNum", "");
+        // postReq.append("ContractNum", "");
         postReq.append("ChopTypeId", this.state.taskDetails.chopTypeId);
         postReq.append("TeamId", this.state.taskDetails.teamId);
         postReq.append("PurposeOfUse", this.state.taskDetails.purposeOfUse);
@@ -1168,16 +1170,16 @@ class EditRequest extends Component {
         postReq.append("IsConfirmed", this.state.taskDetails.isConfirm);
         postReq.append("ReturnDate", returnDate);
         postReq.append("ResponsiblePerson", this.state.taskDetails.responsiblePerson);
-        postReq.append("ContracySignedByFirstPerson", this.state.taskDetails.contractSignedByFirstPerson);
+        postReq.append("ContractSignedByFirstPerson", this.state.taskDetails.contractSignedByFirstPerson);
         postReq.append("ContractSignedBySecondPerson", this.state.taskDetails.contractSignedBySecondPerson);
         postReq.append("EffectivePeriod", this.state.taskDetails.effectivePeriod);
         postReq.append("IsSubmitted", isSubmitted);
         postReq.append("isConnectChop", this.state.taskDetails.connectChop);
         postReq.append("BranchId", this.state.taskDetails.branchId)
 
-        if (this.state.taskDetails.documentCheckBy.length === 0) {
-            postReq.append(`DocumentCheckBy[0]`, "");
-        }
+        // if (this.state.taskDetails.documentCheckBy.length === 0) {
+        //     postReq.append(`DocumentCheckBy[0]`, "");
+        // }
 
         for (let i = 0; i < this.state.taskDetails.documentCheckBy.length; i++) {
             postReq.append(`DocumentCheckBy[${i}]`, this.state.taskDetails.documentCheckBy[i]);
@@ -1213,7 +1215,7 @@ class EditRequest extends Component {
                     postReq.append(`Documents[${temp}].DocumentNameEnglish`, this.state.taskDetails.documents[i].documentNameEnglish);
                     postReq.append(`Documents[${temp}].DocumentNameChinese`, this.state.taskDetails.documents[i].documentNameChinese);
                     for (let j = 0; j < this.state.taskDetails.documents[i].contractNums.length; j++) {
-                        postReq.append(`Documents[${temp}].ContractNumber[${j}]`, this.state.taskDetails.documents[i].contractNums[j]);
+                        postReq.append(`Documents[${temp}].ContractNums[${j}]`, this.state.taskDetails.documents[i].contractNums[j]);
                     }
                 }
             }
