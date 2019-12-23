@@ -792,22 +792,23 @@ class Create extends Component {
     let first = /(?!.*[A-HJ-QT-Z])[IS]/;
     let third = /(?!.*[A-NQRT-Z])[PSO]/;
     let digit = /[0-9]/;
+    let center = /[A-Za-z]/;
     let mask = []
     switch (this.props.match.params.company) {
       case 'MBIA':
-        mask = [first, "-", "IA", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
         break;
       case 'MBLC':
-        mask = [first, "-", "L", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
         break;
       case 'MBAFC':
-        mask = [first, "-", "A", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
         break;
       case 'CAR2GO':
-        mask = [first, "-", "R", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
         break;
       default:
-        mask = [first, "-", "IA", "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
         break;
     }
     this.setState({
