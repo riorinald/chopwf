@@ -437,14 +437,17 @@ class TaskDetails extends Component {
                                             </Col>
                                         </FormGroup>
                                         : ''}
-                                    <FormGroup row >
-                                        <Col md="4" className="d-flex align-items-center" >
+                                    {appType === 'LTU' 
+                                        ? ''
+                                        : <FormGroup row >
+                                            <Col md="4" className="d-flex align-items-center" >
                                             <Label htmlFor="text-input">Confirm</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
+                                            </Col>
+                                            <Col xs="12" md="8">
                                             <Input disabled type="text" id="text-input" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="/" />
-                                        </Col>
-                                    </FormGroup>
+                                            </Col>
+                                         </FormGroup>
+                                    }
                                 </Col>
                                 <Col>
                                     <FormGroup row >
@@ -580,6 +583,17 @@ class TaskDetails extends Component {
                                                     <UncontrolledTooltip placement="right" target="deptHead">{this.setArray(taskDetails.departmentHeadsName)}</UncontrolledTooltip>
                                                 </Col>
                                             </FormGroup>
+                                    }
+                                    {appType === 'LTU' 
+                                        ? <FormGroup row >
+                                            <Col md="4" className="d-flex align-items-center" >
+                                            <Label htmlFor="text-input">Confirm</Label>
+                                            </Col>
+                                            <Col xs="12" md="8">
+                                            <Input disabled type="text" id="text-input" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="/" />
+                                            </Col>
+                                         </FormGroup>
+                                        : ''
                                     }
 
 
