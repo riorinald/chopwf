@@ -44,7 +44,7 @@ class App extends Component {
 
   render() {
     return (
-      <Router>
+      <Router basename='/CLWF/'>
         <React.Suspense fallback={loading()}>
           <Switch>
             <Route exact path="/page404" name="Page 404" render={props => <Page404 {...props} />} />
