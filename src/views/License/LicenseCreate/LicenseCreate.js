@@ -355,7 +355,7 @@ class LicenseCreate extends Component {
         postReq.append("DeliverWayId", this.state.formData.deliverWay);
         postReq.append("isSubmitted", isSubmitted);
         // postReq.append("SeniorManager", this.state.formData.seniorManager);
-        postReq.append("LicenseAdmin", "quincy@otds.admin");
+        // postReq.append("LicenseAdmin", "quincy@otds.admin");
         postReq.append("isConfirm", this.state.formData.isConfirm);
         postReq.append("ExpDeliveryAddress", this.state.formData.address);
         postReq.append("ExpDeliveryReciever", this.state.formData.reciever);

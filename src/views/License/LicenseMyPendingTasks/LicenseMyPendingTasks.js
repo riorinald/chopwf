@@ -26,7 +26,16 @@ class LicenseMyPendingTasks extends Component {
             taskDetails: [],
             approvalHistories: [],
             selectedRow: [],
-            searchOption: { licenseName: "", documentType: "", seniorManagerAbove: "", status: "" },
+            searchOption: {
+                requestNum: "",
+                licenseName: "",
+                documentType: "",
+                seniorManagerAbove: "",
+                status: "",
+                plannedReturnDate: "",
+                createdDate: "",
+                createdByName: ""
+            },
             loading: false,
             filtered: [],
             seniorManagers: [],
@@ -57,11 +66,17 @@ class LicenseMyPendingTasks extends Component {
     }
 
     componentDidMount() {
-        this.getPendingTasks();
-        this.getData('licenseNames');
+        this.getMyApplications()
+        this.getLicenseNames();
         this.getData('seniorManagers');
         // this.getSeniorManagers();
         this.getData('departments');
+    }
+
+    async getLicenseNames() {
+
+        const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`)
+        this.setState({ licenseNames: res.data })
     }
 
     async getData(name) {
@@ -72,22 +87,21 @@ class LicenseMyPendingTasks extends Component {
         else if (name === "seniorManagers") {
             res = await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
         }
-        else {
-            res = await Axios.get(`https://5dedc007b3d17b00146a1c5a.mockapi.io/details/${name}`)
-        }
+
         this.setState({ [name]: res.data })
     }
 
     goToDetails(taskId, status) {
-        if (status !== "DRAFTED") {
+
+        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACK") {
             this.props.history.push({
-                pathname: `mypendingtask/${taskId}`,
+                pathname: `mypendingtask/edit/${taskId}`,
                 state: { redirected: true }
             })
         }
         else {
             this.props.history.push({
-                pathname: `details/edit/${taskId}`,
+                pathname: `mypendingtask/${taskId}`,
                 state: { redirected: true }
             })
         }
@@ -203,7 +217,7 @@ class LicenseMyPendingTasks extends Component {
                                     Header: "License Name",
                                     accessor: "licenseName",
                                     // Cell: this.renderEditable,
-                                    width: this.getColumnWidth('licenseName', "Licese Name"),
+                                    width: this.getColumnWidth('licenseName', "License Name"),
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;
                                     },
@@ -233,8 +247,8 @@ class LicenseMyPendingTasks extends Component {
                                         return (
                                             <Input type="select" value={this.state.searchOption.documentType} onChange={this.handleSearch('documentType')} >
                                                 <option disabled value="">Please Select a document Type</option>
-                                                <option value="1">Scanned Copy</option>
-                                                <option value="2">Original Copy</option>
+                                                <option value="Scan Copy">Scan Copy</option>
+                                                <option value="Original">Original Copy</option>
                                             </Input>
                                         )
                                     },
@@ -261,7 +275,7 @@ class LicenseMyPendingTasks extends Component {
                                     },
                                     Filter: ({ filter, onChange }) => {
                                         return (
-                                            <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('seniorManagerAbove')} >
+                                            <Input type="select" value={this.state.searchOption.seniorManagerAbove} onChange={this.handleSearch('seniorManagerAbove')} >
                                                 <option disabled value="">Please Select a senior Manager</option>
                                                 {seniorManagers.map((mgr, index) =>
                                                     <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
@@ -279,7 +293,7 @@ class LicenseMyPendingTasks extends Component {
                                     },
                                     Filter: ({ filter, onChange }) => {
                                         return (
-                                            <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('seniorManagerAbove')} >
+                                            <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('status')} >
                                                 <option disabled value="">Please Select a status</option>
                                                 {status.map((stat, index) =>
                                                     <option key={index} value={stat} > {stat} </option>
@@ -293,24 +307,51 @@ class LicenseMyPendingTasks extends Component {
                                     accessor: "deliveryWayName",
                                     width: this.getColumnWidth('deliveryWayName', "Deliver Ways"),
                                     // Cell: this.renderEditable,
+                                    filterable: false,
                                     style: { textAlign: "center" }
                                 },
                                 {
-                                    Header: "Express Number",
-                                    accessor: "plannedReturnDate",
-                                    width: this.getColumnWidth('plannedReturnDate', "Express Number"),
+                                    Header: "Created By",
+                                    accessor: "createdByName",
+                                    width: this.getColumnWidth('createdByName', "Created By"),
+                                    // Cell: this.renderEditable,
+                                    style: { textAlign: "center" }
+                                },
+                                {
+                                    Header: "Date of Creation",
+                                    accessor: "createdDate",
+                                    width: this.getColumnWidth('createdDate', "Date of Creation"),
+                                    Cell: row => (
+                                        <div> {this.convertDate(row.original.createdDate)} </div>
+                                    ),
+                                    style: { textAlign: "center" }
+                                },
+                                {
+                                    Header: "Delivery Express Number",
+                                    accessor: "expDeliveryNumber",
+                                    filterable: false,
+                                    width: this.getColumnWidth('expDeliveryNumber', "Delivery Express Number"),
+                                    // Cell: this.renderEditable,
+                                    style: { textAlign: "center" }
+                                },
+                                {
+                                    Header: "Return Express Number",
+                                    accessor: "expReturnNumber",
+                                    filterable: false,
+                                    width: this.getColumnWidth('expReturnNumber', "Return Express Number"),
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" }
                                 },
                                 {
                                     Header: "Return Ways",
-                                    accessor: "plannedReturnDate",
-                                    width: this.getColumnWidth('plannedReturnDate', "Return Ways"),
+                                    accessor: "returnWayName",
+                                    width: this.getColumnWidth('returnWayName', "Return Ways"),
+                                    filterable: false,
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" }
                                 }
                             ]}
-                            defaultPageSize={10}
+                            defaultPageSize={20}
                             // pages={this.state.page}
                             // manual
                             // onPageChange={(e)=>{this.setState({page: e})}}

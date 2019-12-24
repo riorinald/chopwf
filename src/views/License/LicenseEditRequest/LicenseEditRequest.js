@@ -30,6 +30,8 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import SimpleReactValidator from 'simple-react-validator';
 import Select from 'react-select'
+import config from '../../../config'
+import axios from 'axios'
 
 class LicenseEditRequest extends Component {
     constructor(props) {
@@ -56,27 +58,45 @@ class LicenseEditRequest extends Component {
             this.goBack()
         }
         else {
-            this.getData('licenseNames');
-            this.getData('seniorManagers');
+            this.getLicenseNames();
+            this.getSeniorManagers();
             this.getData('departments');
-            this.getTaskDetails(this.props.match.params.taskId)
         }
+
+
+        this.getTaskDetails(this.props.match.params.taskId)
+
+    }
+    async getLicenseNames() {
+        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`)
+        this.setState({ licenseNames: res.data })
     }
 
     async getData(name) {
-        const res = await Axios.get(`https://5dedc007b3d17b00146a1c5a.mockapi.io/details/${name}`)
+        let res = await axios.get(`${config.url}/${name}`)
         this.setState({ [name]: res.data })
+    }
+
+    async getSeniorManagers() {
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+            .then(res => {
+                let arr1 = []
+                res.data.map(mgr => {
+                    let obj = {
+                        value: mgr.userId,
+                        label: mgr.displayName
+                    }
+                    arr1.push(obj)
+                })
+                this.setState({ seniorManagers: arr1 })
+            })
     }
 
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
-        await Axios.get(`http://5de7307ab1ad690014a4e040.mockapi.io/licenseTask/${taskId}`)
+        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem('userId')}`)
             .then(res => {
                 this.setState({ taskDetails: res.data, loading: false })
-            })
-        await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application/2e4fb172-1eca-47d2-92fb-51fa4068a4b0/approval`)
-            .then(res => {
-                this.setState({ approvalHistories: res.data })
             })
     }
 
@@ -102,6 +122,7 @@ class LicenseEditRequest extends Component {
             element.className = "form-control"
         }
         let value = event.target.value
+        console.log(value)
         this.setState(state => {
             let taskDetails = this.state.taskDetails
             taskDetails[name] = value
@@ -150,7 +171,7 @@ class LicenseEditRequest extends Component {
 
         let dates = ""
         if (date) {
-          dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
         }
         this.setState({ [view]: date });
         this.setState(state => {
@@ -166,7 +187,7 @@ class LicenseEditRequest extends Component {
 
     goBack() {
         this.props.history.push({
-            pathname: `/license/mypendingtask`
+            pathname: `/license/${this.props.match.params.page}`
         })
     }
 
@@ -178,11 +199,17 @@ class LicenseEditRequest extends Component {
                 {!loading
                     ? <Card className="animated fadeIn">
                         <CardHeader>
-                            <Button className="mr-1" color="primary" onClick={() => this.goBack()}><i className="fa fa-angle-left" /> Back </Button>
-                            &nbsp;&nbsp; EDIT REQUEST - {taskDetails.requestNumber}
+                            <Button className="mr-1" color="secondary" onClick={() => this.goBack()}><i className="fa fa-angle-left" /> Back </Button>
+                            &nbsp;&nbsp; EDIT REQUEST - {taskDetails.requestNum}
                         </CardHeader>
                         <CardBody>
                             <Form className="form-horizontal">
+                                <FormGroup>
+                                    <Label>Request Number</Label>
+                                    <InputGroup>
+                                        <Input disabled value={taskDetails.requestNum}></Input>
+                                    </InputGroup>
+                                </FormGroup>
                                 <FormGroup>
                                     <Label>Employee Number</Label>
                                     <div className="controls">
@@ -190,23 +217,23 @@ class LicenseEditRequest extends Component {
                                             <InputGroupAddon addonType="prepend">
                                                 <InputGroupText>ID</InputGroupText>
                                             </InputGroupAddon>
-                                            <Input disabled readOnly value={taskDetails.employeeNumber} id="prependedInput" size="16" type="text" />
+                                            <Input disabled readOnly value={taskDetails.employeeNum} id="prependedInput" size="16" type="text" />
                                         </InputGroup>
                                     </div>
                                 </FormGroup>
                                 <FormGroup>
                                     <Label>Telephone Number </Label>
                                     <InputGroup>
-                                        <Input onChange={this.handleChange("telephoneNum")} value={taskDetails.telephoneNumber} id="telephoneNum" size="16" type="text" />
+                                        <Input onChange={this.handleChange("telephoneNum")} value={taskDetails.telephoneNum} id="telephoneNum" size="16" type="text" />
                                     </InputGroup>
                                 </FormGroup>
                                 <FormGroup>
                                     <Label>Department </Label>
                                     <InputGroup>
-                                        <Input id="department" onChange={this.handleChange("department")} type="select">
-                                            <option value="0">Please selet a department</option>
+                                        <Input id="department" onChange={this.handleChange("department")} value={taskDetails.departmentId} type="select">
+                                            <option value="">Please selet a department</option>
                                             {departments.map((dept, index) =>
-                                                <option key={index} value={dept.id} > {dept.name} </option>
+                                                <option key={index} value={dept.deptId.toUpperCase()} > {dept.deptName} </option>
                                             )}
                                         </Input>
                                     </InputGroup>
@@ -215,21 +242,21 @@ class LicenseEditRequest extends Component {
                                 <FormGroup>
                                     <Label>License Name </Label>
                                     <InputGroup>
-                                        <Input id="licenseName" onChange={this.handleChange("licenseName")} type="select">
-                                            <option value="0" >Please select a License Name</option>
+                                        <Input id="licenseName" onChange={this.handleChange("licenseName")} value={taskDetails.licenseName} type="select">
+                                            <option value="" >Please select a License Name</option>
                                             {licenseNames.map((license, index) =>
-                                                <option key={index} value={license.id} > {license.name} </option>
+                                                <option key={index} value={license.name} > {license.name} </option>
                                             )}
                                         </Input>
                                     </InputGroup>
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message('License Name', taskDetails.licenseName, 'required')}</small>
                                 </FormGroup>
 
-                                <FormGroup onChange={this.handleRadio("licensePurpose")} >
+                                <FormGroup onChange={this.handleRadio("purposeType")} >
                                     <Label >License Purpose</Label>
-                                    <CustomInput type="radio" id="licensePurpose1" name="licensePurpose" value="LVFP" label="城市备案 Local VRB Filling Purpose" />
-                                    <CustomInput type="radio" id="licensePurpose2" name="licensePurpose" value="MFP" label="城抵押 Mortgage Filling Purpose" />
-                                    <CustomInput type="radio" id="licensePurpose3" name="licensePurpose" value="PS" label="其他 Please specify:">
+                                    <CustomInput type="radio" id="licensePurpose1" name="licensePurpose" checked={taskDetails.purposeType === "LVFP"} value="LVFP" label="城市备案 Local VRB Filling Purpose" />
+                                    <CustomInput type="radio" id="licensePurpose2" name="licensePurpose" checked={taskDetails.purposeType === "MFP"} value="MFP" label="城抵押 Mortgage Filling Purpose" />
+                                    <CustomInput type="radio" id="licensePurpose3" name="licensePurpose" checked={taskDetails.purposeType === "PS"} value="PS" label="其他 Please specify:">
                                         <Collapse isOpen={taskDetails.licensePurpose === "PS"}>
                                             <Input id="specificPurpose" type="text" onChange={this.handleChange("specificPurpose")} value={taskDetails.specificPurpose} />
                                             {taskDetails.licensePurpose === "PS"
@@ -240,15 +267,15 @@ class LicenseEditRequest extends Component {
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of License', taskDetails.licensePurpose, 'required')}</small>
                                 </FormGroup>
 
-                                <FormGroup onChange={this.handleChange("documentType")} >
+                                <FormGroup onChange={this.handleChange("documentTypeId")} >
                                     <Label>Select Document Type</Label>
-                                    <CustomInput type="radio" id="documentType1" name="documentType" value="SC" label="城电子版 Scan Copy" />
-                                    <CustomInput type="radio" id="documentType2" name="documentType" value="OC" label="城原件 Original Copy" />
+                                    <CustomInput checked={taskDetails.documentTypeId === "SCANCOPY"} type="radio" id="documentType1" name="documentType" value="SCANCOPY" label="城电子版 Scan Copy" />
+                                    <CustomInput checked={taskDetails.documentTypeId === "ORIGINAL"} type="radio" id="documentType2" name="documentType" value="ORIGINAL" label="城原件 Original Copy" />
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Type', taskDetails.documentType, 'required')}</small>
                                 </FormGroup>
 
 
-                                <Collapse isOpen={taskDetails.documentType === "SC"}>
+                                <Collapse isOpen={taskDetails.documentType === "SCANCOPY"}>
                                     <FormGroup onChange={this.handleRadio("isWatermark")}>
                                         <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
                                         <CustomInput type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="城电. Please specify watermark here:">
@@ -267,13 +294,13 @@ class LicenseEditRequest extends Component {
                                                     : null}
                                             </Collapse>
                                         </CustomInput>
-                                        {taskDetails.documentType === "SC"
+                                        {taskDetails.documentTypeId === "SCANCOPY"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', taskDetails.isWatermark, 'required')}</small>
                                             : null}
                                     </FormGroup>
                                 </Collapse>
 
-                                <Collapse isOpen={taskDetails.documentType === "OC"}>
+                                <Collapse isOpen={taskDetails.documentTypeId === "ORIGINAL"}>
                                     <FormGroup>
                                         <Label>Planned Return Date:</Label>
                                         <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
@@ -289,28 +316,28 @@ class LicenseEditRequest extends Component {
                                 </Collapse>
 
 
-                                <FormGroup onChange={this.handleChange("deliverWay")} >
+                                <FormGroup onChange={this.handleChange("deliverWayId")} >
                                     <Label>Deliver Way</Label>
-                                    <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
-                                    <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number" />
+                                    <CustomInput type="radio" id="deliverWay1" checked={taskDetails.deliverWayId === "F2F"} name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                    <CustomInput type="radio" id="deliverWay2" checked={taskDetails.deliverWayId === "EXPRESS"} name="deliverWay" value="Express" label="快递 Express: Express Number" />
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', taskDetails.deliverWay, 'required')}</small>
                                 </FormGroup>
 
                                 <FormGroup>
                                     <Label>Address</Label>
-                                    <Input placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
+                                    <Input placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" />
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.address, 'required')}</small>
                                 </FormGroup>
 
                                 <FormGroup>
                                     <Label>Reciever</Label>
-                                    <Input placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
+                                    <Input placeholder="Please specify Reciever" id="expDeliveryReceiver" onChange={this.handleChange("expDeliveryReceiver")} value={taskDetails.expDeliveryReceiver} type="text" />
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', taskDetails.reciever, 'required')}</small>
                                 </FormGroup>
 
                                 <FormGroup>
                                     <Label>Reciever Mobile Phone</Label>
-                                    <Input placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
+                                    <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="text" />
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.recieverPhone, 'required')}</small>
                                 </FormGroup>
 

@@ -159,6 +159,8 @@ class LicenseApplicationDetail extends Component {
         postReq.append("ExpressAddress", this.state.taskDetails.expDeliveryAddress);
         for (let i = 0; i < this.state.documents.length; i++) {
             postReq.append(`Documents[${i}].Attachment.File`, this.state.documents[i].file);
+            postReq.append(`Documents[${i}].AttachmentName`, this.state.documents[i].fileName);
+
         }
 
         for (var pair of postReq.entries()) {

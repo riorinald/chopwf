@@ -197,7 +197,7 @@ class EditRequest extends Component {
 
     async getDeptHeads() {
         this.setState({ deptHeads: [] })
-        await Axios.get(`${config.url}/users?category=depthead&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`)
+        await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`)
             .then(res => {
                 for (let i = 0; i < res.data.length; i++) {
                     const obj = { value: res.data[i].userId, label: res.data[i].displayName }
@@ -364,7 +364,7 @@ class EditRequest extends Component {
 
         let apptypeId = this.state.taskDetails.applicationTypeId
         details = details.filter(function (item) {
-            return item !== "taskId" && item !== "telephoneNum" && item !== "companyId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption" && item !== "createdBy" && item !== "createdByPhotoUrl" && item !== "contractSignedByFirstPersonOption" && item !== "contractSignedBySecondPersonOption"
+            return item !== "taskId" && item !== "telephoneNum" && item !== "companyId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption" && item !== "createdBy" && item !== "createdByPhotoUrl" && item !== "contractSignedByFirstPersonOption" && item !== "contractSignedBySecondPersonOption" && item !== "departmentHeadsName"
         })
 
         switch (apptypeId) {
@@ -395,7 +395,11 @@ class EditRequest extends Component {
     }
 
     changeDeptHeads(heads) {
-        return heads.join("; ")
+        let dh = ""
+        heads.map(head => {
+            dh = dh + head.displayName + '; '
+        })
+        return dh
     }
 
 
@@ -406,6 +410,7 @@ class EditRequest extends Component {
         //
 
         let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
+        // console.log(url)
         try {
             await Axios.get(url).then(res => {
                 this.setState({ documents: res.data })
@@ -522,9 +527,26 @@ class EditRequest extends Component {
     handleChange = name => event => {
         if (name === "departmentId") {
             this.getTeams(event.target.value)
+            console.log(this.state.taskDetails.applicationTypeId)
+            if (this.state.taskDetails.applicationTypeId === "LTU") {
+                if (this.state.taskDetails.chopTypeId !== "" && this.state.taskDetails.teamId !== "") {
+                    this.getDocuments(this.props.legalName, event.target.value, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId)
+                }
+                this.setState(state => {
+                    const taskDetails = this.state.taskDetails
+                    taskDetails.teamId = ""
+                    return { taskDetails }
+                })
+            }
         }
         else if (name === "teamId") {
+            console.log(this.state.taskDetails.applicationTypeId)
             this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value)
+            if (this.state.taskDetails.applicationTypeId === "LTU") {
+                if (this.state.taskDetails.chopTypeId !== "") {
+                    this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, event.target.value)
+                }
+            }
         }
         else if (name === "applicationTypeId") {
             this.setState(state => {
@@ -532,10 +554,17 @@ class EditRequest extends Component {
                 taskDetails.documents = []
                 return taskDetails
             })
+            this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${event.target.value}`);
         }
         else if (name === "chopTypeId") {
+            console.log(this.state.taskDetails.applicationTypeId)
             if (event.target.value === "CONCHOP") {
                 this.toggleModal();
+            }
+            if (this.state.taskDetails.applicationTypeId === "LTU") {
+                if (this.state.taskDetails.departmentId !== "" && this.state.taskDetails.teamId !== "") {
+                    this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.teamId)
+                }
             }
         }
         if (event.target.value) {
@@ -1377,7 +1406,7 @@ class EditRequest extends Component {
                                                 <Label>Entitled Team</Label>
                                                 <InputGroup>
                                                     <Input id="teamId" onChange={this.handleChange("teamId")} value={taskDetails.teamId} type="select">
-                                                        <option value="0" disabled>Please select a team</option>
+                                                        <option value="" disabled>Please select a team</option>
                                                         {this.state.teams.map((team, index) =>
                                                             <option key={index} value={team.teamId}>{team.teamName}</option>
                                                         )}
@@ -1411,7 +1440,7 @@ class EditRequest extends Component {
                                             ? <FormGroup>
                                                 <Label>Branch Company Chop</Label>
                                                 <Input onChange={this.handleChange("branchId")} type="select" value={taskDetails.branchId}>
-                                                    <option value="0" disabled>Please specify your Brand Company Chop</option>
+                                                    <option value="" disabled>Please specify your Brand Company Chop</option>
                                                     {this.state.branches.map((branch, index) =>
                                                         <option value={branch.branchId} key={index}>{branch.branchName}</option>
                                                     )}
@@ -1492,34 +1521,36 @@ class EditRequest extends Component {
                                                         <div>
                                                             <br />
                                                             <Label>Documents</Label>
-                                                            <Table bordered>
+                                                            {/* <div className="tableWrap"> */}
+                                                            <Table hover bordered responsive size="sm">
                                                                 <thead>
                                                                     <tr>
-                                                                        <th>No.</th>
+                                                                        <th class="smallTd" >No.</th>
                                                                         <th>Document Name (English)</th>
                                                                         <th>Document Name (Chinese)</th>
                                                                         <th>Expiry Date</th>
                                                                         <th>DH Approved</th>
-                                                                        <th></th>
+                                                                        <th class="smallTd" ></th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
                                                                     {taskDetails.documents.map((document, index) =>
                                                                         <tr key={index}>
-                                                                            <th>{index + 1}</th>
-                                                                            <th>{document.documentNameEnglish}</th>
-                                                                            <th>{document.documentNameChinese}</th>
-                                                                            <th id="viewDoc">
+                                                                            <td class="smallTd" >{index + 1}</td>
+                                                                            <td>{document.documentNameEnglish}</td>
+                                                                            <td>{document.documentNameChinese}</td>
+                                                                            <td id="viewDoc">
                                                                                 <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a>
-                                                                            </th>
-                                                                            <th id="viewDoc">
+                                                                            </td>
+                                                                            <td id="viewDoc">
                                                                                 <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a>
-                                                                            </th>
-                                                                            <th><img width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} src={deleteBin} /></th>
+                                                                            </td>
+                                                                            <td class="smallTd" ><img width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} src={deleteBin} /></td>
                                                                         </tr>
                                                                     )}
                                                                 </tbody>
                                                             </Table>
+                                                            {/* </div> */}
                                                         </div>
                                                     </Collapse>
                                                 </div>

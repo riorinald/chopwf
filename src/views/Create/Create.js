@@ -610,7 +610,7 @@ class Create extends Component {
 
   async getDeptHead(companyId) {
 
-    await axios.get(`${config.url}/users?category=depthead&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
+    await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
       .then(res => {
         this.setState({ deptHead: res.data })
       })

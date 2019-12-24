@@ -37,8 +37,9 @@ class ChopApplication extends Component {
       chopTypes: [],
 
       loading: false,
-      page: 1,
+      page: 0,
       limit: 20,
+      totalPages: 3,
 
       collapse: true,
       modal: false,
@@ -68,6 +69,7 @@ class ChopApplication extends Component {
         createdDate: "",
         createdByName: ""
       },
+
       status: [
         "Recall",
         "Pending for Document check by (L4 or above) Approval ",
@@ -90,23 +92,23 @@ class ChopApplication extends Component {
 
     }
     this.getApplications = this.getApplications.bind(this);
-    this.goBack = this.goBack.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
     this.exportLogs = this.exportLogs.bind(this);
     this.onFilteredChangeCustom = this.onFilteredChangeCustom.bind(this)
     // this.dateChange = this.dateChange.bind(this);
   }
   componentDidMount() {
-    this.getApplications();
+    this.getApplications(1, 20);
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
 
   }
 
-  async getApplications() {
+  async getApplications(pageNumber, pageSize) {
     this.setState({ loading: !this.state.loading })
-    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`).then(res => {
-      this.setState({ applications: res.data, loading: !this.state.loading })
+    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`).then(res => {
+      this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.numOfPages === 0 ? 1 : res.data.numOfPages })
+      console.log(res.data)
     })
   }
 
@@ -127,17 +129,6 @@ class ChopApplication extends Component {
       })
     } catch (error) {
       console.error(error);
-    }
-  }
-
-
-  goBack(didUpdate) {
-    if (didUpdate === true) {
-      this.getApplications()
-      this.setState({ collapse: !this.state.collapse })
-    }
-    else {
-      this.setState({ loading: !this.state.loading, collapse: !this.state.collapse })
     }
   }
 
@@ -168,12 +159,12 @@ class ChopApplication extends Component {
 
   handleKeyDown = (e) => {
     if (e.key === "Enter") {
-      this.getApplications()
+      this.getApplications(this.state.page, this.state.limit)
     }
   }
 
   search = () => {
-    this.getApplications()
+    this.getApplications(this.state.page, this.state.limit)
   }
 
   convertDate(dateValue) {
@@ -458,12 +449,27 @@ class ChopApplication extends Component {
                   style: { textAlign: "center" }
                 }
               ]}
-              defaultPageSize={this.state.limit}
-              // pages={this.state.page}
-              // manual
-              // onPageChange={(e)=>{this.setState({page: e})}}
-              // canNextpage={true}
+              defaultPageSize={20}
+              // page={this.state.page}
+              // pageSize={this.state.limit}
+              manual
+              onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
+              onPageSizeChange={(pageSize, page) => {
+                // console.log(pageSize, page + 1)
+                this.setState({ limit: pageSize, page: page + 1 });
+                this.getApplications(page + 1, pageSize)
+              }}
               loading={this.state.loading}
+              pages={Math.round(53 / this.state.limit)}
+              // onFetchData={(state, instance) => {
+              //   console.log(state.page, state.pageSize)
+              //   // this.setState({loading: true})
+              //   this.setState({ page: state.page + 1, limit: state.pageSize })
+              //   this.getApplications(state.page + 1, state.pageSize)
+              //   // this.setState({page: state.page, limit: state.pageSize})
+              // }}
+
+
               getTrProps={(state, rowInfo) => {
                 if (rowInfo && rowInfo.row) {
                   return {
@@ -505,15 +511,7 @@ class ChopApplication extends Component {
             />
           </CardBody>
         </Card>
-        {/* :
 
-          <ChopApplicationDetail
-            wait={1000}
-            applications={this.state.applicationDetail}
-            id={selectedId}
-            goBack={this.goBack}
-            recall={this.recall} />
-        } */}
 
         <Modal isOpen={modal} toggle={this.toggleModal}>
           <ModalHeader >Export Logs</ModalHeader>
