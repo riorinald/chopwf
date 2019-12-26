@@ -76,9 +76,9 @@ class DefaultHeader extends Component {
                       active={state.legalEntity === "MBIA" && state.application === "CHOP" ? true : false}> 
                        MBIA
                     </DropdownItem>
-                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="CAR2GO"
-                      active={state.legalEntity === "CAR2GO" && state.application === "CHOP" ? true : false}> 
-                       CAR2GO
+                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="DMT"
+                      active={state.legalEntity === "DMT" && state.application === "CHOP" ? true : false}> 
+                       DMT
                     </DropdownItem>
                   </DropdownMenu>
               </Dropdown>
@@ -99,9 +99,9 @@ class DefaultHeader extends Component {
                       active={state.legalEntity === "MBIA" && state.application === "LICENSE" ? true : false}>
                        MBIA
                     </DropdownItem>
-                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="CAR2GO"
-                      active={state.legalEntity === "CAR2GO" && state.application === "LICENSE" ? true : false}>
-                       CAR2GO
+                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="DMT"
+                      active={state.legalEntity === "DMT" && state.application === "LICENSE" ? true : false}>
+                       DMT
                     </DropdownItem>
                   </DropdownMenu>
               </Dropdown>

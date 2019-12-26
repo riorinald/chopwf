@@ -34,7 +34,7 @@ const routes = [
   // { path: '/MBAFC/create', name: 'Create', component: Create},
   // { path: '/MBLC/create', name: 'Create', component: Create},
   // { path: '/MBIA/create', name: 'Create', component: Create},
-  // { path: '/CAR2GO/create', name: 'Create', component: Create},
+  // { path: '/DMT/create', name: 'Create', component: Create},
 
   { path: '/create', exact: true, name: 'Create', component: Redirect },
   { path: '/create/:company', exact: true, name: 'Create', component: Create },

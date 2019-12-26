@@ -9,8 +9,8 @@ export const label = {
     MBLC: {
         name: 'MBLC'
     },
-    CAR2GO: {
-        name: 'CAR2GO'
+    DMT: {
+        name: 'DMT'
     },
 
 };

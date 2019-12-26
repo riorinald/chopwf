@@ -804,7 +804,7 @@ class Create extends Component {
       case 'MBAFC':
         mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
         break;
-      case 'CAR2GO':
+      case 'DMT':
         mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
         break;
       default:
