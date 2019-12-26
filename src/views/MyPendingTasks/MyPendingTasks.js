@@ -40,6 +40,8 @@ class MyPendingTasks extends Component {
             chopTypes: [],
 
             filtered: [],
+            totalPages: 1,
+            page: 1,
             limit: 20,
             dateView1: "",
 
@@ -100,7 +102,7 @@ class MyPendingTasks extends Component {
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
         // console.log(mounted)
         if (mounted === 0) {
-            this.getPendingTasks();
+            this.getPendingTasks(1, 20);
         }
         else {
             this.setState({ loading: !this.state.loading })
@@ -151,14 +153,16 @@ class MyPendingTasks extends Component {
 
 
 
-    async getPendingTasks() {
+    async getPendingTasks(pageNumber, pageSize) {
         this.setState({ loading: !this.state.loading })
         let userId = localStorage.getItem('userId')
         // let userId = "josh@otds.admin"
-        let url = `${config.url}/tasks?category=pending&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`
+        let url = `${config.url}/tasks?category=pending&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`
         const response = await Axios.get(url)
-        this.setState({ pendingTasks: response.data.tasks, loading: !this.state.loading })
-        array = response.data
+        this.setState({ pendingTasks: response.data.tasks, totalPages: response.data.pageCount, loading: !this.state.loading })
+        // array = response.data
+        console.log(response.data)
+
     }
 
     handleSearch = name => event => {
@@ -188,7 +192,8 @@ class MyPendingTasks extends Component {
 
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+            dates = `${date.getFullYear()
+                } ${month !== 10 && month !== 11 ? 0 : ""} ${date.getMonth() + 1} ${date.getDate()} `
         }
         this.setState({ [view]: date });
         this.setState(prevState => ({
@@ -197,7 +202,7 @@ class MyPendingTasks extends Component {
                 [name]: dates
             }
         }),
-            this.getPendingTasks
+            this.getPendingTasks(this.state.page, this.state.limit)
         )
     };
 
@@ -266,12 +271,12 @@ class MyPendingTasks extends Component {
     }
 
     search() {
-        this.getPendingTasks()
+        this.getPendingTasks(this.state.page, this.state.limit)
     }
 
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            this.getPendingTasks()
+            this.getPendingTasks(this.state.page, this.state.limit)
         }
     }
 
@@ -289,7 +294,7 @@ class MyPendingTasks extends Component {
     }
 
     render() {
-        const { pendingTasks } = this.state;
+        const { pendingTasks, totalPages } = this.state;
         const ref = React.createRef()
         const ExampleCustomInput = forwardRef(({ value, onClick }, ref) => (
             <Button color="light" ref={ref} onClick={onClick}>
@@ -310,19 +315,25 @@ class MyPendingTasks extends Component {
                             data={pendingTasks}
                             sortable
                             filterable
-                            loading={this.state.loading}
                             onFilteredChange={(filtered, column, value) => {
                                 this.setFilter(filtered)
                                 this.onFilteredChangeCustom(value, column.id || column.accessor);
                             }}
-                            defaultPageSize={this.state.limit}
                             defaultFilterMethod={(filter, row, column) => {
 
                                 const id = filter.pivotId || filter.id;
                                 return row[id]
                             }}
                             getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
-
+                            defaultPageSize={20}
+                            manual
+                            onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getPendingTasks(e + 1, this.state.limit)) }}
+                            onPageSizeChange={(pageSize, page) => {
+                                this.setState({ limit: pageSize, page: page + 1 });
+                                this.getPendingTasks(page + 1, pageSize)
+                            }}
+                            loading={this.state.loading}
+                            pages={totalPages}
                             columns={[
                                 {
                                     Header: "Request Number",
@@ -500,7 +511,7 @@ class MyPendingTasks extends Component {
                                             // console.log("inside");
                                             // console.log(this.state.rowEdit)
 
-                                            // console.log(`Index = ${rowInfo.index} and Edit = ${this.state.rowEdit} `)
+                                            // console.log(`Index = ${ rowInfo.index } and Edit = ${ this.state.rowEdit } `)
                                             if (rowInfo.index !== this.state.rowEdit) {
                                                 this.setState({
                                                     rowEdit: rowInfo.index,
@@ -521,8 +532,8 @@ class MyPendingTasks extends Component {
                                                 this.goToEditRequest(rowInfo.original.taskId)
                                             }
                                             else {
-                                                this.goToDetails(rowInfo.original.taskId, `/mypendingtask/details/${rowInfo.original.applicationTypeId}`)
-                                                // this.goToDetails(rowInfo.original.taskId, `/mypendingtask/details/CNIPS`)
+                                                this.goToDetails(rowInfo.original.taskId, `/ mypendingtask / details / ${rowInfo.original.applicationTypeId} `)
+                                                // this.goToDetails(rowInfo.original.taskId, `/ mypendingtask / details / CNIPS`)
                                             }
 
                                         },

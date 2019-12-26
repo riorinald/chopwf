@@ -230,7 +230,7 @@ class LicenseMyApplications extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.licenseName} onChange={this.handleSearch('licenseName')} >
-                                                <option disabled value="">Please Select a License Name</option>
+                                                <option value="">Please Select a License Name</option>
                                                 {licenseNames.map((name, index) =>
                                                     <option key={index} value={name.name}> {name.name} </option>
                                                 )}
@@ -252,7 +252,7 @@ class LicenseMyApplications extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.documentType} onChange={this.handleSearch('documentType')} >
-                                                <option disabled value="">Please Select a document Type</option>
+                                                <option value="">Please Select a document Type</option>
                                                 <option value="Scan Copy">Scan Copy</option>
                                                 <option value="Original">Original Copy</option>
                                             </Input>
@@ -282,7 +282,7 @@ class LicenseMyApplications extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.seniorManagerAbove} onChange={this.handleSearch('seniorManagerAbove')} >
-                                                <option disabled value="">Please Select a senior Manager</option>
+                                                <option value="">Please Select a senior Manager</option>
                                                 {seniorManagers.map((mgr, index) =>
                                                     <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
                                                 )}
@@ -300,7 +300,7 @@ class LicenseMyApplications extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('status')} >
-                                                <option disabled value="">Please Select a status</option>
+                                                <option value="">Please Select a status</option>
                                                 {status.map((stat, index) =>
                                                     <option key={index} value={stat} > {stat} </option>
                                                 )}

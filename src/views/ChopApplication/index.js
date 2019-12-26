@@ -41,7 +41,6 @@ class ChopApplication extends Component {
       limit: 20,
       totalPages: 3,
 
-      collapse: true,
       modal: false,
 
       filtered: [],
@@ -55,7 +54,6 @@ class ChopApplication extends Component {
       validDate: true,
 
       applications: [],
-      applicationDetail: {},
       selectedId: null,
 
       searchOption: {
@@ -107,18 +105,9 @@ class ChopApplication extends Component {
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: !this.state.loading })
     await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`).then(res => {
-      this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.numOfPages === 0 ? 1 : res.data.numOfPages })
+      this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.pageCount === 0 ? 1 : res.data.pageCount })
       console.log(res.data)
     })
-  }
-
-  async getAppDetails(id) {
-    this.setState({ loading: !this.state.loading })
-    // await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`)
-    await Axios.get(`${config.url}/tasks/5328c220-1f99-4da0-9e12-3e8d29441acd?userid=rio@otds.admin`)
-      .then(res => {
-        this.setState({ applicationDetail: res.data, collapse: !this.state.collapse })
-      })
   }
 
   async getData(state, url) {
@@ -288,7 +277,7 @@ class ChopApplication extends Component {
   }
 
   render() {
-    const { applications, collapse, selectedId, modal, exportFromDateView, exportToDateView, exportDate, validDate } = this.state
+    const { applications, modal, exportFromDateView, exportToDateView, exportDate, validDate, totalPages } = this.state
     // let columnData = Object.keys(applications[0])
     if (this.props.roleId === "REQUESTOR")
       return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
@@ -450,17 +439,14 @@ class ChopApplication extends Component {
                 }
               ]}
               defaultPageSize={20}
-              // page={this.state.page}
-              // pageSize={this.state.limit}
               manual
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {
-                // console.log(pageSize, page + 1)
                 this.setState({ limit: pageSize, page: page + 1 });
                 this.getApplications(page + 1, pageSize)
               }}
               loading={this.state.loading}
-              pages={Math.round(53 / this.state.limit)}
+              pages={totalPages}
               // onFetchData={(state, instance) => {
               //   console.log(state.page, state.pageSize)
               //   // this.setState({loading: true})

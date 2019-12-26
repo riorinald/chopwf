@@ -28,15 +28,14 @@ class Myapps extends Component {
       selectedRowIndex: [],
 
       loading: false,
+      totalPages: 1,
       page: 1,
       limit: 20,
 
-      collapse: true,
 
       username: localStorage.getItem('userId'),
 
       applications: [],
-      selectedApplication: [],
       applicationDetail: [],
       applicationTypeId: "",
 
@@ -82,37 +81,22 @@ class Myapps extends Component {
   }
 
   componentDidMount() {
-    this.getApplications();
+    this.getApplications(1, 20);
     resetMounted.setMounted();
 
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
   }
 
-  async getApplications() {
+  async getApplications(pageNumber, pageSize) {
     this.setState({ loading: true })
     // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
-    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`)
+    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`)
       .then(res => {
-        this.setState({ applications: res.data.tasks, loading: false })
+        this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false })
+        console.log(res.data)
       })
-    // console.log(this.state.applications) 
-    // console.log(Object.keys(this.state.applications[0]))
-  }
 
-  async getAppDetails(id) {
-    this.setState({ loading: !this.state.loading })
-    // let id = this.state.selectedApplication.taskId
-    // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application/${id}`)
-    await Axios.get(`${config.url}/tasks/${id}?userid=${this.state.username}`)
-      .then(res => {
-        let detail = res.data
-        // detail.applicationTypeId = "CNIPS"
-        this.setState({
-          applicationDetail: detail, collapse: !this.state.collapse, applicationTypeId: detail.applicationTypeId
-        })
-
-      })
   }
 
   goToEditRequest(id) {
@@ -130,22 +114,21 @@ class Myapps extends Component {
   }
 
   search = () => {
-    this.getApplications()
+    this.getApplications(this.state.page, this.state.limit)
   }
 
   onKeyPressed = (e) => {
     if (e.key === "Enter") {
-      this.getApplications()
+      this.getApplications(this.state.page, this.state.limit)
     }
   }
 
   goBack(didUpdate) {
     if (didUpdate === true) {
-      this.getApplications()
-      this.setState({ collapse: !this.state.collapse })
+      this.getApplications(this.state.page, this.state.limit)
     }
     else {
-      this.setState({ loading: !this.state.loading, collapse: !this.state.collapse })
+      this.setState({ loading: !this.state.loading })
     }
   }
 
@@ -160,7 +143,7 @@ class Myapps extends Component {
     },
       // console.log(this.state.searchOption)\
     )
-    this.getApplications()
+    this.getApplications(this.state.page, this.state.limit)
   }
 
   getDeptHeads(heads) {
@@ -234,12 +217,11 @@ class Myapps extends Component {
   }
 
   render() {
-    const { applications, collapse, selectedApplication } = this.state
+    const { applications, totalPages } = this.state
     // let columnData = Object.keys(applications[0])
     return (
       <div className="animated fadeIn">
         <h4>My Applications</h4>
-        {/* {this.state.collapse ? */}
         <Card>
           <CardHeader>MY APPLICATIONS <Button className="float-right" onClick={this.search} >Search</Button>
           </CardHeader>
@@ -406,12 +388,15 @@ class Myapps extends Component {
                   style: { textAlign: "center" }
                 },
               ]}
-              defaultPageSize={this.state.limit}
-              // pages={this.state.page}
-              // manual
-              // onPageChange={(e)=>{this.setState({page: e})}}
-              // canNextpage={true}
+              defaultPageSize={20}
+              manual
+              onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
+              onPageSizeChange={(pageSize, page) => {
+                this.setState({ limit: pageSize, page: page + 1 });
+                this.getApplications(page + 1, pageSize)
+              }}
               loading={this.state.loading}
+              pages={totalPages}
               getTrProps={(state, rowInfo) => {
                 if (rowInfo && rowInfo.row) {
                   return {
@@ -441,10 +426,6 @@ class Myapps extends Component {
                         this.goToDetails(rowInfo.original.taskId, `/myapps/details/${rowInfo.original.applicationTypeId}`)
                       }
 
-
-                      this.setState({ selectedApplication: rowInfo.original })
-
-
                     },
                     style: {
                       background:
@@ -460,16 +441,6 @@ class Myapps extends Component {
             />
           </CardBody>
         </Card>
-        {/* :
-          //  this.props.history.push({pathname:`myapps/${this.state.selectedApplication.requestNum}`, state :{data: this.state.applicationDetail, goBack:this.goBack}})
-          <ApplicationDetail
-            wait={1000}
-            applications={this.state.applicationDetail}
-            type={this.state.applicationTypeId}
-            id={selectedApplication.taskId}
-            goBack={this.goBack}
-            recall={this.recall} />
-        } */}
       </div>
     );
   }

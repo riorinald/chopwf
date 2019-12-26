@@ -29,9 +29,19 @@ import {
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import SimpleReactValidator from 'simple-react-validator';
-import Select from 'react-select'
+import AsyncSelect from 'react-select/async';
 import config from '../../../config'
 import axios from 'axios'
+import makeAnimated from 'react-select/animated';
+import Swal from 'sweetalert2';
+
+
+
+const animatedComponents = makeAnimated();
+const reactSelectControl = {
+    control: styles => ({ ...styles, borderColor: '#F86C6B', boxShadow: '0 0 0 0px #F86C6B', ':hover': { ...styles[':hover'], borderColor: '#F86C6B' } }),
+    menuPortal: base => ({ ...base, zIndex: 9999 })
+}
 
 class LicenseEditRequest extends Component {
     constructor(props) {
@@ -42,15 +52,16 @@ class LicenseEditRequest extends Component {
 
             //get data from api
             licenseNames: [],
-            seniorManagers: [],
+            seniorManagersList: [],
             departments: [],
 
-            returnDateView: null,
+            returnDateView: new Date(),
 
         }
         this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
         this.handleAgreeTerms = this.handleAgreeTerms.bind(this);
         this.goBack = this.goBack.bind(this)
+        this.handleSelectOption = this.handleSelectOption.bind(this)
     }
 
     componentDidMount() {
@@ -88,15 +99,24 @@ class LicenseEditRequest extends Component {
                     }
                     arr1.push(obj)
                 })
-                this.setState({ seniorManagers: arr1 })
+                this.setState({ seniorManagersList: arr1 })
             })
+    }
+
+    convertDateView(date) {
+        let regEx = date.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
+        return new Date(regEx)
     }
 
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
         await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem('userId')}`)
             .then(res => {
-                this.setState({ taskDetails: res.data, loading: false })
+                let temp = res.data
+                if (temp.documentTypeId === "ORIGINAL") {
+                    temp.needWatermark = ""
+                }
+                this.setState({ taskDetails: temp, loading: false, returnDateView: this.convertDateView(res.data.plannedReturnDate) })
             })
     }
 
@@ -122,7 +142,6 @@ class LicenseEditRequest extends Component {
             element.className = "form-control"
         }
         let value = event.target.value
-        console.log(value)
         this.setState(state => {
             let taskDetails = this.state.taskDetails
             taskDetails[name] = value
@@ -141,7 +160,7 @@ class LicenseEditRequest extends Component {
         }
 
         let value = ""
-        if (name === "isWatermark") {
+        if (name === "needWatermark") {
             document.getElementById("watermark1").className = "custom-control-input"
             document.getElementById("watermark2").className = "custom-control-input"
             if (event.target.id === "inputWatermark1" || event.target.id === "inputWatermark2") {
@@ -151,11 +170,11 @@ class LicenseEditRequest extends Component {
                 value = event.target.id === "watermark1" ? "Y" : "N"
             }
         }
-        else if (name === "licensePurpose") {
+        else if (name === "purposeType") {
             document.getElementById("licensePurpose1").className = "custom-control-input"
             document.getElementById("licensePurpose2").className = "custom-control-input"
             document.getElementById("licensePurpose3").className = "custom-control-input"
-            value = event.target.id === "specificPurpose" ? "PS" : event.target.value
+            value = event.target.id === "purposeComment" ? "PS" : event.target.value
         }
 
         this.setState(state => {
@@ -181,8 +200,208 @@ class LicenseEditRequest extends Component {
         })
     };
 
-    handleAgreeTerms() {
+    handleSelectOption(event) {
+        // console.log(event)
+        let value = event ? event : null
+        console.log(value)
+        var element = document.getElementById("seniorManagers")
+        if (value) {
+            element.className = "css-2b097c-container"
+        }
+        else {
+            element.className = "notValid css-2b097c-container"
+            this.setState(state => {
+                let taskDetails = this.state.taskDetails
+                taskDetails.isConfirm = "N"
+                return taskDetails
+            })
+        }
+        this.setState(state => {
+            let taskDetails = this.state.taskDetails
+            taskDetails.seniorManagers = value
+            return taskDetails
+        })
 
+    }
+
+
+    validate() {
+        let data = this.state.taskDetails
+        let keys = ["telephoneNum", "licenseNameId", "departmentId", "seniorManagers", "deliverWayId", "expDeliveryAddress", "expDeliveryReceiver",
+            "expDeliveryMobileNo", "documentType1", "documentType2"
+        ]
+
+        if (data.purposeType === "PS") {
+            keys = keys.filter(key => key !== "licensePurpose1" && key !== "licensePurpose2" && key !== "licensePurpose3")
+            keys = keys.concat("purposeComment")
+        }
+        else {
+            keys = keys.filter(key => key !== "purposeComment")
+            keys = keys.concat("licensePurpose1", "licensePurpose2", "licensePurpose3")
+        }
+
+        if (data.documentTypeId === "ORIGINAL") {
+            keys = keys.concat("plannedReturnDate")
+        }
+        else {
+            keys = keys.filter(key => key !== "plannedReturnDate")
+        }
+
+        if (data.documentTypeId === "SCANCOPY") {
+            keys = keys.concat("watermark1")
+            keys = keys.concat("watermark2")
+            if (data.needWatermark === "Y") {
+                keys = keys.concat("inputWatermark1")
+            }
+            else {
+                keys = keys.filter(key => key !== "inputWatermark1")
+            }
+            if (data.needWatermark === "N") {
+                keys = keys.concat("inputWatermark2")
+            }
+            else {
+                keys = keys.filter(key => key !== "inputWatermark2")
+            }
+        }
+        else {
+            keys = keys.filter(key => key !== "watermark1" || key !== "watermark2")
+        }
+        keys.map(key => {
+            console.log(key)
+            var element = document.getElementById(key)
+            if (key === "deliverWay1" || key === "deliverWay2") {
+                if (!data.deliverWayId) {
+                    document.getElementById("deliverWay1").className = "is-invalid custom-control-input"
+                    document.getElementById("deliverWay2").className = "is-invalid custom-control-input"
+                }
+            }
+            else if (key === "licensePurpose1" || key === "licensePurpose2" || key === "licensePurpose3") {
+                if (!data.purposeType) {
+                    document.getElementById("licensePurpose1").className = "is-invalid custom-control-input"
+                    document.getElementById("licensePurpose2").className = "is-invalid custom-control-input"
+                    document.getElementById("licensePurpose3").className = "is-invalid custom-control-input"
+                }
+            }
+            else if (key === "documentType1" || key === "documentType2") {
+                if (!data.documentTypeId) {
+                    document.getElementById("documentType1").className = "is-invalid custom-control-input"
+                    document.getElementById("documentType2").className = "is-invalid custom-control-input"
+                }
+            }
+            else if (key === "watermark1" || key === "watermark2" || key === "inputWatermark1" || key === "inputWatermark2") {
+                if (!data.needWatermark) {
+                    document.getElementById("watermark1").className = "is-invalid custom-control-input"
+                    document.getElementById("watermark2").className = "is-invalid custom-control-input"
+                }
+                if (!data.watermark) {
+                    document.getElementById("inputWatermark1").className = "is-invalid form-control"
+                    document.getElementById("inputWatermark2").className = "is-invalid form-control"
+                }
+            }
+            else if (!data[key]) {
+                if (element.className === "form-control" || element.className === "is-invalid form-control") {
+                    element.className = "is-invalid form-control"
+                }
+                else if (element.className === "custom-control-input" || element.className === "is-invalid custom-control-input") {
+                    element.className = "is-invalid custom-control-input"
+                }
+                else {
+                    element.className = "notValid css-2b097c-container"
+                }
+
+            }
+        })
+    }
+
+    handleAgreeTerms(event) {
+        let checked = event.target.checked
+        this.validate()
+        if (this.validator.allValid()) {
+            this.setState(state => {
+                let taskDetails = this.state.taskDetails
+                taskDetails.isConfirm = "Y"
+                return taskDetails
+            })
+        }
+        else {
+            this.setState(state => {
+                let taskDetails = this.state.taskDetails
+                taskDetails.isConfirm = "N"
+                return taskDetails
+            })
+            // alert("Invalid Fields")
+            this.validator.showMessages()
+            this.forceUpdate()
+        }
+    }
+
+    submitRequest(isSubmitted) {
+        let postReq = new FormData();
+        postReq.append("UserId", localStorage.getItem("userId"));
+        postReq.append("EmployeeNumber", this.state.taskDetails.employeeNum);
+        postReq.append("TelephoneNumber", this.state.taskDetails.telephoneNum);
+        postReq.append("CompanyId", this.props.legalName);  
+        postReq.append("DepartmentId", this.state.taskDetails.departmentId);
+        postReq.append("LicenseNameId", this.state.taskDetails.licenseNameId);
+        postReq.append("PurposeType", this.state.taskDetails.purposeType);
+        postReq.append("PurposeComment", this.state.taskDetails.purposeComment);
+        postReq.append("DocumentTypeId", this.state.taskDetails.documentTypeId);
+        postReq.append("NeedWatermark", this.state.taskDetails.needWatermark === "" ? "N" : this.state.taskDetails.needWatermark);
+        postReq.append("Watermark", this.state.taskDetails.watermark);
+        postReq.append("PlannedReturnDate", this.state.taskDetails.plannedReturnDate);
+        postReq.append("DeliverWayId", this.state.taskDetails.deliverWayId);
+        postReq.append("isSubmitted", isSubmitted);
+        // postReq.append("SeniorManager", this.state.taskDetails.seniorManager);
+        // postReq.append("LicenseAdmin", "quincy@otds.admin");
+        postReq.append("isConfirm", this.state.taskDetails.isConfirm);
+        postReq.append("ExpDeliveryAddress", this.state.taskDetails.expDeliveryAddress);
+        postReq.append("ExpDeliveryReciever", this.state.taskDetails.expDeliveryReceiver);
+        postReq.append("ExpDeliveryMobileNo", this.state.taskDetails.expDeliveryMobileNo);
+
+        for (let i = 0; i < this.state.taskDetails.seniorManagers.length; i++) {
+            postReq.append(`SeniorManagers[${i}]`, this.state.taskDetails.seniorManagers[i].value);
+        }
+
+        for (var pair of postReq.entries()) {
+            console.log(pair[0] + ', ' + pair[1]);
+        }
+
+        this.postData(postReq, isSubmitted)
+    }
+
+    async postData(formData, isSubmitted) {
+        await axios.put(`${config.url}/licenses/${this.state.taskDetails.licenseId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+            .then(res => {
+                if (isSubmitted === "Y") {
+                    Swal.fire({
+                        title: res.data.status === 200 ? 'Request Submitted' : "",
+                        text: 'Request Number : ' + res.data.requestNum,
+                        footer: 'Your request is being processed and is waiting for the approval',
+                        type: 'success',
+                        onClose: () => { this.goBack() }
+                    })
+                }
+                else {
+                    Swal.fire({
+                        title: res.data.status === 200 ? 'Request Saved' : '',
+                        text: 'Request Number : ' + res.data.requestNum,
+                        footer: 'Your request is saved as draft.',
+                        type: 'info',
+                        onClose: () => { this.goBack() }
+                    })
+                }
+            })
+    }
+
+    async deleteTask() {
+        await axios.delete(`${config.url}/licenses/${this.state.taskDetails.licenseId}`).then(res => {
+            Swal.fire({
+                title: "REQUEST DELETED",
+                html: res.data.message,
+                type: "success",
+                onClose: () => { this.goBack() }
+            })
+        })
     }
 
     goBack() {
@@ -192,7 +411,21 @@ class LicenseEditRequest extends Component {
     }
 
     render() {
-        const { taskDetails, loading, licenseNames, returnDateView, departments, seniorManagers } = this.state
+        const { taskDetails, loading, licenseNames, returnDateView, departments, seniorManagersList } = this.state
+        this.validator.purgeFields();
+
+        const filterColors = (inputValue) => {
+            return seniorManagersList.filter(i =>
+                i.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        };
+
+
+        const loadOptions = (inputValue, callback) => {
+
+            callback(filterColors(inputValue));
+        }
+
         return (
             <div>
                 <h4>Edit Request</h4>
@@ -230,72 +463,72 @@ class LicenseEditRequest extends Component {
                                 <FormGroup>
                                     <Label>Department </Label>
                                     <InputGroup>
-                                        <Input id="department" onChange={this.handleChange("department")} value={taskDetails.departmentId} type="select">
+                                        <Input id="departmentId" onChange={this.handleChange("departmentId")} value={taskDetails.departmentId} type="select">
                                             <option value="">Please selet a department</option>
                                             {departments.map((dept, index) =>
                                                 <option key={index} value={dept.deptId.toUpperCase()} > {dept.deptName} </option>
                                             )}
                                         </Input>
                                     </InputGroup>
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Department', taskDetails.department, 'required')}</small>
+                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Department', taskDetails.departmentId, 'required')}</small>
                                 </FormGroup>
                                 <FormGroup>
                                     <Label>License Name </Label>
                                     <InputGroup>
-                                        <Input id="licenseName" onChange={this.handleChange("licenseName")} value={taskDetails.licenseName} type="select">
+                                        <Input id="licenseNameId" onChange={this.handleChange("licenseNameId")} value={taskDetails.licenseNameId} type="select">
                                             <option value="" >Please select a License Name</option>
                                             {licenseNames.map((license, index) =>
-                                                <option key={index} value={license.name} > {license.name} </option>
+                                                <option key={index} value={license.licenseNameId} > {license.name} </option>
                                             )}
                                         </Input>
                                     </InputGroup>
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('License Name', taskDetails.licenseName, 'required')}</small>
+                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('License Name', taskDetails.licenseNameId, 'required')}</small>
                                 </FormGroup>
 
                                 <FormGroup onChange={this.handleRadio("purposeType")} >
                                     <Label >License Purpose</Label>
-                                    <CustomInput type="radio" id="licensePurpose1" name="licensePurpose" checked={taskDetails.purposeType === "LVFP"} value="LVFP" label="城市备案 Local VRB Filling Purpose" />
-                                    <CustomInput type="radio" id="licensePurpose2" name="licensePurpose" checked={taskDetails.purposeType === "MFP"} value="MFP" label="城抵押 Mortgage Filling Purpose" />
-                                    <CustomInput type="radio" id="licensePurpose3" name="licensePurpose" checked={taskDetails.purposeType === "PS"} value="PS" label="其他 Please specify:">
-                                        <Collapse isOpen={taskDetails.licensePurpose === "PS"}>
-                                            <Input id="specificPurpose" type="text" onChange={this.handleChange("specificPurpose")} value={taskDetails.specificPurpose} />
-                                            {taskDetails.licensePurpose === "PS"
-                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Specify Purpose', taskDetails.specificPurpose, 'required')}</small>
+                                    <CustomInput type="radio" id="licensePurpose1" name="purposeType" defaultChecked={taskDetails.purposeType === "LVFP"} value="LVFP" label="城市备案 Local VRB Filling Purpose" />
+                                    <CustomInput type="radio" id="licensePurpose2" name="purposeType" defaultChecked={taskDetails.purposeType === "MFP"} value="MFP" label="城抵押 Mortgage Filling Purpose" />
+                                    <CustomInput type="radio" id="licensePurpose3" name="purposeType" defaultChecked={taskDetails.purposeType === "PS"} value="PS" label="其他 Please specify:">
+                                        <Collapse isOpen={taskDetails.purposeType === "PS"}>
+                                            <Input id="purposeComment" type="text" onChange={this.handleChange("purposeComment")} value={taskDetails.purposeComment} />
+                                            {taskDetails.purposeType === "PS"
+                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Specify Purpose', taskDetails.purposeComment, 'required')}</small>
                                                 : null}
                                         </Collapse>
                                     </CustomInput>
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of License', taskDetails.licensePurpose, 'required')}</small>
+                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of License', taskDetails.purposeType, 'required')}</small>
                                 </FormGroup>
 
                                 <FormGroup onChange={this.handleChange("documentTypeId")} >
                                     <Label>Select Document Type</Label>
-                                    <CustomInput checked={taskDetails.documentTypeId === "SCANCOPY"} type="radio" id="documentType1" name="documentType" value="SCANCOPY" label="城电子版 Scan Copy" />
-                                    <CustomInput checked={taskDetails.documentTypeId === "ORIGINAL"} type="radio" id="documentType2" name="documentType" value="ORIGINAL" label="城原件 Original Copy" />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Type', taskDetails.documentType, 'required')}</small>
+                                    <CustomInput defaultChecked={taskDetails.documentTypeId === "SCANCOPY"} type="radio" id="documentType1" name="documentTypeId" value="SCANCOPY" label="城电子版 Scan Copy" />
+                                    <CustomInput defaultChecked={taskDetails.documentTypeId === "ORIGINAL"} type="radio" id="documentType2" name="documentTypeId" value="ORIGINAL" label="城原件 Original Copy" />
+                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Type', taskDetails.documentTypeId, 'required')}</small>
                                 </FormGroup>
 
 
-                                <Collapse isOpen={taskDetails.documentType === "SCANCOPY"}>
-                                    <FormGroup onChange={this.handleRadio("isWatermark")}>
+                                <Collapse isOpen={taskDetails.documentTypeId === "SCANCOPY"}>
+                                    <FormGroup onChange={this.handleRadio("needWatermark")}>
                                         <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
-                                        <CustomInput type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="城电. Please specify watermark here:">
-                                            <Collapse isOpen={taskDetails.isWatermark === "Y"}>
+                                        <CustomInput defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="城电. Please specify watermark here:">
+                                            <Collapse isOpen={taskDetails.needWatermark === "Y"}>
                                                 <Input id="inputWatermark1" type="text" value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
-                                                {taskDetails.isWatermark === "Y"
+                                                {taskDetails.needWatermark === "Y"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', taskDetails.watermark, 'required')}</small>
                                                     : null}
                                             </Collapse>
                                         </CustomInput>
-                                        <CustomInput type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="城原, No. Please specify the reason of not adding watermark:">
-                                            <Collapse isOpen={taskDetails.isWatermark === "N"}>
+                                        <CustomInput defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="城原, No. Please specify the reason of not adding watermark:">
+                                            <Collapse isOpen={taskDetails.needWatermark === "N"}>
                                                 <Input id="inputWatermark2" type="text" value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
-                                                {taskDetails.isWatermark === "N"
+                                                {taskDetails.needWatermark === "N"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', taskDetails.watermark, 'required')}</small>
                                                     : null}
                                             </Collapse>
                                         </CustomInput>
                                         {taskDetails.documentTypeId === "SCANCOPY"
-                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', taskDetails.isWatermark, 'required')}</small>
+                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', taskDetails.needWatermark, 'required')}</small>
                                             : null}
                                     </FormGroup>
                                 </Collapse>
@@ -303,14 +536,14 @@ class LicenseEditRequest extends Component {
                                 <Collapse isOpen={taskDetails.documentTypeId === "ORIGINAL"}>
                                     <FormGroup>
                                         <Label>Planned Return Date:</Label>
-                                        <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
+                                        <DatePicker id="plannedReturnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
                                             className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                                             showMonthDropdown
                                             showYearDropdown
                                             selected={returnDateView}
-                                            onChange={this.dateChange("returnDate", "returnDateView")} />
-                                        {taskDetails.documentType === "OC"
-                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', taskDetails.returnDate, 'required')}</small>
+                                            onChange={this.dateChange("plannedReturnDate", "returnDateView")} />
+                                        {taskDetails.documentTypeId === "OC"
+                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', taskDetails.plannedReturnDate, 'required')}</small>
                                             : null}
                                     </FormGroup>
                                 </Collapse>
@@ -318,36 +551,42 @@ class LicenseEditRequest extends Component {
 
                                 <FormGroup onChange={this.handleChange("deliverWayId")} >
                                     <Label>Deliver Way</Label>
-                                    <CustomInput type="radio" id="deliverWay1" checked={taskDetails.deliverWayId === "F2F"} name="deliverWay" value="F2F" label="面对面城, Face to face" />
-                                    <CustomInput type="radio" id="deliverWay2" checked={taskDetails.deliverWayId === "EXPRESS"} name="deliverWay" value="Express" label="快递 Express: Express Number" />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', taskDetails.deliverWay, 'required')}</small>
+                                    <CustomInput type="radio" id="deliverWay1" defaultChecked={taskDetails.deliverWayId === "F2F"} name="deliverWayId" value="F2F" label="面对面城, Face to face" />
+                                    <CustomInput type="radio" id="deliverWay2" defaultChecked={taskDetails.deliverWayId === "EXPRESS"} name="deliverWayId" value="Express" label="快递 Express: Express Number" />
+                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', taskDetails.deliverWayId, 'required')}</small>
                                 </FormGroup>
 
                                 <FormGroup>
                                     <Label>Address</Label>
                                     <Input placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.address, 'required')}</small>
+                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.expDeliveryAddress, 'required')}</small>
                                 </FormGroup>
 
                                 <FormGroup>
                                     <Label>Reciever</Label>
                                     <Input placeholder="Please specify Reciever" id="expDeliveryReceiver" onChange={this.handleChange("expDeliveryReceiver")} value={taskDetails.expDeliveryReceiver} type="text" />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', taskDetails.reciever, 'required')}</small>
+                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', taskDetails.expDeliveryReceiver, 'required')}</small>
                                 </FormGroup>
 
                                 <FormGroup>
                                     <Label>Reciever Mobile Phone</Label>
                                     <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="text" />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.recieverPhone, 'required')}</small>
+                                    <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.expDeliveryMobileNo, 'required')}</small>
                                 </FormGroup>
 
                                 <FormGroup>
                                     <Label>Senior Manager or above of requestor department</Label>
-                                    <Select
-                                        options={seniorManagers}
+                                    <AsyncSelect
+                                        id="seniorManagers"
+                                        loadOptions={loadOptions}
+                                        isMulti
+                                        value={taskDetails.seniorManagers}
+                                        // onBlur={this.checkDepartment}
                                         onChange={this.handleSelectOption}
-                                    />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Senior Manager', taskDetails.seniorManager, 'required')}</small>
+                                        menuPortalTarget={document.body}
+                                        components={animatedComponents}
+                                        styles={taskDetails.seniorManagers === null ? reactSelectControl : ""} />
+                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Senior Manager', taskDetails.seniorManagers, 'required')}</small>
                                 </FormGroup>
 
                             </Form>

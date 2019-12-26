@@ -67,7 +67,7 @@ class LicenseApplication extends Component {
     }
 
     componentDidMount() {
-        this.getMyApplications()
+        this.getLicenseApplications()
         this.getLicenseNames();
         this.getData('seniorManagers');
         // this.getSeniorManagers();
@@ -108,8 +108,9 @@ class LicenseApplication extends Component {
     }
 
     async getLicenseApplications() {
+        const searchOption = this.state.searchOption
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&category=all`)
+        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&category=all&requestNum=${searchOption.requestNum}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}`)
             .then(res => {
                 this.setState({ licenseApplication: res.data, loading: false })
             })
@@ -175,7 +176,8 @@ class LicenseApplication extends Component {
                 searchOption
             }
         })
-        this.getLicenseApplications()
+        console.log(this.state.searchOption)
+        // this.search()
     }
 
     handleKeyDown = (e) => {
@@ -222,7 +224,7 @@ class LicenseApplication extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.licenseName} onChange={this.handleSearch('licenseName')} >
-                                                <option disabled value="">Please Select a License Name</option>
+                                                <option value="">Please Select a License Name</option>
                                                 {licenseNames.map((name, index) =>
                                                     <option key={index} value={name.name}> {name.name} </option>
                                                 )}
@@ -244,7 +246,7 @@ class LicenseApplication extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.documentType} onChange={this.handleSearch('documentType')} >
-                                                <option disabled value="">Please Select a document Type</option>
+                                                <option value="">Please Select a document Type</option>
                                                 <option value="Scan Copy">Scan Copy</option>
                                                 <option value="Original">Original Copy</option>
                                             </Input>
@@ -274,7 +276,7 @@ class LicenseApplication extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.seniorManagerAbove} onChange={this.handleSearch('seniorManagerAbove')} >
-                                                <option disabled value="">Please Select a senior Manager</option>
+                                                <option value="">Please Select a senior Manager</option>
                                                 {seniorManagers.map((mgr, index) =>
                                                     <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
                                                 )}
@@ -292,7 +294,7 @@ class LicenseApplication extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('status')} >
-                                                <option disabled value="">Please Select a status</option>
+                                                <option value="">Please Select a status</option>
                                                 {status.map((stat, index) =>
                                                     <option key={index} value={stat} > {stat} </option>
                                                 )}
