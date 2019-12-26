@@ -157,7 +157,7 @@ class MyPendingTasks extends Component {
         // let userId = "josh@otds.admin"
         let url = `${config.url}/tasks?category=pending&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`
         const response = await Axios.get(url)
-        this.setState({ pendingTasks: response.data, loading: !this.state.loading })
+        this.setState({ pendingTasks: response.data.tasks, loading: !this.state.loading })
         array = response.data
     }
 
@@ -184,10 +184,11 @@ class MyPendingTasks extends Component {
     }
 
     dateChange = (name, view) => date => {
-        console.log(date)
+        let month = date.getMonth()
+
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`
+            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
         }
         this.setState({ [view]: date });
         this.setState(prevState => ({

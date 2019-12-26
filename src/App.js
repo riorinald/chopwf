@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import {Spinner} from 'reactstrap';
 
 // import { renderRoutes } from 'react-router-config';
@@ -45,7 +45,7 @@ class App extends Component {
 
   render() {
     return (
-      <Router>
+      <Router basename='/CLWF/'>
         <React.Suspense fallback={loading()}>
           <Switch>
             <Route exact path="/authenticated" name="auth" render={props => <AuthPage {...props} />} />

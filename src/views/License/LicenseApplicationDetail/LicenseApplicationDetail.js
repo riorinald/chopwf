@@ -9,7 +9,7 @@ import {
     FormGroup,
     Label,
     Progress, Badge, Spinner,
-    UncontrolledTooltip, CustomInput
+    UncontrolledTooltip, CustomInput, Collapse
 } from 'reactstrap';
 import config from '../../../config';
 import Swal from 'sweetalert2';
@@ -24,9 +24,16 @@ class LicenseApplicationDetail extends Component {
             loading: true,
             page: "",
             comments: "",
-            currentStatus: ""
+            currentStatus: "",
+            deliverWay: "",
+            expressNumber: "",
+            comments: "",
+            documents: [],
         }
         this.goBack = this.goBack.bind(this)
+        this.handleRadio = this.handleRadio.bind(this)
+        this.handleChange = this.handleChange.bind(this)
+        this.uploadDocument = this.uploadDocument.bind(this)
     }
 
     componentDidMount() {
@@ -61,35 +68,181 @@ class LicenseApplicationDetail extends Component {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
+    validate() {
+        let valid = false
+        if (this.state.currentStatus === "PENDINGLICENSEADMIN") {
+            if (this.state.taskDetails.documentTypeId === "ORIGINAL") {
+                if (this.state.deliverWay === "Express") {
+                    if (this.state.expressNumber !== "") {
+                        valid = true
+                    }
+                    else {
+                        valid = false
+                        Swal.fire({
+                            title: "No Express Number",
+                            html: "Please add Express Number !",
+                            type: "warning"
+                        })
+                    }
+                }
+                else if (this.state.deliverWay === "F2F") {
+                    valid = true
+                }
+                else {
+                    valid = false
+                    Swal.fire({
+                        title: "No Delivery Way Selected",
+                        html: "Please select a way of delivery !",
+                        type: "warning"
+                    })
+                }
+            }
+            else if (this.state.taskDetails.documentTypeId === "SCANCOPY") {
+                if (this.state.documents.length !== 0) {
+                    valid = true
+                }
+                else {
+                    valid = false
+                    Swal.fire({
+                        title: "No Documents attached",
+                        html: "Please attach documents for approval !",
+                        type: "warning"
+                    })
+                }
+            }
+
+            // else {
+            //     valid = false
+            //     Swal.fire({
+            //         title: "No Delivery Way Selected",
+            //         html: "Please select a way of delivery !",
+            //         type: "warning"
+            //     })
+            // }
+        }
+        else if (this.state.currentStatus === "PENDINGREQUESTORRETURN") {
+            if (this.state.deliverWay === "Express") {
+                if (this.state.expressNumber !== "") {
+                    valid = true
+                }
+                else {
+                    valid = false
+                    Swal.fire({
+                        title: "No Express Number",
+                        html: "Please add Express Number !",
+                        type: "warning"
+                    })
+                }
+            }
+            else {
+                valid = true
+            }
+        }
+        else {
+            valid = true
+        }
+        return valid
+    }
+
     updated(action) {
-        let data = {
-            userId: localStorage.getItem('userId'),
-            comments: this.state.comments
+        let valid = false
+        if (action === "approve") {
+            valid = this.validate()
+        }
+        else {
+            valid = true
+        }
+        let postReq = new FormData();
+        postReq.append("UserId", localStorage.getItem("userId"));
+        postReq.append("Comments", this.state.comments);
+        postReq.append("ExpressNumber", this.state.expressNumber);
+        postReq.append("ExpressAddress", this.state.taskDetails.expDeliveryAddress);
+        for (let i = 0; i < this.state.documents.length; i++) {
+            postReq.append(`Documents[${i}].Attachment.File`, this.state.documents[i].file);
+            postReq.append(`Documents[${i}].AttachmentName`, this.state.documents[i].fileName);
+
         }
 
-        Axios.post(`${config.url}/licenses/${this.props.match.params.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
-            .then(res => {
-                Swal.fire({
-                    title: res.data.message,
-                    html: `The request has been ${res.data.message}`,
-                    type: "success",
-                    onClose: () => { this.goBack(true) }
-                })
-            })
-            .catch(error => {
-                Swal.fire({
-                    title: "ERROR",
-                    html: error.response.data.message,
-                    type: "error"
-                })
-            })
+        for (var pair of postReq.entries()) {
+            console.log(pair[0] + ', ' + pair[1]);
+        }
 
 
+
+        if (valid) {
+
+            Axios.post(`${config.url}/licenses/${this.props.match.params.taskId}/${action}`, postReq, { headers: { 'Content-Type': 'multipart/form-data' } })
+                .then(res => {
+                    Swal.fire({
+                        title: res.data.message,
+                        html: `The request has been ${res.data.message}`,
+                        type: "success",
+                        onClose: () => { this.goBack(true) }
+                    })
+                })
+                .catch(error => {
+                    Swal.fire({
+                        title: "ERROR",
+                        html: error.response.data.message,
+                        type: "error"
+                    })
+                })
+        }
+
+    }
+
+    handleRadio(event) {
+        let value = event.target.value
+        if (value === "F2F" || value === "Express") {
+            this.setState({ deliverWay: value })
+        }
+    }
+
+    handleChange = name => event => {
+        let value = event.target.value
+        this.setState({ [name]: value })
+    }
+
+    uploadDocument(event) {
+        if (event.target.files.length !== 0) {
+            let valid = true
+            let file = event.target.files[0]
+            let fileName = file.name
+            for (let i = 0; i < this.state.documents.length; i++) {
+                if (this.state.documents[i].fileName === fileName) {
+                    valid = false
+                    break;
+                }
+                else {
+                    valid = true
+                }
+            }
+            if (valid) {
+                let Url = URL.createObjectURL(file)
+
+                let obj = {
+                    file: file,
+                    fileName: fileName,
+                    url: Url
+                }
+                this.setState(state => {
+                    const documents = this.state.documents.concat(obj)
+                    return { documents }
+                })
+            }
+            else {
+                Swal.fire({
+                    title: "Document Exists ",
+                    html: `The document has already been added to the list !`,
+                    type: "warning",
+                })
+            }
+        }
     }
 
 
     render() {
-        const { taskDetails, redirect, approvalHistories, loading, page, currentStatus } = this.state
+        const { taskDetails, redirect, approvalHistories, loading, page, currentStatus, expressNumber, deliverWay, documents } = this.state
         return (
             <div>
                 {!loading ?
@@ -281,11 +434,39 @@ class LicenseApplicationDetail extends Component {
                             {page === "mypendingtask"
                                 ? <div>
                                     {currentStatus === "PENDINGLICENSEADMIN"
-                                        ? <Row>
-                                            <FormGroup >
-                                                <Label>快递 Express: Express Number</Label>
-                                                <Input type="text"></Input>
-                                            </FormGroup>
+                                        ?
+                                        <Row>
+                                            <Col>
+                                                {taskDetails.documentTypeId === "ORIGINAL"
+                                                    ?
+                                                    <FormGroup onChange={this.handleRadio} >
+                                                        <Label>Deliver Way</Label>
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
+                                                            <Collapse isOpen={deliverWay === "Express"}>
+                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
+                                                                <Row> &nbsp; </Row>
+                                                                <div>Reciever: {taskDetails.expDeliveryReceiver}</div>
+                                                                <div>Address: {taskDetails.expDeliveryAddress}</div>
+                                                                <div>Mobile No. : {taskDetails.expDeliveryMobileNo}</div>
+                                                                <div>Express Number: {expressNumber} </div>
+
+                                                            </Collapse>
+                                                        </CustomInput>
+                                                    </FormGroup>
+                                                    :
+                                                    <FormGroup>
+                                                        <Label>Attach Document</Label>
+                                                        <CustomInput id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" />
+                                                        &nbsp;
+                                                    <Collapse isOpen={documents.length !== 0}>
+                                                            {documents.map((doc, index) =>
+                                                                <div key={index} > <a href={doc.url} target='_blank' rel="noopener noreferrer">{doc.fileName}</a> </div>
+                                                            )}
+                                                        </Collapse>
+                                                    </FormGroup>
+                                                }
+                                            </Col>
                                         </Row>
                                         : currentStatus === "PENDINGREQUESTORRETURN"
                                             ? <Row>
@@ -302,7 +483,7 @@ class LicenseApplicationDetail extends Component {
                                     </Row>
                                     <Row>
                                         <Col >
-                                            <Input type="textarea" ></Input>
+                                            <Input onChange={this.handleChange("comments")} type="textarea" ></Input>
                                         </Col>
                                     </Row>
                                     <Row>
