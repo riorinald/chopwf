@@ -164,6 +164,14 @@ class LicenseMyPendingTasks extends Component {
         return Math.min(maxWidth, Math.max(max, headerText.length) * magicSpacing);
     }
 
+    converManagers(data) {
+        let temp = ""
+        data.map(key => {
+            temp = temp + key.label + "; "
+        })
+        return temp
+    }
+
     convertDate(dateValue) {
         let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
         return regEx
@@ -266,11 +274,11 @@ class LicenseMyPendingTasks extends Component {
                                 },
                                 {
                                     Header: "Senior Manager or above of Requestor Department",
-                                    accessor: `seniorManager`,
+                                    accessor: `seniorManagers`,
                                     width: this.getColumnWidth('seniorManager', "Senior Manager or above of Requestor Department"),
-                                    // Cell: row => (
-                                    //     <div> {row.original.seniorManager} </div>
-                                    // ),
+                                    Cell: row => (
+                                        <div> {this.converManagers(row.original.seniorManagers)} </div>
+                                    ),
                                     style: { textAlign: "center" },
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;

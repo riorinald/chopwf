@@ -62,6 +62,7 @@ class LicenseEditRequest extends Component {
         this.handleAgreeTerms = this.handleAgreeTerms.bind(this);
         this.goBack = this.goBack.bind(this)
         this.handleSelectOption = this.handleSelectOption.bind(this)
+        this.deleteTask = this.deleteTask.bind(this)
     }
 
     componentDidMount() {
@@ -104,8 +105,13 @@ class LicenseEditRequest extends Component {
     }
 
     convertDateView(date) {
-        let regEx = date.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
-        return new Date(regEx)
+        if (date === "" || date === "/") {
+            return ""
+        }
+        else {
+            let regEx = date.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
+            return new Date(regEx)
+        }
     }
 
     async getTaskDetails(taskId) {
@@ -202,10 +208,10 @@ class LicenseEditRequest extends Component {
 
     handleSelectOption(event) {
         // console.log(event)
-        let value = event ? event : null
+        let value = event ? event : []
         console.log(value)
         var element = document.getElementById("seniorManagers")
-        if (value) {
+        if (value.length !== 0) {
             element.className = "css-2b097c-container"
         }
         else {
@@ -227,7 +233,7 @@ class LicenseEditRequest extends Component {
 
     validate() {
         let data = this.state.taskDetails
-        let keys = ["telephoneNum", "licenseNameId", "departmentId", "seniorManagers", "deliverWayId", "expDeliveryAddress", "expDeliveryReceiver",
+        let keys = ["telephoneNum", "licenseNameId", "departmentId", "seniorManagers", "expDeliveryAddress", "expDeliveryReceiver",
             "expDeliveryMobileNo", "documentType1", "documentType2"
         ]
 
@@ -298,6 +304,14 @@ class LicenseEditRequest extends Component {
                     document.getElementById("inputWatermark2").className = "is-invalid form-control"
                 }
             }
+            else if (key === "seniorManagers") {
+                if (data.seniorManagers.length === 0) {
+                    element.className = "notValid css-2b097c-container"
+                }
+                else {
+                    element.className = "css-2b097c-container"
+                }
+            }
             else if (!data[key]) {
                 if (element.className === "form-control" || element.className === "is-invalid form-control") {
                     element.className = "is-invalid form-control"
@@ -340,7 +354,7 @@ class LicenseEditRequest extends Component {
         postReq.append("UserId", localStorage.getItem("userId"));
         postReq.append("EmployeeNumber", this.state.taskDetails.employeeNum);
         postReq.append("TelephoneNumber", this.state.taskDetails.telephoneNum);
-        postReq.append("CompanyId", this.props.legalName);  
+        postReq.append("CompanyId", this.props.legalName);
         postReq.append("DepartmentId", this.state.taskDetails.departmentId);
         postReq.append("LicenseNameId", this.state.taskDetails.licenseNameId);
         postReq.append("PurposeType", this.state.taskDetails.purposeType);
@@ -352,7 +366,7 @@ class LicenseEditRequest extends Component {
         postReq.append("DeliverWayId", this.state.taskDetails.deliverWayId);
         postReq.append("isSubmitted", isSubmitted);
         // postReq.append("SeniorManager", this.state.taskDetails.seniorManager);
-        // postReq.append("LicenseAdmin", "quincy@otds.admin");
+        // postReq.append("LicenseAdmin", this.state.taskDetails.licenseAdmins);
         postReq.append("isConfirm", this.state.taskDetails.isConfirm);
         postReq.append("ExpDeliveryAddress", this.state.taskDetails.expDeliveryAddress);
         postReq.append("ExpDeliveryReciever", this.state.taskDetails.expDeliveryReceiver);
@@ -612,7 +626,7 @@ class LicenseEditRequest extends Component {
                             <div className="form-actions">
                                 <Row>
                                     <Col className="d-flex justify-content-start">
-                                        {taskDetails.isConfirm
+                                        {taskDetails.isConfirm === "Y"
                                             ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
                                             : <Button type="submit" color="success"
                                                 // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })}

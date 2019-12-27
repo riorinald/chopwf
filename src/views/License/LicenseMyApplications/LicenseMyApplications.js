@@ -152,6 +152,13 @@ class LicenseMyApplications extends Component {
         this.setState({ filtered: filtered });
         console.log(this.state.searchOption)
     };
+    converManagers(data) {
+        let temp = ""
+        data.map(key => {
+            temp = temp + key.label + "; "
+        })
+        return temp
+    }
 
     getColumnWidth = (accessor, headerText) => {
         let { applications } = this.state
@@ -272,9 +279,9 @@ class LicenseMyApplications extends Component {
                                     Header: "Senior Manager or above of Requestor Department",
                                     accessor: `seniorManager`,
                                     width: this.getColumnWidth('seniorManager', "Senior Manager or above of Requestor Department"),
-                                    // Cell: row => (
-                                    //     <div> {row.original.seniorManager} </div>
-                                    // ),
+                                    Cell: row => (
+                                        <div> {this.converManagers(row.original.seniorManagers)} </div>
+                                    ),
                                     style: { textAlign: "center" },
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;
