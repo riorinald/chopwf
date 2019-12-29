@@ -11,6 +11,9 @@ import {
     Label
 } from 'reactstrap';
 
+import Axios from 'axios';
+
+
 class Help extends Component {
     constructor(props) {
         super(props)
@@ -69,6 +72,11 @@ class Help extends Component {
         this.deleteContactPerson = this.deleteContactPerson.bind(this);
 
 
+    }
+
+    async getData(){
+        const response = Axios.get('http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/3')
+        this.setState({chopKeepers: response.data.chopKeepers, QA: response.data.QA })
     }
 
     makeEditable() {
@@ -211,7 +219,7 @@ class Help extends Component {
         const Edit = <img onClick={this.makeEditable} width="20px" src={editIcon} />
         const Apply = <Button color="success" onClick={this.makeEditable}>APPLY</Button>
         return (
-            <div>
+            <div className="animated fadeIn">
                 <h2 >Help</h2>
                 <Card>
                     <CardBody>
@@ -228,6 +236,7 @@ class Help extends Component {
                             <thead>
                                 <tr>
                                     {chopKeepersColumnHeaders}
+                                    {!this.state.editable ? null : <th></th>}
                                 </tr>
                             </thead>
                             <tbody>

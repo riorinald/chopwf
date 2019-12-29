@@ -11,7 +11,7 @@ export default {
     },
     {
       name: 'My Application',
-      url: '/Myapps',
+      url: '/myapps',
       icon: 'icon-layers'
     },
     {
@@ -25,8 +25,8 @@ export default {
       icon: 'fa fa-cubes'
     },
     {
-      name: 'Administration',
-      url: '/adminstration',
+      name: 'Chop Admin',
+      url: '/chopadmin',
       icon: 'fa fa-cog'
     },
   

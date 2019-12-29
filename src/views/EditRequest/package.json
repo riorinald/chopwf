@@ -1,0 +1,6 @@
+{
+    "name": "EditRequest",
+    "version": "0.0.0",
+    "private": true,
+    "main": "./EditRequest.js"
+}

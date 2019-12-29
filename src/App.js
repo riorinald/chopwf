@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, HashRouter, Route, Switch, Redirect } from 'react-router-dom';
+import {Spinner} from 'reactstrap';
 
 // import { renderRoutes } from 'react-router-config';
 import './App.scss';
 
 export const fakeAuth = {
-  isAuthenticated: false,
+  isAuthenticated: localStorage.getItem('authenticate')  === 'true' ? true : false,
   authenticate(cb) {
     
     this.isAuthenticated = true
@@ -14,19 +15,21 @@ export const fakeAuth = {
   },
   signOut(cb) {
     this.isAuthenticated = false
+    localStorage.clear();
     setTimeout(cb, 100)
   }
 }
 
 const Login = React.lazy(() => import('./views/Login/Login'));
 
-const loading = () => <div className="animated fadeIn pt-3 text-center">Loading...</div>;
+const loading = () => <div className="animated fadeIn pt-3 text-center"><Spinner /> <br />Loading ...</div>;
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./containers/DefaultLayout'));
 
 // Pages
 const Page404 = React.lazy(() => import('./views/Pages/Page404'));
+const Portal = React.lazy(() => import('./views/Portal/Portal'))
 
 const PrivateRoute = ({component: Component, ...rest}) => (
   <Route {...rest} render={props => (
@@ -41,10 +44,11 @@ class App extends Component {
 
   render() {
     return (
-      <HashRouter>
+      <Router basename='/CLWF/'>
         <React.Suspense fallback={loading()}>
           <Switch>
-            <Route exact path="/404" name="Page 404" render={props => <Page404 {...props} />} />
+            <Route exact path="/page404" name="Page 404" render={props => <Page404 {...props} />} />
+            <Route exact path="/portal" name="Portal" render={props => <Portal {...props} />} />
             <Route path='/login' component={Login} />  
             {/* {fakeAuth.isAuthenticated
               ? <Route path="/" name="Home" render={props => <DefaultLayout {...props} />} />
@@ -53,7 +57,7 @@ class App extends Component {
             <PrivateRoute path='/' component={DefaultLayout}/>
           </Switch>
         </React.Suspense>
-      </HashRouter>
+      </Router>
     );
   }
 }

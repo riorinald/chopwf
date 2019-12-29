@@ -1,0 +1,6 @@
+{
+    "name": "MyPendingTasks",
+    "version": "0.0.0",
+    "private": true,
+    "main": "./MyPendingTasks.js"
+}

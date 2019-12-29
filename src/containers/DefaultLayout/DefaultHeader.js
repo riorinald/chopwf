@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
-import { Badge, UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem } from 'reactstrap';
+import { Badge, UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem, Dropdown } from 'reactstrap';
 import PropTypes from 'prop-types';
 import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
-import { fakeAuth } from '../../App'
-import { withRouter } from 'react-router-dom'
+import { fakeAuth } from '../../App';
+import { withRouter } from 'react-router-dom';
+import LegalEntity from '../../context';
+import Axios from 'axios';
+import config from '../../config';
 
 const propTypes = {
   children: PropTypes.node,
@@ -15,7 +18,7 @@ const AuthButton = withRouter(({ history }) => (
 
   fakeAuth.isAuthenticated
     // ? <Button onClick={() => { fakeAuth.signout(() => history.push('/')) }}>Sign out</Button>
-    ? <DropdownItem onClick={()=> {fakeAuth.signOut(()=> history.push('/'))}} ><i className="fa fa-lock" ></i> Logout</DropdownItem>
+    ? <DropdownItem onClick={() => { fakeAuth.signOut(() => history.push('/')) }} ><i className="fa fa-lock" ></i> Logout</DropdownItem>
     : ""
 )
 )
@@ -24,85 +27,95 @@ class DefaultHeader extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      modal: false
+      userDetails: ''
     };
-    this.toggle = this.toggle.bind(this);
   }
-
-  toggle() {
-    this.setState({
-      modal: !this.state.modal,
-    });
-  }
-
-
 
   logout() {
     console.log("logout")
     fakeAuth.signOut()
-    // return <Redirect to='/login'/>
   }
 
-  // logout = withRouter(({history}))
+  componentDidMount(){
+    this.getUserDetails()
+  }
+
+  async getUserDetails() {
+    this.setState({ loading: true })
+    await Axios.get(`${config.url}/users/${localStorage.getItem('userId')}`).then(res => {
+        this.setState({ userDetails: res.data, loading: false })
+    })
+}
 
   render() {
 
-    // eslint-disable-next-line
-    const { children, ...attributes } = this.props;
 
+    const { children, state } = this.props;
+    const {userDetails} = this.state;
+    const username = localStorage.getItem('userId');
     return (
-      <React.Fragment>
-        <AppSidebarToggler className="d-lg-none" display="sm" mobile />
-        {/* <AppNavbarBrand
-          full={{ src: logo, width: 89, height: 25, alt: 'CoreUI Logo' }}
-          minimized={{ src: sygnet, width: 30, height: 30, alt: 'CoreUI Logo' }}>
-         {//<AppSidebarToggler className="d-md-down-none" display="lg" />
-          </AppNavbarBrand> */
-        }
-        <AppSidebarMinimizer className="d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
-        <p className="h5"><b>Chop Use WORKFLOW for MBAFC</b></p>
-        <Nav className="ml-auto" navbar>
-          <NavItem className="d-md-down-none">
-            <Button color="ghost-secondary" onClick={this.toggle} to="#" className="nav-link"><i className="fa fa-exchange" /> Another Workflow ? &nbsp;
-            </Button>
-            <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
-              <ModalHeader className="center" toggle={this.toggle}> Switch Workflow </ModalHeader>
-              <ModalBody>
-                <Button disabled color="secondary" size="lg" block> MBAFC </Button>
-                <Button color="secondary" size="lg" block> MBLC </Button>
-                <Button color="secondary" size="lg" block > MBIA </Button>
-              </ModalBody>
-              <ModalFooter>
-              </ModalFooter>
-            </Modal>
-          </NavItem>
-          <NavItem>
-          </NavItem>
-          <UncontrolledDropdown nav direction="down" >
-            <DropdownToggle nav>
-              <img src={'../../assets/img/avatars/6.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
-            </DropdownToggle>
-            <DropdownMenu right>
-              <DropdownItem header tag="div" className="text-center"><strong>Account</strong></DropdownItem>
-              <DropdownItem><i className="fa fa-bell-o"></i> Updates<Badge color="info">42</Badge></DropdownItem>
-              <DropdownItem><i className="fa fa-envelope-o"></i> Messages<Badge color="success">42</Badge></DropdownItem>
-              <DropdownItem><i className="fa fa-tasks"></i> Tasks<Badge color="danger">42</Badge></DropdownItem>
-              <DropdownItem><i className="fa fa-comments"></i> Comments<Badge color="warning">42</Badge></DropdownItem>
-              <DropdownItem header tag="div" className="text-center"><strong>Settings</strong></DropdownItem>
-              <DropdownItem><i className="fa fa-user"></i> Profile</DropdownItem>
-              <DropdownItem><i className="fa fa-wrench"></i> Settings</DropdownItem>
-              <DropdownItem><i className="fa fa-usd"></i> Payments<Badge color="secondary">42</Badge></DropdownItem>
-              <DropdownItem><i className="fa fa-file"></i> Projects<Badge color="primary">42</Badge></DropdownItem>
-              <DropdownItem divider />
-              <DropdownItem><i className="fa fa-shield"></i> Lock Account</DropdownItem>
-              <AuthButton/>
-              {/* <DropdownItem onClick={this.logout}><i className="fa fa-lock" ></i> Logout</DropdownItem> */}
-            </DropdownMenu>
-          </UncontrolledDropdown>
-        </Nav>
-        {/* <AppAsideToggler className="d-md-down-none" /> */}
-        {/*<AppAsideToggler className="d-lg-none" mobile />*/}
-      </React.Fragment>
+          <React.Fragment>
+            <AppSidebarToggler className="d-lg-none" display="sm" mobile />
+            <AppSidebarMinimizer className="customMT d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
+            <Nav className="h5 d-sm-down-none"><b className="ml-2">{state.application} Use WORKFLOW for {state.legalEntity}</b></Nav>
+            <Nav className="ml-auto" navbar>
+              <Dropdown isOpen={state.viewChop} toggle={this.props.toggle('viewChop')} nav direction="down" >
+                <DropdownToggle color="ghost" className="btn-pill" caret>
+                   CHOP WF
+                </DropdownToggle>
+                  <DropdownMenu className="mt-2">
+                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBAFC"
+                    active={state.legalEntity === "MBAFC" && state.application === "CHOP" ? true : false}> 
+                       MBAFC 
+                    </DropdownItem>
+                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBLC"
+                    active={state.legalEntity === "MBLC" && state.application === "CHOP" ? true : false}> 
+                      MBLC
+                    </DropdownItem>
+                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBIA"
+                      active={state.legalEntity === "MBIA" && state.application === "CHOP" ? true : false}> 
+                       MBIA
+                    </DropdownItem>
+                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="CAR2GO"
+                      active={state.legalEntity === "CAR2GO" && state.application === "CHOP" ? true : false}> 
+                       CAR2GO
+                    </DropdownItem>
+                  </DropdownMenu>
+              </Dropdown>
+              <Dropdown className="mr-2" isOpen={state.viewLicense} toggle={this.props.toggle('viewLicense')} nav direction="down" >
+                <DropdownToggle color="ghost" className="btn-pill" caret>
+                    LICENSE WF
+                </DropdownToggle>
+                  <DropdownMenu className="mt-2">
+                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBAFC"
+                      active={state.legalEntity === "MBAFC" && state.application === "LICENSE" ? true : false}>
+                       MBAFC 
+                    </DropdownItem>
+                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBLC"
+                      active={state.legalEntity === "MBLC" && state.application === "LICENSE" ? true : false}>
+                      MBLC
+                    </DropdownItem>
+                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBIA"
+                      active={state.legalEntity === "MBIA" && state.application === "LICENSE" ? true : false}>
+                       MBIA
+                    </DropdownItem>
+                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="CAR2GO"
+                      active={state.legalEntity === "CAR2GO" && state.application === "LICENSE" ? true : false}>
+                       CAR2GO
+                    </DropdownItem>
+                  </DropdownMenu>
+              </Dropdown>
+              <UncontrolledDropdown nav direction="down" >
+                <DropdownToggle nav>
+                {username}<img src={userDetails.photoUrl} className="img-avatar" alt={userDetails.firstName} />
+                </DropdownToggle>
+                <DropdownMenu right className="mt-2">
+                  <DropdownItem><i className="fa fa-user"></i> Profile</DropdownItem>
+                  <AuthButton />
+                </DropdownMenu>
+              </UncontrolledDropdown>
+            </Nav>
+          </React.Fragment>
     );
   }
 }
@@ -110,4 +123,4 @@ class DefaultHeader extends Component {
 DefaultHeader.propTypes = propTypes;
 DefaultHeader.defaultProps = defaultProps;
 
-export default DefaultHeader;
+export default withRouter(DefaultHeader);
