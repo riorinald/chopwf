@@ -160,9 +160,7 @@ class Login extends Component {
                         </div>
                     </ModalBody>
                     <ModalBody>
-                        {/* <Card> */}
-                        {/* <CardBody> */}
-                        {/* <Form> */}
+
                         <Form>
                             <FormGroup row>
                                 <Label for="exampleEmail" sm={3}>Username</Label>
@@ -183,9 +181,6 @@ class Login extends Component {
                             </FormGroup>
                         </Form>
 
-
-                        {/* </CardBody> */}
-                        {/* </Card> */}
                     </ModalBody>
                     <ModalFooter>
                         <Button id="login" block color="primary" style={{ justifyContent: "center" }} onClick={this.loginCheck}>Login </Button>
