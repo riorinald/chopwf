@@ -1,0 +1,6 @@
+{
+    "name": "ChopInstruction",
+    "version": "0.0.0",
+    "private": true,
+    "main": "./ChopInstruction.js"
+}

@@ -1,0 +1,6 @@
+{
+    "name": "ChopMyPendingTasks",
+    "version": "0.0.0",
+    "private": true,
+    "main": "./ChopMyPendingTasks.js"
+}
