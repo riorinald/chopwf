@@ -8,7 +8,7 @@ const RedirectCreate = (props) => {
   return <LegalEntity.Consumer>{
     ContextValue => (
         // props.history.push(`/create/${ContextValue.legalEntity.name}/`)
-        <Redirect to={`/create/${ContextValue.legalEntity.name}`} />
+        <Redirect to={`/chop/create/${ContextValue.legalEntity.name}`} />
       )}
   </LegalEntity.Consumer>
 } 

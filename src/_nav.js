@@ -2,7 +2,7 @@ export default {
   items: [
     {
       name: 'Create',
-      url: '/create',
+      url: '/chop/create',
       icon: 'icon-note',
       // badge: {
       //   variant: 'info',
@@ -11,28 +11,28 @@ export default {
     },
     {
       name: 'My Application',
-      url: '/myapps',
+      url: '/chop/myapps',
       icon: 'icon-layers'
     },
     {
       name: 'My Pending Task',
-      url: '/mypendingtask',
+      url: '/chop/mypendingtask',
       icon: 'fa fa-clock-o'
     },
     {
       name: 'Chop Application',
-      url: '/chopapps',
+      url: '/chop/chopapps',
       icon: 'fa fa-cubes'
     },
     {
       name: 'Chop Admin',
-      url: '/chopadmin',
+      url: '/chop/chopadmin',
       icon: 'fa fa-cog'
     },
   
     {
       name: 'User Instruction',
-      url: '/instruction',
+      url: '/chop/instruction',
       icon: 'fa fa-info-circle',
       class: 'mt-auto',
       // variant: 'success',
@@ -40,7 +40,7 @@ export default {
     },
     {
       name: 'Help',
-      url: '/help',
+      url: '/chop/help',
       icon: 'fa fa-question-circle',
     },
   ],

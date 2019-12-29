@@ -67,13 +67,8 @@ class DefaultLayout extends Component {
   }
   
   changeEntity = workflow => event => {
-    if (workflow === "LICENSE") {
-      this.props.history.push(`/${workflow.toLowerCase()}/create`)
-      }
-      else{
-      this.props.history.push(`/create/${event.target.value}`)
-      }
-
+    this.props.history.push(`/${workflow.toLowerCase()}/create`)
+  
     this.setState({
       legalEntity: event.target.value,
       application: workflow,
@@ -147,7 +142,7 @@ class DefaultLayout extends Component {
                           )} />
                       ) : (null);
                     })}
-                    <Redirect from="/" to={{ pathname: "/404" }} />
+                    {/* <Redirect from="/" to={{ pathname: "/404" }} /> */}
                   </Switch>
                 </Suspense>
               </Container>
