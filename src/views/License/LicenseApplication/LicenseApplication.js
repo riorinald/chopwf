@@ -94,14 +94,14 @@ class LicenseApplication extends Component {
     goToDetails(taskId, status) {
         if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACK") {
             this.props.history.push({
-                pathname: `admin-apps/edit/${taskId}`,
-                state: { redirected: true }
+                pathname: `admin-apps/edit`,
+                state: { redirected: true, taskId: taskId }
             })
         }
         else {
             this.props.history.push({
-                pathname: `admin-apps/${taskId}`,
-                state: { redirected: true }
+                pathname: `admin-apps/details`,
+                state: { redirected: true, taskId: taskId }
             })
         }
 

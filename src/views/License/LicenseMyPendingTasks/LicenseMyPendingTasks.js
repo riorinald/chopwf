@@ -95,14 +95,14 @@ class LicenseMyPendingTasks extends Component {
 
         if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACK") {
             this.props.history.push({
-                pathname: `mypendingtask/edit/${taskId}`,
-                state: { redirected: true }
+                pathname: `mypendingtask/edit`,
+                state: { redirected: true, taskId: taskId }
             })
         }
         else {
             this.props.history.push({
-                pathname: `mypendingtask/${taskId}`,
-                state: { redirected: true }
+                pathname: `mypendingtask/details`,
+                state: { redirected: true, taskId: taskId }
             })
         }
 

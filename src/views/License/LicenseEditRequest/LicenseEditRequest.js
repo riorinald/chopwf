@@ -62,6 +62,7 @@ class LicenseEditRequest extends Component {
         this.handleAgreeTerms = this.handleAgreeTerms.bind(this);
         this.goBack = this.goBack.bind(this)
         this.handleSelectOption = this.handleSelectOption.bind(this)
+        this.handleSelectReciever = this.handleSelectReciever.bind(this)
         this.deleteTask = this.deleteTask.bind(this)
     }
 
@@ -76,7 +77,7 @@ class LicenseEditRequest extends Component {
         }
 
 
-        this.getTaskDetails(this.props.match.params.taskId)
+        this.getTaskDetails(this.props.location.state.taskId)
 
     }
     async getLicenseNames() {
@@ -356,7 +357,7 @@ class LicenseEditRequest extends Component {
         postReq.append("TelephoneNumber", this.state.taskDetails.telephoneNum);
         postReq.append("CompanyId", this.props.legalName);
         postReq.append("DepartmentId", this.state.taskDetails.departmentId);
-        postReq.append("LicenseNameId", this.state.taskDetails.licenseNameId);
+        postReq.append("LicenseName", this.state.taskDetails.licenseNameId);
         postReq.append("PurposeType", this.state.taskDetails.purposeType);
         postReq.append("PurposeComment", this.state.taskDetails.purposeComment);
         postReq.append("DocumentTypeId", this.state.taskDetails.documentTypeId);
@@ -415,6 +416,27 @@ class LicenseEditRequest extends Component {
                 type: "success",
                 onClose: () => { this.goBack() }
             })
+        })
+    }
+
+    handleSelectReciever(event) {
+        let value = event ? event.value : ""
+        var element = document.getElementById("expDeliveryReceiver")
+        if (value !== "") {
+            element.className = "css-2b097c-container"
+        }
+        else {
+            element.className = "notValid css-2b097c-container"
+            this.setState(state => {
+                let taskDetails = this.state.taskDetails
+                taskDetails.isConfirm = "N"
+                return taskDetails
+            })
+        }
+        this.setState(state => {
+            let taskDetails = this.state.taskDetails
+            taskDetails.expDeliveryReceiver = value
+            return taskDetails
         })
     }
 
@@ -480,7 +502,7 @@ class LicenseEditRequest extends Component {
                                         <Input id="departmentId" onChange={this.handleChange("departmentId")} value={taskDetails.departmentId} type="select">
                                             <option value="">Please selet a department</option>
                                             {departments.map((dept, index) =>
-                                                <option key={index} value={dept.deptId.toUpperCase()} > {dept.deptName} </option>
+                                                <option key={index} value={dept.deptId} > {dept.deptName} </option>
                                             )}
                                         </Input>
                                     </InputGroup>
@@ -578,7 +600,14 @@ class LicenseEditRequest extends Component {
 
                                 <FormGroup>
                                     <Label>Reciever</Label>
-                                    <Input placeholder="Please specify Reciever" id="expDeliveryReceiver" onChange={this.handleChange("expDeliveryReceiver")} value={taskDetails.expDeliveryReceiver} type="text" />
+                                    <AsyncSelect
+                                        id="expDeliveryReceiver"
+                                        loadOptions={loadOptions}
+                                        isClearable
+                                        onChange={this.handleSelectReciever}
+                                        menuPortalTarget={document.body}
+                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                    />
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', taskDetails.expDeliveryReceiver, 'required')}</small>
                                 </FormGroup>
 

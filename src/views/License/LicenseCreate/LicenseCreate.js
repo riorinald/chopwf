@@ -63,6 +63,7 @@ class LicenseCreate extends Component {
         this.handleAgreeTerms = this.handleAgreeTerms.bind(this);
         this.handleSelectOption = this.handleSelectOption.bind(this);
         this.submitRequest = this.submitRequest.bind(this);
+        this.handleSelectReciever = this.handleSelectReciever.bind(this);
         this.formRef = React.createRef()
     }
 
@@ -230,7 +231,7 @@ class LicenseCreate extends Component {
 
         let dates = ""
         if (date) {
-          dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
         }
         this.setState({ [view]: date });
         this.setState(state => {
@@ -239,6 +240,14 @@ class LicenseCreate extends Component {
             return formData
         })
     };
+
+    handleSelectReciever(event) {
+        this.setState(state => {
+            let formData = this.state.formData
+            formData.reciever = event.value
+            return formData
+        })
+    }
 
     //validation
     handleAgreeTerms(event) {
@@ -523,7 +532,15 @@ class LicenseCreate extends Component {
 
                             <FormGroup>
                                 <Label>Reciever</Label>
-                                <Input placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
+                                <AsyncSelect
+                                    id="reciever"
+                                    loadOptions={loadOptions}
+                                    isClearable
+                                    onChange={this.handleSelectReciever}
+                                    menuPortalTarget={document.body}
+                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                />
+                                {/* <Input placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" /> */}
                                 <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
                             </FormGroup>
 
