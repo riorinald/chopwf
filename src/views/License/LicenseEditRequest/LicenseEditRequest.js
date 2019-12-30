@@ -328,6 +328,22 @@ class LicenseEditRequest extends Component {
         })
     }
 
+
+    getOption(person) {
+        let i = 0
+        if (person !== "") {
+            this.state.seniorManagersList.map((head, index) => {
+                if (head.value === person) {
+                    i = index
+                }
+            })
+        }
+        else {
+            i = null
+        }
+        return i
+    }
+
     handleAgreeTerms(event) {
         let checked = event.target.checked
         this.validate()
@@ -370,7 +386,7 @@ class LicenseEditRequest extends Component {
         // postReq.append("LicenseAdmin", this.state.taskDetails.licenseAdmins);
         postReq.append("isConfirm", this.state.taskDetails.isConfirm);
         postReq.append("ExpDeliveryAddress", this.state.taskDetails.expDeliveryAddress);
-        postReq.append("ExpDeliveryReciever", this.state.taskDetails.expDeliveryReceiver);
+        postReq.append("ExpDeliveryReceiver", this.state.taskDetails.expDeliveryReceiver);
         postReq.append("ExpDeliveryMobileNo", this.state.taskDetails.expDeliveryMobileNo);
 
         for (let i = 0; i < this.state.taskDetails.seniorManagers.length; i++) {
@@ -538,8 +554,8 @@ class LicenseEditRequest extends Component {
 
                                 <FormGroup onChange={this.handleChange("documentTypeId")} >
                                     <Label>Select Document Type</Label>
-                                    <CustomInput defaultChecked={taskDetails.documentTypeId === "SCANCOPY"} type="radio" id="documentType1" name="documentTypeId" value="SCANCOPY" label="城电子版 Scan Copy" />
-                                    <CustomInput defaultChecked={taskDetails.documentTypeId === "ORIGINAL"} type="radio" id="documentType2" name="documentTypeId" value="ORIGINAL" label="城原件 Original Copy" />
+                                    <CustomInput defaultChecked={taskDetails.documentTypeId === "SCANCOPY"} type="radio" id="documentType1" name="documentTypeId" value="SCANCOPY" label="电子版 Scan Copy" />
+                                    <CustomInput defaultChecked={taskDetails.documentTypeId === "ORIGINAL"} type="radio" id="documentType2" name="documentTypeId" value="ORIGINAL" label="原件 Original Copy" />
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Type', taskDetails.documentTypeId, 'required')}</small>
                                 </FormGroup>
 
@@ -547,7 +563,7 @@ class LicenseEditRequest extends Component {
                                 <Collapse isOpen={taskDetails.documentTypeId === "SCANCOPY"}>
                                     <FormGroup onChange={this.handleRadio("needWatermark")}>
                                         <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
-                                        <CustomInput defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="城电. Please specify watermark here:">
+                                        <CustomInput defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes, Please specify watermark here:">
                                             <Collapse isOpen={taskDetails.needWatermark === "Y"}>
                                                 <Input id="inputWatermark1" type="text" value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
                                                 {taskDetails.needWatermark === "Y"
@@ -555,7 +571,7 @@ class LicenseEditRequest extends Component {
                                                     : null}
                                             </Collapse>
                                         </CustomInput>
-                                        <CustomInput defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="城原, No. Please specify the reason of not adding watermark:">
+                                        <CustomInput defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No, Please specify the reason of not adding watermark:">
                                             <Collapse isOpen={taskDetails.needWatermark === "N"}>
                                                 <Input id="inputWatermark2" type="text" value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
                                                 {taskDetails.needWatermark === "N"
@@ -604,6 +620,7 @@ class LicenseEditRequest extends Component {
                                         id="expDeliveryReceiver"
                                         loadOptions={loadOptions}
                                         isClearable
+                                        value={seniorManagersList[this.getOption(taskDetails.expDeliveryReceiver)]}
                                         onChange={this.handleSelectReciever}
                                         menuPortalTarget={document.body}
                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}

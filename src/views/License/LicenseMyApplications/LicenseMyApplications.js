@@ -17,6 +17,8 @@ import {
     Collapse
 } from 'reactstrap';
 import config from '../../../config';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 
 class LicenseMyApplications extends Component {
@@ -37,33 +39,33 @@ class LicenseMyApplications extends Component {
                 createdDate: "",
                 createdByName: ""
             },
+            returnDateView: "",
+            createdDateView: "",
             loading: false,
             filtered: [],
             seniorManagers: [],
             departments: [],
             licenseNames: [],
-            status: [
-                "Recall",
-                "Pending for Document check by (L4 or above) Approval ",
-                "Pending for Department Head Approval",
-                "Bring the Original Documents for Chop",
-                "Pending for Chop Owner Approval",
+            statusName: [
+                "Recalled",
+                "Pending for Senior Manager or above approval",
+                "Pending for License Administrator Acknowledge Lend Out",
                 "Send Back to Requestor",
                 "Rejected",
-                "Pending for Chop Keeper Acknowledge Lend Out",
-                "Pending Chop Keeper Acknowledge Return",
+                "Requestor Received",
+                "Pending Requestor Return/ Extend",
                 "Completed",
                 "Draft",
-                "Pending Requestor Return/Extension",
-                "Pending Department Head Approval for Extension",
-                "Pending Chop Keeper Approval for extension",
-                "Pending Chop Owner Approval for extension",
-                "Chop request expired after 30 days",
+                "Pending for License Administrator acknowledge return",
+                "Pending Senior Manager Approval for extension",
+                "Pending License Administrator Approval for extension",
+                "License request expired after 30 days",
                 "Pending Requestor Return"
             ]
         }
         this.search = this.search.bind(this)
         this.onFilteredChangeCustom = this.onFilteredChangeCustom.bind(this)
+        this.getMyApplications = this.getMyApplications.bind(this)
     }
 
     componentDidMount() {
@@ -111,8 +113,9 @@ class LicenseMyApplications extends Component {
 
     async getMyApplications() {
         const { searchOption } = this.state
+        console.log(searchOption)
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&category=requestor&requestNum=${searchOption.requestNum}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}`)
+        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}`)
             .then(res => {
                 this.setState({ applications: res.data, loading: false })
             })
@@ -199,8 +202,25 @@ class LicenseMyApplications extends Component {
         this.getMyApplications()
     }
 
+    dateChange = (name, view) => date => {
+        let dates = ""
+        if (date) {
+            let month = date.getMonth()
+            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+        }
+        this.setState({ [view]: date });
+        this.setState(state => {
+            let searchOption = this.state.searchOption
+            searchOption[name] = dates
+            return searchOption
+        })
+    };
+
     render() {
-        const { applications, seniorManagers, licenseNames, status } = this.state
+        const { applications, seniorManagers, licenseNames, statusName, returnDateView, createdDateView } = this.state
+
+
+
         return (
             <div className="animated fadeIn" >
                 <h4>My Applications</h4>
@@ -214,6 +234,7 @@ class LicenseMyApplications extends Component {
                                 this.setState({ filtered: filtered })
                                 this.onFilteredChangeCustom(value, column.id || column.accessor);
                             }}
+                            getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
                             defaultFilterMethod={(filter, row, column) => {
                                 const id = filter.pivotId || filter.id;
                                 return row[id]
@@ -273,6 +294,23 @@ class LicenseMyApplications extends Component {
                                     Cell: row => (
                                         <div> {this.convertDate(row.original.plannedReturnDate)} </div>
                                     ),
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                                                className="form-control" dateFormat="yyyy/MM/dd"
+                                                peekNextMonth
+                                                showMonthDropdown
+                                                showYearDropdown
+                                                selected={returnDateView}
+                                                isClearable
+                                                getTheadFilterThProps
+                                                onChange={this.dateChange("plannedReturnDate", "returnDateView")}
+                                            />
+                                        )
+                                    },
                                     style: { textAlign: "center" }
                                 },
                                 {
@@ -308,7 +346,8 @@ class LicenseMyApplications extends Component {
                                         return (
                                             <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('status')} >
                                                 <option value="">Please Select a status</option>
-                                                {status.map((stat, index) =>
+
+                                                {statusName.map((stat, index) =>
                                                     <option key={index} value={stat} > {stat} </option>
                                                 )}
                                             </Input>
@@ -327,7 +366,19 @@ class LicenseMyApplications extends Component {
                                     Header: "Created By",
                                     accessor: "createdByName",
                                     width: this.getColumnWidth('createdByName', "Created By"),
-                                    // Cell: this.renderEditable,
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <Input type="select" value={this.state.searchOption.createdByName} onChange={this.handleSearch('createdByName')} >
+                                                <option value="">Please Select a name</option>
+                                                {seniorManagers.map((mgr, index) =>
+                                                    <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
+                                                )}
+                                            </Input>
+                                        )
+                                    },
                                     style: { textAlign: "center" }
                                 },
                                 {
@@ -337,6 +388,23 @@ class LicenseMyApplications extends Component {
                                     Cell: row => (
                                         <div> {this.convertDate(row.original.createdDate)} </div>
                                     ),
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                                                className="form-control" dateFormat="yyyy/MM/dd"
+                                                peekNextMonth
+                                                showMonthDropdown
+                                                showYearDropdown
+                                                selected={createdDateView}
+                                                isClearable
+                                                getTheadFilterThProps
+                                                onChange={this.dateChange("createdDate", "createdDateView")}
+                                            />
+                                        )
+                                    },
                                     style: { textAlign: "center" }
                                 },
                                 {

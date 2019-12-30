@@ -59,6 +59,7 @@ const SelectTable = selectTableHOC(ReactTable);
 
 const animatedComponents = makeAnimated();
 
+// var NewFormData = require('formdata-polyfill')
 
 class Create extends Component {
 
@@ -364,6 +365,7 @@ class Create extends Component {
   }
 
   async submitRequest(isSubmitted) {
+    console.log("SUBMIT")
     let useInOffice = "Y"
     let isConnectChop = "N"
     let IsConfirmed = "N"
@@ -371,7 +373,6 @@ class Create extends Component {
     useInOffice = this.state.collapse ? "Y" : "N"
     isConnectChop = this.state.connectingChop ? "Y" : "N"
     IsConfirmed = this.state.agreeTerms ? "Y" : "N"
-
     let postReq = new FormData();
     postReq.append("UserId", this.state.userId);
     postReq.append("EmployeeNum", this.state.employeeId);
@@ -539,6 +540,7 @@ class Create extends Component {
 
   async postData(formData, isSubmitted) {
     try {
+      // await axios.post(`${config.url}/tasks`, formData)
       await axios.post(`${config.url}/tasks`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then(res => {
           if (isSubmitted === 'N') {
