@@ -41,21 +41,23 @@ class Portal extends Component {
         <div className="app flex-row align-items-center">
           <Container>
             <Row className="justify-content-center">
-              <Col sm={6} md lg={3}>
+              <Col sm={6} md lg={3} className="text-center h-100">
                 <Card id="CWF" tag="a" style={{ cursor: "pointer" }} onClick={() => {this.redirectTo('CHOP')}} className="shadow-lg p-3 mb-5 bg-white rounded">
-                  <CardBody className="text-center"><h5>CHOP WORKFLOW APPLICATION</h5>
-                     <Col className="text-center p-4">
+                  <CardBody>
+                    <h6>CHOP WORKFLOW APPLICATION</h6>
+                      <Col className="text-center p-4">
                       <i className="fa fa-sitemap fa-5x"></i>
-                     </Col>
+                      </Col>
                   </CardBody>
                 </Card>
               </Col>
-              <Col sm={6} md lg={3}>
+              <Col sm={6} md lg={3} className="text-center h-100">
                 <Card id="LWF" tag="a" style={{ cursor: "pointer" }} onClick={() => {this.redirectTo('LICENSE')}} className="shadow-lg p-3 mb-5 bg-white rounded">
-                  <CardBody className="text-center"><h5>LICENSE WORKFLOW APPLICATION</h5>
-                    <Col className="text-center p-4">
-                    <i className="fa fa-files-o fa-5x"></i>
-                    </Col>
+                  <CardBody>
+                    <h6>LICENSE WORKFLOW APPLICATION</h6>
+                      <Col className="text-center p-4">
+                      <i className="fa fa-files-o fa-5x"></i>
+                      </Col>
                   </CardBody>
                 </Card>
               </Col>

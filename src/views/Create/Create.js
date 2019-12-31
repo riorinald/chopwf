@@ -1347,7 +1347,7 @@ class Create extends Component {
           {this.state.documentTableCNIPS.map((document, index) =>
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
-              <td><div>{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</div></td>
+              <td className="mediumTd">{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</td>
               <td><div>{document.engName}</div></td>
               <td><div>{document.cnName}</div></td>
               <td id="viewDoc">
