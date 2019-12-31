@@ -541,6 +541,7 @@ class LicenseApplicationDetail extends Component {
                                         )}
                                     </Row>
                                 </div>
+
                                 : page === "myapplication"
                                     ? <div>
                                         {currentStatus === "PENDINGREQUESTORRETURN"
@@ -581,6 +582,37 @@ class LicenseApplicationDetail extends Component {
 
                                     </div>
                                     : null}
+                            {currentStatus === "COMPLETED"
+                                ?
+                                <Collapse isOpen={taskDetails.documents.length !== 0}>
+                                    <Col className="mb-4">
+                                        <FormGroup>
+                                            <Label>Documents</Label>
+                                            <Table responsive hover bordered size="sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th className="smallTd">#</th>
+                                                        <th>Attached File</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {taskDetails.documents.map((doc, index) =>
+                                                        <tr key={index} >
+                                                            <td className="smallTd"> {index + 1} </td>
+                                                            <td>
+                                                                <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+
+                                                </tbody>
+                                            </Table>
+                                        </FormGroup>
+                                    </Col>
+                                </Collapse>
+                                // </Row>
+                                : ""
+                            }
                         </CardBody>
                         <CardFooter>
                             <Row><Col><h4>Approval History</h4></Col></Row>

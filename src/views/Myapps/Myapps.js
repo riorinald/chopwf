@@ -13,8 +13,9 @@ import Axios from 'axios';
 import config from '../../config';
 // import ApplicationDetail from './ApplicationDetail';
 import { Redirect } from 'react-router-dom';
-import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
-
+// import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 class Myapps extends Component {
   constructor(props) {
@@ -82,7 +83,7 @@ class Myapps extends Component {
 
   componentDidMount() {
     this.getApplications(1, 20);
-    resetMounted.setMounted();
+    // resetMounted.setMounted();
 
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
@@ -170,6 +171,26 @@ class Myapps extends Component {
     return regEx
   }
 
+  dateChange = (name, view) => date => {
+
+
+    let dates = ""
+    if (date) {
+      let month = date.getMonth()
+      dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+    }
+
+    // console.log(this.state.page, this.state.limit)
+    this.setState({ [view]: date });
+    this.setState(prevState => ({
+      searchOption: {
+        ...prevState.searchOption,
+        [name]: dates
+      }
+    }))
+    // this.getPendingTasks(this.state.page, this.state.limit)
+  };
+
 
   onFilteredChangeCustom = (value, accessor) => {
     this.setState(state => {
@@ -233,6 +254,7 @@ class Myapps extends Component {
                 this.setState({ filtered: filtered })
                 this.onFilteredChangeCustom(value, column.id || column.accessor);
               }}
+              getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
               defaultFilterMethod={(filter, row, column) => {
                 const id = filter.pivotId || filter.id;
                 return row[id]
@@ -367,6 +389,23 @@ class Myapps extends Component {
                   Cell: row => (
                     <div> {this.convertDate(row.original.createdDate)} </div>
                   ),
+                  filterMethod: (filter, row) => {
+                    return row[filter.id] === filter.value;
+                  },
+                  Filter: ({ filter, onChange }) => {
+                    return (
+                      <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                        className="form-control" dateFormat="yyyy/MM/dd"
+                        peekNextMonth
+                        showMonthDropdown
+                        showYearDropdown
+                        selected={this.state.dateView1}
+                        isClearable
+                        getTheadFilterThProps
+                        onChange={this.dateChange("createdDate", "dateView1")}
+                      />
+                    )
+                  },
                   style: { textAlign: "center" }
                 },
                 {
