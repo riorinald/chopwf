@@ -33,7 +33,7 @@ import ReactTable from "react-table";
 import "react-table/react-table.css"
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import PropTypes from "prop-types";
-import { resetMounted } from '../MyPendingTasks/MyPendingTasks';
+// import { resetMounted } from '../MyPendingTasks/MyPendingTasks';
 import SimpleReactValidator from 'simple-react-validator';
 import LegalEntity from '../../context';
 
@@ -244,7 +244,7 @@ class EditRequest extends Component {
 
     async deleteTask() {
         // console.log(this.state.taskDetails.taskId)
-        resetMounted.setMounted()
+        // resetMounted.setMounted()
         Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res => {
             // console.log(res.data)
 
@@ -622,6 +622,7 @@ class EditRequest extends Component {
                 return { editRequestForm }
             })
         }
+        event.target.value = null
     }
 
     deleteContractNumber(i) {
@@ -1189,21 +1190,30 @@ class EditRequest extends Component {
     async handleAgreeTerm(event) {
         let checked = event.target.checked
         await this.setValidForm()
-        await this.validate()
+        if (this.state.taskDetails.applicationTypeId !== "") {
+            await this.validate()
+            if (this.validator.allValid()) {
+                this.setState(state => {
+                    let taskDetails = this.state.taskDetails
+                    if (checked) { taskDetails.isConfirm = "Y" }
+                    return { taskDetails }
+                })
+            } else {
+                this.validator.showMessages();
+                this.forceUpdate()
+            }
+        }
+        else {
+            Swal.fire({
+                title: "Application Type not Selected",
+                html: 'Please select an application type to continue!',
+                type: "warning"
+            })
+        }
+
         // console.log(this.state.isValid)
         // console.log(this.validator.allValid())
-        if (this.validator.allValid()) {
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                if (checked) { taskDetails.isConfirm = "Y" }
-                return { taskDetails }
-            })
-        } else {
-            this.validator.showMessages();
-            // rerender to show messages for the first time
-            // you can use the autoForceUpdate option to do this automatically`
-            this.forceUpdate()
-        }
+
     }
 
     async submitRequest(isSubmitted) {
@@ -1293,13 +1303,13 @@ class EditRequest extends Component {
 
         if (isSubmitted === "N") {
             this.postData(postReq, isSubmitted)
-            resetMounted.setMounted()
+            // resetMounted.setMounted()
         }
         else {
             //if all valid = isConfirmed || All Fields are filled
             // console.log(this.state.taskDetails)
             this.postData(postReq, isSubmitted)
-            resetMounted.setMounted()
+            // resetMounted.setMounted()
         }
     }
 
@@ -1375,6 +1385,7 @@ class EditRequest extends Component {
                                         <FormGroup>
                                             <Label>Application Type</Label>
                                             <Input type="select" id="appTypeSelected" onChange={this.handleChange("applicationTypeId")} value={taskDetails.applicationTypeId} name="appType">
+                                                <option value="" disabled>Please select an application type</option>
                                                 {appTypes.map((type, index) =>
                                                     <option key={index} value={type.appTypeId} > {type.appTypeName} </option>
                                                 )}
@@ -1848,7 +1859,7 @@ class EditRequest extends Component {
                                     </FormGroup>
                                 </Collapse> */}
 
-                                        <Collapse isOpen={taskDetails.applicationTypeId === "STU" || taskDetails.applicationTypeId === "LTI"}>
+                                        <Collapse isOpen={taskDetails.applicationTypeId === "STU" || taskDetails.applicationTypeId === "LTI" || taskDetails.applicationTypeId === ""}>
                                             <FormGroup>
                                                 <Label>Department Heads <i className="fa fa-user" /></Label>
                                                 <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.legalName} entity</small>

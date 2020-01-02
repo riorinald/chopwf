@@ -14,7 +14,7 @@ import config from '../../config';
 import Swal from 'sweetalert2';
 import ReactTable from "react-table";
 import "react-table/react-table.css"
-import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
+// import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
 
 
 
@@ -83,7 +83,7 @@ class TaskDetails extends Component {
 
     goBack(updated) {
         if (updated) {
-            resetMounted.setMounted()
+            // resetMounted.setMounted()
         }
         this.props.history.push({
             pathname: `/${this.props.match.params.page}`
@@ -437,16 +437,16 @@ class TaskDetails extends Component {
                                             </Col>
                                         </FormGroup>
                                         : ''}
-                                    {appType === 'LTU' 
+                                    {appType === 'LTU'
                                         ? ''
                                         : <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
-                                            <Label htmlFor="text-input">Confirm</Label>
+                                                <Label htmlFor="text-input">Confirm</Label>
                                             </Col>
                                             <Col xs="12" md="8">
-                                            <Input disabled type="text" id="text-input" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="/" />
+                                                <Input disabled type="text" id="text-input" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="/" />
                                             </Col>
-                                         </FormGroup>
+                                        </FormGroup>
                                     }
                                 </Col>
                                 <Col>
@@ -584,15 +584,15 @@ class TaskDetails extends Component {
                                                 </Col>
                                             </FormGroup>
                                     }
-                                    {appType === 'LTU' 
+                                    {appType === 'LTU'
                                         ? <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
-                                            <Label htmlFor="text-input">Confirm</Label>
+                                                <Label htmlFor="text-input">Confirm</Label>
                                             </Col>
                                             <Col xs="12" md="8">
-                                            <Input disabled type="text" id="text-input" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="/" />
+                                                <Input disabled type="text" id="text-input" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} name="text-input" placeholder="/" />
                                             </Col>
-                                         </FormGroup>
+                                        </FormGroup>
                                         : ''
                                     }
 

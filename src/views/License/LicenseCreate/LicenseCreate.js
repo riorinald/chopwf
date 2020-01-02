@@ -192,14 +192,6 @@ class LicenseCreate extends Component {
 
     handleRadio = name => event => {
         let id = event.target.id
-        if (this.state.formData.isConfirm === "Y") {
-            this.setState(state => {
-                let formData = this.state.formData
-                formData.isConfirm = "N"
-                return formData
-            })
-        }
-
         let value = ""
         if (name === "isWatermark") {
             document.getElementById("watermark1").className = "custom-control-input"
@@ -242,23 +234,33 @@ class LicenseCreate extends Component {
     };
 
     handleSelectReciever(event) {
+        let value = event ? event.value : ""
+        console.log(value)
+        var element = document.getElementById("reciever")
+        if (value !== "") {
+            element.className = "css-2b097c-container"
+        }
+        else {
+            element.className = "notValid css-2b097c-container"
+        }
         this.setState(state => {
             let formData = this.state.formData
-            formData.reciever = event.value
+            formData.reciever = value
             return formData
         })
     }
 
     //validation
     handleAgreeTerms(event) {
-        let checked = event.target.checked
         this.validate()
         if (this.validator.allValid()) {
-            this.setState(state => {
-                let formData = this.state.formData
-                formData.isConfirm = "Y"
-                return formData
-            })
+            // this.setState(state => {
+            //     let formData = this.state.formData
+            //     formData.isConfirm = "Y"
+            //     return formData
+            // })
+            this.submitRequest("Y")
+            // console.log("ALL VALIDATED")
         }
         else {
             // alert("Invalid Fields")
@@ -434,7 +436,7 @@ class LicenseCreate extends Component {
                                     <Input id="department" onChange={this.handleChange("department")} defaultValue="0" type="select">
                                         <option value="0">Please selet a department</option>
                                         {departments.map((dept, index) =>
-                                            <option key={index} value={dept.deptId.toUpperCase()} > {dept.deptName} </option>
+                                            <option key={index} value={dept.deptId} > {dept.deptName} </option>
                                         )}
                                     </Input>
                                 </InputGroup>
@@ -571,7 +573,7 @@ class LicenseCreate extends Component {
                             </FormGroup>
 
                         </Form>
-                        <Col md="16">
+                        {/* <Col md="16">
                             <FormGroup check>
                                 <FormGroup>
                                     <CustomInput
@@ -587,16 +589,17 @@ class LicenseCreate extends Component {
                                     </CustomInput>
                                 </FormGroup>
                             </FormGroup>
-                        </Col>
+                        </Col> */}
                     </CardBody>
                     <CardFooter>
                         <div className="form-actions" >
                             <Row noGutters className="float-left">
                                 <Col className="mr-2" >
-                                    {formData.isConfirm === "Y"
-                                        ? <Button className="mr-2" type="submit" onClick={() => this.submitRequest("Y")} color="success">Submit</Button>
-                                        : <Button className="mr-2" type="submit" disabled color="secondary">Submit</Button>
-                                    }
+                                    {/* {formData.isConfirm === "Y" */}
+                                    {/* ?  */}
+                                    <Button className="mr-2" type="submit" onClick={() => this.handleAgreeTerms()} color="success">Submit</Button>
+                                    {/* : <Button className="mr-2" type="submit" disabled color="secondary">Submit</Button> */}
+                                    {/* } */}
                                     <Button type="submit" onClick={() => this.submitRequest("N")} color="primary" > Save </Button>
 
                                 </Col>

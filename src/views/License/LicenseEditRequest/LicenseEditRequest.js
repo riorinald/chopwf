@@ -129,13 +129,6 @@ class LicenseEditRequest extends Component {
 
     handleChange = name => event => {
         let id = event.target.id
-        if (this.state.taskDetails.isConfirm === "Y") {
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.isConfirm = "N"
-                return taskDetails
-            })
-        }
         var element = document.getElementById(id)
         if (id === "deliverWay1" || id === "deliverWay2") {
             document.getElementById('deliverWay1').className = "custom-control-input"
@@ -158,13 +151,6 @@ class LicenseEditRequest extends Component {
 
     handleRadio = name => event => {
         let id = event.target.id
-        if (this.state.taskDetails.isConfirm === "Y") {
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.isConfirm = "N"
-                return taskDetails
-            })
-        }
 
         let value = ""
         if (name === "needWatermark") {
@@ -217,11 +203,6 @@ class LicenseEditRequest extends Component {
         }
         else {
             element.className = "notValid css-2b097c-container"
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.isConfirm = "N"
-                return taskDetails
-            })
         }
         this.setState(state => {
             let taskDetails = this.state.taskDetails
@@ -345,21 +326,11 @@ class LicenseEditRequest extends Component {
     }
 
     handleAgreeTerms(event) {
-        let checked = event.target.checked
         this.validate()
         if (this.validator.allValid()) {
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.isConfirm = "Y"
-                return taskDetails
-            })
+            this.submitRequest("Y")
         }
         else {
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.isConfirm = "N"
-                return taskDetails
-            })
             // alert("Invalid Fields")
             this.validator.showMessages()
             this.forceUpdate()
@@ -443,11 +414,6 @@ class LicenseEditRequest extends Component {
         }
         else {
             element.className = "notValid css-2b097c-container"
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.isConfirm = "N"
-                return taskDetails
-            })
         }
         this.setState(state => {
             let taskDetails = this.state.taskDetails
@@ -650,7 +616,7 @@ class LicenseEditRequest extends Component {
                                 </FormGroup>
 
                             </Form>
-                            <Col md="16">
+                            {/* <Col md="16">
                                 <FormGroup check>
                                     <FormGroup>
                                         <CustomInput
@@ -666,17 +632,18 @@ class LicenseEditRequest extends Component {
                                         </CustomInput>
                                     </FormGroup>
                                 </FormGroup>
-                            </Col>
+                            </Col> */}
                         </CardBody>
                         <CardFooter>
                             <div className="form-actions">
                                 <Row>
                                     <Col className="d-flex justify-content-start">
-                                        {taskDetails.isConfirm === "Y"
-                                            ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
-                                            : <Button type="submit" color="success"
-                                                // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })}
-                                                id="disabledSubmit" disabled >Submit</Button>}
+                                        {/* {taskDetails.isConfirm === "Y"
+                                            ?  */}
+                                        <Button type="submit" color="success" onClick={() => { this.handleAgreeTerms() }}>Submit</Button>
+                                        {/* : <Button type="submit" color="success" */}
+                                        {/* // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} */}
+                                        {/* id="disabledSubmit" disabled >Submit</Button>} */}
                                         {/* <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit"> */}
                                         {/* please confirm the agree terms </Tooltip> */}
                                         <span>&nbsp;</span>

@@ -14,7 +14,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { addDays } from 'date-fns';
 import config from '../../config';
 import { STU, LTU, LTI, CNIPS } from '../../config/validation';
-import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
+// import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
 import ReactTable from "react-table";
 import "react-table/react-table.css"
 import selectTableHOC from "react-table/lib/hoc/selectTable";
@@ -205,7 +205,7 @@ class Create extends Component {
     this.getData("department", `${config.url}/departments`);
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=` + this.props.legalName);
-    resetMounted.setMounted()
+    // resetMounted.setMounted()
 
 
   }
@@ -1177,6 +1177,7 @@ class Create extends Component {
 
       })
     }
+    event.target.value = null
   }
 
   handleSelectOption = sname => newValue => {

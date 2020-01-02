@@ -14,15 +14,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import InputMask from "react-input-mask";
 
 
-let mounted = 0
-let array = []
-
-export const resetMounted = {
-    setMounted() {
-        mounted = 0
-    }
-}
-
 class MyPendingTasks extends Component {
     constructor(props) {
         super(props)
@@ -101,14 +92,14 @@ class MyPendingTasks extends Component {
         await this.getData("applicationTypes", `${config.url}/apptypes`);
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
         // console.log(mounted)
-        if (mounted === 0) {
-            this.getPendingTasks(1, 20);
-        }
-        else {
-            this.setState({ loading: !this.state.loading })
-            this.setState({ pendingTasks: array, loading: !this.state.loading })
-        }
-        mounted = mounted + 1
+        // if (mounted === 0) {
+        this.getPendingTasks(1, 20);
+        // }
+        // else {
+        //     this.setState({ loading: !this.state.loading })
+        //     this.setState({ pendingTasks: array, loading: !this.state.loading })
+        // }
+        // mounted = mounted + 1
     }
 
     convertDate(dateValue) {
@@ -158,11 +149,9 @@ class MyPendingTasks extends Component {
         let userId = localStorage.getItem('userId')
         // let userId = "josh@otds.admin"
         let url = `${config.url}/tasks?category=pending&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`
-        console.log(url)
         const response = await Axios.get(url)
         this.setState({ pendingTasks: response.data.tasks, totalPages: response.data.pageCount, loading: !this.state.loading })
         // array = response.data
-        console.log(response.data)
 
     }
 
@@ -189,22 +178,23 @@ class MyPendingTasks extends Component {
     }
 
     dateChange = (name, view) => date => {
-        let month = date.getMonth()
+
 
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()
-                } ${month !== 10 && month !== 11 ? 0 : ""} ${date.getMonth() + 1} ${date.getDate()} `
+            let month = date.getMonth()
+            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
         }
+
+        // console.log(this.state.page, this.state.limit)
         this.setState({ [view]: date });
         this.setState(prevState => ({
             searchOption: {
                 ...prevState.searchOption,
                 [name]: dates
             }
-        }),
-            this.getPendingTasks(this.state.page, this.state.limit)
-        )
+        }))
+        // this.getPendingTasks(this.state.page, this.state.limit)
     };
 
     onFilteredChangeCustom = (value, accessor) => {
@@ -533,7 +523,7 @@ class MyPendingTasks extends Component {
                                                 this.goToEditRequest(rowInfo.original.taskId)
                                             }
                                             else {
-                                                this.goToDetails(rowInfo.original.taskId, `/ mypendingtask / details / ${rowInfo.original.applicationTypeId} `)
+                                                this.goToDetails(rowInfo.original.taskId, `/mypendingtask/details/${rowInfo.original.applicationTypeId}`)
                                                 // this.goToDetails(rowInfo.original.taskId, `/ mypendingtask / details / CNIPS`)
                                             }
 
