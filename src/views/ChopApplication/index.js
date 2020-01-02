@@ -253,11 +253,18 @@ class ChopApplication extends Component {
     })
   };
 
-  exportLogs() {
+  async exportLogs() {
     let from = this.state.exportDate.exportFrom
     let to = this.state.exportDate.exportTo
+    console.log(from, to)
     if (from !== "" && to !== "") {
-      console.log(`Exporting Logs from ${this.convertDate(from)} to ${this.convertDate(to)}`)
+      let url = `${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${localStorage.getItem('userId')}`
+      window.open(url, "_blank")
+      console.log(`Exporting Logs from ${from} to ${to}`)
+      // await Axios.get(`${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${localStorage.getItem('userId')}`)
+      //   .then(res => {
+      //     // console.log(res.data.fileContents)
+      //   })
       this.toggleModal()
       this.setState({ validDate: true })
       return true;
@@ -556,7 +563,8 @@ class ChopApplication extends Component {
               </div>
               : null
             }
-            <CSVLink
+            <Button color="primary" onClick={this.exportLogs} >Export Logs</Button>
+            {/* <CSVLink
               data={applications}
               filename={`CHOP${this.props.legalName}${this.getCurrentDate()}.csv`}
               className="btn btn-primary"
@@ -565,7 +573,7 @@ class ChopApplication extends Component {
                 return this.exportLogs()
               }}
             >
-              Export Logs </CSVLink>
+              Export Logs </CSVLink> */}
             {/* <Button color="primary" onClick={this.exportLogs}>Export Logs</Button>{' '} */}
             <Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
           </ModalFooter>

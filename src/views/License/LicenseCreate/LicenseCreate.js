@@ -571,29 +571,11 @@ class LicenseCreate extends Component {
                                 /> */}
                                 <small style={{ color: '#F86C6B' }} >{this.validator.message('Senior Manager', formData.seniorManager, 'required')}</small>
                             </FormGroup>
-
                         </Form>
-                        {/* <Col md="16">
-                            <FormGroup check>
-                                <FormGroup>
-                                    <CustomInput
-                                        className="form-check-input"
-                                        type="checkbox"
-                                        checked={formData.isConfirm === "Y"}
-                                        onChange={this.handleAgreeTerms}
-                                        id="confirm" value="option1">
-                                        <Label className="form-check-label" check >
-                                            By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
-                                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
-                      </Label>
-                                    </CustomInput>
-                                </FormGroup>
-                            </FormGroup>
-                        </Col> */}
                     </CardBody>
                     <CardFooter>
                         <div className="form-actions" >
-                            <Row noGutters className="float-left">
+                            <Row noGutters className="align-items-left">
                                 <Col className="mr-2" >
                                     {/* {formData.isConfirm === "Y" */}
                                     {/* ?  */}

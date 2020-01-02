@@ -57,7 +57,7 @@ class DefaultLayout extends Component {
     if (value === "LICENSE") {
       this.props.history.push(`/${value.toLowerCase()}/create`)
     }
-    else{
+    else {
       this.props.history.push('/create')
     }
     this.setState({
@@ -65,22 +65,22 @@ class DefaultLayout extends Component {
     },
       localStorage.setItem("application", value));
   }
-  
+
   changeEntity = workflow => event => {
     if (workflow === "LICENSE") {
       this.props.history.push(`/${workflow.toLowerCase()}/create`)
-      }
-      else{
+    }
+    else {
       this.props.history.push(`/create/${event.target.value}`)
-      }
+    }
 
     this.setState({
       legalEntity: event.target.value,
       application: workflow,
-      },
-        localStorage.setItem("application", workflow),
-        localStorage.setItem("legalEntity", event.target.value)
-        )
+    },
+      localStorage.setItem("application", workflow),
+      localStorage.setItem("legalEntity", event.target.value)
+    )
   }
 
   toggle = (name) => () => {
