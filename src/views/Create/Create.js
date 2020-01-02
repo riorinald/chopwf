@@ -541,7 +541,7 @@ class Create extends Component {
   async postData(formData, isSubmitted) {
     try {
       // await axios.post(`${config.url}/tasks`, formData)
-      await axios.post(`${config.url}/tasks`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+      await axios.post(`${config.url}/tasks`, formData)
         .then(res => {
           if (isSubmitted === 'N') {
             Swal.fire({
