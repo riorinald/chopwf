@@ -49,7 +49,7 @@ class LicenseApplicationDetail extends Component {
 
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/api/v1/licenses/${taskId}?userId=${localStorage.getItem("userId")}`)
+        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem("userId")}`)
             .then(res => {
                 console.log(res.data)
                 let currentStatusArr = res.data.allStages.filter(stage => stage.state === "CURRENT")
