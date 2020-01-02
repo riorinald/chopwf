@@ -21,10 +21,10 @@ export const label = {
             Filling Business</b> For any other contracts (e.g. purchase orders/release orders) and agreements, please select company chop.
         </p>
     },
-    CAR2GO: {
-        name: 'CAR2GO',
+    DMT: {
+        name: 'DMT',
         contractChop:<p>
-            <b>CAR2GO</b> China Contract Chop hasn’t been initiated to be used yet. Please select<b>Company Chop</b>
+            <b>DMT</b> China Contract Chop hasn’t been initiated to be used yet. Please select<b>Company Chop</b>
             for PO/RO/Contract/Agreement.
         </p>
     },
