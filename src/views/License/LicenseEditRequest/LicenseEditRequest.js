@@ -107,10 +107,10 @@ class LicenseEditRequest extends Component {
 
     convertDateView(date) {
         if (date === "" || date === "/") {
-            return ""
+            return new Date()
         }
         else {
-            let regEx = date.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
+            let regEx = date.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
             return new Date(regEx)
         }
     }

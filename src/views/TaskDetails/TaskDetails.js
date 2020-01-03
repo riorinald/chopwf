@@ -254,7 +254,7 @@ class TaskDetails extends Component {
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
                                         <Col xs={12} sm={12} md={4} lg={2}>
-                                            <img src={taskDetails.createdByPhotoUrl} className="img-avaa img-responsive center-block" alt="admin@bootstrapmaster.com" />
+                                            <img src={taskDetails.createdByPhotoUrl} className="img-avaa img-responsive center-block" alt="picture" />
                                         </Col>
                                         <Col md><h5> {taskDetails.employeeName} </h5>
                                             <Row>

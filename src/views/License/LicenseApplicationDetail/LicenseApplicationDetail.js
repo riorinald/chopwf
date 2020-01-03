@@ -277,7 +277,7 @@ class LicenseApplicationDetail extends Component {
 
 
     render() {
-        const { taskDetails, redirect, approvalHistories, loading, page, currentStatus, expressNumber, deliverWay, documents } = this.state
+        const { taskDetails, loading, page, currentStatus, expressNumber, deliverWay, documents } = this.state
         return (
             <div>
                 {!loading ?
