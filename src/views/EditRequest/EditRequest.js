@@ -22,7 +22,7 @@ import config from '../../config';
 import Axios from 'axios';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import InputMask from "react-input-mask";
 import deleteBin from '../../assets/img/deletebin.png'
 import { AppSwitch } from '@coreui/react';
@@ -993,11 +993,10 @@ class EditRequest extends Component {
     }
 
     dateChange = (name, view) => date => {
-        let month = date.getMonth()
-
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+          let tempDate = format(date,"yyyy-MM-dd").split('T')[0];//right
+          dates = tempDate.replace(/-/g, "")
         }
         this.setState({
             [view]: date

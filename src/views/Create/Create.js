@@ -11,7 +11,7 @@ import makeAnimated from 'react-select/animated';
 import SimpleReactValidator from 'simple-react-validator';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import config from '../../config';
 import { STU, LTU, LTI, CNIPS } from '../../config/validation';
 // import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
@@ -791,28 +791,30 @@ class Create extends Component {
 
   handleInputMask = () => {
     // let value = ("" + event.target.value).toUpperCase();
-    let first = /(?!.*[A-HJ-QT-Z])[IS]/;
-    let third = /(?!.*[A-NQRT-Z])[PSO]/;
+    let first = /(?!.*[A-HJ-QT-Z])[IS]/i;
+    let third = /(?!.*[A-NQRT-Z])[PSO]/i;
     let digit = /[0-9]/;
-    let center = /[A-Za-z]/;
-    let mask = []
-    switch (this.props.match.params.company) {
-      case 'MBIA':
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-      case 'MBLC':
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-      case 'MBAFC':
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-      case 'CAR2GO':
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-      default:
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-    }
+    let center = /[IALR]/i;
+    let mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit]
+
+    // switch (this.props.match.params.company) {
+    //   case 'MBIA':
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    //   case 'MBLC':
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    //   case 'MBAFC':
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    //   case 'CAR2GO':
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    //   default:
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    // }
+
     this.setState({
       inputMask: mask, viewContract: true
     });
@@ -827,7 +829,7 @@ class Create extends Component {
     var isDigit = false
     let valid = false
     isFirst = first.test(this.state.contractNumber[0])
-    if (this.props.match.params.company === "MBIA") {
+    // if (this.props.match.params.company === "MBIA") {
       isThird = third.test(this.state.contractNumber[5])
       for (let i = 7; i < 11; i++) {
         isDigit = digit.test(this.state.contractNumber[i])
@@ -836,14 +838,14 @@ class Create extends Component {
         }
       }
       if (isDigit) {
-        for (let i = 12; i < 15; i++) {
+        for (let i = 12; i < 16; i++) {
           isDigit = digit.test(this.state.contractNumber[i])
           if (!isDigit) {
             break;
           }
         }
       }
-    }
+    // }
 
     else {
       isThird = third.test(this.state.contractNumber[4])
@@ -867,11 +869,11 @@ class Create extends Component {
       if (this.state.conNum.length !== 0) {
         for (let i = 0; i < this.state.conNum.length; i++) {
           let value = this.state.contractNumber
-          if (this.props.match.params.company === "MBIA") {
-            if (!digit.test(value[15])) {
-              value = value.substr(0, 15)
+          // if (this.props.match.params.company === "MBIA") {
+            if (!digit.test(value[16])) {
+              value = value.substr(0, 16)
             }
-          }
+          // }
           else {
             if (!digit.test(value[14])) {
               value = value.substr(0, 14)
@@ -904,16 +906,37 @@ class Create extends Component {
     return valid
   }
 
+  handleContractChange = (event) => {
+    let first = /(?!.*[A-HJ-QT-Z])[IS]/i;
+    let third = /(?!.*[A-NQRT-Z])[PSO]/i;
+    let digit = /[0-9]/;
+    let center = /[IALR]/i;
+    let centers = /[A]/i;
+    let mask = [first, "-", center, centers, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit]
+
+    let value = ("" + event.target.value).toUpperCase();
+
+    this.setState({
+      contractNumber: value
+    })
+
+    if (/^..[Ii]/.test(event.target.value)){
+      this.setState({
+        inputMask: mask,
+        })
+      }
+  }
+
   addContract(event) {
     let valid = this.validateConNum()
     let digit = /[0-9]/;
     let value = this.state.contractNumber
     if (valid) {
-      if (this.props.match.params.company === "MBIA") {
-        if (!digit.test(this.state.contractNumber[15])) {
-          value = this.state.contractNumber.substr(0, 15)
+      // if (this.props.match.params.company === "MBIA") {
+        if (!digit.test(this.state.contractNumber[16])) {
+          value = this.state.contractNumber.substr(0, 16)
         }
-      }
+      // }
       else {
         if (!digit.test(this.state.contractNumber[14])) {
           value = this.state.contractNumber.substr(0, 14)
@@ -1219,11 +1242,10 @@ class Create extends Component {
   }
 
   dateChange = (name, view) => date => {
-    let month = date.getMonth()
-
     let dates = ""
     if (date) {
-      dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+      let tempDate = format(date,"yyyy-MM-dd").split('T')[0];//right
+      dates = tempDate.replace(/-/g, "")
     }
     console.log(dates)
     this.setState({
@@ -1387,7 +1409,7 @@ class Create extends Component {
                       </DropdownMenu>
                     </InputGroupButtonDropdown>
                     <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
-                      onChange={this.handleChange('contractNumber')} value={this.state.contractNumber}
+                      onChange={this.handleContractChange} value={this.state.contractNumber}
                       onClick={this.handleInputMask}></InputMask>
                     <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
                   </InputGroup>
