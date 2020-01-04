@@ -328,7 +328,7 @@ class TaskDetails extends Component {
                                                             <Label htmlFor="text-input">Responsible Person</Label>
                                                         </Col>
                                                         <Col xs="12" md="8">
-                                                            <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonNameName} name="text-input" placeholder="/" />
+                                                            <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonName} name="text-input" placeholder="/" />
                                                         </Col>
                                                     </FormGroup>
                                                 </div>
@@ -368,8 +368,7 @@ class TaskDetails extends Component {
                                                 </Col>
                                             </FormGroup>
                                             {taskDetails.isUseInOffice === "N"
-                                                ? <>
-                                                    <FormGroup row >
+                                                ?   <FormGroup row >
                                                         <Col md="4" className="d-flex align-items-center" >
                                                             <Label htmlFor="text-input">Return Date</Label>
                                                         </Col>
@@ -377,16 +376,6 @@ class TaskDetails extends Component {
                                                             <Input disabled type="text" id="text-input" value={taskDetails.returnDate} name="text-input" placeholder="/" />
                                                         </Col>
                                                     </FormGroup>
-                                                    <FormGroup row >
-                                                        <Col md="4" className="d-flex align-items-center" >
-                                                            <Label htmlFor="text-input">Responsible Person</Label>
-                                                        </Col>
-                                                        <Col xs="12" md="8">
-                                                            <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonNameName} name="text-input" placeholder="/" />
-                                                        </Col>
-                                                    </FormGroup>
-                                                </>
-
                                                 : ""}
                                         </>
                                         : null}
@@ -555,6 +544,16 @@ class TaskDetails extends Component {
                                         </FormGroup>
                                         : null
                                     }
+                                    {taskDetails.isUseInOffice === "N"
+                                        ? <FormGroup row >
+                                                <Col md="4" className="d-flex align-items-center" >
+                                                    <Label htmlFor="text-input">Responsible Person</Label>
+                                                </Col>
+                                                <Col xs="12" md="8">
+                                                    <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonName} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </FormGroup>
+                                        : null }
                                     {appType === "CNIPS"
                                         ? <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
