@@ -791,11 +791,11 @@ class Create extends Component {
 
   handleInputMask = () => {
     // let value = ("" + event.target.value).toUpperCase();
-    let first = /(?!.*[A-HJ-QT-Z])[IS]/i;
-    let third = /(?!.*[A-NQRT-Z])[PSO]/i;
+    let first = /(?!.*[A-HJ-QT-Z])[IS]/;
+    let third = /(?!.*[A-NQRT-Z])[PSO]/;
     let digit = /[0-9]/;
-    let center = /[IALR]/i;
-    let mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit]
+    let center = /[IALR]/;
+    let mask = [first, "-", center,center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit]
 
     // switch (this.props.match.params.company) {
     //   case 'MBIA':
@@ -907,12 +907,9 @@ class Create extends Component {
   }
 
   handleContractChange = (event) => {
-    let first = /(?!.*[A-HJ-QT-Z])[IS]/i;
-    let third = /(?!.*[A-NQRT-Z])[PSO]/i;
-    let digit = /[0-9]/;
-    let center = /[IALR]/i;
-    let centers = /[A]/i;
-    let mask = [first, "-", center, centers, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit]
+
+    let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
+    let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
 
     let value = ("" + event.target.value).toUpperCase();
 
@@ -920,11 +917,16 @@ class Create extends Component {
       contractNumber: value
     })
 
+    if (/^..[AaLlRr]/.test(event.target.value)){
+      this.setState({
+        inputMask: masks,
+        })
+      }
     if (/^..[Ii]/.test(event.target.value)){
       this.setState({
         inputMask: mask,
         })
-      }
+    }
   }
 
   addContract(event) {
@@ -943,9 +945,9 @@ class Create extends Component {
         }
 
       }
-
+      // console.log(value.replace(/_/g, ''))
       this.setState(state => ({
-        conNum: [...state.conNum, value]
+        conNum: [...state.conNum, value.replace(/_/g, '')]
       })
       )
       this.setState({ contractNumber: "" }, this.toggle('viewContract'))
@@ -1409,7 +1411,7 @@ class Create extends Component {
                       </DropdownMenu>
                     </InputGroupButtonDropdown>
                     <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
-                      onChange={this.handleContractChange} value={this.state.contractNumber}
+                      onChange={this.handleChange('contractNumber')} value={this.state.contractNumber}
                       onClick={this.handleInputMask}></InputMask>
                     <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
                   </InputGroup>
