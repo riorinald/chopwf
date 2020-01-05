@@ -158,7 +158,7 @@ class Myapps extends Component {
 
   async getData(state, url) {
     try {
-      const response = await Axios.get(url);
+      const response = await Axios.get(url,{headers: { Pragma: 'no-cache'}});
       this.setState({
         [state]: response.data
       })

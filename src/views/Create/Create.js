@@ -516,7 +516,7 @@ class Create extends Component {
   Axios
   async getData(state, url) {
     try {
-      const response = await axios.get(url);
+      const response = await axios.get(url, {headers: { Pragma: 'no-cache'}});
       this.setState({
         [state]: response.data
       })
@@ -530,7 +530,7 @@ class Create extends Component {
 
     let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
     try {
-      await axios.get(url).then(res => {
+      await axios.get(url, {headers: { Pragma: 'no-cache'}}).then(res => {
         this.setState({ documents: res.data })
       })
     } catch (error) {
@@ -612,14 +612,15 @@ class Create extends Component {
 
   async getDeptHead(companyId) {
 
-    await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
+    await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`,{headers: { Pragma: 'no-cache'}})
       .then(res => {
         this.setState({ deptHead: res.data })
       })
   }
 
   async getDocCheckBy(teamId) {
-    await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`)
+    await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`,
+    {headers: { Pragma: 'no-cache'}})
       .then(res => {
         this.setState({ docCheckBy: res.data })
       })
@@ -627,13 +628,13 @@ class Create extends Component {
 
   async getTeams(deptId) {
     let url = `${config.url}/teams?companyid=` + this.props.legalName + "&departmentId=" + deptId
-    await axios.get(url).then(res => {
+    await axios.get(url, {headers: { Pragma: 'no-cache'}}).then(res => {
       this.setState({ teams: res.data })
     })
   }
 
   async getChopTypes(companyId, appTypeId) {
-    await axios.get(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`)
+    await axios.get(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`, {headers: { Pragma: 'no-cache'}})
       .then(res => {
         this.setState({ chopTypes: res.data })
       })

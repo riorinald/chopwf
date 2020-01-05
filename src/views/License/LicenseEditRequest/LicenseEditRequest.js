@@ -81,17 +81,18 @@ class LicenseEditRequest extends Component {
 
     }
     async getLicenseNames() {
-        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`)
+        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`,{headers: { Pragma: 'no-cache'}})
         this.setState({ licenseNames: res.data })
     }
 
     async getData(name) {
-        let res = await axios.get(`${config.url}/${name}`)
+        let res = await axios.get(`${config.url}/${name}`,{headers: { Pragma: 'no-cache'}})
         this.setState({ [name]: res.data })
     }
 
     async getSeniorManagers() {
-        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
+        {headers: { Pragma: 'no-cache'}})
             .then(res => {
                 let arr1 = []
                 res.data.map(mgr => {
@@ -117,7 +118,8 @@ class LicenseEditRequest extends Component {
 
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem('userId')}`)
+        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem('userId')}`,
+        {headers: { Pragma: 'no-cache'}})
             .then(res => {
                 let temp = res.data
                 if (temp.documentTypeId === "ORIGINAL") {

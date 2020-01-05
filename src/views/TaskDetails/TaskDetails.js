@@ -52,7 +52,7 @@ class TaskDetails extends Component {
     async getTaskDetails(id) {
         this.setState({ loading: true })
         let userId = localStorage.getItem('userId')
-        await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`).then(res => {
+        await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`,{headers: { Pragma: 'no-cache'}}).then(res => {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
             this.setState({ taskDetails: res.data, loading: false })
         })
@@ -62,7 +62,7 @@ class TaskDetails extends Component {
 
     async getUserDetails() {
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/users/${this.state.taskDetails.histories[0].approvedBy}`).then(res => {
+        await Axios.get(`${config.url}/users/${this.state.taskDetails.histories[0].approvedBy}`,{headers: { Pragma: 'no-cache'}}).then(res => {
             this.setState({ userDetails: res.data, loading: false })
             console.log(res.data)
         })

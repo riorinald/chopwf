@@ -183,7 +183,8 @@ class EditRequest extends Component {
     }
 
     async getDocCheckBy(deptId, teamId) {
-        const res = await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`)
+        const res = await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
+        {headers: { Pragma: 'no-cache'}})
         for (let i = 0; i < res.data.length; i++) {
             const obj = { value: res.data[i].userId, label: res.data[i].displayName }
             this.setState(state => {
@@ -197,7 +198,8 @@ class EditRequest extends Component {
 
     async getDeptHeads() {
         this.setState({ deptHeads: [] })
-        await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`)
+        await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
+        {headers: { Pragma: 'no-cache'}})
             .then(res => {
                 for (let i = 0; i < res.data.length; i++) {
                     const obj = { value: res.data[i].userId, label: res.data[i].displayName }
@@ -213,14 +215,14 @@ class EditRequest extends Component {
 
     async getTeams(deptId) {
         let url = `${config.url}/teams?companyid=` + this.props.legalName + "&departmentId=" + deptId
-        await Axios.get(url).then(res => {
+        await Axios.get(url, {headers: { Pragma: 'no-cache'}}).then(res => {
             this.setState({ teams: res.data })
         })
     }
 
     async getData(state, url) {
         try {
-            const response = await Axios.get(url);
+            const response = await Axios.get(url, {headers: { Pragma: 'no-cache'}});
             this.setState({
                 [state]: response.data
             })
@@ -303,7 +305,7 @@ class EditRequest extends Component {
 
     async getTaskDetails(id) {
         this.setState({ loading: true })
-        const response = await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`)
+        const response = await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`,{headers: { Pragma: 'no-cache'}})
         let temporary = response.data
         if (temporary.departmentId !== "") {
             this.getTeams(temporary.departmentId)
@@ -412,7 +414,7 @@ class EditRequest extends Component {
         let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
         // console.log(url)
         try {
-            await Axios.get(url).then(res => {
+            await Axios.get(url, {headers: { Pragma: 'no-cache'}}).then(res => {
                 this.setState({ documents: res.data })
             })
         } catch (error) {

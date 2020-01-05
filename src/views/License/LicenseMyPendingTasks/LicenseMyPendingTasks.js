@@ -76,17 +76,18 @@ class LicenseMyPendingTasks extends Component {
 
     async getLicenseNames() {
 
-        const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`)
+        const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`,{headers: { Pragma: 'no-cache'}})
         this.setState({ licenseNames: res.data })
     }
 
     async getData(name) {
         let res = null
         if (name === "departments") {
-            res = await Axios.get(`${config.url}/${name}`)
+            res = await Axios.get(`${config.url}/${name}`,{headers: { Pragma: 'no-cache'}})
         }
         else if (name === "seniorManagers") {
-            res = await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+            res = await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
+            {headers: { Pragma: 'no-cache'}})
         }
 
         this.setState({ [name]: res.data })
