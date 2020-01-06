@@ -32,7 +32,9 @@ class DefaultLayout extends Component {
   loading = () => <div className="animated fadeIn pt-1 text-center"><Spinner /></div>
 
   signOut(e) {
-    e.preventDefault()
+    if(e){
+      e.preventDefault()
+    }
     this.props.history.push('/login')
   }
 
@@ -97,17 +99,20 @@ class DefaultLayout extends Component {
           return ChopNav.requestor;
         if (this.state.cAdmin === 'Y')
           return ChopNav.admin;
-        else return console.log('error! Roles not match, no sideBarNav');
+        else return this.signOut();
+          console.log('error! Roles not match, no sideBarNav');
 
       case 'LICENSE':
         if (this.state.lAdmin === 'N')
           return LicenseNav.requestor;
         if (this.state.lAdmin === 'Y')
           return LicenseNav.admin;
-        else return console.log('error! Roles not match, no sideBarNav');
+        else return this.signOut();
+          console.log('error! Roles not match, no sideBarNav');
 
-      default:
-        return console.log('error! workflow application not match, no sideBarNav');
+        default:
+          return this.signOut(); 
+          console.log('error! workflow application not match, no sideBarNav');
     }
   }
 
