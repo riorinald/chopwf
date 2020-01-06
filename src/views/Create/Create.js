@@ -7,6 +7,7 @@ import theme from './theme.css'
 import deleteBin from '../../assets/img/deletebin.png'
 import InputMask from "react-input-mask";
 import AsyncSelect from 'react-select/async';
+import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 import SimpleReactValidator from 'simple-react-validator';
 import DatePicker from 'react-datepicker';
@@ -172,7 +173,8 @@ class Create extends Component {
       ],
       validateForm: [],
       noteInfo: [],
-      inputMask: [],
+      // inputMask: [/(?!.*[A-HJ-QT-Z])[IS]/,"-",/[IALR]/,/[A]/,"-",/(?!.*[A-NQRT-Z])[PSO]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/],
+      inputMask:"a-a-a-9999-9999",
       selectInfo: ''
 
     };
@@ -796,8 +798,8 @@ class Create extends Component {
     let third = /(?!.*[A-NQRT-Z])[PSO]/;
     let digit = /[0-9]/;
     let center = /[IALR]/;
-    let mask = [first, "-", center,center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit]
-
+    let centers = /[A]/;
+    let mask = [first, "-", center,centers, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit]
     // switch (this.props.match.params.company) {
     //   case 'MBIA':
     //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
@@ -857,7 +859,7 @@ class Create extends Component {
         }
       }
       if (isDigit) {
-        for (let i = 11; i < 14; i++) {
+        for (let i = 11; i < 15; i++) {
           isDigit = digit.test(this.state.contractNumber[i])
           if (!isDigit) {
             break;
@@ -876,8 +878,8 @@ class Create extends Component {
             }
           // }
           else {
-            if (!digit.test(value[14])) {
-              value = value.substr(0, 14)
+            if (!digit.test(value[15])) {
+              value = value.substr(0, 15)
             }
           }
           if (this.state.conNum[i] === value) {
@@ -907,27 +909,28 @@ class Create extends Component {
     return valid
   }
 
+
   handleContractChange = (event) => {
 
-    let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
-    let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
+    // let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
+    // let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
 
-    let value = ("" + event.target.value).toUpperCase();
+    var value = event.target.value.toUpperCase();
 
+      // if (/^..[AaLlRr]/.test(value)){
+      //   this.setState({
+      //     inputMask: "a-a-a-9999-9999",
+      //     })
+      //   }
+      let mask = "a-a-a-9999-9999"
+      if (/^..[Ii]/.test(value)){
+        mask = "a-aa-a-9999-9999";
+      }
     this.setState({
+      viewContract: true,
+      inputMask: mask,
       contractNumber: value
     })
-
-    if (/^..[AaLlRr]/.test(event.target.value)){
-      this.setState({
-        inputMask: masks,
-        })
-      }
-    if (/^..[Ii]/.test(event.target.value)){
-      this.setState({
-        inputMask: mask,
-        })
-    }
   }
 
   addContract(event) {
@@ -941,8 +944,8 @@ class Create extends Component {
         }
       // }
       else {
-        if (!digit.test(this.state.contractNumber[14])) {
-          value = this.state.contractNumber.substr(0, 14)
+        if (!digit.test(this.state.contractNumber[15])) {
+          value = this.state.contractNumber.substr(0, 15)
         }
 
       }
@@ -962,6 +965,14 @@ class Create extends Component {
     }
   }
 
+  deleteContract(i){
+    this.setState(state => {
+        const conNum = state.conNum.filter((item, index) => i !== index)
+        return {
+          conNum
+        }
+    })
+  }
 
   deleteDocument(table, i) {
     this.setState(state => {
@@ -975,6 +986,12 @@ class Create extends Component {
         const documentTableLTI = state.documentTableLTI.filter((item, index) => i !== index)
         return {
           documentTableLTI
+        }
+      }
+      else if (table === "documentTableCNIPS") {
+        const documentTableCNIPS = state.documentTableCNIPS.filter((item, index) => i !== index)
+        return {
+          documentTableCNIPS
         }
       }
     })
@@ -1374,8 +1391,8 @@ class Create extends Component {
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
               <td className="mediumTd">{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</td>
-              <td><div>{document.engName}</div></td>
-              <td><div>{document.cnName}</div></td>
+              <td className="descTd">{document.engName}</td>
+              <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
                 <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
               </td>
@@ -1403,7 +1420,7 @@ class Create extends Component {
                           ? this.state.conNum.map((
                             (conNum, index) => (
                               <span key={index}>
-                                <DropdownItem >{conNum}</DropdownItem>
+                                <DropdownItem style={{cursor:'default'}}>{conNum} <span style={{cursor:'pointer'}} onClick={()=>this.deleteContract(index)} className="float-right"><i className="mx-0 fa fa-trash" /></span></DropdownItem>
                               </span>
                             )))
                           : <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
@@ -1412,8 +1429,9 @@ class Create extends Component {
                       </DropdownMenu>
                     </InputGroupButtonDropdown>
                     <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
-                      onChange={this.handleChange('contractNumber')} value={this.state.contractNumber}
-                      onClick={this.handleInputMask}></InputMask>
+                      onChange={this.handleContractChange} value={this.state.contractNumber}
+                      // onClick={this.handleInputMask}
+                      ></InputMask>
                     <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
                   </InputGroup>
                 </FormGroup></Col>
@@ -1440,7 +1458,7 @@ class Create extends Component {
             <Col xl={1}>
               <FormGroup>
                 {this.state.isCNIPS
-                  ? <Button id="addDocs" block onMouseEnter={this.toggle('viewContract')} onMouseLeave={this.toggle('viewContract')} onClick={this.addDocumentCNIPS}>Add</Button>
+                  ? <Button id="addDocs" block onClick={this.addDocumentCNIPS}>Add</Button>
                   : <Button id="addDocs" block onClick={this.addDocumentLTI}>Add</Button>
                 }
               </FormGroup>
@@ -1597,16 +1615,23 @@ class Create extends Component {
                   </FormGroup>
                   <FormGroup>
                     <Label>Dept</Label>
-                    <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
+                    {/* <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
                       <option disabled value="0">Please Select . . .</option>
-
                       {this.state.department.map((option, index) => (
-                        <option value={option.deptId} key={option.deptId}>
+                        <option value={option.deptId} label={option.dept} key={option.deptId}>
                           {option.deptName}
-
                         </option>
                       ))}
-                    </Input>
+                    </Input> */}
+                    <Select id="deptSelected" 
+                          onChange={this.handleSelectOption("deptSelected")}
+                          options={this.state.department.map((option, index) => { 
+                            return {value: option.deptId, label:option.deptName}}
+                          )} 
+                          placeholder = "Please Select..."
+                          isSearchable={false} 
+                          menuPortalTarget={document.body} 
+                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Department', this.state.deptSelected, 'required')}</small>
                   </FormGroup>
                   <FormGroup>
@@ -1873,8 +1898,12 @@ class Create extends Component {
                       ? <FormGroup>
                         <Label>Document Check By <i className="fa fa-user" /></Label>
                         <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-                        <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
-                          loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
+                        <Select id="docCheckBySelected" 
+                          onChange={this.handleSelectOption("docCheckBySelected")}
+                          options={docCheckByUsers}
+                          isSearchable={false} 
+                          menuPortalTarget={document.body} 
+                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
                         <InputGroup>
                           {this.state.isLTU
                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Check By ', this.state.docCheckBySelected, 'required')}</small>

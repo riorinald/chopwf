@@ -122,7 +122,15 @@ table {
 }
 
 .mediumTd{
-    width: 128px;
+    min-width: 128px;
+    max-width: 128px;
     text-align: center; 
     vertical-align: middle;
+}
+
+.descTd{
+    min-width: 50px;
+    max-width: 350px;
+    vertical-align: middle;
+    word-wrap: break-word;
 }
