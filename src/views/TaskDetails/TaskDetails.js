@@ -55,6 +55,7 @@ class TaskDetails extends Component {
         await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`).then(res => {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
             this.setState({ taskDetails: res.data, loading: false })
+            console.log(res.data)
         })
         // this.getUserDetails()
 
@@ -163,7 +164,6 @@ class TaskDetails extends Component {
     render() {
 
         const { taskDetails, userDetails, loading, showModal, page, appType } = this.state
-        console.log(taskDetails)
         return (
             <div className="animated fadeIn">
                 {!loading ?
@@ -232,24 +232,6 @@ class TaskDetails extends Component {
                                 </ModalBody>
                             </Modal>
 
-                            {/* <Row className="mb-3">
-                                <Col>
-                                    <div >
-                                        <Progress multi>
-                                            {taskDetails.allStages.map((stage, index) =>
-
-                                                <Progress
-                                                    key={index}
-                                                    bar
-                                                    animated={stage.state === "CURRENT" ? true : false}
-                                                    color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : ""}
-                                                    value="50"> {stage.statusName}
-                                                </Progress>
-                                            )}
-                                        </Progress>
-                                    </div>
-                                </Col>
-                            </Row> */}
                             <Row className="mb-4">
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
@@ -320,7 +302,7 @@ class TaskDetails extends Component {
                                                             <Label htmlFor="text-input">Return Date</Label>
                                                         </Col>
                                                         <Col xs="12" md="8">
-                                                            <Input disabled type="text" id="text-input" value={taskDetails.returnDate} name="text-input" placeholder="/" />
+                                                            <Input disabled type="text" id="text-input" value={this.convertDate(taskDetails.returnDate)} name="text-input" placeholder="/" />
                                                         </Col>
                                                     </FormGroup>
                                                     <FormGroup row >
@@ -328,7 +310,7 @@ class TaskDetails extends Component {
                                                             <Label htmlFor="text-input">Responsible Person</Label>
                                                         </Col>
                                                         <Col xs="12" md="8">
-                                                            <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonNameName} name="text-input" placeholder="/" />
+                                                            <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonName} name="text-input" placeholder="/" />
                                                         </Col>
                                                     </FormGroup>
                                                 </div>
@@ -374,7 +356,7 @@ class TaskDetails extends Component {
                                                             <Label htmlFor="text-input">Return Date</Label>
                                                         </Col>
                                                         <Col xs="12" md="8">
-                                                            <Input disabled type="text" id="text-input" value={taskDetails.returnDate} name="text-input" placeholder="/" />
+                                                            <Input disabled type="text" id="text-input" value={this.convertDate(taskDetails.returnDate)} name="text-input" placeholder="/" />
                                                         </Col>
                                                     </FormGroup>
                                                     <FormGroup row >
@@ -382,7 +364,7 @@ class TaskDetails extends Component {
                                                             <Label htmlFor="text-input">Responsible Person</Label>
                                                         </Col>
                                                         <Col xs="12" md="8">
-                                                            <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonNameName} name="text-input" placeholder="/" />
+                                                            <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonName} name="text-input" placeholder="/" />
                                                         </Col>
                                                     </FormGroup>
                                                 </>
@@ -403,7 +385,7 @@ class TaskDetails extends Component {
                                         : null}
 
 
-                                    {appType === "LTU" || appType === "LTI"
+                                    {appType === "LTI"
                                         ? <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
                                                 <Label htmlFor="text-input">Effective Period</Label>

@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import theme from './theme.css'
 import deleteBin from '../../assets/img/deletebin.png'
 import InputMask from "react-input-mask";
+import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
 import makeAnimated from 'react-select/animated';
 import SimpleReactValidator from 'simple-react-validator';
@@ -1181,22 +1182,23 @@ class Create extends Component {
   }
 
   handleSelectOption = sname => newValue => {
-    if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
-      if (newValue) {
-        this.setState({ [sname]: newValue })
-        document.getElementById(sname).className = "css-2b097c-container"
+    if (newValue)
+      if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
+        if (newValue) {
+          this.setState({ [sname]: newValue })
+          document.getElementById(sname).className = "css-2b097c-container"
+        }
+        else {
+          this.setState({ [sname]: [] })
+        }
+
       }
       else {
-        this.setState({ [sname]: [] })
+        if (newValue.value) {
+          document.getElementById(sname).className = "css-2b097c-container"
+        }
+        this.setState({ [sname]: newValue.value })
       }
-
-    }
-    else {
-      if (newValue.value) {
-        document.getElementById(sname).className = "css-2b097c-container"
-      }
-      this.setState({ [sname]: newValue.value })
-    }
 
   }
 
@@ -1476,7 +1478,7 @@ class Create extends Component {
                   Header: 'Expiry Date',
                   accessor: 'expiryDate',
                   Cell: row => (
-                    <div> {this.convertExpDate(row.original.expiryDate)} </div>
+                    <div>  <a href={row.original.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(row.original.expiryDate)}</a>  </div>
                   ),
                   // style: { textAlign: "center" },
                 },
@@ -1484,7 +1486,7 @@ class Create extends Component {
                   Header: 'DH Approved',
                   accessor: 'departmentHeads',
                   Cell: row => (
-                    <div> {this.changeDeptHeads(row.original.departmentHeads)} </div>
+                    <div>  <a href={row.original.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(row.original.departmentHeads)}</a> </div>
                   ),
                   // style: { textAlign: "center" },
                 },
@@ -1848,8 +1850,16 @@ class Create extends Component {
                       ? <FormGroup>
                         <Label>Document Check By <i className="fa fa-user" /></Label>
                         <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-                        <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
-                          loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
+                        <Select
+                          id="docCheckBySelected"
+                          options={docCheckByUsers}
+                          isClearable
+                          menuPortalTarget={document.body}
+                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                          onChange={this.handleSelectOption("docCheckBySelected")}
+                        />
+                        {/* <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
+                          loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} /> */}
                         <InputGroup>
                           {this.state.isLTU
                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Check By ', this.state.docCheckBySelected, 'required')}</small>
