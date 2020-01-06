@@ -62,7 +62,7 @@ class Myapps extends Component {
         "Pending for Department Head Approval",
         "Bring the Original Documents for Chop",
         "Pending for Chop Owner Approval",
-        "Send Back to Requestor",
+        "SendBack",
         "Rejected",
         "Pending for Chop Keeper Acknowledge Lend Out",
         "Pending Chop Keeper Acknowledge Return",
