@@ -16,8 +16,7 @@ import {
   // AppBreadcrumb2 as AppBreadcrumb,
 } from '@coreui/react';
 // sidebar nav config
-import ChopKeeperNav from '../../_nav';
-import RequestorNav from '../../_Rnav';
+import ChopNav from '../../_ChopNav';
 import LicenseNav from '../../_LicenseNav';
 // routes config
 import routes from '../../routes';
@@ -42,6 +41,8 @@ class DefaultLayout extends Component {
     this.state = {
       legalEntity: localStorage.getItem('legalEntity'),
       roleId: localStorage.getItem("roleId"),
+      cAdmin: localStorage.getItem("isChopKeeper"),
+      lAdmin: localStorage.getItem('isLicenseAdmin'),
       application: localStorage.getItem('application'),
     }
     this.handleLegalEntity = this.handleLegalEntity.bind(this)
@@ -92,14 +93,18 @@ class DefaultLayout extends Component {
   handleSideBarNav(application) {
     switch (application) {
       case 'CHOP':
-        if (this.state.roleId === 'REQUESTOR')
-          return RequestorNav;
-        if (this.state.roleId === 'CHOPKEEPER' || 'CHOPOWNER')
-          return ChopKeeperNav;
+        if (this.state.cAdmin === 'N')
+          return ChopNav.requestor;
+        if (this.state.cAdmin === 'Y')
+          return ChopNav.admin;
         else return console.log('error! Roles not match, no sideBarNav');
 
       case 'LICENSE':
-        return LicenseNav;
+        if (this.state.lAdmin === 'N')
+          return LicenseNav.requestor;
+        if (this.state.lAdmin === 'Y')
+          return LicenseNav.admin;
+        else return console.log('error! Roles not match, no sideBarNav');
 
       default:
         return console.log('error! workflow application not match, no sideBarNav');

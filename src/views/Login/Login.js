@@ -95,6 +95,10 @@ class Login extends Component {
                     localStorage.setItem('userId', res.data.userId)
                     localStorage.setItem('roleId', res.data.roleId)
                     localStorage.setItem('token', res.data.token)
+                    localStorage.setItem('isLicenseAdmin', res.data.isLicenseAdmin)
+                    localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
+
+
                     if (res.data.status === "success") {
                         this.setState({ info: info})
                         setTimeout(this.redirect, 1000);

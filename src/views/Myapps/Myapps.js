@@ -92,7 +92,8 @@ class Myapps extends Component {
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: true })
     // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
-    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`)
+    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
+    {headers: { Pragma: 'no-cache'}})
       .then(res => {
         this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false })
         console.log(res.data)
@@ -157,7 +158,7 @@ class Myapps extends Component {
 
   async getData(state, url) {
     try {
-      const response = await Axios.get(url);
+      const response = await Axios.get(url,{headers: { Pragma: 'no-cache'}});
       this.setState({
         [state]: response.data
       })

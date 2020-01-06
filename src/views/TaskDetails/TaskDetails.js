@@ -52,7 +52,7 @@ class TaskDetails extends Component {
     async getTaskDetails(id) {
         this.setState({ loading: true })
         let userId = localStorage.getItem('userId')
-        await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`).then(res => {
+        await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`,{headers: { Pragma: 'no-cache'}}).then(res => {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
             this.setState({ taskDetails: res.data, loading: false })
             console.log(res.data)
@@ -63,7 +63,7 @@ class TaskDetails extends Component {
 
     async getUserDetails() {
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/users/${this.state.taskDetails.histories[0].approvedBy}`).then(res => {
+        await Axios.get(`${config.url}/users/${this.state.taskDetails.histories[0].approvedBy}`,{headers: { Pragma: 'no-cache'}}).then(res => {
             this.setState({ userDetails: res.data, loading: false })
             console.log(res.data)
         })
@@ -350,8 +350,7 @@ class TaskDetails extends Component {
                                                 </Col>
                                             </FormGroup>
                                             {taskDetails.isUseInOffice === "N"
-                                                ? <>
-                                                    <FormGroup row >
+                                                ?   <FormGroup row >
                                                         <Col md="4" className="d-flex align-items-center" >
                                                             <Label htmlFor="text-input">Return Date</Label>
                                                         </Col>
@@ -359,16 +358,6 @@ class TaskDetails extends Component {
                                                             <Input disabled type="text" id="text-input" value={this.convertDate(taskDetails.returnDate)} name="text-input" placeholder="/" />
                                                         </Col>
                                                     </FormGroup>
-                                                    <FormGroup row >
-                                                        <Col md="4" className="d-flex align-items-center" >
-                                                            <Label htmlFor="text-input">Responsible Person</Label>
-                                                        </Col>
-                                                        <Col xs="12" md="8">
-                                                            <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonName} name="text-input" placeholder="/" />
-                                                        </Col>
-                                                    </FormGroup>
-                                                </>
-
                                                 : ""}
                                         </>
                                         : null}
@@ -537,6 +526,16 @@ class TaskDetails extends Component {
                                         </FormGroup>
                                         : null
                                     }
+                                    {taskDetails.isUseInOffice === "N"
+                                        ? <FormGroup row >
+                                                <Col md="4" className="d-flex align-items-center" >
+                                                    <Label htmlFor="text-input">Responsible Person</Label>
+                                                </Col>
+                                                <Col xs="12" md="8">
+                                                    <Input disabled type="text" id="text-input" value={taskDetails.responsiblePersonName} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </FormGroup>
+                                        : null }
                                     {appType === "CNIPS"
                                         ? <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >

@@ -12,7 +12,7 @@ import makeAnimated from 'react-select/animated';
 import SimpleReactValidator from 'simple-react-validator';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import config from '../../config';
 import { STU, LTU, LTI, CNIPS } from '../../config/validation';
 // import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
@@ -517,7 +517,7 @@ class Create extends Component {
   Axios
   async getData(state, url) {
     try {
-      const response = await axios.get(url);
+      const response = await axios.get(url, {headers: { Pragma: 'no-cache'}});
       this.setState({
         [state]: response.data
       })
@@ -531,7 +531,7 @@ class Create extends Component {
 
     let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
     try {
-      await axios.get(url).then(res => {
+      await axios.get(url, {headers: { Pragma: 'no-cache'}}).then(res => {
         this.setState({ documents: res.data })
       })
     } catch (error) {
@@ -613,14 +613,15 @@ class Create extends Component {
 
   async getDeptHead(companyId) {
 
-    await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
+    await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`,{headers: { Pragma: 'no-cache'}})
       .then(res => {
         this.setState({ deptHead: res.data })
       })
   }
 
   async getDocCheckBy(teamId) {
-    await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`)
+    await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`,
+    {headers: { Pragma: 'no-cache'}})
       .then(res => {
         this.setState({ docCheckBy: res.data })
       })
@@ -628,13 +629,13 @@ class Create extends Component {
 
   async getTeams(deptId) {
     let url = `${config.url}/teams?companyid=` + this.props.legalName + "&departmentId=" + deptId
-    await axios.get(url).then(res => {
+    await axios.get(url, {headers: { Pragma: 'no-cache'}}).then(res => {
       this.setState({ teams: res.data })
     })
   }
 
   async getChopTypes(companyId, appTypeId) {
-    await axios.get(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`)
+    await axios.get(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`, {headers: { Pragma: 'no-cache'}})
       .then(res => {
         this.setState({ chopTypes: res.data })
       })
@@ -795,25 +796,27 @@ class Create extends Component {
     let first = /(?!.*[A-HJ-QT-Z])[IS]/;
     let third = /(?!.*[A-NQRT-Z])[PSO]/;
     let digit = /[0-9]/;
-    let center = /[A-Za-z]/;
-    let mask = []
-    switch (this.props.match.params.company) {
-      case 'MBIA':
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-      case 'MBLC':
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-      case 'MBAFC':
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-      case 'CAR2GO':
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-      default:
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-    }
+    let center = /[IALR]/;
+    let mask = [first, "-", center,center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit]
+
+    // switch (this.props.match.params.company) {
+    //   case 'MBIA':
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    //   case 'MBLC':
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    //   case 'MBAFC':
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    //   case 'CAR2GO':
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    //   default:
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    // }
+
     this.setState({
       inputMask: mask, viewContract: true
     });
@@ -828,7 +831,7 @@ class Create extends Component {
     var isDigit = false
     let valid = false
     isFirst = first.test(this.state.contractNumber[0])
-    if (this.props.match.params.company === "MBIA") {
+    // if (this.props.match.params.company === "MBIA") {
       isThird = third.test(this.state.contractNumber[5])
       for (let i = 7; i < 11; i++) {
         isDigit = digit.test(this.state.contractNumber[i])
@@ -837,14 +840,14 @@ class Create extends Component {
         }
       }
       if (isDigit) {
-        for (let i = 12; i < 15; i++) {
+        for (let i = 12; i < 16; i++) {
           isDigit = digit.test(this.state.contractNumber[i])
           if (!isDigit) {
             break;
           }
         }
       }
-    }
+    // }
 
     else {
       isThird = third.test(this.state.contractNumber[4])
@@ -868,11 +871,11 @@ class Create extends Component {
       if (this.state.conNum.length !== 0) {
         for (let i = 0; i < this.state.conNum.length; i++) {
           let value = this.state.contractNumber
-          if (this.props.match.params.company === "MBIA") {
-            if (!digit.test(value[15])) {
-              value = value.substr(0, 15)
+          // if (this.props.match.params.company === "MBIA") {
+            if (!digit.test(value[16])) {
+              value = value.substr(0, 16)
             }
-          }
+          // }
           else {
             if (!digit.test(value[14])) {
               value = value.substr(0, 14)
@@ -905,25 +908,48 @@ class Create extends Component {
     return valid
   }
 
+  handleContractChange = (event) => {
+
+    let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
+    let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
+
+    let value = ("" + event.target.value).toUpperCase();
+
+    this.setState({
+      contractNumber: value
+    })
+
+    if (/^..[AaLlRr]/.test(event.target.value)){
+      this.setState({
+        inputMask: masks,
+        })
+      }
+    if (/^..[Ii]/.test(event.target.value)){
+      this.setState({
+        inputMask: mask,
+        })
+    }
+  }
+
   addContract(event) {
     let valid = this.validateConNum()
     let digit = /[0-9]/;
     let value = this.state.contractNumber
     if (valid) {
-      if (this.props.match.params.company === "MBIA") {
-        if (!digit.test(this.state.contractNumber[15])) {
-          value = this.state.contractNumber.substr(0, 15)
+      // if (this.props.match.params.company === "MBIA") {
+        if (!digit.test(this.state.contractNumber[16])) {
+          value = this.state.contractNumber.substr(0, 16)
         }
-      }
+      // }
       else {
         if (!digit.test(this.state.contractNumber[14])) {
           value = this.state.contractNumber.substr(0, 14)
         }
 
       }
-
+      // console.log(value.replace(/_/g, ''))
       this.setState(state => ({
-        conNum: [...state.conNum, value]
+        conNum: [...state.conNum, value.replace(/_/g, '')]
       })
       )
       this.setState({ contractNumber: "" }, this.toggle('viewContract'))
@@ -1221,11 +1247,10 @@ class Create extends Component {
   }
 
   dateChange = (name, view) => date => {
-    let month = date.getMonth()
-
     let dates = ""
     if (date) {
-      dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+      let tempDate = format(date,"yyyy-MM-dd").split('T')[0];//right
+      dates = tempDate.replace(/-/g, "")
     }
     console.log(dates)
     this.setState({
