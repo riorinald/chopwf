@@ -8,7 +8,6 @@ import deleteBin from '../../assets/img/deletebin.png'
 import InputMask from "react-input-mask";
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
-import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 import SimpleReactValidator from 'simple-react-validator';
 import DatePicker from 'react-datepicker';
