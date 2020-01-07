@@ -56,25 +56,7 @@ class Myapps extends Component {
         createdByName: ""
       },
 
-      status: [
-        "Recall",
-        "Pending for Document check by (L4 or above) Approval ",
-        "Pending for Department Head Approval",
-        "Bring the Original Documents for Chop",
-        "Pending for Chop Owner Approval",
-        "SendBack",
-        "Rejected",
-        "Pending for Chop Keeper Acknowledge Lend Out",
-        "Pending Chop Keeper Acknowledge Return",
-        "Completed",
-        "Draft",
-        "Pending Requestor Return/Extension",
-        "Pending Department Head Approval for Extension",
-        "Pending Chop Keeper Approval for extension",
-        "Pending Chop Owner Approval for extension",
-        "Chop request expired after 30 days",
-        "Pending Requestor Return"
-      ]
+      status: []
 
     }
     this.getApplications = this.getApplications.bind(this);
@@ -87,13 +69,19 @@ class Myapps extends Component {
 
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
+    this.getStatusList();
+  }
+
+  async getStatusList() {
+    const res = await Axios.get(`${config.url}/statuses`)
+    this.setState({ status: res.data })
   }
 
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: true })
     // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
     await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
-    {headers: { Pragma: 'no-cache'}})
+      { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false })
         console.log(res.data)
@@ -158,7 +146,7 @@ class Myapps extends Component {
 
   async getData(state, url) {
     try {
-      const response = await Axios.get(url,{headers: { Pragma: 'no-cache'}});
+      const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } });
       this.setState({
         [state]: response.data
       })
@@ -375,7 +363,7 @@ class Myapps extends Component {
                       <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
                         <option value="" >Please Select a status</option>
                         {this.state.status.map((stat, index) =>
-                          <option key={index} value={stat} >{stat}</option>
+                          <option key={index} value={stat.statusName} >{stat.statusName}</option>
                         )}
                       </Input>
 

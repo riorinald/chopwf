@@ -52,7 +52,7 @@ class TaskDetails extends Component {
     async getTaskDetails(id) {
         this.setState({ loading: true })
         let userId = localStorage.getItem('userId')
-        await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`,{headers: { Pragma: 'no-cache'}}).then(res => {
+        await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`, { headers: { Pragma: 'no-cache' } }).then(res => {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
             this.setState({ taskDetails: res.data, loading: false })
             console.log(res.data)
@@ -63,7 +63,7 @@ class TaskDetails extends Component {
 
     async getUserDetails() {
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/users/${this.state.taskDetails.histories[0].approvedBy}`,{headers: { Pragma: 'no-cache'}}).then(res => {
+        await Axios.get(`${config.url}/users/${this.state.taskDetails.histories[0].approvedBy}`, { headers: { Pragma: 'no-cache' } }).then(res => {
             this.setState({ userDetails: res.data, loading: false })
             console.log(res.data)
         })
@@ -235,9 +235,9 @@ class TaskDetails extends Component {
                             <Row className="mb-4">
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col xs={12} sm={12} md={4} lg={2}>
+                                        {/* <Col xs={12} sm={12} md={4} lg={2}>
                                             <img src={taskDetails.createdByPhotoUrl} className="img-avaa img-responsive center-block" alt="picture" />
-                                        </Col>
+                                        </Col> */}
                                         <Col md><h5> {taskDetails.employeeName} </h5>
                                             <Row>
                                                 <Col md><h6> DFS/CN, {taskDetails.companyId} </h6></Col>
@@ -282,7 +282,7 @@ class TaskDetails extends Component {
                                             <Label>Chop Type</Label>
                                         </Col>
                                         <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.chopTypeName} id="chopTypeName"  name="chopTypeName" placeholder="/" />
+                                            <Input disabled type="text" value={taskDetails.chopTypeName} id="chopTypeName" name="chopTypeName" placeholder="/" />
                                         </Col>
                                     </FormGroup>
                                     {appType === "LTI" ?
@@ -292,7 +292,7 @@ class TaskDetails extends Component {
                                                     <Label>Use in Office or not</Label>
                                                 </Col>
                                                 <Col xs="12" md="8">
-                                                    <Input disabled type="text" value={taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} id="isUseInOffice"  name="isUseInOffice" placeholder="/" />
+                                                    <Input disabled type="text" value={taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} id="isUseInOffice" name="isUseInOffice" placeholder="/" />
                                                 </Col>
                                             </FormGroup>
                                             {taskDetails.isUseInOffice === "N"
@@ -302,7 +302,7 @@ class TaskDetails extends Component {
                                                             <Label>Return Date</Label>
                                                         </Col>
                                                         <Col xs="12" md="8">
-                                                            <Input disabled type="text" value={this.convertDate(taskDetails.returnDate)} id="returnDate"  name="returnDate" placeholder="/" />
+                                                            <Input disabled type="text" value={this.convertDate(taskDetails.returnDate)} id="returnDate" name="returnDate" placeholder="/" />
                                                         </Col>
                                                     </FormGroup>
                                                     <FormGroup row >
@@ -310,7 +310,7 @@ class TaskDetails extends Component {
                                                             <Label>Responsible Person</Label>
                                                         </Col>
                                                         <Col xs="12" md="8">
-                                                            <Input disabled type="text" value={taskDetails.responsiblePersonName} id="responsiblePersonName"  name="responsiblePersonName" placeholder="/" />
+                                                            <Input disabled type="text" value={taskDetails.responsiblePersonName} id="responsiblePersonName" name="responsiblePersonName" placeholder="/" />
                                                         </Col>
                                                     </FormGroup>
                                                 </div>
@@ -334,7 +334,7 @@ class TaskDetails extends Component {
                                                 <Label>Branch Company Chop</Label>
                                             </Col>
                                             <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.branchName} id="branchName"  name="branchName" placeholder="/" />
+                                                <Input disabled type="text" value={taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
                                             </Col>
                                         </FormGroup>
                                         : ""
@@ -350,14 +350,14 @@ class TaskDetails extends Component {
                                                 </Col>
                                             </FormGroup>
                                             {taskDetails.isUseInOffice === "N"
-                                                ?   <FormGroup row >
-                                                        <Col md="4" className="d-flex align-items-center" >
-                                                            <Label>Return Date</Label>
-                                                        </Col>
-                                                        <Col xs="12" md="8">
-                                                            <Input disabled type="text" value={this.convertDate(taskDetails.returnDate)} id="returnDate"  name="returnDate" placeholder="/" />
-                                                        </Col>
-                                                    </FormGroup>
+                                                ? <FormGroup row >
+                                                    <Col md="4" className="d-flex align-items-center" >
+                                                        <Label>Return Date</Label>
+                                                    </Col>
+                                                    <Col xs="12" md="8">
+                                                        <Input disabled type="text" value={this.convertDate(taskDetails.returnDate)} id="returnDate" name="returnDate" placeholder="/" />
+                                                    </Col>
+                                                </FormGroup>
                                                 : ""}
                                         </>
                                         : null}
@@ -368,7 +368,7 @@ class TaskDetails extends Component {
                                                 <Label>Pick Up By</Label>
                                             </Col>
                                             <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.pickUpBy} id="pickUpBy"  name="pickUpBy" placeholder="EMPTY DATA" />
+                                                <Input disabled type="text" value={taskDetails.pickUpByName} id="pickUpBy" name="pickUpBy" placeholder="EMPTY DATA" />
                                             </Col>
                                         </FormGroup>
                                         : null}
@@ -528,14 +528,14 @@ class TaskDetails extends Component {
                                     }
                                     {taskDetails.isUseInOffice === "N"
                                         ? <FormGroup row >
-                                                <Col md="4" className="d-flex align-items-center" >
-                                                    <Label>Responsible Person</Label>
-                                                </Col>
-                                                <Col xs="12" md="8">
-                                                    <Input disabled type="text" value={taskDetails.responsiblePersonName} id="responsiblePersonName"  name="responsiblePersonName" placeholder="/" />
-                                                </Col>
-                                            </FormGroup>
-                                        : null }
+                                            <Col md="4" className="d-flex align-items-center" >
+                                                <Label>Responsible Person</Label>
+                                            </Col>
+                                            <Col xs="12" md="8">
+                                                <Input disabled type="text" value={taskDetails.responsiblePersonName} id="responsiblePersonName" name="responsiblePersonName" placeholder="/" />
+                                            </Col>
+                                        </FormGroup>
+                                        : null}
                                     {appType === "CNIPS"
                                         ? <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
@@ -571,7 +571,7 @@ class TaskDetails extends Component {
                                                 <Label>Confirm</Label>
                                             </Col>
                                             <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm"  name="isConfirm" placeholder="/" />
+                                                <Input disabled type="text" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
                                             </Col>
                                         </FormGroup>
                                         : ''
@@ -680,9 +680,9 @@ class TaskDetails extends Component {
                                 <div key={index}>
                                     <Row className="bottom-border"></Row>
                                     <Row className="text-md-left text-center">
-                                        <Col xs="12" sm="12" md="2" lg="1">
+                                        {/* <Col xs="12" sm="12" md="2" lg="1">
                                             <img src={history.approvedByAvatarUrl} className="img-avaa img-responsive" alt="Avatar" />
-                                        </Col>
+                                        </Col> */}
                                         <Col sm md="10" lg>
                                             <h5>{history.approvedByName} (000)<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
                                             <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>

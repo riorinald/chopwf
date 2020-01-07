@@ -99,21 +99,22 @@ class ChopApplication extends Component {
     this.getApplications(1, 20);
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
+    this.getStatusList();
 
   }
 
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: !this.state.loading })
     await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
-    {headers: { Pragma: 'no-cache'}}).then(res => {
-      this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.pageCount === 0 ? 1 : res.data.pageCount })
-      console.log(res.data)
-    })
+      { headers: { Pragma: 'no-cache' } }).then(res => {
+        this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.pageCount === 0 ? 1 : res.data.pageCount })
+        console.log(res.data)
+      })
   }
 
   async getData(state, url) {
     try {
-      const response = await Axios.get(url, {headers: { Pragma: 'no-cache'}});
+      const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } });
       this.setState({
         [state]: response.data
       })
@@ -137,6 +138,11 @@ class ChopApplication extends Component {
     }
 
     return Math.min(maxWidth, Math.max(max, headerText.length) * magicSpacing);
+  }
+
+  async getStatusList() {
+    const res = await Axios.get(`${config.url}/statuses`)
+    this.setState({ status: res.data })
   }
 
   getDeptHeads(heads) {
@@ -422,7 +428,7 @@ class ChopApplication extends Component {
                       <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
                         <option value="" >Please Select a status</option>
                         {this.state.status.map((stat, index) =>
-                          <option key={index} value={stat} >{stat}</option>
+                          <option key={index} value={stat.statusName} >{stat.statusName}</option>
                         )}
                       </Input>
                     )

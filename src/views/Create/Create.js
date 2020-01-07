@@ -174,7 +174,7 @@ class Create extends Component {
       validateForm: [],
       noteInfo: [],
       // inputMask: [/(?!.*[A-HJ-QT-Z])[IS]/,"-",/[IALR]/,/[A]/,"-",/(?!.*[A-NQRT-Z])[PSO]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/],
-      inputMask:"a-a-a-9999-9999",
+      inputMask: "a-a-a-9999-9999",
       selectInfo: ''
 
     };
@@ -518,7 +518,7 @@ class Create extends Component {
   Axios
   async getData(state, url) {
     try {
-      const response = await axios.get(url, {headers: { Pragma: 'no-cache'}});
+      const response = await axios.get(url, { headers: { Pragma: 'no-cache' } });
       this.setState({
         [state]: response.data
       })
@@ -532,7 +532,7 @@ class Create extends Component {
 
     let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
     try {
-      await axios.get(url, {headers: { Pragma: 'no-cache'}}).then(res => {
+      await axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ documents: res.data })
       })
     } catch (error) {
@@ -613,8 +613,8 @@ class Create extends Component {
   }
 
   async getDeptHead(companyId) {
-
-    await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`,{headers: { Pragma: 'no-cache'}})
+    console.log(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
+    await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`, { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ deptHead: res.data })
       })
@@ -622,7 +622,7 @@ class Create extends Component {
 
   async getDocCheckBy(teamId) {
     await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`,
-    {headers: { Pragma: 'no-cache'}})
+      { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ docCheckBy: res.data })
       })
@@ -630,13 +630,13 @@ class Create extends Component {
 
   async getTeams(deptId) {
     let url = `${config.url}/teams?companyid=` + this.props.legalName + "&departmentId=" + deptId
-    await axios.get(url, {headers: { Pragma: 'no-cache'}}).then(res => {
+    await axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
       this.setState({ teams: res.data })
     })
   }
 
   async getChopTypes(companyId, appTypeId) {
-    await axios.get(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`, {headers: { Pragma: 'no-cache'}})
+    await axios.get(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`, { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ chopTypes: res.data })
       })
@@ -672,6 +672,7 @@ class Create extends Component {
 
   //handle value on changes
   handleChange = name => event => {
+    console.log(name)
     //APPLICATION TYPE
     if (name === "appTypeSelected") {
       this.setValidateForm(event.target.value)
@@ -799,7 +800,7 @@ class Create extends Component {
     let digit = /[0-9]/;
     let center = /[IALR]/;
     let centers = /[A]/;
-    let mask = [first, "-", center,centers, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit]
+    let mask = [first, "-", center, centers, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit]
     // switch (this.props.match.params.company) {
     //   case 'MBIA':
     //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
@@ -833,21 +834,21 @@ class Create extends Component {
     let valid = false
     isFirst = first.test(this.state.contractNumber[0])
     // if (this.props.match.params.company === "MBIA") {
-      isThird = third.test(this.state.contractNumber[5])
-      for (let i = 7; i < 11; i++) {
+    isThird = third.test(this.state.contractNumber[5])
+    for (let i = 7; i < 11; i++) {
+      isDigit = digit.test(this.state.contractNumber[i])
+      if (!isDigit) {
+        break;
+      }
+    }
+    if (isDigit) {
+      for (let i = 12; i < 16; i++) {
         isDigit = digit.test(this.state.contractNumber[i])
         if (!isDigit) {
           break;
         }
       }
-      if (isDigit) {
-        for (let i = 12; i < 16; i++) {
-          isDigit = digit.test(this.state.contractNumber[i])
-          if (!isDigit) {
-            break;
-          }
-        }
-      }
+    }
     // }
 
     else {
@@ -873,9 +874,9 @@ class Create extends Component {
         for (let i = 0; i < this.state.conNum.length; i++) {
           let value = this.state.contractNumber
           // if (this.props.match.params.company === "MBIA") {
-            if (!digit.test(value[16])) {
-              value = value.substr(0, 16)
-            }
+          if (!digit.test(value[16])) {
+            value = value.substr(0, 16)
+          }
           // }
           else {
             if (!digit.test(value[15])) {
@@ -917,15 +918,15 @@ class Create extends Component {
 
     var value = event.target.value.toUpperCase();
 
-      // if (/^..[AaLlRr]/.test(value)){
-      //   this.setState({
-      //     inputMask: "a-a-a-9999-9999",
-      //     })
-      //   }
-      let mask = "a-a-a-9999-9999"
-      if (/^..[Ii]/.test(value)){
-        mask = "a-aa-a-9999-9999";
-      }
+    // if (/^..[AaLlRr]/.test(value)){
+    //   this.setState({
+    //     inputMask: "a-a-a-9999-9999",
+    //     })
+    //   }
+    let mask = "a-a-a-9999-9999"
+    if (/^..[Ii]/.test(value)) {
+      mask = "a-aa-a-9999-9999";
+    }
     this.setState({
       viewContract: true,
       inputMask: mask,
@@ -939,9 +940,9 @@ class Create extends Component {
     let value = this.state.contractNumber
     if (valid) {
       // if (this.props.match.params.company === "MBIA") {
-        if (!digit.test(this.state.contractNumber[16])) {
-          value = this.state.contractNumber.substr(0, 16)
-        }
+      if (!digit.test(this.state.contractNumber[16])) {
+        value = this.state.contractNumber.substr(0, 16)
+      }
       // }
       else {
         if (!digit.test(this.state.contractNumber[15])) {
@@ -965,12 +966,12 @@ class Create extends Component {
     }
   }
 
-  deleteContract(i){
+  deleteContract(i) {
     this.setState(state => {
-        const conNum = state.conNum.filter((item, index) => i !== index)
-        return {
-          conNum
-        }
+      const conNum = state.conNum.filter((item, index) => i !== index)
+      return {
+        conNum
+      }
     })
   }
 
@@ -1265,7 +1266,7 @@ class Create extends Component {
   dateChange = (name, view) => date => {
     let dates = ""
     if (date) {
-      let tempDate = format(date,"yyyy-MM-dd").split('T')[0];//right
+      let tempDate = format(date, "yyyy-MM-dd").split('T')[0];//right
       dates = tempDate.replace(/-/g, "")
     }
     console.log(dates)
@@ -1421,7 +1422,7 @@ class Create extends Component {
                           ? this.state.conNum.map((
                             (conNum, index) => (
                               <span key={index}>
-                                <DropdownItem style={{cursor:'default'}}>{conNum} <span style={{cursor:'pointer'}} onClick={()=>this.deleteContract(index)} className="float-right"><i className="mx-0 fa fa-trash" /></span></DropdownItem>
+                                <DropdownItem style={{ cursor: 'default' }}>{conNum} <span style={{ cursor: 'pointer' }} onClick={() => this.deleteContract(index)} className="float-right"><i className="mx-0 fa fa-trash" /></span></DropdownItem>
                               </span>
                             )))
                           : <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
@@ -1431,8 +1432,8 @@ class Create extends Component {
                     </InputGroupButtonDropdown>
                     <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
                       onChange={this.handleContractChange} value={this.state.contractNumber}
-                      // onClick={this.handleInputMask}
-                      ></InputMask>
+                    // onClick={this.handleInputMask}
+                    ></InputMask>
                     <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
                   </InputGroup>
                 </FormGroup></Col>
@@ -1616,23 +1617,24 @@ class Create extends Component {
                   </FormGroup>
                   <FormGroup>
                     <Label>Dept</Label>
-                    {/* <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
+                    <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
                       <option disabled value="0">Please Select . . .</option>
                       {this.state.department.map((option, index) => (
                         <option value={option.deptId} label={option.dept} key={option.deptId}>
                           {option.deptName}
                         </option>
                       ))}
-                    </Input> */}
-                    <Select id="deptSelected" 
-                          onChange={this.handleSelectOption("deptSelected")}
-                          options={this.state.department.map((option, index) => { 
-                            return {value: option.deptId, label:option.deptName}}
-                          )} 
-                          placeholder = "Please Select..."
-                          isSearchable={false} 
-                          menuPortalTarget={document.body} 
-                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
+                    </Input>
+                    {/* <Select id="deptSelected"
+                      onChange={this.handleSelectOption("deptSelected")}
+                      options={this.state.department.map((option, index) => {
+                        return { value: option.deptId, label: option.deptName }
+                      }
+                      )}
+                      placeholder="Please Select..."
+                      isSearchable={false}
+                      menuPortalTarget={document.body}
+                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} /> */}
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Department', this.state.deptSelected, 'required')}</small>
                   </FormGroup>
                   <FormGroup>

@@ -36,86 +36,85 @@ class DefaultHeader extends Component {
     fakeAuth.signOut()
   }
 
-  componentDidMount(){
+  componentDidMount() {
     this.getUserDetails()
   }
 
   async getUserDetails() {
     this.setState({ loading: true })
     await Axios.get(`${config.url}/users/${localStorage.getItem('userId')}`).then(res => {
-        this.setState({ userDetails: res.data, loading: false })
+      this.setState({ userDetails: res.data, loading: false })
     })
-}
+  }
 
   render() {
 
 
     const { children, state } = this.props;
-    const {userDetails} = this.state;
+    const { userDetails } = this.state;
     const username = localStorage.getItem('userId');
     return (
-          <React.Fragment>
-            <AppSidebarToggler className="d-lg-none" display="sm" mobile />
-            <AppSidebarMinimizer className="customMT d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
-            <Nav className="h5 d-sm-down-none"><b className="ml-2">{state.application} Use WORKFLOW for {state.legalEntity}</b></Nav>
-            <Nav className="ml-auto" navbar>
-              <Dropdown isOpen={state.viewChop} toggle={this.props.toggle('viewChop')} nav direction="down" >
-                <DropdownToggle color="ghost" className="btn-pill" caret>
-                   CHOP WF
+      <React.Fragment>
+        <AppSidebarToggler className="d-lg-none" display="sm" mobile />
+        <AppSidebarMinimizer className="customMT d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
+        <Nav className="h5 d-sm-down-none"><b className="ml-2">{state.application} Use WORKFLOW for {state.legalEntity}</b></Nav>
+        <Nav className="ml-auto" navbar>
+          <Dropdown isOpen={state.viewChop} toggle={this.props.toggle('viewChop')} nav direction="down" >
+            <DropdownToggle color="ghost" className="btn-pill" caret>
+              CHOP WF
                 </DropdownToggle>
-                  <DropdownMenu className="mt-2">
-                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBAFC"
-                    active={state.legalEntity === "MBAFC" && state.application === "CHOP" ? true : false}> 
-                       MBAFC 
+            <DropdownMenu className="mt-2">
+              <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBAFC"
+                active={state.legalEntity === "MBAFC" && state.application === "CHOP" ? true : false}>
+                MBAFC
                     </DropdownItem>
-                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBLC"
-                    active={state.legalEntity === "MBLC" && state.application === "CHOP" ? true : false}> 
-                      MBLC
+              <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBLC"
+                active={state.legalEntity === "MBLC" && state.application === "CHOP" ? true : false}>
+                MBLC
                     </DropdownItem>
-                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBIA"
-                      active={state.legalEntity === "MBIA" && state.application === "CHOP" ? true : false}> 
-                       MBIA
+              <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBIA"
+                active={state.legalEntity === "MBIA" && state.application === "CHOP" ? true : false}>
+                MBIA
                     </DropdownItem>
-                    <DropdownItem onClick={this.props.changeEntity('CHOP')} value="DMT"
-                      active={state.legalEntity === "DMT" && state.application === "CHOP" ? true : false}> 
-                       DMT
+              <DropdownItem onClick={this.props.changeEntity('CHOP')} value="DMT"
+                active={state.legalEntity === "DMT" && state.application === "CHOP" ? true : false}>
+                DMT
                     </DropdownItem>
-                  </DropdownMenu>
-              </Dropdown>
-              <Dropdown className="mr-2" isOpen={state.viewLicense} toggle={this.props.toggle('viewLicense')} nav direction="down" >
-                <DropdownToggle color="ghost" className="btn-pill" caret>
-                    LICENSE WF
+            </DropdownMenu>
+          </Dropdown>
+          <Dropdown className="mr-2" isOpen={state.viewLicense} toggle={this.props.toggle('viewLicense')} nav direction="down" >
+            <DropdownToggle color="ghost" className="btn-pill" caret>
+              LICENSE WF
                 </DropdownToggle>
-                  <DropdownMenu className="mt-2">
-                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBAFC"
-                      active={state.legalEntity === "MBAFC" && state.application === "LICENSE" ? true : false}>
-                       MBAFC 
+            <DropdownMenu className="mt-2">
+              <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBAFC"
+                active={state.legalEntity === "MBAFC" && state.application === "LICENSE" ? true : false}>
+                MBAFC
                     </DropdownItem>
-                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBLC"
-                      active={state.legalEntity === "MBLC" && state.application === "LICENSE" ? true : false}>
-                      MBLC
+              <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBLC"
+                active={state.legalEntity === "MBLC" && state.application === "LICENSE" ? true : false}>
+                MBLC
                     </DropdownItem>
-                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBIA"
-                      active={state.legalEntity === "MBIA" && state.application === "LICENSE" ? true : false}>
-                       MBIA
+              <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBIA"
+                active={state.legalEntity === "MBIA" && state.application === "LICENSE" ? true : false}>
+                MBIA
                     </DropdownItem>
-                    <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="DMT"
-                      active={state.legalEntity === "DMT" && state.application === "LICENSE" ? true : false}>
-                       DMT
+              <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="DMT"
+                active={state.legalEntity === "DMT" && state.application === "LICENSE" ? true : false}>
+                DMT
                     </DropdownItem>
-                  </DropdownMenu>
-              </Dropdown>
-              <UncontrolledDropdown nav direction="down" >
-                <DropdownToggle nav>
-                {username}<img src={userDetails.photoUrl} className="img-avatar" alt={userDetails.firstName} />
-                </DropdownToggle>
-                <DropdownMenu right className="mt-2">
-                  <DropdownItem><i className="fa fa-user"></i> Profile</DropdownItem>
-                  <AuthButton />
-                </DropdownMenu>
-              </UncontrolledDropdown>
-            </Nav>
-          </React.Fragment>
+            </DropdownMenu>
+          </Dropdown>
+          <UncontrolledDropdown nav direction="down" >
+            <DropdownToggle nav>
+              {username}<img src={userDetails.photoUrl} className="img-avatar" alt={userDetails.firstName} />
+            </DropdownToggle>
+            <DropdownMenu right className="mt-2">
+              <AuthButton />
+            </DropdownMenu>
+          </UncontrolledDropdown>
+        </Nav>
+      </React.Fragment>
     );
   }
 }
