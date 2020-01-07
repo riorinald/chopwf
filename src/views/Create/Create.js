@@ -859,7 +859,7 @@ class Create extends Component {
         }
       }
       if (isDigit) {
-        for (let i = 11; i < 15; i++) {
+        for (let i = 11; i < 14; i++) {
           isDigit = digit.test(this.state.contractNumber[i])
           if (!isDigit) {
             break;
@@ -915,7 +915,7 @@ class Create extends Component {
     // let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
     // let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
 
-    var value = event.target.value.toUpperCase();
+    var value = event.target.value;
 
       // if (/^..[AaLlRr]/.test(value)){
       //   this.setState({
@@ -924,8 +924,8 @@ class Create extends Component {
       //   }
       let mask = "a-a-a-9999-9999"
       if (/^..[Ii]/.test(value)){
-        mask = "a-aa-a-9999-9999";
-      }
+        mask = "a-aA-a-9999-9999";
+      } 
     this.setState({
       viewContract: true,
       inputMask: mask,
@@ -939,16 +939,16 @@ class Create extends Component {
     let value = this.state.contractNumber
     if (valid) {
       // if (this.props.match.params.company === "MBIA") {
-        if (!digit.test(this.state.contractNumber[16])) {
-          value = this.state.contractNumber.substr(0, 16)
-        }
-      // }
-      else {
-        if (!digit.test(this.state.contractNumber[15])) {
-          value = this.state.contractNumber.substr(0, 15)
-        }
+      //   if (!digit.test(this.state.contractNumber[14])) {
+      //     value = this.state.contractNumber.substr(0, 15)
+      //   }
+      // // }
+      // else {
+      //   if (!digit.test(this.state.contractNumber[14])) {
+      //     value = this.state.contractNumber.substr(0, 14)
+      //   }
 
-      }
+      // }
       // console.log(value.replace(/_/g, ''))
       this.setState(state => ({
         conNum: [...state.conNum, value.replace(/_/g, '')]
@@ -1616,15 +1616,15 @@ class Create extends Component {
                   </FormGroup>
                   <FormGroup>
                     <Label>Dept</Label>
-                    {/* <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
+                    <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
                       <option disabled value="0">Please Select . . .</option>
                       {this.state.department.map((option, index) => (
                         <option value={option.deptId} label={option.dept} key={option.deptId}>
                           {option.deptName}
                         </option>
                       ))}
-                    </Input> */}
-                    <Select id="deptSelected" 
+                    </Input>
+                    {/* <Select id="deptSelected" 
                           onChange={this.handleSelectOption("deptSelected")}
                           options={this.state.department.map((option, index) => { 
                             return {value: option.deptId, label:option.deptName}}
@@ -1632,7 +1632,7 @@ class Create extends Component {
                           placeholder = "Please Select..."
                           isSearchable={false} 
                           menuPortalTarget={document.body} 
-                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
+                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} /> */}
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Department', this.state.deptSelected, 'required')}</small>
                   </FormGroup>
                   <FormGroup>
