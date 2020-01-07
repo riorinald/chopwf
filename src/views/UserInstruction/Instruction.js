@@ -23,6 +23,7 @@ import {
 } from 'reactstrap';
 import { tsExpressionWithTypeArguments } from '@babel/types';
 import Axios from 'axios';
+import config from '../../config';
 
 class Instruction extends Component {
     constructor(props) {
@@ -54,6 +55,7 @@ class Instruction extends Component {
 
     componentDidMount() {
         this.getInstructions()
+        this.getUserInstructions()
         this.updateWindowDimensions();
         window.addEventListener("resize", this.updateWindowDimensions.bind(this));
     }
@@ -62,6 +64,11 @@ class Instruction extends Component {
     }
     updateWindowDimensions() {
         this.setState({ width: window.innerWidth, height: window.innerHeight });
+    }
+
+    async getUserInstructions() {
+        const res = await Axios.get(`${config.url}/userinstructions/chop`)
+        console.log(res.data)
     }
 
     async getInstructions() {

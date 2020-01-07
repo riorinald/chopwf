@@ -21,6 +21,7 @@ import {
 
 } from 'reactstrap';
 import Axios from 'axios';
+import config from '../../../config';
 
 class LicenseInstructions extends Component {
     constructor(props) {
@@ -53,6 +54,7 @@ class LicenseInstructions extends Component {
 
     componentDidMount() {
         this.getInstructions()
+        this.getUserInstructions()
         this.updateWindowDimensions();
         window.addEventListener("resize", this.updateWindowDimensions.bind(this));
     }
@@ -61,6 +63,11 @@ class LicenseInstructions extends Component {
     }
     updateWindowDimensions() {
         this.setState({ width: window.innerWidth, height: window.innerHeight });
+    }
+
+    async getUserInstructions() {
+        const res = await Axios.get(`${config.url}/userinstructions/chop`)
+        console.log(res.data)
     }
 
     async getInstructions() {

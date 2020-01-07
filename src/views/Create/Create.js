@@ -672,7 +672,6 @@ class Create extends Component {
 
   //handle value on changes
   handleChange = name => event => {
-    console.log(name)
     //APPLICATION TYPE
     if (name === "appTypeSelected") {
       this.setValidateForm(event.target.value)
@@ -1034,6 +1033,7 @@ class Create extends Component {
             docURL: URL.createObjectURL(this.state.docSelected),
             // contractNumbers: this.state.contractNumbers
           }
+          console.log(obj.docURL)
           this.setState(state => {
             const documentTableLTI = state.documentTableLTI.concat(obj)
             return {
