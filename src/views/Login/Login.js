@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Redirect,NavLink } from 'react-router-dom';
 import { fakeAuth } from '../../App';
 import config from '../../config';
-import {GoogleAPI,GoogleLogin,GoogleLogout} from 'react-google-oauth'
+import queryString from 'query-string';
 
 import {
     Form,
@@ -190,23 +190,17 @@ class Login extends Component {
 
     render() {
         const { redirectToReferrer } = this.state
-
+        const src = queryString.parse(this.props.location.search)
+        console.log(src)
+        if (src.code){
+            console.log('code acquired!', src.code)
+        }
+        if(this.props.location.search === '?authhandler=Daimler_OpenID')
+            return <Redirect to={'/authenticated'} />
         if (redirectToReferrer) {
             console.log("redirect")
             return <Redirect to={'/portal'} />
         }
-        
-        const googleOauth = <GoogleAPI clientId="877545934462-i1ap0krecmv6qqsema0ch6n5l4mndk21.apps.googleusercontent.com"
-         redirectUri="http%3A%2F%2Flocalhost/authenticated"
-        // onUpdateSigninStatus= {console.log()}
-        // onInitFailure={CALLBACK}
-         >
-        <div>
-              <div><GoogleLogin /></div>
-              {/* <div><GoogleLogout /></div> */}
-        </div>
-    </GoogleAPI>
-
         return (
             <div>
                 <Navbar color="light" light expand="md">

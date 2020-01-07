@@ -59,7 +59,7 @@ class Authenticated extends Component {
   render(){
     if (this.state.redirectOuth || localStorage.getItem('userId') ) {
       console.log("redirect oauth google")
-      return <Redirect to={`/portal`} />
+      // return <Redirect to={`/portal`} />
     }
     const authenticated = <><label>Authenticated as {this.state.userDetails.given_name || localStorage.getItem('userId')}</label><center>redirecting . . .</center></>
     const notAuth = <label>You are not Authenticated</label> 
