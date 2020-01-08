@@ -859,7 +859,7 @@ class Create extends Component {
         }
       }
       if (isDigit) {
-        for (let i = 11; i < 15; i++) {
+        for (let i = 11; i < 14; i++) {
           isDigit = digit.test(this.state.contractNumber[i])
           if (!isDigit) {
             break;
@@ -915,17 +915,17 @@ class Create extends Component {
     // let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
     // let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
 
-    var value = event.target.value.toUpperCase();
+    var value = event.target.value;
 
-    // if (/^..[AaLlRr]/.test(value)){
-    //   this.setState({
-    //     inputMask: "a-a-a-9999-9999",
-    //     })
-    //   }
-    let mask = "a-a-a-9999-9999"
-    if (/^..[Ii]/.test(value)) {
-      mask = "a-aa-a-9999-9999";
-    }
+      // if (/^..[AaLlRr]/.test(value)){
+      //   this.setState({
+      //     inputMask: "a-a-a-9999-9999",
+      //     })
+      //   }
+      let mask = "a-a-a-9999-9999"
+      if (/^..[Ii]/.test(value)){
+        mask = "a-aA-a-9999-9999";
+      } 
     this.setState({
       viewContract: true,
       inputMask: mask,
@@ -939,16 +939,16 @@ class Create extends Component {
     let value = this.state.contractNumber
     if (valid) {
       // if (this.props.match.params.company === "MBIA") {
-      if (!digit.test(this.state.contractNumber[16])) {
-        value = this.state.contractNumber.substr(0, 16)
-      }
-      // }
-      else {
-        if (!digit.test(this.state.contractNumber[15])) {
-          value = this.state.contractNumber.substr(0, 15)
-        }
+      //   if (!digit.test(this.state.contractNumber[14])) {
+      //     value = this.state.contractNumber.substr(0, 15)
+      //   }
+      // // }
+      // else {
+      //   if (!digit.test(this.state.contractNumber[14])) {
+      //     value = this.state.contractNumber.substr(0, 14)
+      //   }
 
-      }
+      // }
       // console.log(value.replace(/_/g, ''))
       this.setState(state => ({
         conNum: [...state.conNum, value.replace(/_/g, '')]
