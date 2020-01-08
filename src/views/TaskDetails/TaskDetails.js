@@ -161,6 +161,38 @@ class TaskDetails extends Component {
         }
     }
 
+    dataURLtoFile(dataurl, filename) {
+
+        var arr = dataurl.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]),
+            n = bstr.length,
+            u8arr = new Uint8Array(n);
+
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+
+        return new File([u8arr], filename, { type: mime });
+    }
+
+    viewOrDownloadFile(b64, type, name) {
+        if (b64 !== "") {
+            let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+            var blobUrl = new Blob([file], { type: type })
+            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                window.navigator.msSaveOrOpenBlob(blobUrl, name)
+                return;
+            }
+            else {
+                alert('Opening Blob doesnt support here  :( !!!')
+            }
+        }
+        else {
+            alert("BASE 64 String is empty !!!")
+        }
+    }
+
     render() {
 
         const { taskDetails, userDetails, loading, showModal, page, appType } = this.state
@@ -636,7 +668,7 @@ class TaskDetails extends Component {
                                                             Header: "Attached Document",
                                                             accessor: "documentName",
                                                             Cell: row => (
-                                                                <a href={row.original.documentUrl} target='_blank' rel="noopener noreferrer">{row.original.documentFileName}</a>
+                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} >{row.original.documentFileName}</div>
                                                             ),
                                                             // style: { textAlign: "center" },
                                                         },

@@ -184,7 +184,7 @@ class EditRequest extends Component {
 
     async getDocCheckBy(deptId, teamId) {
         const res = await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
-        {headers: { Pragma: 'no-cache'}})
+            { headers: { Pragma: 'no-cache' } })
         for (let i = 0; i < res.data.length; i++) {
             const obj = { value: res.data[i].userId, label: res.data[i].displayName }
             this.setState(state => {
@@ -199,7 +199,7 @@ class EditRequest extends Component {
     async getDeptHeads() {
         this.setState({ deptHeads: [] })
         await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
-        {headers: { Pragma: 'no-cache'}})
+            { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 for (let i = 0; i < res.data.length; i++) {
                     const obj = { value: res.data[i].userId, label: res.data[i].displayName }
@@ -215,14 +215,14 @@ class EditRequest extends Component {
 
     async getTeams(deptId) {
         let url = `${config.url}/teams?companyid=` + this.props.legalName + "&departmentId=" + deptId
-        await Axios.get(url, {headers: { Pragma: 'no-cache'}}).then(res => {
+        await Axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
             this.setState({ teams: res.data })
         })
     }
 
     async getData(state, url) {
         try {
-            const response = await Axios.get(url, {headers: { Pragma: 'no-cache'}});
+            const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } });
             this.setState({
                 [state]: response.data
             })
@@ -305,7 +305,7 @@ class EditRequest extends Component {
 
     async getTaskDetails(id) {
         this.setState({ loading: true })
-        const response = await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`,{headers: { Pragma: 'no-cache'}})
+        const response = await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`, { headers: { Pragma: 'no-cache' } })
         let temporary = response.data
         if (temporary.departmentId !== "") {
             this.getTeams(temporary.departmentId)
@@ -414,7 +414,7 @@ class EditRequest extends Component {
         let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
         // console.log(url)
         try {
-            await Axios.get(url, {headers: { Pragma: 'no-cache'}}).then(res => {
+            await Axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
                 this.setState({ documents: res.data })
             })
         } catch (error) {
@@ -677,6 +677,8 @@ class EditRequest extends Component {
                 }
 
                 if (valid) {
+
+
                     const obj = {
                         taskId: this.state.taskDetails.taskId,
                         documentFileName: this.state.editRequestForm.docAttachedName,
@@ -687,6 +689,8 @@ class EditRequest extends Component {
                         updated: "",
                         documentType: "",
                         documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
+                        documentFileType: this.state.editRequestForm.docSelected.type,
+                        documentBase64String: "",
                         expiryDate: null,
                         departmentHeads: null,
                         documentId: rand,
@@ -695,6 +699,12 @@ class EditRequest extends Component {
                         docSelected: this.state.editRequestForm.docSelected,
                         contractNums: this.state.conNum
                     }
+
+                    this.getBase64(this.state.editRequestForm.docSelected, (result) => {
+                        obj.documentBase64String = result
+                    })
+
+                    console.log(obj)
 
                     this.setState(state => {
                         let taskDetails = this.state.taskDetails
@@ -997,8 +1007,8 @@ class EditRequest extends Component {
     dateChange = (name, view) => date => {
         let dates = ""
         if (date) {
-          let tempDate = format(date,"yyyy-MM-dd").split('T')[0];//right
-          dates = tempDate.replace(/-/g, "")
+            let tempDate = format(date, "yyyy-MM-dd").split('T')[0];//right
+            dates = tempDate.replace(/-/g, "")
         }
         this.setState({
             [view]: date
@@ -1314,6 +1324,46 @@ class EditRequest extends Component {
         }
     }
 
+    dataURLtoFile(dataurl, filename) {
+
+        var arr = dataurl.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]),
+            n = bstr.length,
+            u8arr = new Uint8Array(n);
+
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+
+        return new File([u8arr], filename, { type: mime });
+    }
+
+    viewOrDownloadFile(b64, type, name, url) {
+        if (b64 !== "") {
+            let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+            var blobUrl = new Blob([file], { type: type })
+            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                window.navigator.msSaveOrOpenBlob(blobUrl, name)
+                return;
+            }
+            else {
+                alert('Opening Blob doesnt support here  :( !!!')
+                window.open(url, "_blank")
+            }
+        }
+        else {
+            alert("BASE 64 String is empty !!!")
+        }
+    }
+
+    getBase64(file, callback) {
+        let reader = new FileReader();
+        reader.onload = function () {
+            callback(reader.result.replace(/^data:.+;base64,/, ''))
+        };
+        reader.readAsDataURL(file)
+    }
 
 
 
@@ -1552,10 +1602,12 @@ class EditRequest extends Component {
                                                                             <td>{document.documentNameEnglish}</td>
                                                                             <td>{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a>
+                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.convertExpDate(document.expiryDate)} </div>
+                                                                                {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                                                                             </td>
                                                                             <td id="viewDoc">
-                                                                                <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a>
+                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.changeDeptHeads(document.departmentHeads)} </div>
+                                                                                {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
                                                                             </td>
                                                                             <td class="smallTd" ><img width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} src={deleteBin} /></td>
                                                                         </tr>
@@ -1653,7 +1705,8 @@ class EditRequest extends Component {
                                                                             <td>{document.documentNameEnglish}</td>
                                                                             <td>{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a>
+                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
+                                                                                {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a> */}
                                                                             </td>
                                                                             <td className="smallTd"><img width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} src={deleteBin} /></td>
                                                                         </tr>

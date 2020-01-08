@@ -48,14 +48,16 @@ class Instruction extends Component {
         this.onExiting = this.onExiting.bind(this);
         this.onExited = this.onExited.bind(this);
         this.makeEditable = this.makeEditable.bind(this);
-        this.getInstructions = this.getInstructions.bind(this);
+        this.getUserInstructions = this.getUserInstructions.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleFileUpload = this.handleFileUpload.bind(this);
     };
 
     componentDidMount() {
-        this.getInstructions()
-        this.getUserInstructions()
+        // this.getInstructions()
+        this.getUserInstructions("USERINSTRUCTIONS", "summary")
+        // this.getUserInstructions("APPLICANT", "applicantInstructions")
+        // this.getUserInstructions("APPROVERS", "approverInstructions")
         this.updateWindowDimensions();
         window.addEventListener("resize", this.updateWindowDimensions.bind(this));
     }
@@ -66,31 +68,32 @@ class Instruction extends Component {
         this.setState({ width: window.innerWidth, height: window.innerHeight });
     }
 
-    async getUserInstructions() {
-        const res = await Axios.get(`${config.url}/userinstructions/chop`)
+    async getUserInstructions(sectionId, name) {
+        const res = await Axios.get(`${config.url}/userinstructions/chop/${sectionId}`)
+        this.setState({ [name]: res.data.sectionData })
         console.log(res.data)
     }
 
-    async getInstructions() {
-        const response = await Axios.get('http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/2')
-        let instructions = response.data
-        this.setState({ summary: instructions.summary, applicantInstructions: instructions.section1, approverInstructions: instructions.section2 })
-        instructions.screenshot.map((shot, index) => {
-            let obj = {
-                name: `Screenshot ${index + 1}`,
-                src: shot,
-                altText: `Slide ${index + 1}`,
-                caption: `Slide ${index + 1}`
-            }
-            this.setState(state => {
-                const screenshots = state.screenshots.concat(obj)
-                return {
-                    screenshots
-                }
-            })
+    // async getInstructions() {
+    //     const response = await Axios.get('http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/2')
+    //     let instructions = response.data
+    //     this.setState({ summary: instructions.summary, applicantInstructions: instructions.section1, approverInstructions: instructions.section2 })
+    //     instructions.screenshot.map((shot, index) => {
+    //         let obj = {
+    //             name: `Screenshot ${index + 1}`,
+    //             src: shot,
+    //             altText: `Slide ${index + 1}`,
+    //             caption: `Slide ${index + 1}`
+    //         }
+    //         this.setState(state => {
+    //             const screenshots = state.screenshots.concat(obj)
+    //             return {
+    //                 screenshots
+    //             }
+    //         })
 
-        })
-    }
+    //     })
+    // }
 
     onExiting() {
         this.animating = true;
@@ -204,6 +207,9 @@ class Instruction extends Component {
     }
 
     render() {
+
+        const { instructions } = this.state
+
         const applicantInstructions = this.state.applicantInstructions.map((instruction, index) =>
             <li key={index + "applicant"}>{instruction}</li>)
         const applicantInstructionsEditable = <div>{this.state.applicantInstructions.map((instruction, index) =>

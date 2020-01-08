@@ -224,14 +224,30 @@ class Administration extends Component {
                 //to be used if data returned from api only has bse64 string without the MIMI type
                 // file = this.dataURLtoFile(`data:${tempFile.type};base64,${b64}`, tempFile.name); 
 
-                console.log(b64)
-                console.log(file)
 
-                this.setState({ tempFileURL: URL.createObjectURL(file) })
+
+                // console.log(b64)
+                // console.log(file)
+                // let url = URL.createObjectURL(file).replace(/^blob:/, '')
+                let url = URL.createObjectURL(file)
+                var newBlob = new Blob([file], { type: tempFile.type })
+                console.log(newBlob)
+                if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                    window.navigator.msSaveOrOpenBlob(newBlob, tempFile.name)
+                    return;
+                }
+                else {
+                    console.log('blob illa - venonki anand ine vilik')
+                }
+                // console.log(url)
+                // window.navigator.msSaveOrOpenBlob(url, tempFile.name);
+                this.setState({ tempFileURL: url })
             })
 
         }
     }
+
+
 
     render() {
 
@@ -246,7 +262,7 @@ class Administration extends Component {
                 <CardBody>
 
                     {/* <Input type="file" id="testBase63" onChange={this.testFile}></Input>
-                    <a href={this.state.tempFileURL} target='_blank' rel="noopener noreferrer">TESTING BASE64</a> */}
+                    <a download href={this.state.tempFileURL} target='_blank' rel="noopener noreferrer">TESTING BASE64</a> */}
 
                     <Card className="mb-4">
                         <CardHeader>

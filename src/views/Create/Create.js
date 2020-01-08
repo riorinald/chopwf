@@ -1033,6 +1033,10 @@ class Create extends Component {
             docURL: URL.createObjectURL(this.state.docSelected),
             // contractNumbers: this.state.contractNumbers
           }
+          this.getBase64(this.state.docSelected, (result) => {
+            obj.documentBase64String = result
+          })
+
           console.log(obj.docURL)
           this.setState(state => {
             const documentTableLTI = state.documentTableLTI.concat(obj)
@@ -1068,6 +1072,15 @@ class Create extends Component {
       })
     }
   }
+
+  getBase64(file, callback) {
+    let reader = new FileReader();
+    reader.onload = function () {
+      callback(reader.result.replace(/^data:.+;base64,/, ''))
+    };
+    reader.readAsDataURL(file)
+  }
+
 
   addDocumentCNIPS = () => {
     var maxNumber = 45;
