@@ -185,7 +185,7 @@ class TaskDetails extends Component {
                 return;
             }
             else {
-                alert('Opening Blob doesnt support here  :( !!!')
+                window.open(URL.createObjectURL(file), "_blank")
             }
         }
         else {

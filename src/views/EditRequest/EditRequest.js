@@ -1348,7 +1348,6 @@ class EditRequest extends Component {
                 return;
             }
             else {
-                alert('Opening Blob doesnt support here  :( !!!')
                 window.open(url, "_blank")
             }
         }

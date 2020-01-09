@@ -49,7 +49,7 @@ class LicenseApplicationDetail extends Component {
 
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem("userId")}`,{headers: { Pragma: 'no-cache'}})
+        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem("userId")}`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 console.log(res.data)
                 let currentStatusArr = res.data.allStages.filter(stage => stage.state === "CURRENT")
@@ -275,6 +275,18 @@ class LicenseApplicationDetail extends Component {
         }
     }
 
+    viewOrDownloadFile(file) {
+        var blobUrl = new Blob([file], { type: file.type })
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(blobUrl, file.name)
+            return;
+        }
+        else {
+            window.open(URL.createObjectURL(file), "_blank")
+        }
+    }
+
+
 
     render() {
         const { taskDetails, loading, page, currentStatus, expressNumber, deliverWay, documents } = this.state
@@ -327,9 +339,9 @@ class LicenseApplicationDetail extends Component {
                             <Row className="mb-4">
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col xs={12} sm={12} md={4} lg={2}>
+                                        {/* <Col xs={12} sm={12} md={4} lg={2}>
                                             <img src={taskDetails.histories[0].approvedByAvatarUrl} className="img-avaa img-responsive center-block" alt="picture" />
-                                        </Col>
+                                        </Col> */}
                                         <Col md><h5> {taskDetails.employeeName} </h5>
                                             <Row>
                                                 <Col md><h6> DFS/CN, MBAFC </h6></Col>
@@ -494,7 +506,7 @@ class LicenseApplicationDetail extends Component {
                                                         &nbsp;
                                                     <Collapse isOpen={documents.length !== 0}>
                                                             {documents.map((doc, index) =>
-                                                                <div key={index} > <a href={doc.url} target='_blank' rel="noopener noreferrer">{doc.fileName}</a> </div>
+                                                                <div key={index} style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(doc.file)}> {doc.fileName} </div>
                                                             )}
                                                         </Collapse>
                                                     </FormGroup>
@@ -600,6 +612,7 @@ class LicenseApplicationDetail extends Component {
                                                         <tr key={index} >
                                                             <td className="smallTd"> {index + 1} </td>
                                                             <td>
+                                                                {/* <div onClick={() => this.viewOrDownloadFile(doc.docSelected)} > {doc.documentName} </div> */}
                                                                 <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a>
                                                             </td>
                                                         </tr>
@@ -620,9 +633,9 @@ class LicenseApplicationDetail extends Component {
                                 <div key={index}>
                                     <Row className="bottom-border"></Row>
                                     <Row>
-                                        <Col md="1">
+                                        {/* <Col md="1">
                                             <img src={history.approvedByAvatarUrl} className="img-avatar" alt="Avatar" />
-                                        </Col>
+                                        </Col> */}
                                         <Col md="8">
                                             <h5>{history.approvedByName} (000)<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
                                             <div><b>Approved On:</b> {this.convertApprovedDate(history.approvedDate)}</div>

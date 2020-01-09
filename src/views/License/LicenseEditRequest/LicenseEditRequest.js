@@ -81,18 +81,18 @@ class LicenseEditRequest extends Component {
 
     }
     async getLicenseNames() {
-        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`,{headers: { Pragma: 'no-cache'}})
+        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
         this.setState({ licenseNames: res.data })
     }
 
     async getData(name) {
-        let res = await axios.get(`${config.url}/${name}`,{headers: { Pragma: 'no-cache'}})
+        let res = await axios.get(`${config.url}/${name}`, { headers: { Pragma: 'no-cache' } })
         this.setState({ [name]: res.data })
     }
 
     async getSeniorManagers() {
         await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
-        {headers: { Pragma: 'no-cache'}})
+            { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let arr1 = []
                 res.data.map(mgr => {
@@ -119,7 +119,7 @@ class LicenseEditRequest extends Component {
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
         await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem('userId')}`,
-        {headers: { Pragma: 'no-cache'}})
+            { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let temp = res.data
                 if (temp.documentTypeId === "ORIGINAL") {
@@ -213,7 +213,6 @@ class LicenseEditRequest extends Component {
         })
 
     }
-
 
     validate() {
         let data = this.state.taskDetails
@@ -316,7 +315,7 @@ class LicenseEditRequest extends Component {
         let i = 0
         if (person !== "") {
             this.state.seniorManagersList.map((head, index) => {
-                if (head.value === person) {
+                if (head.label === person) {
                     i = index
                 }
             })
@@ -598,7 +597,8 @@ class LicenseEditRequest extends Component {
 
                                 <FormGroup>
                                     <Label>Reciever Mobile Phone</Label>
-                                    <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="text" />
+                                    ]<input type="number" id="phoneNumber"></input>
+                                    <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="number" />
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.expDeliveryMobileNo, 'required')}</small>
                                 </FormGroup>
 

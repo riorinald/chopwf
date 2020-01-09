@@ -47,13 +47,13 @@ class LicenseInstructions extends Component {
         this.onExiting = this.onExiting.bind(this);
         this.onExited = this.onExited.bind(this);
         this.makeEditable = this.makeEditable.bind(this);
-        this.getInstructions = this.getInstructions.bind(this);
+        this.getUserInstructions = this.getUserInstructions.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleFileUpload = this.handleFileUpload.bind(this);
     }
 
     componentDidMount() {
-        this.getInstructions()
+        // this.getInstructions()
         this.getUserInstructions()
         this.updateWindowDimensions();
         window.addEventListener("resize", this.updateWindowDimensions.bind(this));
@@ -67,29 +67,29 @@ class LicenseInstructions extends Component {
 
     async getUserInstructions() {
         const res = await Axios.get(`${config.url}/userinstructions/chop`)
-        console.log(res.data)
+        
     }
 
-    async getInstructions() {
-        const response = await Axios.get('http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/2')
-        let instructions = response.data
-        this.setState({ summary: instructions.summary, applicantInstructions: instructions.section1, approverInstructions: instructions.section2 })
-        instructions.screenshot.map((shot, index) => {
-            let obj = {
-                name: `Screenshot ${index + 1}`,
-                src: shot,
-                altText: `Slide ${index + 1}`,
-                caption: `Slide ${index + 1}`
-            }
-            this.setState(state => {
-                const screenshots = state.screenshots.concat(obj)
-                return {
-                    screenshots
-                }
-            })
+    // async getInstructions() {
+    //     const response = await Axios.get('http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/2')
+    //     let instructions = response.data
+    //     this.setState({ summary: instructions.summary, applicantInstructions: instructions.section1, approverInstructions: instructions.section2 })
+    //     instructions.screenshot.map((shot, index) => {
+    //         let obj = {
+    //             name: `Screenshot ${index + 1}`,
+    //             src: shot,
+    //             altText: `Slide ${index + 1}`,
+    //             caption: `Slide ${index + 1}`
+    //         }
+    //         this.setState(state => {
+    //             const screenshots = state.screenshots.concat(obj)
+    //             return {
+    //                 screenshots
+    //             }
+    //         })
 
-        })
-    }
+    //     })
+    // }
 
 
     onExiting() {

@@ -76,18 +76,18 @@ class LicenseMyPendingTasks extends Component {
 
     async getLicenseNames() {
 
-        const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`,{headers: { Pragma: 'no-cache'}})
+        const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
         this.setState({ licenseNames: res.data })
     }
 
     async getData(name) {
         let res = null
         if (name === "departments") {
-            res = await Axios.get(`${config.url}/${name}`,{headers: { Pragma: 'no-cache'}})
+            res = await Axios.get(`${config.url}/${name}`, { headers: { Pragma: 'no-cache' } })
         }
         else if (name === "seniorManagers") {
             res = await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
-            {headers: { Pragma: 'no-cache'}})
+                { headers: { Pragma: 'no-cache' } })
         }
 
         this.setState({ [name]: res.data })
@@ -95,7 +95,7 @@ class LicenseMyPendingTasks extends Component {
 
     goToDetails(taskId, status) {
 
-        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACK") {
+        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACKED") {
             this.props.history.push({
                 pathname: `mypendingtask/edit`,
                 state: { redirected: true, taskId: taskId }

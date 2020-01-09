@@ -77,24 +77,24 @@ class LicenseApplication extends Component {
 
     async getLicenseNames() {
 
-        const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`,{headers: { Pragma: 'no-cache'}})
+        const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
         this.setState({ licenseNames: res.data })
     }
 
     async getData(name) {
         let res = null
         if (name === "departments") {
-            res = await Axios.get(`${config.url}/${name}`,{headers: { Pragma: 'no-cache'}})
+            res = await Axios.get(`${config.url}/${name}`, { headers: { Pragma: 'no-cache' } })
         }
         else if (name === "seniorManagers") {
             res = await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
-            {headers: { Pragma: 'no-cache'}})
+                { headers: { Pragma: 'no-cache' } })
         }
 
         this.setState({ [name]: res.data })
     }
     goToDetails(taskId, status) {
-        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACK") {
+        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACKED") {
             this.props.history.push({
                 pathname: `admin-apps/edit`,
                 state: { redirected: true, taskId: taskId }
@@ -113,7 +113,7 @@ class LicenseApplication extends Component {
         const searchOption = this.state.searchOption
         this.setState({ loading: true })
         await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&category=all&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}`,
-        {headers: { Pragma: 'no-cache'}})
+            { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 this.setState({ licenseApplication: res.data, loading: false })
             })

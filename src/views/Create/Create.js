@@ -917,15 +917,15 @@ class Create extends Component {
 
     var value = event.target.value;
 
-      // if (/^..[AaLlRr]/.test(value)){
-      //   this.setState({
-      //     inputMask: "a-a-a-9999-9999",
-      //     })
-      //   }
-      let mask = "a-a-a-9999-9999"
-      if (/^..[Ii]/.test(value)){
-        mask = "a-aA-a-9999-9999";
-      } 
+    // if (/^..[AaLlRr]/.test(value)){
+    //   this.setState({
+    //     inputMask: "a-a-a-9999-9999",
+    //     })
+    //   }
+    let mask = "a-a-a-9999-9999"
+    if (/^..[Ii]/.test(value)) {
+      mask = "a-aA-a-9999-9999";
+    }
     this.setState({
       viewContract: true,
       inputMask: mask,
@@ -1292,6 +1292,42 @@ class Create extends Component {
   //scroll To Function
   // scrollToRef = (ref) => window.scrollTo(0, ref)
 
+  viewOrDownloadFile(file) {
+    if (file) {
+      var blobUrl = new Blob([file], { type: file.type })
+      if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveOrOpenBlob(blobUrl, file.name)
+        return;
+      }
+      else {
+        window.open(URL.createObjectURL(file), "_blank")
+      }
+    }
+    else {
+      alert("No File detected! :( ")
+    }
+  }
+
+  dataURLtoFile(dataurl, filename) {
+    if (dataurl !== "") {
+      var arr = dataurl.split(','),
+        mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]),
+        n = bstr.length,
+        u8arr = new Uint8Array(n);
+
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+
+      return new File([u8arr], filename, { type: mime });
+    }
+    else {
+      alert("BASE64 String is empty :(")
+      return null
+    }
+  }
+
   render() {
     this.validator.purgeFields();
     const deptHeads = []
@@ -1380,7 +1416,7 @@ class Create extends Component {
               <td><div>{document.engName}</div></td>
               <td><div>{document.cnName}</div></td>
               <td id="viewDoc">
-                <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
@@ -1409,7 +1445,7 @@ class Create extends Component {
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
-                <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableCNIPS", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
@@ -1534,7 +1570,9 @@ class Create extends Component {
                   Header: 'Expiry Date',
                   accessor: 'expiryDate',
                   Cell: row => (
-                    <div>  <a href={row.original.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(row.original.expiryDate)}</a>  </div>
+                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(row.original.documentBase64String, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                      {this.convertExpDate(row.original.expiryDate)}
+                    </div>
                   ),
                   // style: { textAlign: "center" },
                 },
@@ -1542,7 +1580,10 @@ class Create extends Component {
                   Header: 'DH Approved',
                   accessor: 'departmentHeads',
                   Cell: row => (
-                    <div>  <a href={row.original.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(row.original.departmentHeads)}</a> </div>
+                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(row.original.documentBase64String, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                      {this.changeDeptHeads(row.original.departmentHeads)}
+                    </div>
+
                   ),
                   // style: { textAlign: "center" },
                 },
@@ -1579,10 +1620,16 @@ class Create extends Component {
                     <td>{document.documentNameEnglish}</td>
                     <td>{document.documentNameChinese}</td>
                     <td id="viewDoc">
-                      <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a>
+                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(document.documentBase64String, document.documentFileName))} >
+                        {this.convertExpDate(document.expiryDate)}
+                      </div>
+                      {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                     </td>
                     <td id="viewDoc">
-                      <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a>
+                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(document.documentBase64String, document.documentFileName))} >
+                        {this.changeDeptHeads(document.departmentHeads)}
+                      </div>
+                      {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
                     </td>
                     <td><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
                   </tr>
