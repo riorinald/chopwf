@@ -15,11 +15,17 @@ import {
     Modal, ModalHeader, ModalBody, ModalFooter
 } from 'reactstrap';
 
-const scope="email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly";
-const client_id="414328176448-a8id4cjtkim0f3ag4nli28hjbcqte4su.apps.googleusercontent.com";
-const redirect_uri="http%3A%2F%2Flocalhost/authenticated"
-const pathname = `https://accounts.google.com/o/oauth2/v2/auth?scope=${scope}&state=state_parameter_passthrough_value&redirect_uri=${redirect_uri}&response_type=token&client_id=${client_id}&authuser=1`;
- 
+// const scope="email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly";
+// const client_id="414328176448-a8id4cjtkim0f3ag4nli28hjbcqte4su.apps.googleusercontent.com";
+// const redirect_uri="http%3A%2F%2Flocalhost/authenticated"
+// const pathname = `https://accounts.google.com/o/oauth2/v2/auth?scope=${scope}&state=state_parameter_passthrough_value&redirect_uri=${redirect_uri}&response_type=token&client_id=${client_id}&authuser=1`;
+
+const scope ="openid"
+const client_id="812da7d2-b74a-484d-82a3-d30ff8ae6f9c"
+const client_secret="5dd084f6-d9da-452a-86ee-45a6d301439f"
+const redirect_uri="https%3A%2F%2Fdocms.es.corpintra.net%2Fclwf%2Flogin%3Fauthhandler%3DDaimler_OpenID"
+const pathname=`https://sso-int.daimler.com/as/authorization.oauth2?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}`
+
 
 class Login extends Component {
     constructor(props) {
@@ -139,10 +145,16 @@ class Login extends Component {
     }
 
     loginWithGoogle = () =>{
-        const scope="email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly";
-        const client_id="414328176448-a8id4cjtkim0f3ag4nli28hjbcqte4su.apps.googleusercontent.com";
-        const redirect_uri="http%3A%2F%2Flocalhost/authenticated"
-        const pathname = `https://accounts.google.com/o/oauth2/v2/auth?scope=${scope}&state=state_parameter_passthrough_value&redirect_uri=${redirect_uri}&response_type=token&client_id=${client_id}&authuser=1`;
+        // const scope="email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly";
+        // const client_id="414328176448-a8id4cjtkim0f3ag4nli28hjbcqte4su.apps.googleusercontent.com";
+        // const redirect_uri="http%3A%2F%2Flocalhost/authenticated"
+        // const pathname = `https://accounts.google.com/o/oauth2/v2/auth?scope=${scope}&state=state_parameter_passthrough_value&redirect_uri=${redirect_uri}&response_type=token&client_id=${client_id}&authuser=1`;
+        const scope ="openid"
+        const client_id="812da7d2-b74a-484d-82a3-d30ff8ae6f9c"
+        const client_secret="5dd084f6-d9da-452a-86ee-45a6d301439f"
+        const redirect_uri="https%3A%2F%2Fdocms.es.corpintra.net%2Fclwf%2Flogin%3Fauthhandler%3DDaimler_OpenID"
+        const pathname=`https://sso-int.daimler.com/as/authorization.oauth2?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}`
+        console.log(pathname)
         var windowpop = window.open(pathname,null, 'height=600,width=450')
         windowpop.focus()
         var newThis = this;
@@ -191,12 +203,11 @@ class Login extends Component {
     render() {
         const { redirectToReferrer } = this.state
         const src = queryString.parse(this.props.location.search)
-        console.log(src)
+
         if (src.code){
             console.log('code acquired!', src.code)
+            return <Redirect to={{pathname:`/authenticated`, code:src.code}} />
         }
-        if(this.props.location.search === '?authhandler=Daimler_OpenID')
-            return <Redirect to={'/authenticated'} />
         if (redirectToReferrer) {
             console.log("redirect")
             return <Redirect to={'/portal'} />
@@ -243,12 +254,12 @@ class Login extends Component {
                         <Row noGutters>
                             <Col className="text-center">
                                 <Button className="btn-openid btn-brand" onClick= {this.loginWithGoogle}>
-                                    <i className="fa fa-openid"></i><span>Google OpenID </span>
+                                    <i className="fa fa-openid"></i><span>OpenID Auth</span>
                                 </Button>
                             </Col>
                             <Col className="text-center">
-                                <Button className="btn-google-plus btn-brand" onClick= {event =>  window.location.href = pathname} >
-                                    <i className="fa fa-google-plus"></i><span>Google Account</span>
+                                <Button className="btn-openid btn-brand" onClick= {event =>  window.location.href = pathname} >
+                                    <i className="fa fa-openid"></i><span>OpenID Auth</span>
                                 </Button>
                             </Col>
                         </Row>
