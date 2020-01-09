@@ -42,14 +42,14 @@ class LicenseApplicationDetail extends Component {
         }
         else {
             this.setState({ page: this.props.match.params.page })
-            this.getTaskDetails(this.props.match.params.taskId)
+            this.getTaskDetails(this.props.location.state.taskId)
         }
     }
 
 
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
-        await Axios.get(`http://192.168.1.47/echopx/api/v1/licenses/${taskId}?userId=${localStorage.getItem("userId")}`)
+        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem("userId")}`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 console.log(res.data)
                 let currentStatusArr = res.data.allStages.filter(stage => stage.state === "CURRENT")
@@ -64,8 +64,18 @@ class LicenseApplicationDetail extends Component {
         })
     }
 
-    capitalize(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
+
+    convertDate(dateValue) {
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        return regEx
+    }
+
+    convertMgrs(data) {
+        let temp = ""
+        data.map(key => {
+            temp = temp + key.label + "; "
+        })
+        return temp
     }
 
     validate() {
@@ -121,18 +131,47 @@ class LicenseApplicationDetail extends Component {
             // }
         }
         else if (this.state.currentStatus === "PENDINGREQUESTORRETURN") {
-            if (this.state.deliverWay === "Express") {
-                if (this.state.expressNumber !== "") {
+            if (this.state.taskDetails.documentTypeId === "ORIGINAL") {
+                if (this.state.deliverWay === "Express") {
+                    if (this.state.expressNumber !== "") {
+                        valid = true
+                    }
+                    else {
+                        valid = false
+                        Swal.fire({
+                            title: "No Express Number",
+                            html: "Please add Express Number !",
+                            type: "warning"
+                        })
+                    }
+                }
+                else if (this.state.deliverWay === "F2F") {
                     valid = true
                 }
                 else {
                     valid = false
                     Swal.fire({
-                        title: "No Express Number",
-                        html: "Please add Express Number !",
+                        title: "No Delivery Way Selected",
+                        html: "Please select a way of delivery !",
                         type: "warning"
                     })
                 }
+            }
+            else if (this.state.taskDetails.documentTypeId === "SCANCOPY") {
+                valid = true
+            }
+        }
+
+        return valid
+    }
+
+    updated(action) {
+        console.log(action)
+        let valid = false
+        if (this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
+
+            if (action === "approve" || action === "requestorreturn") {
+                valid = this.validate()
             }
             else {
                 valid = true
@@ -141,20 +180,10 @@ class LicenseApplicationDetail extends Component {
         else {
             valid = true
         }
-        return valid
-    }
-
-    updated(action) {
-        let valid = false
-        if (action === "approve") {
-            valid = this.validate()
-        }
-        else {
-            valid = true
-        }
         let postReq = new FormData();
         postReq.append("UserId", localStorage.getItem("userId"));
         postReq.append("Comments", this.state.comments);
+        postReq.append("ReturnWay", this.state.deliverWay);
         postReq.append("ExpressNumber", this.state.expressNumber);
         postReq.append("ExpressAddress", this.state.taskDetails.expDeliveryAddress);
         for (let i = 0; i < this.state.documents.length; i++) {
@@ -171,7 +200,7 @@ class LicenseApplicationDetail extends Component {
 
         if (valid) {
 
-            Axios.post(`${config.url}/licenses/${this.props.match.params.taskId}/${action}`, postReq, { headers: { 'Content-Type': 'multipart/form-data' } })
+            Axios.post(`${config.url}/licenses/${this.props.location.state.taskId}/${action}`, postReq, { headers: { 'Content-Type': 'multipart/form-data' } })
                 .then(res => {
                     Swal.fire({
                         title: res.data.message,
@@ -201,6 +230,12 @@ class LicenseApplicationDetail extends Component {
     handleChange = name => event => {
         let value = event.target.value
         this.setState({ [name]: value })
+    }
+
+    convertApprovedDate(dateValue) {
+
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\w{2})/g, '$1/$2/$3 $4:$5 $6')
+        return regEx
     }
 
     uploadDocument(event) {
@@ -240,9 +275,21 @@ class LicenseApplicationDetail extends Component {
         }
     }
 
+    viewOrDownloadFile(file) {
+        var blobUrl = new Blob([file], { type: file.type })
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(blobUrl, file.name)
+            return;
+        }
+        else {
+            window.open(URL.createObjectURL(file), "_blank")
+        }
+    }
+
+
 
     render() {
-        const { taskDetails, redirect, approvalHistories, loading, page, currentStatus, expressNumber, deliverWay, documents } = this.state
+        const { taskDetails, loading, page, currentStatus, expressNumber, deliverWay, documents } = this.state
         return (
             <div>
                 {!loading ?
@@ -250,19 +297,20 @@ class LicenseApplicationDetail extends Component {
                         <CardHeader>
                             <Row className="align-items-left">
                                 <Button className="mr-1" color="primary" onClick={() => this.goBack()}><i className="fa fa-angle-left" /> Back </Button>
-                                {page === "myapplication" ? <div>
-                                    {taskDetails.actions.map((action, index) =>
-                                        <Button
-                                            key={index}
-                                            className="mr-1"
-                                            color={action.action === "recall" ? "danger" : action.action === "copy" ? "light-blue" : "warning"}
-                                            onClick={() => this.updated(action.action)}
-                                        >
-                                            <i className={action.action === " recall" ? "icon-loop" : action.action === "copy" ? "fa fa-copy" : "icon-bell"} />
-                                            {action.actionName}
-                                        </Button>
-                                    )}
-                                </div>
+                                {page === "myapplication" ?
+                                    currentStatus !== "PENDINGREQUESTORACK" && currentStatus !== "PENDINGREQUESTORRETURN"
+                                        ? taskDetails.actions.map((action, index) =>
+                                            <Button
+                                                key={index}
+                                                className="mr-1"
+                                                color={action.action === "recall" ? "danger" : action.action === "copy" ? "light-blue" : "warning"}
+                                                onClick={() => this.updated(action.action)}
+                                            >
+                                                <i className={action.action === " recall" ? "icon-loop" : action.action === "copy" ? "fa fa-copy" : "icon-bell"} />&nbsp;
+                                                {action.actionName}
+                                            </Button>
+                                        )
+                                        : null
                                     : null}
                             </Row></CardHeader>
                         <CardBody>
@@ -277,7 +325,7 @@ class LicenseApplicationDetail extends Component {
                                                     bar
                                                     animated={stage.state === "CURRENT" ? true : false}
                                                     striped={stage.state === "FINISHED"}
-                                                    color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
+                                                    color={stage.state === "CURRENT" ? "green" : stage.state === "FINISHED" ? "secondary" : "warning  "}
                                                     value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
                                                 </Progress>
                                             </React.Fragment>
@@ -291,9 +339,9 @@ class LicenseApplicationDetail extends Component {
                             <Row className="mb-4">
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col xs={12} sm={12} md={4} lg={2}>
-                                            <img src={'../../assets/img/avatars/5.jpg'} className="img-avaa img-responsive center-block" alt="admin@bootstrapmaster.com" />
-                                        </Col>
+                                        {/* <Col xs={12} sm={12} md={4} lg={2}>
+                                            <img src={taskDetails.histories[0].approvedByAvatarUrl} className="img-avaa img-responsive center-block" alt="picture" />
+                                        </Col> */}
                                         <Col md><h5> {taskDetails.employeeName} </h5>
                                             <Row>
                                                 <Col md><h6> DFS/CN, MBAFC </h6></Col>
@@ -335,8 +383,7 @@ class LicenseApplicationDetail extends Component {
                                         <Label>License Name</Label>
                                     </Col>
                                     <Col md lg>
-                                        {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
-                                        <Input disabled type="text" name="text-input" placeholder="EMPTY DATA" />
+                                        <Input disabled type="text" name="text-input" value={taskDetails.licenseName} placeholder="EMPTY DATA" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Purpose</Label>
@@ -358,7 +405,7 @@ class LicenseApplicationDetail extends Component {
                                                 <Label>Planned Return Date</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={taskDetails.plannedReturnDate} name="text-input" placeholder="EMPTY DATA" />
+                                                <Input disabled type="text" defaultValue={this.convertDate(taskDetails.plannedReturnDate)} name="text-input" placeholder="EMPTY DATA" />
                                             </Col>
                                         </>
                                         : <>
@@ -393,12 +440,12 @@ class LicenseApplicationDetail extends Component {
                                         <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
                                     <Col md lg>
-                                        <Label>Return Ways</Label>
+                                        <Label>Deliver Express Number</Label>
                                     </Col>
                                     <Col md lg>
-                                        {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
-                                        <Input disabled type="text" name="text-input" placeholder="NO VALUE FROM API" />
+                                        <Input disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
                                     </Col>
+
                                 </FormGroup>
                                 <FormGroup row>
                                     <Col md lg>
@@ -408,11 +455,10 @@ class LicenseApplicationDetail extends Component {
                                         <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
                                     <Col md lg>
-                                        <Label>Deliver Express Number</Label>
+                                        <Label>Return Way</Label>
                                     </Col>
                                     <Col md lg>
-                                        {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
-                                        <Input disabled type="text" name="text-input" placeholder="NO VALUE FROM API" />
+                                        <Input disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -420,14 +466,13 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Senior Manager or above of Requestor Department</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.seniorManager} name="text-input" placeholder="EMPTY DATA" />
+                                        <Input disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="EMPTY DATA" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Return Express Number</Label>
                                     </Col>
                                     <Col md lg>
-                                        {/* DEFAULT VALUE IS NOT ADDED - MISSING VALUE FROM API */}
-                                        <Input disabled type="text" name="text-input" placeholder="NO VALUE FROM API" />
+                                        <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
                                     </Col>
                                 </FormGroup>
                             </Col>
@@ -461,7 +506,7 @@ class LicenseApplicationDetail extends Component {
                                                         &nbsp;
                                                     <Collapse isOpen={documents.length !== 0}>
                                                             {documents.map((doc, index) =>
-                                                                <div key={index} > <a href={doc.url} target='_blank' rel="noopener noreferrer">{doc.fileName}</a> </div>
+                                                                <div key={index} style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(doc.file)}> {doc.fileName} </div>
                                                             )}
                                                         </Collapse>
                                                     </FormGroup>
@@ -470,11 +515,24 @@ class LicenseApplicationDetail extends Component {
                                         </Row>
                                         : currentStatus === "PENDINGREQUESTORRETURN"
                                             ? <Row>
-                                                <FormGroup >
-                                                    <Label>Deliver Way</Label>
-                                                    <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
-                                                    <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number" />
-                                                </FormGroup>
+                                                <Col>
+                                                    <FormGroup onChange={this.handleRadio} >
+                                                        <Label>Return Way</Label>
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
+                                                            <Collapse isOpen={deliverWay === "Express"}>
+                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
+                                                                <Row> &nbsp; </Row>
+                                                                {/* <div>Reciever: </div>
+                                                                <div>Address: </div>
+                                                                <div>Mobile No. :</div> */}
+                                                                <div>Express Number: {expressNumber} </div>
+
+                                                            </Collapse>
+                                                        </CustomInput>
+
+                                                    </FormGroup>
+                                                </Col>
                                             </Row>
                                             : null
                                     }
@@ -495,7 +553,79 @@ class LicenseApplicationDetail extends Component {
                                         )}
                                     </Row>
                                 </div>
-                                : null}
+
+                                : page === "myapplication"
+                                    ? <div>
+                                        {currentStatus === "PENDINGREQUESTORRETURN"
+                                            ? <Row>
+                                                <Col>
+                                                    <FormGroup onChange={this.handleRadio} >
+                                                        <Label>Return Way</Label>
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
+                                                            <Collapse isOpen={deliverWay === "Express"}>
+                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
+                                                                <Row> &nbsp; </Row>
+                                                                {/* <div>Reciever: </div>
+                                                            <div>Address: </div>
+                                                            <div>Mobile No. :</div> */}
+                                                                <div>Express Number: {expressNumber} </div>
+
+                                                            </Collapse>
+                                                        </CustomInput>
+
+                                                    </FormGroup>
+                                                </Col>
+                                            </Row>
+                                            : null}
+                                        {currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
+                                            ?
+                                            taskDetails.actions.map((action, index) =>
+                                                <Button
+                                                    key={index}
+                                                    className="mr-1"
+                                                    color="success"
+                                                    onClick={() => this.updated(action.action)}
+                                                >
+                                                    {action.actionName}
+                                                </Button>
+                                            )
+                                            : null}
+
+                                    </div>
+                                    : null}
+                            {currentStatus === "COMPLETED"
+                                ?
+                                <Collapse isOpen={taskDetails.documents.length !== 0}>
+                                    <Col className="mb-4">
+                                        <FormGroup>
+                                            <Label>Documents</Label>
+                                            <Table responsive hover bordered size="sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th className="smallTd">#</th>
+                                                        <th>Attached File</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {taskDetails.documents.map((doc, index) =>
+                                                        <tr key={index} >
+                                                            <td className="smallTd"> {index + 1} </td>
+                                                            <td>
+                                                                {/* <div onClick={() => this.viewOrDownloadFile(doc.docSelected)} > {doc.documentName} </div> */}
+                                                                <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+
+                                                </tbody>
+                                            </Table>
+                                        </FormGroup>
+                                    </Col>
+                                </Collapse>
+                                // </Row>
+                                : ""
+                            }
                         </CardBody>
                         <CardFooter>
                             <Row><Col><h4>Approval History</h4></Col></Row>
@@ -503,12 +633,12 @@ class LicenseApplicationDetail extends Component {
                                 <div key={index}>
                                     <Row className="bottom-border"></Row>
                                     <Row>
-                                        <Col md="1">
-                                            <img src={history.avatar} className="img-avatar" alt="Avatar" />
-                                        </Col>
+                                        {/* <Col md="1">
+                                            <img src={history.approvedByAvatarUrl} className="img-avatar" alt="Avatar" />
+                                        </Col> */}
                                         <Col md="8">
-                                            <h5>{history.name} (000)<span> <Badge color="success">{history.status}</Badge></span></h5>
-                                            <div><b>Approved On:</b> {history.updatedAt}</div>
+                                            <h5>{history.approvedByName} (000)<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
+                                            <div><b>Approved On:</b> {this.convertApprovedDate(history.approvedDate)}</div>
                                             <small>{history.comments}</small>
                                         </Col>
                                     </Row>

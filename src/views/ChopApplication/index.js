@@ -41,7 +41,6 @@ class ChopApplication extends Component {
       limit: 20,
       totalPages: 3,
 
-      collapse: true,
       modal: false,
 
       filtered: [],
@@ -55,7 +54,6 @@ class ChopApplication extends Component {
       validDate: true,
 
       applications: [],
-      applicationDetail: {},
       selectedId: null,
 
       searchOption: {
@@ -101,29 +99,22 @@ class ChopApplication extends Component {
     this.getApplications(1, 20);
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
+    this.getStatusList();
 
   }
 
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: !this.state.loading })
-    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`).then(res => {
-      this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.numOfPages === 0 ? 1 : res.data.numOfPages })
-      console.log(res.data)
-    })
-  }
-
-  async getAppDetails(id) {
-    this.setState({ loading: !this.state.loading })
-    // await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`)
-    await Axios.get(`${config.url}/tasks/5328c220-1f99-4da0-9e12-3e8d29441acd?userid=rio@otds.admin`)
-      .then(res => {
-        this.setState({ applicationDetail: res.data, collapse: !this.state.collapse })
+    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
+      { headers: { Pragma: 'no-cache' } }).then(res => {
+        this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.pageCount === 0 ? 1 : res.data.pageCount })
+        console.log(res.data)
       })
   }
 
   async getData(state, url) {
     try {
-      const response = await Axios.get(url);
+      const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } });
       this.setState({
         [state]: response.data
       })
@@ -147,6 +138,11 @@ class ChopApplication extends Component {
     }
 
     return Math.min(maxWidth, Math.max(max, headerText.length) * magicSpacing);
+  }
+
+  async getStatusList() {
+    const res = await Axios.get(`${config.url}/statuses`)
+    this.setState({ status: res.data })
   }
 
   getDeptHeads(heads) {
@@ -264,11 +260,18 @@ class ChopApplication extends Component {
     })
   };
 
-  exportLogs() {
+  async exportLogs() {
     let from = this.state.exportDate.exportFrom
     let to = this.state.exportDate.exportTo
+    console.log(from, to)
     if (from !== "" && to !== "") {
-      console.log(`Exporting Logs from ${this.convertDate(from)} to ${this.convertDate(to)}`)
+      let url = `${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${localStorage.getItem('userId')}`
+      window.open(url, "_blank")
+      console.log(`Exporting Logs from ${from} to ${to}`)
+      // await Axios.get(`${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${localStorage.getItem('userId')}`)
+      //   .then(res => {
+      //     // console.log(res.data.fileContents)
+      //   })
       this.toggleModal()
       this.setState({ validDate: true })
       return true;
@@ -288,7 +291,7 @@ class ChopApplication extends Component {
   }
 
   render() {
-    const { applications, collapse, selectedId, modal, exportFromDateView, exportToDateView, exportDate, validDate } = this.state
+    const { applications, modal, exportFromDateView, exportToDateView, exportDate, validDate, totalPages } = this.state
     // let columnData = Object.keys(applications[0])
     if (this.props.roleId === "REQUESTOR")
       return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
@@ -425,7 +428,7 @@ class ChopApplication extends Component {
                       <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
                         <option value="" >Please Select a status</option>
                         {this.state.status.map((stat, index) =>
-                          <option key={index} value={stat} >{stat}</option>
+                          <option key={index} value={stat.statusName} >{stat.statusName}</option>
                         )}
                       </Input>
                     )
@@ -450,17 +453,14 @@ class ChopApplication extends Component {
                 }
               ]}
               defaultPageSize={20}
-              // page={this.state.page}
-              // pageSize={this.state.limit}
               manual
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {
-                // console.log(pageSize, page + 1)
                 this.setState({ limit: pageSize, page: page + 1 });
                 this.getApplications(page + 1, pageSize)
               }}
               loading={this.state.loading}
-              pages={Math.round(53 / this.state.limit)}
+              pages={totalPages}
               // onFetchData={(state, instance) => {
               //   console.log(state.page, state.pageSize)
               //   // this.setState({loading: true})
@@ -570,7 +570,8 @@ class ChopApplication extends Component {
               </div>
               : null
             }
-            <CSVLink
+            <Button color="primary" onClick={this.exportLogs} >Export Logs</Button>
+            {/* <CSVLink
               data={applications}
               filename={`CHOP${this.props.legalName}${this.getCurrentDate()}.csv`}
               className="btn btn-primary"
@@ -579,7 +580,7 @@ class ChopApplication extends Component {
                 return this.exportLogs()
               }}
             >
-              Export Logs </CSVLink>
+              Export Logs </CSVLink> */}
             {/* <Button color="primary" onClick={this.exportLogs}>Export Logs</Button>{' '} */}
             <Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
           </ModalFooter>

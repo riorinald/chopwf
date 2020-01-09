@@ -17,7 +17,8 @@ import {
     Collapse
 } from 'reactstrap';
 import config from '../../../config';
-
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 class LicenseApplication extends Component {
     constructor(props) {
@@ -37,37 +38,37 @@ class LicenseApplication extends Component {
                 createdDate: "",
                 createdByName: ""
             },
+            returnDateView: "",
+            createdDateView: "",
             loading: false,
             filtered: [],
             seniorManagers: [],
             departments: [],
             licenseNames: [],
-            status: [
-                "Recall",
-                "Pending for Document check by (L4 or above) Approval ",
-                "Pending for Department Head Approval",
-                "Bring the Original Documents for Chop",
-                "Pending for Chop Owner Approval",
+            statusName: [
+                "Recalled",
+                "Pending for Senior Manager or above approval",
+                "Pending for License Administrator Acknowledge Lend Out",
                 "Send Back to Requestor",
                 "Rejected",
-                "Pending for Chop Keeper Acknowledge Lend Out",
-                "Pending Chop Keeper Acknowledge Return",
+                "Requestor Received",
+                "Pending Requestor Return/ Extend",
                 "Completed",
                 "Draft",
-                "Pending Requestor Return/Extension",
-                "Pending Department Head Approval for Extension",
-                "Pending Chop Keeper Approval for extension",
-                "Pending Chop Owner Approval for extension",
-                "Chop request expired after 30 days",
+                "Pending for License Administrator acknowledge return",
+                "Pending Senior Manager Approval for extension",
+                "Pending License Administrator Approval for extension",
+                "License request expired after 30 days",
                 "Pending Requestor Return"
             ]
         }
         this.onFilteredChangeCustom = this.onFilteredChangeCustom.bind(this)
+        this.getLicenseApplications = this.getLicenseApplications.bind(this)
 
     }
 
     componentDidMount() {
-        this.getMyApplications()
+        this.getLicenseApplications()
         this.getLicenseNames();
         this.getData('seniorManagers');
         // this.getSeniorManagers();
@@ -76,40 +77,43 @@ class LicenseApplication extends Component {
 
     async getLicenseNames() {
 
-        const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`)
+        const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
         this.setState({ licenseNames: res.data })
     }
 
     async getData(name) {
         let res = null
         if (name === "departments") {
-            res = await Axios.get(`${config.url}/${name}`)
+            res = await Axios.get(`${config.url}/${name}`, { headers: { Pragma: 'no-cache' } })
         }
         else if (name === "seniorManagers") {
-            res = await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+            res = await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
+                { headers: { Pragma: 'no-cache' } })
         }
 
         this.setState({ [name]: res.data })
     }
     goToDetails(taskId, status) {
-        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACK") {
+        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACKED") {
             this.props.history.push({
-                pathname: `admin-apps/edit/${taskId}`,
-                state: { redirected: true }
+                pathname: `admin-apps/edit`,
+                state: { redirected: true, taskId: taskId }
             })
         }
         else {
             this.props.history.push({
-                pathname: `admin-apps/${taskId}`,
-                state: { redirected: true }
+                pathname: `admin-apps/details`,
+                state: { redirected: true, taskId: taskId }
             })
         }
 
     }
 
     async getLicenseApplications() {
+        const searchOption = this.state.searchOption
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&category=all`)
+        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&category=all&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}`,
+            { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 this.setState({ licenseApplication: res.data, loading: false })
             })
@@ -143,6 +147,14 @@ class LicenseApplication extends Component {
         this.setState({ filtered: filtered });
     };
 
+    converManagers(data) {
+        let temp = ""
+        data.map(key => {
+            temp = temp + key.label + "; "
+        })
+        return temp
+    }
+
 
     getColumnWidth = (accessor, headerText) => {
         let { licenseApplication } = this.state
@@ -175,7 +187,8 @@ class LicenseApplication extends Component {
                 searchOption
             }
         })
-        this.getLicenseApplications()
+        console.log(this.state.searchOption)
+        // this.search()
     }
 
     handleKeyDown = (e) => {
@@ -184,8 +197,22 @@ class LicenseApplication extends Component {
         }
     }
 
+    dateChange = (name, view) => date => {
+        let dates = ""
+        if (date) {
+            let month = date.getMonth()
+            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+        }
+        this.setState({ [view]: date });
+        this.setState(state => {
+            let searchOption = this.state.searchOption
+            searchOption[name] = dates
+            return searchOption
+        })
+    };
+
     render() {
-        const { licenseApplication, licenseNames, seniorManagers, departments, status } = this.state
+        const { licenseApplication, licenseNames, seniorManagers, departments, statusName, returnDateView, createdDateView } = this.state
         return (
             <div className="animated fadeIn" >
                 <h4>License Applications</h4>
@@ -195,6 +222,7 @@ class LicenseApplication extends Component {
                         <ReactTable
                             data={licenseApplication}
                             filterable
+                            getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
                             onFilteredChange={(filtered, column, value) => {
                                 this.setState({ filtered: filtered })
                                 this.onFilteredChangeCustom(value, column.id || column.accessor);
@@ -222,7 +250,7 @@ class LicenseApplication extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.licenseName} onChange={this.handleSearch('licenseName')} >
-                                                <option disabled value="">Please Select a License Name</option>
+                                                <option value="">Please Select a License Name</option>
                                                 {licenseNames.map((name, index) =>
                                                     <option key={index} value={name.name}> {name.name} </option>
                                                 )}
@@ -244,7 +272,7 @@ class LicenseApplication extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.documentType} onChange={this.handleSearch('documentType')} >
-                                                <option disabled value="">Please Select a document Type</option>
+                                                <option value="">Please Select a document Type</option>
                                                 <option value="Scan Copy">Scan Copy</option>
                                                 <option value="Original">Original Copy</option>
                                             </Input>
@@ -258,15 +286,32 @@ class LicenseApplication extends Component {
                                     Cell: row => (
                                         <div> {this.convertDate(row.original.plannedReturnDate)} </div>
                                     ),
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                                                className="form-control" dateFormat="yyyy/MM/dd"
+                                                peekNextMonth
+                                                showMonthDropdown
+                                                showYearDropdown
+                                                selected={returnDateView}
+                                                isClearable
+                                                getTheadFilterThProps
+                                                onChange={this.dateChange("plannedReturnDate", "returnDateView")}
+                                            />
+                                        )
+                                    },
                                     style: { textAlign: "center" }
                                 },
                                 {
                                     Header: "Senior Manager or above of Requestor Department",
                                     accessor: `seniorManager`,
                                     width: this.getColumnWidth('seniorManager', "Senior Manager or above of Requestor Department"),
-                                    // Cell: row => (
-                                    //     <div> {row.original.seniorManager} </div>
-                                    // ),
+                                    Cell: row => (
+                                        <div> {this.converManagers(row.original.seniorManagers)} </div>
+                                    ),
                                     style: { textAlign: "center" },
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;
@@ -274,7 +319,7 @@ class LicenseApplication extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.seniorManagerAbove} onChange={this.handleSearch('seniorManagerAbove')} >
-                                                <option disabled value="">Please Select a senior Manager</option>
+                                                <option value="">Please Select a senior Manager</option>
                                                 {seniorManagers.map((mgr, index) =>
                                                     <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
                                                 )}
@@ -292,8 +337,8 @@ class LicenseApplication extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('status')} >
-                                                <option disabled value="">Please Select a status</option>
-                                                {status.map((stat, index) =>
+                                                <option value="">Please Select a status</option>
+                                                {statusName.map((stat, index) =>
                                                     <option key={index} value={stat} > {stat} </option>
                                                 )}
                                             </Input>
@@ -313,6 +358,19 @@ class LicenseApplication extends Component {
                                     accessor: "createdByName",
                                     width: this.getColumnWidth('createdByName', "Created By"),
                                     // Cell: this.renderEditable,
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <Input type="select" value={this.state.searchOption.createdByName} onChange={this.handleSearch('createdByName')} >
+                                                <option value="">Please Select a name</option>
+                                                {seniorManagers.map((mgr, index) =>
+                                                    <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
+                                                )}
+                                            </Input>
+                                        )
+                                    },
                                     style: { textAlign: "center" }
                                 },
                                 {
@@ -322,6 +380,23 @@ class LicenseApplication extends Component {
                                     Cell: row => (
                                         <div> {this.convertDate(row.original.createdDate)} </div>
                                     ),
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                                                className="form-control" dateFormat="yyyy/MM/dd"
+                                                peekNextMonth
+                                                showMonthDropdown
+                                                showYearDropdown
+                                                selected={createdDateView}
+                                                isClearable
+                                                getTheadFilterThProps
+                                                onChange={this.dateChange("createdDate", "createdDateView")}
+                                            />
+                                        )
+                                    },
                                     style: { textAlign: "center" }
                                 },
                                 {

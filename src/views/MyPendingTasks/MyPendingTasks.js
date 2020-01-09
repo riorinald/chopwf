@@ -14,15 +14,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import InputMask from "react-input-mask";
 
 
-let mounted = 0
-let array = []
-
-export const resetMounted = {
-    setMounted() {
-        mounted = 0
-    }
-}
-
 class MyPendingTasks extends Component {
     constructor(props) {
         super(props)
@@ -40,6 +31,8 @@ class MyPendingTasks extends Component {
             chopTypes: [],
 
             filtered: [],
+            totalPages: 1,
+            page: 1,
             limit: 20,
             dateView1: "",
 
@@ -66,25 +59,7 @@ class MyPendingTasks extends Component {
             redirectToUrl: "",
             loading: false,
 
-            status: [
-                "Recall",
-                "Pending for Document check by (L4 or above) Approval ",
-                "Pending for Department Head Approval",
-                "Bring the Original Documents for Chop",
-                "Pending for Chop Owner Approval",
-                "Send Back to Requestor",
-                "Rejected",
-                "Pending for Chop Keeper Acknowledge Lend Out",
-                "Pending Chop Keeper Acknowledge Return",
-                "Completed",
-                "Draft",
-                "Pending Requestor Return/Extension",
-                "Pending Department Head Approval for Extension",
-                "Pending Chop Keeper Approval for extension",
-                "Pending Chop Owner Approval for extension",
-                "Chop request expired after 30 days",
-                "Pending Requestor Return"
-            ]
+            status: []
         }
 
         this.getPendingTasks = this.getPendingTasks.bind(this);
@@ -93,20 +68,27 @@ class MyPendingTasks extends Component {
         this.getData = this.getData.bind(this);
         this.setFilter = this.setFilter.bind(this);
         this.redirectDetails = this.redirectDetails.bind(this);
+        this.getStatusList = this.getStatusList.bind(this);
     }
 
     async componentDidMount() {
         await this.getData("applicationTypes", `${config.url}/apptypes`);
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
+        await this.getStatusList();
         // console.log(mounted)
-        if (mounted === 0) {
-            this.getPendingTasks();
-        }
-        else {
-            this.setState({ loading: !this.state.loading })
-            this.setState({ pendingTasks: array, loading: !this.state.loading })
-        }
-        mounted = mounted + 1
+        // if (mounted === 0) {
+        await this.getPendingTasks(1, 20);
+        // }
+        // else {
+        //     this.setState({ loading: !this.state.loading })
+        //     this.setState({ pendingTasks: array, loading: !this.state.loading })
+        // }
+        // mounted = mounted + 1
+    }
+
+    async getStatusList() {
+        const res = await Axios.get(`${config.url}/statuses`)
+        this.setState({ status: res.data })
     }
 
     convertDate(dateValue) {
@@ -117,7 +99,7 @@ class MyPendingTasks extends Component {
     async getData(state, url) {
 
         try {
-            const response = await Axios.get(url);
+            const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } });
             this.setState({
                 [state]: response.data
             })
@@ -151,14 +133,15 @@ class MyPendingTasks extends Component {
 
 
 
-    async getPendingTasks() {
+    async getPendingTasks(pageNumber, pageSize) {
         this.setState({ loading: !this.state.loading })
         let userId = localStorage.getItem('userId')
         // let userId = "josh@otds.admin"
-        let url = `${config.url}/tasks?category=pending&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`
-        const response = await Axios.get(url)
-        this.setState({ pendingTasks: response.data.tasks, loading: !this.state.loading })
-        array = response.data
+        let url = `${config.url}/tasks?category=pending&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`
+        const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } })
+        this.setState({ pendingTasks: response.data.tasks, totalPages: response.data.pageCount, loading: !this.state.loading })
+        // array = response.data
+
     }
 
     handleSearch = name => event => {
@@ -184,21 +167,23 @@ class MyPendingTasks extends Component {
     }
 
     dateChange = (name, view) => date => {
-        let month = date.getMonth()
+
 
         let dates = ""
         if (date) {
+            let month = date.getMonth()
             dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
         }
+
+        // console.log(this.state.page, this.state.limit)
         this.setState({ [view]: date });
         this.setState(prevState => ({
             searchOption: {
                 ...prevState.searchOption,
                 [name]: dates
             }
-        }),
-            this.getPendingTasks
-        )
+        }))
+        // this.getPendingTasks(this.state.page, this.state.limit)
     };
 
     onFilteredChangeCustom = (value, accessor) => {
@@ -266,12 +251,12 @@ class MyPendingTasks extends Component {
     }
 
     search() {
-        this.getPendingTasks()
+        this.getPendingTasks(this.state.page, this.state.limit)
     }
 
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            this.getPendingTasks()
+            this.getPendingTasks(this.state.page, this.state.limit)
         }
     }
 
@@ -289,7 +274,7 @@ class MyPendingTasks extends Component {
     }
 
     render() {
-        const { pendingTasks } = this.state;
+        const { pendingTasks, totalPages } = this.state;
         const ref = React.createRef()
         const ExampleCustomInput = forwardRef(({ value, onClick }, ref) => (
             <Button color="light" ref={ref} onClick={onClick}>
@@ -310,19 +295,25 @@ class MyPendingTasks extends Component {
                             data={pendingTasks}
                             sortable
                             filterable
-                            loading={this.state.loading}
                             onFilteredChange={(filtered, column, value) => {
                                 this.setFilter(filtered)
                                 this.onFilteredChangeCustom(value, column.id || column.accessor);
                             }}
-                            defaultPageSize={this.state.limit}
                             defaultFilterMethod={(filter, row, column) => {
 
                                 const id = filter.pivotId || filter.id;
                                 return row[id]
                             }}
                             getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
-
+                            defaultPageSize={20}
+                            manual
+                            onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getPendingTasks(e + 1, this.state.limit)) }}
+                            onPageSizeChange={(pageSize, page) => {
+                                this.setState({ limit: pageSize, page: page + 1 });
+                                this.getPendingTasks(page + 1, pageSize)
+                            }}
+                            loading={this.state.loading}
+                            pages={totalPages}
                             columns={[
                                 {
                                     Header: "Request Number",
@@ -436,7 +427,7 @@ class MyPendingTasks extends Component {
                                             <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
                                                 <option value="" >Please Select a status</option>
                                                 {this.state.status.map((stat, index) =>
-                                                    <option key={index} value={stat} >{stat}</option>
+                                                    <option key={index} value={stat.statusName} >{stat.statusName}</option>
                                                 )}
                                             </Input>
 
@@ -500,7 +491,7 @@ class MyPendingTasks extends Component {
                                             // console.log("inside");
                                             // console.log(this.state.rowEdit)
 
-                                            // console.log(`Index = ${rowInfo.index} and Edit = ${this.state.rowEdit} `)
+                                            // console.log(`Index = ${ rowInfo.index } and Edit = ${ this.state.rowEdit } `)
                                             if (rowInfo.index !== this.state.rowEdit) {
                                                 this.setState({
                                                     rowEdit: rowInfo.index,
@@ -522,7 +513,7 @@ class MyPendingTasks extends Component {
                                             }
                                             else {
                                                 this.goToDetails(rowInfo.original.taskId, `/mypendingtask/details/${rowInfo.original.applicationTypeId}`)
-                                                // this.goToDetails(rowInfo.original.taskId, `/mypendingtask/details/CNIPS`)
+                                                // this.goToDetails(rowInfo.original.taskId, `/ mypendingtask / details / CNIPS`)
                                             }
 
                                         },

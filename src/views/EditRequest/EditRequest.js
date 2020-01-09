@@ -22,7 +22,7 @@ import config from '../../config';
 import Axios from 'axios';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import InputMask from "react-input-mask";
 import deleteBin from '../../assets/img/deletebin.png'
 import { AppSwitch } from '@coreui/react';
@@ -33,7 +33,7 @@ import ReactTable from "react-table";
 import "react-table/react-table.css"
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import PropTypes from "prop-types";
-import { resetMounted } from '../MyPendingTasks/MyPendingTasks';
+// import { resetMounted } from '../MyPendingTasks/MyPendingTasks';
 import SimpleReactValidator from 'simple-react-validator';
 import LegalEntity from '../../context';
 
@@ -183,7 +183,8 @@ class EditRequest extends Component {
     }
 
     async getDocCheckBy(deptId, teamId) {
-        const res = await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`)
+        const res = await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
+            { headers: { Pragma: 'no-cache' } })
         for (let i = 0; i < res.data.length; i++) {
             const obj = { value: res.data[i].userId, label: res.data[i].displayName }
             this.setState(state => {
@@ -197,7 +198,8 @@ class EditRequest extends Component {
 
     async getDeptHeads() {
         this.setState({ deptHeads: [] })
-        await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`)
+        await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
+            { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 for (let i = 0; i < res.data.length; i++) {
                     const obj = { value: res.data[i].userId, label: res.data[i].displayName }
@@ -213,14 +215,14 @@ class EditRequest extends Component {
 
     async getTeams(deptId) {
         let url = `${config.url}/teams?companyid=` + this.props.legalName + "&departmentId=" + deptId
-        await Axios.get(url).then(res => {
+        await Axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
             this.setState({ teams: res.data })
         })
     }
 
     async getData(state, url) {
         try {
-            const response = await Axios.get(url);
+            const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } });
             this.setState({
                 [state]: response.data
             })
@@ -244,7 +246,7 @@ class EditRequest extends Component {
 
     async deleteTask() {
         // console.log(this.state.taskDetails.taskId)
-        resetMounted.setMounted()
+        // resetMounted.setMounted()
         Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res => {
             // console.log(res.data)
 
@@ -303,7 +305,7 @@ class EditRequest extends Component {
 
     async getTaskDetails(id) {
         this.setState({ loading: true })
-        const response = await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`)
+        const response = await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`, { headers: { Pragma: 'no-cache' } })
         let temporary = response.data
         if (temporary.departmentId !== "") {
             this.getTeams(temporary.departmentId)
@@ -412,7 +414,7 @@ class EditRequest extends Component {
         let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
         // console.log(url)
         try {
-            await Axios.get(url).then(res => {
+            await Axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
                 this.setState({ documents: res.data })
             })
         } catch (error) {
@@ -622,6 +624,7 @@ class EditRequest extends Component {
                 return { editRequestForm }
             })
         }
+        event.target.value = null
     }
 
     deleteContractNumber(i) {
@@ -674,6 +677,8 @@ class EditRequest extends Component {
                 }
 
                 if (valid) {
+
+
                     const obj = {
                         taskId: this.state.taskDetails.taskId,
                         documentFileName: this.state.editRequestForm.docAttachedName,
@@ -684,6 +689,8 @@ class EditRequest extends Component {
                         updated: "",
                         documentType: "",
                         documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
+                        documentFileType: this.state.editRequestForm.docSelected.type,
+                        documentBase64String: "",
                         expiryDate: null,
                         departmentHeads: null,
                         documentId: rand,
@@ -692,6 +699,12 @@ class EditRequest extends Component {
                         docSelected: this.state.editRequestForm.docSelected,
                         contractNums: this.state.conNum
                     }
+
+                    this.getBase64(this.state.editRequestForm.docSelected, (result) => {
+                        obj.documentBase64String = result
+                    })
+
+                    console.log(obj)
 
                     this.setState(state => {
                         let taskDetails = this.state.taskDetails
@@ -992,11 +1005,10 @@ class EditRequest extends Component {
     }
 
     dateChange = (name, view) => date => {
-        let month = date.getMonth()
-
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+            let tempDate = format(date, "yyyy-MM-dd").split('T')[0];//right
+            dates = tempDate.replace(/-/g, "")
         }
         this.setState({
             [view]: date
@@ -1189,21 +1201,30 @@ class EditRequest extends Component {
     async handleAgreeTerm(event) {
         let checked = event.target.checked
         await this.setValidForm()
-        await this.validate()
+        if (this.state.taskDetails.applicationTypeId !== "") {
+            await this.validate()
+            if (this.validator.allValid()) {
+                this.setState(state => {
+                    let taskDetails = this.state.taskDetails
+                    if (checked) { taskDetails.isConfirm = "Y" }
+                    return { taskDetails }
+                })
+            } else {
+                this.validator.showMessages();
+                this.forceUpdate()
+            }
+        }
+        else {
+            Swal.fire({
+                title: "Application Type not Selected",
+                html: 'Please select an application type to continue!',
+                type: "warning"
+            })
+        }
+
         // console.log(this.state.isValid)
         // console.log(this.validator.allValid())
-        if (this.validator.allValid()) {
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                if (checked) { taskDetails.isConfirm = "Y" }
-                return { taskDetails }
-            })
-        } else {
-            this.validator.showMessages();
-            // rerender to show messages for the first time
-            // you can use the autoForceUpdate option to do this automatically`
-            this.forceUpdate()
-        }
+
     }
 
     async submitRequest(isSubmitted) {
@@ -1293,16 +1314,55 @@ class EditRequest extends Component {
 
         if (isSubmitted === "N") {
             this.postData(postReq, isSubmitted)
-            resetMounted.setMounted()
+            // resetMounted.setMounted()
         }
         else {
             //if all valid = isConfirmed || All Fields are filled
             // console.log(this.state.taskDetails)
             this.postData(postReq, isSubmitted)
-            resetMounted.setMounted()
+            // resetMounted.setMounted()
         }
     }
 
+    dataURLtoFile(dataurl, filename) {
+
+        var arr = dataurl.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]),
+            n = bstr.length,
+            u8arr = new Uint8Array(n);
+
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+
+        return new File([u8arr], filename, { type: mime });
+    }
+
+    viewOrDownloadFile(b64, type, name, url) {
+        if (b64 !== "") {
+            let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+            var blobUrl = new Blob([file], { type: type })
+            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                window.navigator.msSaveOrOpenBlob(blobUrl, name)
+                return;
+            }
+            else {
+                window.open(url, "_blank")
+            }
+        }
+        else {
+            alert("BASE 64 String is empty !!!")
+        }
+    }
+
+    getBase64(file, callback) {
+        let reader = new FileReader();
+        reader.onload = function () {
+            callback(reader.result.replace(/^data:.+;base64,/, ''))
+        };
+        reader.readAsDataURL(file)
+    }
 
 
 
@@ -1375,6 +1435,7 @@ class EditRequest extends Component {
                                         <FormGroup>
                                             <Label>Application Type</Label>
                                             <Input type="select" id="appTypeSelected" onChange={this.handleChange("applicationTypeId")} value={taskDetails.applicationTypeId} name="appType">
+                                                <option value="" disabled>Please select an application type</option>
                                                 {appTypes.map((type, index) =>
                                                     <option key={index} value={type.appTypeId} > {type.appTypeName} </option>
                                                 )}
@@ -1540,10 +1601,12 @@ class EditRequest extends Component {
                                                                             <td>{document.documentNameEnglish}</td>
                                                                             <td>{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a>
+                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.convertExpDate(document.expiryDate)} </div>
+                                                                                {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                                                                             </td>
                                                                             <td id="viewDoc">
-                                                                                <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a>
+                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.changeDeptHeads(document.departmentHeads)} </div>
+                                                                                {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
                                                                             </td>
                                                                             <td class="smallTd" ><img width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} src={deleteBin} /></td>
                                                                         </tr>
@@ -1641,7 +1704,8 @@ class EditRequest extends Component {
                                                                             <td>{document.documentNameEnglish}</td>
                                                                             <td>{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a>
+                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
+                                                                                {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a> */}
                                                                             </td>
                                                                             <td className="smallTd"><img width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} src={deleteBin} /></td>
                                                                         </tr>
@@ -1848,7 +1912,7 @@ class EditRequest extends Component {
                                     </FormGroup>
                                 </Collapse> */}
 
-                                        <Collapse isOpen={taskDetails.applicationTypeId === "STU" || taskDetails.applicationTypeId === "LTI"}>
+                                        <Collapse isOpen={taskDetails.applicationTypeId === "STU" || taskDetails.applicationTypeId === "LTI" || taskDetails.applicationTypeId === ""}>
                                             <FormGroup>
                                                 <Label>Department Heads <i className="fa fa-user" /></Label>
                                                 <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.legalName} entity</small>

@@ -13,8 +13,9 @@ import Axios from 'axios';
 import config from '../../config';
 // import ApplicationDetail from './ApplicationDetail';
 import { Redirect } from 'react-router-dom';
-import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
-
+// import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 class Myapps extends Component {
   constructor(props) {
@@ -28,15 +29,14 @@ class Myapps extends Component {
       selectedRowIndex: [],
 
       loading: false,
+      totalPages: 1,
       page: 1,
       limit: 20,
 
-      collapse: true,
 
       username: localStorage.getItem('userId'),
 
       applications: [],
-      selectedApplication: [],
       applicationDetail: [],
       applicationTypeId: "",
 
@@ -56,25 +56,7 @@ class Myapps extends Component {
         createdByName: ""
       },
 
-      status: [
-        "Recall",
-        "Pending for Document check by (L4 or above) Approval ",
-        "Pending for Department Head Approval",
-        "Bring the Original Documents for Chop",
-        "Pending for Chop Owner Approval",
-        "Send Back to Requestor",
-        "Rejected",
-        "Pending for Chop Keeper Acknowledge Lend Out",
-        "Pending Chop Keeper Acknowledge Return",
-        "Completed",
-        "Draft",
-        "Pending Requestor Return/Extension",
-        "Pending Department Head Approval for Extension",
-        "Pending Chop Keeper Approval for extension",
-        "Pending Chop Owner Approval for extension",
-        "Chop request expired after 30 days",
-        "Pending Requestor Return"
-      ]
+      status: []
 
     }
     this.getApplications = this.getApplications.bind(this);
@@ -82,37 +64,29 @@ class Myapps extends Component {
   }
 
   componentDidMount() {
-    this.getApplications();
-    resetMounted.setMounted();
+    this.getApplications(1, 20);
+    // resetMounted.setMounted();
 
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
+    this.getStatusList();
   }
 
-  async getApplications() {
+  async getStatusList() {
+    const res = await Axios.get(`${config.url}/statuses`)
+    this.setState({ status: res.data })
+  }
+
+  async getApplications(pageNumber, pageSize) {
     this.setState({ loading: true })
     // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
-    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}`)
+    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
+      { headers: { Pragma: 'no-cache' } })
       .then(res => {
-        this.setState({ applications: res.data.tasks, loading: false })
+        this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false })
+        console.log(res.data)
       })
-    // console.log(this.state.applications) 
-    // console.log(Object.keys(this.state.applications[0]))
-  }
 
-  async getAppDetails(id) {
-    this.setState({ loading: !this.state.loading })
-    // let id = this.state.selectedApplication.taskId
-    // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application/${id}`)
-    await Axios.get(`${config.url}/tasks/${id}?userid=${this.state.username}`)
-      .then(res => {
-        let detail = res.data
-        // detail.applicationTypeId = "CNIPS"
-        this.setState({
-          applicationDetail: detail, collapse: !this.state.collapse, applicationTypeId: detail.applicationTypeId
-        })
-
-      })
   }
 
   goToEditRequest(id) {
@@ -130,22 +104,21 @@ class Myapps extends Component {
   }
 
   search = () => {
-    this.getApplications()
+    this.getApplications(this.state.page, this.state.limit)
   }
 
   onKeyPressed = (e) => {
     if (e.key === "Enter") {
-      this.getApplications()
+      this.getApplications(this.state.page, this.state.limit)
     }
   }
 
   goBack(didUpdate) {
     if (didUpdate === true) {
-      this.getApplications()
-      this.setState({ collapse: !this.state.collapse })
+      this.getApplications(this.state.page, this.state.limit)
     }
     else {
-      this.setState({ loading: !this.state.loading, collapse: !this.state.collapse })
+      this.setState({ loading: !this.state.loading })
     }
   }
 
@@ -160,7 +133,7 @@ class Myapps extends Component {
     },
       // console.log(this.state.searchOption)\
     )
-    this.getApplications()
+    this.getApplications(this.state.page, this.state.limit)
   }
 
   getDeptHeads(heads) {
@@ -173,7 +146,7 @@ class Myapps extends Component {
 
   async getData(state, url) {
     try {
-      const response = await Axios.get(url);
+      const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } });
       this.setState({
         [state]: response.data
       })
@@ -186,6 +159,26 @@ class Myapps extends Component {
     let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
     return regEx
   }
+
+  dateChange = (name, view) => date => {
+
+
+    let dates = ""
+    if (date) {
+      let month = date.getMonth()
+      dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+    }
+
+    // console.log(this.state.page, this.state.limit)
+    this.setState({ [view]: date });
+    this.setState(prevState => ({
+      searchOption: {
+        ...prevState.searchOption,
+        [name]: dates
+      }
+    }))
+    // this.getPendingTasks(this.state.page, this.state.limit)
+  };
 
 
   onFilteredChangeCustom = (value, accessor) => {
@@ -234,12 +227,11 @@ class Myapps extends Component {
   }
 
   render() {
-    const { applications, collapse, selectedApplication } = this.state
+    const { applications, totalPages } = this.state
     // let columnData = Object.keys(applications[0])
     return (
       <div className="animated fadeIn">
         <h4>My Applications</h4>
-        {/* {this.state.collapse ? */}
         <Card>
           <CardHeader>MY APPLICATIONS <Button className="float-right" onClick={this.search} >Search</Button>
           </CardHeader>
@@ -251,6 +243,7 @@ class Myapps extends Component {
                 this.setState({ filtered: filtered })
                 this.onFilteredChangeCustom(value, column.id || column.accessor);
               }}
+              getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
               defaultFilterMethod={(filter, row, column) => {
                 const id = filter.pivotId || filter.id;
                 return row[id]
@@ -370,7 +363,7 @@ class Myapps extends Component {
                       <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
                         <option value="" >Please Select a status</option>
                         {this.state.status.map((stat, index) =>
-                          <option key={index} value={stat} >{stat}</option>
+                          <option key={index} value={stat.statusName} >{stat.statusName}</option>
                         )}
                       </Input>
 
@@ -385,6 +378,23 @@ class Myapps extends Component {
                   Cell: row => (
                     <div> {this.convertDate(row.original.createdDate)} </div>
                   ),
+                  filterMethod: (filter, row) => {
+                    return row[filter.id] === filter.value;
+                  },
+                  Filter: ({ filter, onChange }) => {
+                    return (
+                      <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                        className="form-control" dateFormat="yyyy/MM/dd"
+                        peekNextMonth
+                        showMonthDropdown
+                        showYearDropdown
+                        selected={this.state.dateView1}
+                        isClearable
+                        getTheadFilterThProps
+                        onChange={this.dateChange("createdDate", "dateView1")}
+                      />
+                    )
+                  },
                   style: { textAlign: "center" }
                 },
                 {
@@ -406,12 +416,15 @@ class Myapps extends Component {
                   style: { textAlign: "center" }
                 },
               ]}
-              defaultPageSize={this.state.limit}
-              // pages={this.state.page}
-              // manual
-              // onPageChange={(e)=>{this.setState({page: e})}}
-              // canNextpage={true}
+              defaultPageSize={20}
+              manual
+              onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
+              onPageSizeChange={(pageSize, page) => {
+                this.setState({ limit: pageSize, page: page + 1 });
+                this.getApplications(page + 1, pageSize)
+              }}
               loading={this.state.loading}
+              pages={totalPages}
               getTrProps={(state, rowInfo) => {
                 if (rowInfo && rowInfo.row) {
                   return {
@@ -441,10 +454,6 @@ class Myapps extends Component {
                         this.goToDetails(rowInfo.original.taskId, `/myapps/details/${rowInfo.original.applicationTypeId}`)
                       }
 
-
-                      this.setState({ selectedApplication: rowInfo.original })
-
-
                     },
                     style: {
                       background:
@@ -460,16 +469,6 @@ class Myapps extends Component {
             />
           </CardBody>
         </Card>
-        {/* :
-          //  this.props.history.push({pathname:`myapps/${this.state.selectedApplication.requestNum}`, state :{data: this.state.applicationDetail, goBack:this.goBack}})
-          <ApplicationDetail
-            wait={1000}
-            applications={this.state.applicationDetail}
-            type={this.state.applicationTypeId}
-            id={selectedApplication.taskId}
-            goBack={this.goBack}
-            recall={this.recall} />
-        } */}
       </div>
     );
   }

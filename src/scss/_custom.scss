@@ -109,11 +109,11 @@ table {
     width: 100% !important
 }
 
-th, td {
-    border: 1px solid black;
-    min-width: 1px;
-    max-width: 50px;
-}
+// th, td {
+//     border: 1px solid black;
+//     min-width: 1px;
+//     max-width: 50px;
+// }
 
 .smallTd{
     width: 1px;
@@ -122,7 +122,15 @@ th, td {
 }
 
 .mediumTd{
-    width: 8rem;
+    min-width: 128px;
+    max-width: 128px;
     text-align: center; 
     vertical-align: middle;
+}
+
+.descTd{
+    min-width: 50px;
+    max-width: 350px;
+    vertical-align: middle;
+    word-wrap: break-word;
 }

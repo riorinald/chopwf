@@ -1,6 +1,6 @@
 import React, { Component,useEffect } from 'react';
 import LegalEntity from '../../context';
-import Axios from 'axios';
+import axios from 'axios';
 import { Redirect,NavLink } from 'react-router-dom';
 import { fakeAuth } from '../../App';
 import {Card, CardBody, Row} from 'reactstrap';
@@ -14,21 +14,21 @@ class Authenticated extends Component {
     this.state = {
       userDetails:'',
       redirectOuth: false,
+      token: ''
     };
   }
   
   componentDidMount(){
-    // if(this.props.location.hash){
-    //   this.getUserDetails(this.getParameterByName('access_token',this.props.location.hash))
-    // }
-    // else{
-
-    // }
+    const code = this.props.location.code
+    if(code){
+      this.exchangeToken()
+    }
   }
 
-  async getUserDetails(token) {
+  async getGoogleUserDetails(token) {
     this.setState({ loading: true })
-    await Axios.get(`https://www.googleapis.com/oauth2/v3/userinfo?alt=json&access_token=${token}`).then(res => {
+    await axios.get(`https://www.googleapis.com/oauth2/v3/userinfo?alt=json&access_token=${token}`)
+    .then(res => {
         this.setState({ userDetails: res.data, loading: false })
 
         localStorage.setItem('authenticate', true)
@@ -44,6 +44,17 @@ class Authenticated extends Component {
   // const token = JSON.parse(url).access_token
   // console.log(url, token)
 
+  async getUserDetails(token) {
+    await axios.post(`https://sso-int.daimler.com/idp/userinfo.openid`, {headers:{'Authorization': 'Bearer' + token}})
+          .then(res => {
+            console.log(res)
+            this.setState({ userDetails: res.data})
+            localStorage.setItem('userId', res.data.sub)
+          })
+
+      setTimeout(this.redirect, 1000)
+  }
+
   getParameterByName(name, url) {
     name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
     var regex = new RegExp("[\\?&#]" + name + "=([^&#]*)"),
@@ -58,65 +69,45 @@ class Authenticated extends Component {
   }
 
   exchangeToken(){
-    // let code = this.props.location.hash
-    // let data = "grant_type=authorization_code&code="+code;
-    // let xhr = new XMLHttpRequest();
-    // xhr.withCredentials = true;
-    // xhr.addEventListener("readystatechange", function() {
-    //   if(this.readyState === 4) {
-    //     console.log(this.responseText);
-    //   }
-    // });
-    // xhr.open("POST", "https://sso-int.daimler.com/sa/token.oauth2");
-    // xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    // xhr.setRequestHeader("Authorization", "Basic YmFzaWM6T0RFeVpHRTNaREl0WWpjMFlTMDBPRFJrTFRneVlUTXRaRE13Wm1ZNFlXVTJaamxqT2pWa1pEQTROR1kyTFdRNVpHRXRORFV5WVMwNE5tVmxMVFExWVRaa016QXhORE01Wmc9PQ==");
-    // xhr.send(data);
-
     const requestBody = {
       grant_type: 'authorization_code',
       code: this.props.location.code,
-      redirect_uri: "https%3A%2F%2Fdocms.es.corpintra.net%2Fclwf%2Flogin%3Fauthhandler%3DDaimler_OpenID"
+      redirect_uri: "https://docms.es.corpintra.net/clwf/login?authhandler=Daimler_OpenID"
     }
 
     const config = {
-      withCredentials: false,
+      // withCredentials: false,
       headers: {
-        "Authorization": "Basic YmFzaWM6T0RFeVpHRTNaREl0WWpjMFlTMDBPRFJrTFRneVlUTXRaRE13Wm1ZNFlXVTJaamxqT2pWa1pEQTROR1kyTFdRNVpHRXRORFV5WVMwNE5tVmxMVFExWVRaa016QXhORE01Wmc9PQ==",
+        "Authorization": "Basic ODEyZGE3ZDItYjc0YS00ODRkLTgyYTMtZDMwZmY4YWU2ZjljOjVkZDA4NGY2LWQ5ZGEtNDUyYS04NmVlLTQ1YTZkMzAxNDM5Zg==",
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }
     
-    Axios.post(`https://sso-int.daimler.com/as/token.oauth2`, qs.stringify(requestBody), config)
+    axios.post(`https://sso-int.daimler.com/as/token.oauth2`, qs.stringify(requestBody), config)
       .then((result) => {
         console.log(result)
-        this.setState({userDetails:result})
-        localStorage.setItem('at',result.access_token)
-        localStorage.setItem('it',result.id_token)
+        this.setState({token:result.data})
+        localStorage.setItem('at',result.data.access_token)
+        localStorage.setItem('it',result.data.id_token)
         localStorage.setItem('authenticate', true)
         localStorage.setItem('isLicenseAdmin', 'N')
         localStorage.setItem('isChopKeeper', 'Y')
-
-        if (result.data.status === "success") {
-          this.setState({ redirectOuth: true})
-          setTimeout(this.redirect, 1000);
-      }
       })
+      .then(this.getUserDetails(this.state.token.access_token))
       .catch((err) => {
-        console.log(err)
-        console.log(err.data)
-
+        if(err.response){
+          console.log(err.response)
+          console.log(err.response.statusText)}
+        else {
+          console.log(err)
+        }
       })
   }
 
   render(){
-    const code = this.props.location.code
     if (this.state.redirectOuth || localStorage.getItem('userId') ) {
-      console.log("redirect oauth google")
-      // return <Redirect to={`/portal`} />
-    }
-    if (code){
-      console.log(code)
-      this.exchangeToken()
+      console.log("redirect oauth")
+      return <Redirect to={`/portal`} />
     }
     const authenticated = <><label>Authenticated as {this.state.userDetails.given_name || localStorage.getItem('userId')}</label><center>redirecting . . .</center></>
     const notAuth = <label>You are not Authenticated</label> 
