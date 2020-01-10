@@ -345,7 +345,7 @@ class LicenseEditRequest extends Component {
         postReq.append("TelephoneNumber", this.state.taskDetails.telephoneNum);
         postReq.append("CompanyId", this.props.legalName);
         postReq.append("DepartmentId", this.state.taskDetails.departmentId);
-        postReq.append("LicenseName", this.state.taskDetails.licenseNameId);
+        postReq.append("LicenseNameId", this.state.taskDetails.licenseNameId);
         postReq.append("PurposeType", this.state.taskDetails.purposeType);
         postReq.append("PurposeComment", this.state.taskDetails.purposeComment);
         postReq.append("DocumentTypeId", this.state.taskDetails.documentTypeId);
