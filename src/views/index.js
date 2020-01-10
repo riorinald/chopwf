@@ -20,7 +20,7 @@ import {
 
 import { ButtonDropdowns, ButtonGroups, Buttons, BrandButtons } from './Buttons';
 import Charts from './Charts';
-import Dashboard from './Dashboard';
+// import Dashboard from './Dashboard';
 import Create from './Create';
 import { CoreUIIcons, Flags, FontAwesome, SimpleLineIcons } from './Icons';
 import { Alerts, Badges, Modals } from './Notifications';
@@ -50,7 +50,7 @@ export {
   Tabs,
   Tables,
   Charts,
-  Dashboard,
+  // Dashboard,
   Widgets,
   Jumbotrons,
   Switches,

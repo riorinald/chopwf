@@ -17,6 +17,7 @@ import {
     CardHeader,
     ListGroup,
     ListGroupItem,
+    InputGroup,
     CustomInput
 
 } from 'reactstrap';
@@ -25,9 +26,8 @@ import config from '../../../config';
 
 class LicenseInstructions extends Component {
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
-            instructions: {},
             workflow: `${this.props.legalName} WORKFLOWS USER INSTRUCTIONS`,
             summary: "",
             applicantInstructions: [],
@@ -36,9 +36,8 @@ class LicenseInstructions extends Component {
             activeIndex: 0,
             height: 0,
             width: 0,
-            editable: false,
-            loading: false
-        }
+            editable: false
+        };
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         this.next = this.next.bind(this);
         this.next = this.next.bind(this);
@@ -50,11 +49,13 @@ class LicenseInstructions extends Component {
         this.getUserInstructions = this.getUserInstructions.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleFileUpload = this.handleFileUpload.bind(this);
-    }
+    };
 
-    componentDidMount() {
+    async componentDidMount() {
         // this.getInstructions()
-        this.getUserInstructions()
+        await this.getUserInstructions("USERINSTRUCTIONS", "summary")
+        await this.getUserInstructions("APPLICANT", "applicantInstructions")
+        await this.getUserInstructions("APPROVERS", "approverInstructions")
         this.updateWindowDimensions();
         window.addEventListener("resize", this.updateWindowDimensions.bind(this));
     }
@@ -65,31 +66,21 @@ class LicenseInstructions extends Component {
         this.setState({ width: window.innerWidth, height: window.innerHeight });
     }
 
-    async getUserInstructions() {
-        const res = await Axios.get(`${config.url}/userinstructions/chop`)
-        
+    async getUserInstructions(sectionId, name) {
+        const res = await Axios.get(`${config.url}/userinstructions/license/${sectionId}`)
+        if (sectionId === "APPLICANT" || sectionId === "APPROVERS") {
+            let temp = res.data
+            temp.sectionData = temp.sectionData.split(',')
+            console.log(temp.sectionData)
+            this.setState({ [name]: temp.sectionData })
+
+        }
+        else {
+            this.setState({ [name]: res.data.sectionData })
+        }
+
+        // console.log(res.data)
     }
-
-    // async getInstructions() {
-    //     const response = await Axios.get('http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/2')
-    //     let instructions = response.data
-    //     this.setState({ summary: instructions.summary, applicantInstructions: instructions.section1, approverInstructions: instructions.section2 })
-    //     instructions.screenshot.map((shot, index) => {
-    //         let obj = {
-    //             name: `Screenshot ${index + 1}`,
-    //             src: shot,
-    //             altText: `Slide ${index + 1}`,
-    //             caption: `Slide ${index + 1}`
-    //         }
-    //         this.setState(state => {
-    //             const screenshots = state.screenshots.concat(obj)
-    //             return {
-    //                 screenshots
-    //             }
-    //         })
-
-    //     })
-    // }
 
 
     onExiting() {
@@ -127,7 +118,7 @@ class LicenseInstructions extends Component {
 
     addApplicantInstruction = () => {
         this.setState(state => {
-            const applicantInstructions = state.applicantInstructions.concat('Please input the new instructions for Applicants')
+            const applicantInstructions = state.applicantInstructions.concat('')
             return {
                 applicantInstructions
             }
@@ -143,7 +134,7 @@ class LicenseInstructions extends Component {
     }
     addApproverInstruction = () => {
         this.setState(state => {
-            const approverInstructions = state.approverInstructions.concat('Please input the new instructions for Approvers')
+            const approverInstructions = state.approverInstructions.concat('')
             return {
                 approverInstructions
             }
@@ -203,19 +194,33 @@ class LicenseInstructions extends Component {
         })
     }
 
+    updateInstructions(sectionId) {
+        let newFormData = new FormData()
+        if (sectionId === "APPLICANT" || sectionId === "APPROVERS") {
+            let temp = sectionId === "APPLICANT" ? this.state.applicantInstructions : this.state.approverInstructions
+            temp = temp.join()
+            newFormData.append("sectionData", temp)
+        }
+        else {
+            newFormData.append("sectionData", this.state.summary)
+        }
+        Axios.put(`${config.url}/userInstructions/license/${sectionId}/${localStorage.getItem('userId')}`, newFormData).then(res => {
+            alert("Saved")
+        })
+    }
+
     render() {
 
-        const { loading } = this.state
 
         const applicantInstructions = this.state.applicantInstructions.map((instruction, index) =>
             <li key={index + "applicant"}>{instruction}</li>)
         const applicantInstructionsEditable = <div>{this.state.applicantInstructions.map((instruction, index) =>
-            <li key={index + "applicant"}><Form style={{ display: "flex" }}><Input onChange={this.handleList(index)} type="text" name="applicantInstructions" value={instruction}></Input><Button color="danger " onClick={() => this.deleteApplicantInstruction(index)}>Delete</Button></Form><br /></li>)}<Button onClick={this.addApplicantInstruction}>Add new instruction for applicants</Button></div>
+            <li key={index + "applicant"}><Form style={{ display: "flex" }}><Input placeholder="Please input the new instructions for Applicants" onChange={this.handleList(index)} type="text" name="applicantInstructions" value={instruction}></Input><Button color="danger " onClick={() => this.deleteApplicantInstruction(index)}>Delete</Button></Form><br /></li>)}<Button onClick={this.addApplicantInstruction}>Add new instruction for applicants</Button></div>
         // <img onClick={() => this.deleteApplicantInstruction(index)} width="17px" height="17px" src={deleteIcon} />
         const approverInstructions = this.state.approverInstructions.map((instruction, index) =>
             <li key={index + "approver"}>{instruction}</li>)
         const approverInstructionsEditable = <div>{this.state.approverInstructions.map((instruction, index) =>
-            <li key={index + "approver"}><Form style={{ display: "flex" }}><Input type="text" name="approverInstructions" defaultValue={instruction}></Input><Button color="danger " onClick={() => this.deleteApproverInstruction(index)}>Delete</Button></Form><br /></li>)}<Button onClick={this.addApproverInstruction}>Add new instruction for Approvers</Button></div>
+            <li key={index + "approver"}><Form style={{ display: "flex" }}><Input placeholder="Please input the new instructions for Approvers" onChange={this.handleList(index)} type="text" name="approverInstructions" defaultValue={instruction}></Input><Button color="danger " onClick={() => this.deleteApproverInstruction(index)}>Delete</Button></Form><br /></li>)}<Button onClick={this.addApproverInstruction}>Add new instruction for Approvers</Button></div>
         // const { activeIndex } = this.state;
         const slides = this.state.screenshots.map((item) => {
             return (
@@ -230,12 +235,16 @@ class LicenseInstructions extends Component {
             );
         });
         const summary = this.state.summary;
-        const summaryEditable = <Form>
+        const summaryEditable = <>
             <Label>Edit User Instructions</Label>
-            <Input style={{ height: "150px" }} type="textarea" onChange={this.handleChange} name="summary" value={this.state.summary}></Input>
-        </Form>
+            <Button style={{ float: "right" }} color="success" onClick={() => this.updateInstructions("USERINSTRUCTIONS")} > Save </Button>
+            <InputGroup>
+                <Input style={{ height: "150px" }} type="textarea" onChange={this.handleChange} name="summary" value={this.state.summary}></Input>
+            </InputGroup>
+        </>
+
         const Edit = <img onClick={this.makeEditable} width="20px" src={editIcon} />
-        const Apply = <Button color="success" onClick={this.makeEditable}>APPLY</Button>
+        const Apply = <Button color="primary" onClick={this.makeEditable}>APPLY</Button>
         const Screenshots = <Carousel
             activeIndex={this.state.activeIndex}
             next={this.next}
@@ -256,38 +265,42 @@ class LicenseInstructions extends Component {
                 <CustomInput id="screenshot" type="file" onChange={this.handleFileUpload} ></CustomInput>
             </div>
 
-
         return (
             <div className="animated fadeIn">
                 <h2>User Instructions</h2>
-                {!loading ?
-                    <Card >
-                        <CardHeader><h5 style={{ float: "left" }}>{this.state.workflow}</h5>
-                            <div style={{ float: "right" }}>
-                                {!this.state.editable ? Edit : Apply}
-                            </div>
-                        </CardHeader>
+                <Card >
+                    <CardHeader><h5 style={{ float: "left" }}>{this.state.workflow}</h5>
+                        <div style={{ float: "right" }}>
+                            {!this.state.editable ? Edit : Apply}
+                        </div>
+                    </CardHeader>
 
-                        <CardBody>
-                            {/* <div className=""> */}
-                            <div className="">{!this.state.editable ? summary : summaryEditable}</div>
-                            <br />
-                            <h3>Applicant</h3>
-                            <div>Applicant is referring to the person who created the request in the system</div>
-                            <br />
-                            <ul>{!this.state.editable ? applicantInstructions : applicantInstructionsEditable}</ul>
-                            <br />
-                            <h3>Approvers</h3>
-                            <div>Applicant is referring to the person who created the request in the system</div>
-                            <br />
-                            <ul>{!this.state.editable ? approverInstructions : approverInstructionsEditable}</ul>
-                            <br />
+                    <CardBody>
+                        <Form>
+                            <FormGroup>
+                                <div className="">{!this.state.editable ? summary : summaryEditable}</div>
+                            </FormGroup>
+
+                            <FormGroup>
+                                <Label><h3>Applicant</h3></Label>
+                                {this.state.editable ? <Button color="success" style={{ float: "right" }} onClick={() => this.updateInstructions("APPLICANT")} >Save</Button> : null}
+                                <div>Applicant is referring to the person who created the request in the system</div>
+                                <ul>{!this.state.editable ? applicantInstructions : applicantInstructionsEditable}</ul>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label><h3>Approvers</h3></Label>
+                                {this.state.editable ? <Button color="success" style={{ float: "right" }} onClick={() => this.updateInstructions("APPROVERS")} >Save</Button> : null}
+                                <div>Applicant is referring to the person who created the request in the system</div>
+                                <ul>{!this.state.editable ? approverInstructions : approverInstructionsEditable}</ul>
+                            </FormGroup>
+
                             <h3>Screenshots</h3>
+
                             <div>{!this.state.editable ? Screenshots : editScreenShots}</div>
                             <br />
-                        </CardBody>
-                    </Card>
-                    : null}
+                        </Form>
+                    </CardBody>
+                </Card>
             </div>
         )
     }

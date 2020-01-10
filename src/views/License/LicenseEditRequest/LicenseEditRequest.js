@@ -597,7 +597,7 @@ class LicenseEditRequest extends Component {
 
                                 <FormGroup>
                                     <Label>Reciever Mobile Phone</Label>
-                                    ]<input type="number" id="phoneNumber"></input>
+                                    {/* <input type="number" id="phoneNumber"></input> */}
                                     <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="number" />
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.expDeliveryMobileNo, 'required')}</small>
                                 </FormGroup>
