@@ -112,8 +112,11 @@ class Instruction extends Component {
 
     makeEditable() {
         if (this.state.editable) {
-            console.log("Instructions updated")
+           alert("Instructions updated")
             //codes to update instructions to the database
+            this.updateInstructions("USERINSTRUCTIONS")
+            this.updateInstructions("APPLICANT")
+            this.updateInstructions("APPROVERS")
         }
         this.setState({ editable: !this.state.editable })
     }
@@ -196,7 +199,7 @@ class Instruction extends Component {
         })
     }
 
-    updateInstructions(sectionId) {
+    async updateInstructions(sectionId) {
         let newFormData = new FormData()
         if (sectionId === "APPLICANT" || sectionId === "APPROVERS") {
             let temp = sectionId === "APPLICANT" ? this.state.applicantInstructions : this.state.approverInstructions
@@ -206,8 +209,8 @@ class Instruction extends Component {
         else {
             newFormData.append("sectionData", this.state.summary)
         }
-        Axios.put(`${config.url}/userInstructions/chop/${sectionId}/${localStorage.getItem('userId')}`, newFormData).then(res => {
-            alert("Saved")
+        await Axios.put(`${config.url}/userInstructions/chop/${sectionId}/${localStorage.getItem('userId')}`, newFormData).then(res => {
+            // alert("Saved")
         })
     }
 
@@ -239,7 +242,7 @@ class Instruction extends Component {
         const summary = this.state.summary;
         const summaryEditable = <>
             <Label>Edit User Instructions</Label>
-            <Button style={{ float: "right" }} color="success" onClick={() => this.updateInstructions("USERINSTRUCTIONS")} > Save </Button>
+            {/* <Button style={{ float: "right" }} color="success" onClick={() => this.updateInstructions("USERINSTRUCTIONS")} > Save </Button> */}
             <InputGroup>
                 <Input style={{ height: "150px" }} type="textarea" onChange={this.handleChange} name="summary" value={this.state.summary}></Input>
             </InputGroup>
@@ -285,13 +288,13 @@ class Instruction extends Component {
 
                             <FormGroup>
                                 <Label><h3>Applicant</h3></Label>
-                                {this.state.editable ? <Button color="success" style={{ float: "right" }} onClick={() => this.updateInstructions("APPLICANT")} >Save</Button> : null}
+                                {/* {this.state.editable ? <Button color="success" style={{ float: "right" }} onClick={() => this.updateInstructions("APPLICANT")} >Save</Button> : null} */}
                                 <div>Applicant is referring to the person who created the request in the system</div>
                                 <ul>{!this.state.editable ? applicantInstructions : applicantInstructionsEditable}</ul>
                             </FormGroup>
                             <FormGroup>
                                 <Label><h3>Approvers</h3></Label>
-                                {this.state.editable ? <Button color="success" style={{ float: "right" }} onClick={() => this.updateInstructions("APPROVERS")} >Save</Button> : null}
+                                {/* {this.state.editable ? <Button color="success" style={{ float: "right" }} onClick={() => this.updateInstructions("APPROVERS")} >Save</Button> : null} */}
                                 <div>Applicant is referring to the person who created the request in the system</div>
                                 <ul>{!this.state.editable ? approverInstructions : approverInstructionsEditable}</ul>
                             </FormGroup>
