@@ -287,6 +287,27 @@ class LicenseApplicationDetail extends Component {
     }
 
 
+    dataURLtoFile(dataurl, filename) {
+        if (dataurl !== "") {
+            var arr = dataurl.split(','),
+                mime = arr[0].match(/:(.*?);/)[1],
+                bstr = atob(arr[1]),
+                n = bstr.length,
+                u8arr = new Uint8Array(n);
+
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+
+            return new File([u8arr], filename, { type: mime });
+        }
+        else {
+            alert("BASE64 String is empty :(")
+            return null
+        }
+    }
+
+
 
     render() {
         const { taskDetails, loading, page, currentStatus, expressNumber, deliverWay, documents } = this.state
@@ -612,8 +633,8 @@ class LicenseApplicationDetail extends Component {
                                                         <tr key={index} >
                                                             <td className="smallTd"> {index + 1} </td>
                                                             <td>
-                                                                {/* <div onClick={() => this.viewOrDownloadFile(doc.docSelected)} > {doc.documentName} </div> */}
-                                                                <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a>
+                                                                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(doc.documentBase64String))} > {doc.documentName} </div>
+                                                                {/* <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a> */}
                                                             </td>
                                                         </tr>
                                                     )}
