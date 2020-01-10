@@ -3,7 +3,7 @@ import LegalEntity from '../../context';
 import axios from 'axios';
 import { Redirect,NavLink } from 'react-router-dom';
 import { fakeAuth } from '../../App';
-import {Card, CardBody, Row} from 'reactstrap';
+import {Card, CardBody, Row, Spinner} from 'reactstrap';
 import config from '../../config';
 import { access } from 'fs';
 import qs from 'querystring';
@@ -14,14 +14,16 @@ class Authenticated extends Component {
     this.state = {
       userDetails:'',
       redirectOuth: false,
-      token: ''
+      token: '',
+      loading: true
     };
+     this.getUserDetails = this.getUserDetails.bind(this)
   }
   
   componentDidMount(){
-    const code = this.props.location.code
-    if(code){
-      this.exchangeToken()
+    const code = this.props.location.code;
+    if (code){
+       this.exchangeToken(code);
     }
   }
 
@@ -45,14 +47,14 @@ class Authenticated extends Component {
   // console.log(url, token)
 
   async getUserDetails(token) {
-    await axios.post(`https://sso-int.daimler.com/idp/userinfo.openid`, {headers:{'Authorization': 'Bearer' + token}})
+    await axios.post(`https://sso-int.daimler.com/idp/userinfo.openid`, {headers:{'Authorization': 'Bearer ' + token}})
           .then(res => {
-            console.log(res)
-            this.setState({ userDetails: res.data})
+            console.log(res, 'executed')
+            this.setState({ loading: false, userDetails: res.data})
             localStorage.setItem('userId', res.data.sub)
           })
 
-      setTimeout(this.redirect, 1000)
+      setTimeout(this.redirect, 2000)
   }
 
   getParameterByName(name, url) {
@@ -68,10 +70,10 @@ class Authenticated extends Component {
       });
   }
 
-  exchangeToken(){
+  exchangeToken(code){
     const requestBody = {
       grant_type: 'authorization_code',
-      code: this.props.location.code,
+      code: code,
       redirect_uri: "https://docms.es.corpintra.net/clwf/login?authhandler=Daimler_OpenID"
     }
 
@@ -87,13 +89,14 @@ class Authenticated extends Component {
       .then((result) => {
         console.log(result)
         this.setState({token:result.data})
-        localStorage.setItem('at',result.data.access_token)
-        localStorage.setItem('it',result.data.id_token)
+
+        localStorage.setItem('accessToken',result.data.access_token)
+        localStorage.setItem('idToken',result.data.id_token)
         localStorage.setItem('authenticate', true)
         localStorage.setItem('isLicenseAdmin', 'N')
         localStorage.setItem('isChopKeeper', 'Y')
       })
-      .then(this.getUserDetails(this.state.token.access_token))
+      .then(()=> this.getUserDetails(this.state.token.access_token))
       .catch((err) => {
         if(err.response){
           console.log(err.response)
@@ -109,14 +112,15 @@ class Authenticated extends Component {
       console.log("redirect oauth")
       return <Redirect to={`/portal`} />
     }
-    const authenticated = <><label>Authenticated as {this.state.userDetails.given_name || localStorage.getItem('userId')}</label><center>redirecting . . .</center></>
-    const notAuth = <label>You are not Authenticated</label> 
+    const authenticated = <><label>Authenticated as {this.state.userDetails.sub || localStorage.getItem('userId')}</label><center>redirecting . . .</center></>
+    const notAuth = <label>You are not Authenticated</label>
+    const loading = <div> <Spinner type='grow' color="info" /> </div>
     return(
     <div className="app flex-row align-items-center">
     <Row className="justify-content-center">
       <Card className="shadow-lg p-3 bg-white rounded">
         <CardBody>
-          {this.props.location.code || localStorage.getItem('userId') ? authenticated : notAuth}
+          {this.state.loading ? loading : this.state.userDetails || localStorage.getItem('userId') ? authenticated : notAuth}
         </CardBody>
       </Card>
     </Row>
