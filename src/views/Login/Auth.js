@@ -7,6 +7,7 @@ import {Card, CardBody, Row, Spinner} from 'reactstrap';
 import config from '../../config';
 import { access } from 'fs';
 import qs from 'querystring';
+import JWT from 'jsonwebtoken';
 
 class Authenticated extends Component { 
   constructor(props) {
@@ -15,16 +16,30 @@ class Authenticated extends Component {
       userDetails:'',
       redirectOuth: false,
       token: '',
-      loading: true
+      loading: true,
+      isExpired: false
     };
-     this.getUserDetails = this.getUserDetails.bind(this)
   }
   
   componentDidMount(){
-    const code = this.props.location.code;
-    if (code){
-       this.exchangeToken(code);
-    }
+ 
+    var token = this.props.location.token
+      if (token){
+        var decodedToken=JWT.decode(token.id_token, {complete: true}); //decode JWT token with library jsonwebtoken
+        var dates = new Date();
+        var dateNow = dates.getTime() / 1000 //conver to unix Time
+      
+        // if(decodedToken.payload.exp < dateNow){
+        //   this.setState({ isExpired: true })
+        //   console.log('token expired')
+        //   }
+        // else{
+          this.getUserDetails(token.access_token);
+          console.log('token not expired')
+          // }
+      } else {
+          this.setState({ isExpired: true })
+      }
   }
 
   async getGoogleUserDetails(token) {
@@ -47,11 +62,23 @@ class Authenticated extends Component {
   // console.log(url, token)
 
   async getUserDetails(token) {
-    await axios.post(`https://sso-int.daimler.com/idp/userinfo.openid`, {headers:{'Authorization': 'Bearer ' + token}})
+    const config = {
+
+      headers: {
+        "Authorization": "Bearer "+ token,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }
+       await axios.get(`https://sso-int.daimler.com/idp/userinfo.openid`, config)
           .then(res => {
             console.log(res, 'executed')
             this.setState({ loading: false, userDetails: res.data})
+
             localStorage.setItem('userId', res.data.sub)
+            localStorage.setItem('authenticate', true)
+            localStorage.setItem('legalEntity', 'MBAFC')
+            localStorage.setItem('isLicenseAdmin', 'N')
+            localStorage.setItem('isChopKeeper', 'Y')
           })
 
       setTimeout(this.redirect, 2000)
@@ -111,6 +138,9 @@ class Authenticated extends Component {
     if (this.state.redirectOuth || localStorage.getItem('userId') ) {
       console.log("redirect oauth")
       return <Redirect to={`/portal`} />
+    }
+    if (this.state.isExpired) {
+      return <Redirect to={`/login`} />
     }
     const authenticated = <><label>Authenticated as {this.state.userDetails.sub || localStorage.getItem('userId')}</label><center>redirecting . . .</center></>
     const notAuth = <label>You are not Authenticated</label>
