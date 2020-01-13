@@ -485,6 +485,7 @@ class EditRequest extends Component {
                 }
             }
         })
+        console.log(this.state.selectedDocCheckBy)
     }
 
     toggle = name => event => {
@@ -1325,7 +1326,7 @@ class EditRequest extends Component {
     }
 
     dataURLtoFile(dataurl, filename) {
-
+        console.log(dataurl.split(','))
         var arr = dataurl.split(','),
             mime = arr[0].match(/:(.*?);/)[1],
             bstr = atob(arr[1]),

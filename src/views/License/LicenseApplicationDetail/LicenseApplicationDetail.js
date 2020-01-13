@@ -34,6 +34,7 @@ class LicenseApplicationDetail extends Component {
         this.handleRadio = this.handleRadio.bind(this)
         this.handleChange = this.handleChange.bind(this)
         this.uploadDocument = this.uploadDocument.bind(this)
+        this.dataURLtoFile = this.dataURLtoFile.bind(this)
     }
 
     componentDidMount() {
@@ -288,23 +289,18 @@ class LicenseApplicationDetail extends Component {
 
 
     dataURLtoFile(dataurl, filename) {
-        if (dataurl !== "") {
-            var arr = dataurl.split(','),
-                mime = arr[0].match(/:(.*?);/)[1],
-                bstr = atob(arr[1]),
-                n = bstr.length,
-                u8arr = new Uint8Array(n);
+        console.log(dataurl.split(','))
+        var arr = dataurl.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]),
+            n = bstr.length,
+            u8arr = new Uint8Array(n);
 
-            while (n--) {
-                u8arr[n] = bstr.charCodeAt(n);
-            }
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
 
-            return new File([u8arr], filename, { type: mime });
-        }
-        else {
-            alert("BASE64 String is empty :(")
-            return null
-        }
+        return new File([u8arr], filename, { type: mime });
     }
 
 
@@ -633,7 +629,7 @@ class LicenseApplicationDetail extends Component {
                                                         <tr key={index} >
                                                             <td className="smallTd"> {index + 1} </td>
                                                             <td>
-                                                                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(doc.documentBase64String))} > {doc.documentName} </div>
+                                                                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${doc.documentFileType};base64,${doc.documentBase64String}`, doc.documentName))} > {doc.documentName} </div>
                                                                 {/* <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a> */}
                                                             </td>
                                                         </tr>
