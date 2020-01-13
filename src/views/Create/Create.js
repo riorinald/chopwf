@@ -172,10 +172,12 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       validateForm: [],
-      noteInfo: [],
-      // inputMask: [/(?!.*[A-HJ-QT-Z])[IS]/,"-",/[IALR]/,/[A]/,"-",/(?!.*[A-NQRT-Z])[PSO]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/],
-      inputMask: "a-a-a-9999-9999",
-      selectInfo: ''
+      noteInfo: '如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。 For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR.',
+      mask: [/(?!.*[A-HJ-QT-Z])[IS]/i,"-",/[A-Z]/i,/[A]/i,"-",/(?!.*[A-NQRT-Z])[PSO]/i,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/],
+      // mask: "a-a-a-9999-9999",
+      selectInfo: '',
+      inputMask: {mask:"a-a-a-9999-9999"},
+      maskTooltip: {}
 
     };
 
@@ -202,7 +204,7 @@ class Create extends Component {
   };
 
   componentDidMount() {
-    this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
+    // this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
     this.getUserData();
     this.getData("department", `${config.url}/departments`);
     this.getData("applicationTypes", `${config.url}/apptypes`);
@@ -541,54 +543,111 @@ class Create extends Component {
   }
 
   async postData(formData, isSubmitted) {
-    try {
-      // await axios.post(`${config.url}/tasks`, formData)
-      await axios.post(`${config.url}/tasks`, formData)
-        .then(res => {
-          if (isSubmitted === 'N') {
-            Swal.fire({
-              title: res.data.status === 200 ? 'Request Saved' : '',
+
+
+    Swal.fire({
+      title: `Creating your Request ... `,
+      type: "info",
+      text: '',
+      footer: '',
+      allowOutsideClick: false,
+      onClose: () => { this.formReset() },
+      onBeforeOpen: () => {
+        Swal.showLoading()
+      },
+      onOpen: () => {
+        axios.post(`${config.url}/tasks`, formData)
+          .then(res => {
+
+            Swal.update({
+              title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
               text: 'Request Number : ' + res.data.requestNum,
-              footer: 'Your request is saved as draft.',
-              type: 'info',
-              onClose: () => { this.formReset() }
+              footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
+              type: isSubmitted === "Y" ? "success" : "info",
+
             })
-          }
-          if (isSubmitted === 'Y') {
-            Swal.fire({
-              title: res.data.status === 200 ? 'Request Submitted' : "",
-              text: 'Request Number : ' + res.data.requestNum,
-              footer: 'Your request is being processed and is waiting for the approval',
-              type: 'success',
-              onClose: () => { this.formReset() }
+            Swal.hideLoading()
+          })
+          .catch(error => {
+            let err = "Please contact the IT Admin !"
+            let err2 = []
+            let err3 = ""
+            if (error.response) {
+              console.log(error.response)
+              let keys = Object.keys(error.response.data.errors)
+              err = keys.join(',')
+              keys.map(key => {
+                // console.log(error.response.data.errors[key].join(','))
+                err2.push(error.response.data.errors[key].join(','))
+              })
+              err3 = err2.join(';')
+            }
+            Swal.hideLoading()
+            Swal.update({
+              title: "Error",
+              type: "error",
+              text: err,
+              html: err3,
+
             })
-          }
-        })
-    } catch (error) {
-      if (error.response && isSubmitted === 'N') {
-        Swal.fire({
-          title: error.response.statusText,
-          text: error.response.data.message,
-          footer: JSON.stringify(error.response.data),
-          type: 'error',
-        })
+          })
       }
-      if (error.response && isSubmitted === 'Y') {
-        Swal.fire({
-          title: error.response.statusText,
-          text: JSON.stringify(error.response.data),
-          footer: 'traceId : ' + error.response.data.traceId,
-          type: 'error',
-        })
-      }
-      console.error(error.response);
-    }
+    })
+
+
+    // try {
+    //   // await axios.post(`${config.url}/tasks`, formData)
+    //   await axios.post(`${config.url}/tasks`, formData)
+    //     .then(res => {
+    //       if (isSubmitted === 'N') {
+    //         Swal.fire({
+    //           title: res.data.status === 200 ? 'Request Saved' : '',
+    //           text: 'Request Number : ' + res.data.requestNum,
+    //           footer: 'Your request is saved as draft.',
+    //           type: 'info',
+    //           onClose: () => { this.formReset() }
+    //         })
+    //       }
+    //       if (isSubmitted === 'Y') {
+    //         Swal.fire({
+    //           title: res.data.status === 200 ? 'Request Submitted' : "",
+    //           text: 'Request Number : ' + res.data.requestNum,
+    //           footer: 'Your request is being processed and is waiting for the approval',
+    //           type: 'success',
+    //           onClose: () => { this.formReset() }
+    //         })
+    //       }
+    //     })
+    // } catch (error) {
+    //   if (error.response && isSubmitted === 'N') {
+    //     Swal.fire({
+    //       title: error.response.statusText,
+    //       text: error.response.data.message,
+    //       footer: JSON.stringify(error.response.data),
+    //       type: 'error',
+    //     })
+    //   }
+    //   if (error.response && isSubmitted === 'Y') {
+    //     Swal.fire({
+    //       title: error.response.statusText,
+    //       text: JSON.stringify(error.response.data),
+    //       footer: 'traceId : ' + error.response.data.traceId,
+    //       type: 'error',
+    //     })
+    //   }
+    //   console.error(error.response);
+    // }
   }
 
   formReset() {
     this.formRef.current.reset()
     window.location.reload();
   }
+
+  formRes() {
+    this.formRef.current.reset()
+  }
+
   convertExpDate(dateValue) {
     let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
     return regEx;
@@ -738,6 +797,7 @@ class Create extends Component {
 
     //CHOP TYPE
     else if (name === "chopTypeSelected") {
+      console.log(event.target.value)
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected)
       }
@@ -760,6 +820,7 @@ class Create extends Component {
 
     //DEPARTMENT
     else if (name === "deptSelected") {
+      this.setState({ teamSelected: "" })
       this.getDeptHead(this.props.legalName)
       if (this.state.isLTU || this.state.isLTI) {
         this.getTeams(event.target.value)
@@ -771,6 +832,7 @@ class Create extends Component {
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
+      // console.log(event.target.value)
       this.getDocCheckBy(event.target.value)
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value)
@@ -792,7 +854,7 @@ class Create extends Component {
   };
 
 
-  handleInputMask = () => {
+  handlemask = () => {
     // let value = ("" + event.target.value).toUpperCase();
     let first = /(?!.*[A-HJ-QT-Z])[IS]/;
     let third = /(?!.*[A-NQRT-Z])[PSO]/;
@@ -819,13 +881,13 @@ class Create extends Component {
     // }
 
     this.setState({
-      inputMask: mask, viewContract: true
+      mask: mask, viewContract: true
     });
   }
 
   validateConNum() {
-    let first = /(?!.*[A-HJ-QT-Z])[IS]/;
-    let third = /(?!.*[A-NQRT-Z])[PSO]/;
+    let first = /(?!.*[A-HJ-QT-Z])[IS]/i;
+    let third = /(?!.*[A-NQRT-Z])[PSO]/i;
     let digit = /[0-9]/;
     var isFirst = false
     var isThird = false
@@ -919,24 +981,33 @@ class Create extends Component {
 
     // if (/^..[AaLlRr]/.test(value)){
     //   this.setState({
-    //     inputMask: "a-a-a-9999-9999",
+    //     mask: "a-a-a-9999-9999",
     //     })
     //   }
-    let mask = "a-a-a-9999-9999"
-    if (/^..[Ii]/.test(value)) {
-      mask = "a-aA-a-9999-9999";
+    // var inputMask={
+    //   mask: "a-a-a-9999-9999",
+    //   value: value, 
+    // }
+    var maskTooltip={
+        isOpen: false,
+        message: ''
     }
-    this.setState({
-      viewContract: true,
-      inputMask: mask,
-      contractNumber: value
-    })
+    maskTooltip.isOpen = true
+    maskTooltip.message = '[ I / S ]-[ A / L / IA / R ]-[ O / P / S ] \n\n e.g "S-A-O-9999-9999"'
+    if (/^..[LIAR]/i.test(value)) {
+            // inputMask.mask = "a-aa-a-9999-9999"
+      // value = value.replace("I-_", "IA-_")
+      } else {
+        
+      }
+    // console.log(inputMask, inputMask.value);
+    this.setState({maskTooltip:maskTooltip,contractNumber: value})
   }
 
   addContract(event) {
     let valid = this.validateConNum()
     let digit = /[0-9]/;
-    let value = this.state.contractNumber
+    let value = this.state.contractNumber.toUpperCase();
     if (valid) {
       // if (this.props.match.params.company === "MBIA") {
       //   if (!digit.test(this.state.contractNumber[14])) {
@@ -954,7 +1025,10 @@ class Create extends Component {
         conNum: [...state.conNum, value.replace(/_/g, '')]
       })
       )
-      this.setState({ contractNumber: "" }, this.toggle('viewContract'))
+      let maskTooltip = {
+        isOpen: false
+      }
+      this.setState({ contractNumber: "", maskTooltip:maskTooltip }, this.toggle('viewContract'))
     }
     else {
       Swal.fire({
@@ -1413,8 +1487,8 @@ class Create extends Component {
           {this.state.documentTableLTI.map((document, index) =>
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
-              <td><div>{document.engName}</div></td>
-              <td><div>{document.cnName}</div></td>
+              <td className="descTd">{document.engName}</td>
+              <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
                 <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
@@ -1479,9 +1553,10 @@ class Create extends Component {
 
                       </DropdownMenu>
                     </InputGroupButtonDropdown>
-                    <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
+                    <Tooltip placement="top" isOpen={this.state.maskTooltip.isOpen} target="contractNumber">{this.state.maskTooltip.message} </Tooltip>
+                    <InputMask placeholder="Enter Contract Number" mask={this.state.mask} name="contractNumber" id="contractNumber" className="form-control"
                       onChange={this.handleContractChange} value={this.state.contractNumber}
-                    // onClick={this.handleInputMask}
+                    // onClick={this.handlemask}
                     ></InputMask>
                     <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
                   </InputGroup>
@@ -1491,13 +1566,13 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 {/* <Label>English Name</Label> */}
-                <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
+                <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
               </FormGroup>
             </Col>
             <Col md>
               <FormGroup>
                 {/* <Label>Chinese Name</Label> */}
-                <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
+                <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3" placeholder="Please describe in Chinese (optional)" />
               </FormGroup>
             </Col>
             <Col md>
@@ -1570,7 +1645,7 @@ class Create extends Component {
                   Header: 'Expiry Date',
                   accessor: 'expiryDate',
                   Cell: row => (
-                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(row.original.documentBase64String, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
                       {this.convertExpDate(row.original.expiryDate)}
                     </div>
                   ),
@@ -1580,7 +1655,7 @@ class Create extends Component {
                   Header: 'DH Approved',
                   accessor: 'departmentHeads',
                   Cell: row => (
-                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(row.original.documentBase64String, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
                       {this.changeDeptHeads(row.original.departmentHeads)}
                     </div>
 
@@ -1620,13 +1695,13 @@ class Create extends Component {
                     <td>{document.documentNameEnglish}</td>
                     <td>{document.documentNameChinese}</td>
                     <td id="viewDoc">
-                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(document.documentBase64String, document.documentFileName))} >
+                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
                         {this.convertExpDate(document.expiryDate)}
                       </div>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                     </td>
                     <td id="viewDoc">
-                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(document.documentBase64String, document.documentFileName))} >
+                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
                         {this.changeDeptHeads(document.departmentHeads)}
                       </div>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
@@ -1653,7 +1728,7 @@ class Create extends Component {
                 <FormGroup>
                   <h5>NOTES :</h5>
                   {/* {this.state.noteInfo.notes || <Skeleton count={3}/>} */}
-                  {this.state.noteInfo.notes}
+                  {this.state.noteInfo}
                 </FormGroup>
                 <Form className="form-horizontal" innerRef={this.formRef}>
                   <FormGroup>

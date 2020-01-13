@@ -75,6 +75,7 @@ class DefaultLayout extends Component {
     }
     else {
       this.props.history.push(`/create/${event.target.value}`)
+      window.location.reload();
     }
 
     this.setState({

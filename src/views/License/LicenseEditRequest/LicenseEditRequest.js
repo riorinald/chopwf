@@ -373,38 +373,119 @@ class LicenseEditRequest extends Component {
     }
 
     async postData(formData, isSubmitted) {
-        await axios.put(`${config.url}/licenses/${this.state.taskDetails.licenseId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-            .then(res => {
-                if (isSubmitted === "Y") {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Submitted' : "",
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is being processed and is waiting for the approval',
-                        type: 'success',
-                        onClose: () => { this.goBack() }
+        Swal.fire({
+            title: `Creating your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.goBack() },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                axios.put(`${config.url}/licenses/${this.state.taskDetails.licenseId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+                    .then(res => {
+
+                        Swal.update({
+                            title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
+                            text: 'Request Number : ' + res.data.requestNum,
+                            footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
+                            type: isSubmitted === "Y" ? "success" : "info",
+
+                        })
+                        Swal.hideLoading()
                     })
-                }
-                else {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Saved' : '',
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is saved as draft.',
-                        type: 'info',
-                        onClose: () => { this.goBack() }
+                    .catch(error => {
+                        let err = "Please contact the IT Admin !"
+                        let err2 = []
+                        let err3 = ""
+                        if (error.response) {
+                            console.log(error.response)
+                            let keys = Object.keys(error.response.data.errors)
+                            err = keys.join(',')
+                            keys.map(key => {
+                                // console.log(error.response.data.errors[key].join(','))
+                                err2.push(error.response.data.errors[key].join(','))
+                            })
+                            err3 = err2.join(';')
+                        }
+                        Swal.hideLoading()
+                        Swal.update({
+                            title: "Error",
+                            type: "error",
+                            text: err,
+                            html: err3,
+
+                        })
                     })
-                }
-            })
+            }
+        })
+        // await axios.put(`${config.url}/licenses/${this.state.taskDetails.licenseId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        //     .then(res => {
+        //         if (isSubmitted === "Y") {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Submitted' : "",
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is being processed and is waiting for the approval',
+        //                 type: 'success',
+        //                 onClose: () => { this.goBack() }
+        //             })
+        //         }
+        //         else {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Saved' : '',
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is saved as draft.',
+        //                 type: 'info',
+        //                 onClose: () => { this.goBack() }
+        //             })
+        //         }
+        //     })
     }
 
     async deleteTask() {
-        await axios.delete(`${config.url}/licenses/${this.state.taskDetails.licenseId}`).then(res => {
-            Swal.fire({
-                title: "REQUEST DELETED",
-                html: res.data.message,
-                type: "success",
-                onClose: () => { this.goBack() }
-            })
+        Swal.fire({
+            title: `Deleting your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                axios.delete(`${config.url}/licenses/${this.state.taskDetails.licenseId}`)
+                    .then(res => {
+
+                        Swal.update({
+                            title: "Request Deleted",
+                            text: `The request has been successfully deleted`,
+                            type: "success",
+
+                        })
+                        Swal.hideLoading()
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
+            }
         })
+        // await axios.delete(`${config.url}/licenses/${this.state.taskDetails.licenseId}`).then(res => {
+        //     Swal.fire({
+        //         title: "REQUEST DELETED",
+        //         html: res.data.message,
+        //         type: "success",
+        //         onClose: () => { this.goBack() }
+        //     })
+        // })
     }
 
     handleSelectReciever(event) {

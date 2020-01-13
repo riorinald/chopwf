@@ -114,24 +114,59 @@ class TaskDetails extends Component {
             comments: this.state.comments
         }
 
-        Axios.post(`${config.url}/tasks/${this.state.taskDetails.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
-            .then(res => {
-                Swal.fire({
-                    title: res.data.message,
-                    html: `The request has been ${res.data.message}`,
-                    type: "success",
-                    onClose: () => { this.goBack(true) }
-                })
-            })
-            .catch(error => {
-                if (error.response) {
-                    Swal.fire({
-                        title: "ERROR",
-                        html: error.response.data.message,
-                        type: "error"
+        Swal.fire({
+            title: `Creating your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.goBack(true) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                Axios.post(`${config.url}/tasks/${this.state.taskDetails.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
+                    .then(res => {
+
+                        Swal.update({
+                            title: res.data.message,
+                            text: `The request has been ${res.data.message}`,
+                            type: "success",
+
+                        })
+                        Swal.hideLoading()
                     })
-                }
-            })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
+            }
+        })
+
+
+        // Axios.post(`${config.url}/tasks/${this.state.taskDetails.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
+        //     .then(res => {
+        //         Swal.fire({
+        //             title: res.data.message,
+        //             html: `The request has been ${res.data.message}`,
+        //             type: "success",
+        //             onClose: () => { this.goBack(true) }
+        //         })
+        //     })
+        //     .catch(error => {
+        //         if (error.response) {
+        //             Swal.fire({
+        //                 title: "ERROR",
+        //                 html: error.response.data.message,
+        //                 type: "error"
+        //             })
+        //         }
+        //     })
 
 
     }
