@@ -1770,8 +1770,8 @@ class Create extends Component {
                   <Collapse isOpen={this.state.isLTI || this.state.isLTU}>
                     <FormGroup>
                       <Label>Entitled Team</Label>
-                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
-                        <option value="0" disabled>Please select a team</option>
+                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} value={this.state.teamSelected} type="select">
+                        <option value="" disabled>Please select a team</option>
                         {this.state.teams.map((team, index) =>
                           <option key={index} value={team.teamId}>{team.teamName}</option>
                         )}
