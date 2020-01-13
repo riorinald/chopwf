@@ -542,48 +542,100 @@ class Create extends Component {
   }
 
   async postData(formData, isSubmitted) {
-    try {
-      // await axios.post(`${config.url}/tasks`, formData)
-      await axios.post(`${config.url}/tasks`, formData)
-        .then(res => {
-          if (isSubmitted === 'N') {
-            Swal.fire({
-              title: res.data.status === 200 ? 'Request Saved' : '',
+
+
+    Swal.fire({
+      title: `Creating your Request ... `,
+      type: "info",
+      text: '',
+      footer: '',
+      allowOutsideClick: false,
+      onClose: () => { this.formReset() },
+      onBeforeOpen: () => {
+        Swal.showLoading()
+      },
+      onOpen: () => {
+        axios.post(`${config.url}/tasks`, formData)
+          .then(res => {
+
+            Swal.update({
+              title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
               text: 'Request Number : ' + res.data.requestNum,
-              footer: 'Your request is saved as draft.',
-              type: 'info',
-              onClose: () => { this.formReset() }
+              footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
+              type: isSubmitted === "Y" ? "success" : "info",
+
             })
-          }
-          if (isSubmitted === 'Y') {
-            Swal.fire({
-              title: res.data.status === 200 ? 'Request Submitted' : "",
-              text: 'Request Number : ' + res.data.requestNum,
-              footer: 'Your request is being processed and is waiting for the approval',
-              type: 'success',
-              onClose: () => { this.formReset() }
+            Swal.hideLoading()
+          })
+          .catch(error => {
+            let err = "Please contact the IT Admin !"
+            let err2 = []
+            let err3 = ""
+            if (error.response) {
+              console.log(error.response)
+              let keys = Object.keys(error.response.data.errors)
+              err = keys.join(',')
+              keys.map(key => {
+                // console.log(error.response.data.errors[key].join(','))
+                err2.push(error.response.data.errors[key].join(','))
+              })
+              err3 = err2.join(';')
+            }
+            Swal.hideLoading()
+            Swal.update({
+              title: "Error",
+              type: "error",
+              text: err,
+              html: err3,
+
             })
-          }
-        })
-    } catch (error) {
-      if (error.response && isSubmitted === 'N') {
-        Swal.fire({
-          title: error.response.statusText,
-          text: error.response.data.message,
-          footer: JSON.stringify(error.response.data),
-          type: 'error',
-        })
+          })
       }
-      if (error.response && isSubmitted === 'Y') {
-        Swal.fire({
-          title: error.response.statusText,
-          text: JSON.stringify(error.response.data),
-          footer: 'traceId : ' + error.response.data.traceId,
-          type: 'error',
-        })
-      }
-      console.error(error.response);
-    }
+    })
+
+
+    // try {
+    //   // await axios.post(`${config.url}/tasks`, formData)
+    //   await axios.post(`${config.url}/tasks`, formData)
+    //     .then(res => {
+    //       if (isSubmitted === 'N') {
+    //         Swal.fire({
+    //           title: res.data.status === 200 ? 'Request Saved' : '',
+    //           text: 'Request Number : ' + res.data.requestNum,
+    //           footer: 'Your request is saved as draft.',
+    //           type: 'info',
+    //           onClose: () => { this.formReset() }
+    //         })
+    //       }
+    //       if (isSubmitted === 'Y') {
+    //         Swal.fire({
+    //           title: res.data.status === 200 ? 'Request Submitted' : "",
+    //           text: 'Request Number : ' + res.data.requestNum,
+    //           footer: 'Your request is being processed and is waiting for the approval',
+    //           type: 'success',
+    //           onClose: () => { this.formReset() }
+    //         })
+    //       }
+    //     })
+    // } catch (error) {
+    //   if (error.response && isSubmitted === 'N') {
+    //     Swal.fire({
+    //       title: error.response.statusText,
+    //       text: error.response.data.message,
+    //       footer: JSON.stringify(error.response.data),
+    //       type: 'error',
+    //     })
+    //   }
+    //   if (error.response && isSubmitted === 'Y') {
+    //     Swal.fire({
+    //       title: error.response.statusText,
+    //       text: JSON.stringify(error.response.data),
+    //       footer: 'traceId : ' + error.response.data.traceId,
+    //       type: 'error',
+    //     })
+    //   }
+    //   console.error(error.response);
+    // }
   }
 
   formReset() {
@@ -744,6 +796,7 @@ class Create extends Component {
 
     //CHOP TYPE
     else if (name === "chopTypeSelected") {
+      console.log(event.target.value)
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected)
       }
@@ -766,6 +819,7 @@ class Create extends Component {
 
     //DEPARTMENT
     else if (name === "deptSelected") {
+      this.setState({ teamSelected: "" })
       this.getDeptHead(this.props.legalName)
       if (this.state.isLTU || this.state.isLTI) {
         this.getTeams(event.target.value)
@@ -777,6 +831,7 @@ class Create extends Component {
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
+      // console.log(event.target.value)
       this.getDocCheckBy(event.target.value)
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value)
@@ -1578,7 +1633,7 @@ class Create extends Component {
                   Header: 'Expiry Date',
                   accessor: 'expiryDate',
                   Cell: row => (
-                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(row.original.documentBase64String, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
                       {this.convertExpDate(row.original.expiryDate)}
                     </div>
                   ),
@@ -1588,7 +1643,7 @@ class Create extends Component {
                   Header: 'DH Approved',
                   accessor: 'departmentHeads',
                   Cell: row => (
-                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(row.original.documentBase64String, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
                       {this.changeDeptHeads(row.original.departmentHeads)}
                     </div>
 
@@ -1628,13 +1683,13 @@ class Create extends Component {
                     <td>{document.documentNameEnglish}</td>
                     <td>{document.documentNameChinese}</td>
                     <td id="viewDoc">
-                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(document.documentBase64String, document.documentFileName))} >
+                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
                         {this.convertExpDate(document.expiryDate)}
                       </div>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                     </td>
                     <td id="viewDoc">
-                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(document.documentBase64String, document.documentFileName))} >
+                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
                         {this.changeDeptHeads(document.departmentHeads)}
                       </div>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}

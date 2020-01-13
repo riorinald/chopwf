@@ -182,7 +182,7 @@ class EditRequest extends Component {
         this.validator = new SimpleReactValidator();
     }
 
-    async getDocCheckBy(deptId, teamId) {
+    async getDocCheckBy(deptId, teamId, callback) {
         const res = await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
             { headers: { Pragma: 'no-cache' } })
         for (let i = 0; i < res.data.length; i++) {
@@ -194,6 +194,7 @@ class EditRequest extends Component {
                 }
             })
         }
+        callback()
     }
 
     async getDeptHeads() {
@@ -247,16 +248,50 @@ class EditRequest extends Component {
     async deleteTask() {
         // console.log(this.state.taskDetails.taskId)
         // resetMounted.setMounted()
-        Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res => {
-            // console.log(res.data)
+        Swal.fire({
+            title: `Deleting your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`)
+                    .then(res => {
 
-            Swal.fire({
-                title: "REQUEST DELETED",
-                html: res.data.message,
-                type: "success",
-                onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) }
-            })
+                        Swal.update({
+                            title: "Request Deleted",
+                            text: `The request has been ${res.data.message}`,
+                            type: "success",
+
+                        })
+                        Swal.hideLoading()
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
+            }
         })
+
+        // Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res => {
+        //     // console.log(res.data)
+
+        //     Swal.fire({
+        //         title: "REQUEST DELETED",
+        //         html: res.data.message,
+        //         type: "success",
+        //         onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) }
+        //     })
+        // })
     }
 
     convertExpDate(dateValue) {
@@ -271,11 +306,14 @@ class EditRequest extends Component {
     }
 
     getDocCheckByOption(person) {
+        console.log(person)
         let i = 0
-        if (person.length !== 0) {
-
+        if (person.length === 1) {
+            console.log("akath keri")
             this.state.docCheckBy.map((head, index) => {
+                console.log(head.value)
                 if (head.value === person[0]) {
+                    console.log(index)
                     i = index
                 }
             })
@@ -325,11 +363,12 @@ class EditRequest extends Component {
 
         //LTU
         else if (temporary.applicationTypeId === "LTU") {
-            if (temporary.teamId !== "") {
-                this.getDocCheckBy(temporary.departmentId, temporary.teamId)
+            if (temporary.teamId !== "" && temporary.departmentId !== "") {
+                this.getDocCheckBy(temporary.departmentId, temporary.teamId, (callback) => {
+                    temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
+                })
             }
             temporary.effectivePeriod = temporary.effectivePeriod !== "" ? this.convertDate(temporary.effectivePeriod, 'dateView1') : null
-            temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
         }
 
         else if (temporary.applicationTypeId === "LTI") {
@@ -366,7 +405,7 @@ class EditRequest extends Component {
 
         let apptypeId = this.state.taskDetails.applicationTypeId
         details = details.filter(function (item) {
-            return item !== "taskId" && item !== "telephoneNum" && item !== "companyId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption" && item !== "createdBy" && item !== "createdByPhotoUrl" && item !== "contractSignedByFirstPersonOption" && item !== "contractSignedBySecondPersonOption" && item !== "departmentHeadsName"
+            return item !== "taskId" && item !== "telephoneNum" && item !== "companyId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption" && item !== "createdBy" && item !== "createdByPhotoUrl" && item !== "contractSignedByFirstPersonOption" && item !== "contractSignedBySecondPersonOption" && item !== "departmentHeadsName" && item !== "pickUpByName"
         })
 
         switch (apptypeId) {
@@ -485,6 +524,7 @@ class EditRequest extends Component {
                 }
             }
         })
+        console.log(this.state.selectedDocCheckBy)
     }
 
     toggle = name => event => {
@@ -542,8 +582,10 @@ class EditRequest extends Component {
             }
         }
         else if (name === "teamId") {
-            console.log(this.state.taskDetails.applicationTypeId)
-            this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value)
+            // console.log(this.state.taskDetails.applicationTypeId)
+            this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value, (callback) => {
+
+            })
             if (this.state.taskDetails.applicationTypeId === "LTU") {
                 if (this.state.taskDetails.chopTypeId !== "") {
                     this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, event.target.value)
@@ -1113,59 +1155,111 @@ class EditRequest extends Component {
 
     async postData(formData, isSubmitted) {
         let url = `${config.url}/tasks/${this.props.location.state.id}`
-        await Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-            .then(res => {
-                if (isSubmitted === 'N') {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Saved' : '',
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is saved as a draft',
-                        type: 'info',
-                        onClose: () => {
-                            this.props.history.push(`/${this.props.match.params.page}`)
-                        }
-                    })
 
-                }
-                if (isSubmitted === 'Y') {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Submitted' : "",
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is being processed and is waiting for the approval',
-                        type: 'success',
-                        onClose: () => {
-                            this.props.history.push(`/${this.props.match.params.page}`)
-                        }
+        Swal.fire({
+            title: `Creating your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.props.history.push(`/${this.props.match.params.page}`) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+                    .then(res => {
 
-                    })
+                        Swal.update({
+                            title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
+                            text: 'Request Number : ' + res.data.requestNum,
+                            footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
+                            type: isSubmitted === "Y" ? "success" : "info",
 
-                }
-            })
-            .catch(error => {
-                console.log(error.response.data)
-                let stat = error.response.data.status !== "failed" && error.response.data.status !== "error"
-                let msg = ""
-                if (stat) {
-                    if (error.response.data.errors) {
-                        let keys = Object.keys(error.response.data.errors)
-                        keys.map((key, index) => {
-                            msg = index + 1 + '.' + ' ' + msg + error.response.data.errors[key]
                         })
-                    }
-                    else if (error.response.data.message) {
-                        msg = error.response.data.message
-                    }
-                }
+                        Swal.hideLoading()
+                    })
+                    .catch(error => {
+                        console.log(error.response.data)
+                        let stat = error.response.data.status !== "failed" && error.response.data.status !== "error"
+                        let msg = ""
+                        if (stat) {
+                            if (error.response.data.errors) {
+                                let keys = Object.keys(error.response.data.errors)
+                                keys.map((key, index) => {
+                                    msg = index + 1 + '.' + ' ' + msg + error.response.data.errors[key]
+                                })
+                            }
+                            else if (error.response.data.message) {
+                                msg = error.response.data.message
+                            }
+                        }
 
-                else {
-                    msg = "Validation Errors occured"
-                }
-                Swal.fire({
-                    title: stat ? error.response.data.title : "ERROR",
-                    text: msg,
-                    type: 'error'
-                })
-            })
+                        else {
+                            msg = "Validation Errors occured"
+                        }
+                        Swal.update({
+                            title: stat ? error.response.data.title : "ERROR",
+                            text: msg,
+                            type: 'error'
+                        })
+                    })
+            }
+        })
+
+        // await Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        //     .then(res => {
+        //         if (isSubmitted === 'N') {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Saved' : '',
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is saved as a draft',
+        //                 type: 'info',
+        //                 onClose: () => {
+        //                     this.props.history.push(`/${this.props.match.params.page}`)
+        //                 }
+        //             })
+
+        //         }
+        //         if (isSubmitted === 'Y') {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Submitted' : "",
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is being processed and is waiting for the approval',
+        //                 type: 'success',
+        //                 onClose: () => {
+        //                     this.props.history.push(`/${this.props.match.params.page}`)
+        //                 }
+
+        //             })
+
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.log(error.response.data)
+        //         let stat = error.response.data.status !== "failed" && error.response.data.status !== "error"
+        //         let msg = ""
+        //         if (stat) {
+        //             if (error.response.data.errors) {
+        //                 let keys = Object.keys(error.response.data.errors)
+        //                 keys.map((key, index) => {
+        //                     msg = index + 1 + '.' + ' ' + msg + error.response.data.errors[key]
+        //                 })
+        //             }
+        //             else if (error.response.data.message) {
+        //                 msg = error.response.data.message
+        //             }
+        //         }
+
+        //         else {
+        //             msg = "Validation Errors occured"
+        //         }
+        //         Swal.fire({
+        //             title: stat ? error.response.data.title : "ERROR",
+        //             text: msg,
+        //             type: 'error'
+        //         })
+        //     })
     }
 
     async validate() {
@@ -1173,8 +1267,9 @@ class EditRequest extends Component {
         if (this.state.taskDetails.isUseInOffice === "Y") {
             details = details.filter(item => item !== "responsiblePerson" && item !== "returnDate")
         }
-        console.log(details)
+        // console.log(details)
         for (let i = 0; i < details.length; i++) {
+            console.log(details[i])
             var element = document.getElementById(details[i])
             if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
                 element.classList.contains("form-control")
@@ -1325,7 +1420,7 @@ class EditRequest extends Component {
     }
 
     dataURLtoFile(dataurl, filename) {
-
+        console.log(dataurl.split(','))
         var arr = dataurl.split(','),
             mime = arr[0].match(/:(.*?);/)[1],
             bstr = atob(arr[1]),
@@ -1652,13 +1747,13 @@ class EditRequest extends Component {
                                                         <Col md>
                                                             <FormGroup>
                                                                 {/* <Label>English Name</Label> */}
-                                                                <Input value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
+                                                                <Input value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="docName" maxLength="500" rows="3" placeholder="please describe in English" />
                                                             </FormGroup>
                                                         </Col>
                                                         <Col md>
                                                             <FormGroup>
                                                                 {/* <Label>Chinese Name</Label> */}
-                                                                <Input value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
+                                                                <Input value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="500" placeholder="please describe in Chinese" />
                                                             </FormGroup>
                                                         </Col>
                                                         <Col md>
