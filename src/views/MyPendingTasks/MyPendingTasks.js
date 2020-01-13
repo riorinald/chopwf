@@ -87,7 +87,7 @@ class MyPendingTasks extends Component {
     }
 
     async getStatusList() {
-        const res = await Axios.get(`${config.url}/statuses`)
+        const res = await Axios.get(`${config.url}/statuses?category=chop`)
         this.setState({ status: res.data })
     }
 
