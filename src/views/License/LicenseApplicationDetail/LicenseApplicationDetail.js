@@ -201,22 +201,56 @@ class LicenseApplicationDetail extends Component {
 
         if (valid) {
 
-            Axios.post(`${config.url}/licenses/${this.props.location.state.taskId}/${action}`, postReq, { headers: { 'Content-Type': 'multipart/form-data' } })
-                .then(res => {
-                    Swal.fire({
-                        title: res.data.message,
-                        html: `The request has been ${res.data.message}`,
-                        type: "success",
-                        onClose: () => { this.goBack(true) }
-                    })
-                })
-                .catch(error => {
-                    Swal.fire({
-                        title: "ERROR",
-                        html: error.response.data.message,
-                        type: "error"
-                    })
-                })
+            Swal.fire({
+                title: `Please wait while your request is being processed ... `,
+                type: "info",
+                text: '',
+                footer: '',
+                allowOutsideClick: false,
+                onClose: () => { this.goBack(true) },
+                onBeforeOpen: () => {
+                    Swal.showLoading()
+                },
+                onOpen: () => {
+                    Axios.post(`${config.url}/licenses/${this.props.location.state.taskId}/${action}`, postReq, { headers: { 'Content-Type': 'multipart/form-data' } })
+                        .then(res => {
+
+                            Swal.update({
+                                title: res.data.message,
+                                text: `The request has been ${res.data.message}`,
+                                type: "success",
+
+                            })
+                            Swal.hideLoading()
+                        })
+                        .catch(error => {
+                            if (error.response) {
+                                Swal.fire({
+                                    title: "ERROR",
+                                    html: error.response.data.message,
+                                    type: "error"
+                                })
+                            }
+                        })
+                }
+            })
+
+            // Axios.post(`${config.url}/licenses/${this.props.location.state.taskId}/${action}`, postReq, { headers: { 'Content-Type': 'multipart/form-data' } })
+            //     .then(res => {
+            //         Swal.fire({
+            //             title: res.data.message,
+            //             html: `The request has been ${res.data.message}`,
+            //             type: "success",
+            //             onClose: () => { this.goBack(true) }
+            //         })
+            //     })
+            //     .catch(error => {
+            //         Swal.fire({
+            //             title: "ERROR",
+            //             html: error.response.data.message,
+            //             type: "error"
+            //         })
+            //     })
         }
 
     }

@@ -541,48 +541,100 @@ class Create extends Component {
   }
 
   async postData(formData, isSubmitted) {
-    try {
-      // await axios.post(`${config.url}/tasks`, formData)
-      await axios.post(`${config.url}/tasks`, formData)
-        .then(res => {
-          if (isSubmitted === 'N') {
-            Swal.fire({
-              title: res.data.status === 200 ? 'Request Saved' : '',
+
+
+    Swal.fire({
+      title: `Creating your Request ... `,
+      type: "info",
+      text: '',
+      footer: '',
+      allowOutsideClick: false,
+      onClose: () => { this.formReset() },
+      onBeforeOpen: () => {
+        Swal.showLoading()
+      },
+      onOpen: () => {
+        axios.post(`${config.url}/tasks`, formData)
+          .then(res => {
+
+            Swal.update({
+              title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
               text: 'Request Number : ' + res.data.requestNum,
-              footer: 'Your request is saved as draft.',
-              type: 'info',
-              onClose: () => { this.formReset() }
+              footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
+              type: isSubmitted === "Y" ? "success" : "info",
+
             })
-          }
-          if (isSubmitted === 'Y') {
-            Swal.fire({
-              title: res.data.status === 200 ? 'Request Submitted' : "",
-              text: 'Request Number : ' + res.data.requestNum,
-              footer: 'Your request is being processed and is waiting for the approval',
-              type: 'success',
-              onClose: () => { this.formReset() }
+            Swal.hideLoading()
+          })
+          .catch(error => {
+            let err = "Please contact the IT Admin !"
+            let err2 = []
+            let err3 = ""
+            if (error.response) {
+              console.log(error.response)
+              let keys = Object.keys(error.response.data.errors)
+              err = keys.join(',')
+              keys.map(key => {
+                // console.log(error.response.data.errors[key].join(','))
+                err2.push(error.response.data.errors[key].join(','))
+              })
+              err3 = err2.join(';')
+            }
+            Swal.hideLoading()
+            Swal.update({
+              title: "Error",
+              type: "error",
+              text: err,
+              html: err3,
+
             })
-          }
-        })
-    } catch (error) {
-      if (error.response && isSubmitted === 'N') {
-        Swal.fire({
-          title: error.response.statusText,
-          text: error.response.data.message,
-          footer: JSON.stringify(error.response.data),
-          type: 'error',
-        })
+          })
       }
-      if (error.response && isSubmitted === 'Y') {
-        Swal.fire({
-          title: error.response.statusText,
-          text: JSON.stringify(error.response.data),
-          footer: 'traceId : ' + error.response.data.traceId,
-          type: 'error',
-        })
-      }
-      console.error(error.response);
-    }
+    })
+
+
+    // try {
+    //   // await axios.post(`${config.url}/tasks`, formData)
+    //   await axios.post(`${config.url}/tasks`, formData)
+    //     .then(res => {
+    //       if (isSubmitted === 'N') {
+    //         Swal.fire({
+    //           title: res.data.status === 200 ? 'Request Saved' : '',
+    //           text: 'Request Number : ' + res.data.requestNum,
+    //           footer: 'Your request is saved as draft.',
+    //           type: 'info',
+    //           onClose: () => { this.formReset() }
+    //         })
+    //       }
+    //       if (isSubmitted === 'Y') {
+    //         Swal.fire({
+    //           title: res.data.status === 200 ? 'Request Submitted' : "",
+    //           text: 'Request Number : ' + res.data.requestNum,
+    //           footer: 'Your request is being processed and is waiting for the approval',
+    //           type: 'success',
+    //           onClose: () => { this.formReset() }
+    //         })
+    //       }
+    //     })
+    // } catch (error) {
+    //   if (error.response && isSubmitted === 'N') {
+    //     Swal.fire({
+    //       title: error.response.statusText,
+    //       text: error.response.data.message,
+    //       footer: JSON.stringify(error.response.data),
+    //       type: 'error',
+    //     })
+    //   }
+    //   if (error.response && isSubmitted === 'Y') {
+    //     Swal.fire({
+    //       title: error.response.statusText,
+    //       text: JSON.stringify(error.response.data),
+    //       footer: 'traceId : ' + error.response.data.traceId,
+    //       type: 'error',
+    //     })
+    //   }
+    //   console.error(error.response);
+    // }
   }
 
   formReset() {
@@ -738,6 +790,7 @@ class Create extends Component {
 
     //CHOP TYPE
     else if (name === "chopTypeSelected") {
+      console.log(event.target.value)
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected)
       }
@@ -760,6 +813,7 @@ class Create extends Component {
 
     //DEPARTMENT
     else if (name === "deptSelected") {
+      this.setState({ teamSelected: "" })
       this.getDeptHead(this.props.legalName)
       if (this.state.isLTU || this.state.isLTI) {
         this.getTeams(event.target.value)
@@ -771,6 +825,7 @@ class Create extends Component {
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
+      // console.log(event.target.value)
       this.getDocCheckBy(event.target.value)
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value)
@@ -1491,13 +1546,13 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 {/* <Label>English Name</Label> */}
-                <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
+                <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" name="textarea-input" maxLength="500" id="docName" rows="3" placeholder="please describe in English" />
               </FormGroup>
             </Col>
             <Col md>
               <FormGroup>
                 {/* <Label>Chinese Name</Label> */}
-                <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
+                <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" name="textarea-input" maxLength="500" id="cnName" rows="3" placeholder="please describe in Chinese" />
               </FormGroup>
             </Col>
             <Col md>
