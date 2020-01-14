@@ -732,6 +732,8 @@ class Create extends Component {
   //handle value on changes
   handleChange = name => event => {
     //APPLICATION TYPE
+    let value = event.target.value
+    
     if (name === "appTypeSelected") {
       this.setValidateForm(event.target.value)
       //Clear Doc Table and agreeTerms
@@ -839,8 +841,17 @@ class Create extends Component {
       }
     }
 
+    //Handle engName
+    if (name === "engName" && value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)){
+      Swal.fire({
+              title: "invalid",
+              html: 'Please input english character',
+              type: "warning"
+            })
+    }
+
     this.setState({
-      [name]: event.target.value
+      [name]: value
     },
       () => { this.checkDepartment() }
     );
@@ -1078,7 +1089,7 @@ class Create extends Component {
     let typeValid = false
     let doc = this.state.documentTableLTI
     if (this.state.docSelected !== null) {
-      if (this.state.engName !== "" && this.state.cnName !== "") {
+      if (this.state.engName !== "") {
         typeValid = true
       }
       else {
@@ -1553,7 +1564,7 @@ class Create extends Component {
 
                       </DropdownMenu>
                     </InputGroupButtonDropdown>
-                    <Tooltip placement="top" isOpen={this.state.maskTooltip.isOpen} target="contractNumber">{this.state.maskTooltip.message} </Tooltip>
+                    <Tooltip autoComplete="off" autoCapitalize="on" placement="top" isOpen={this.state.maskTooltip.isOpen} target="contractNumber">{this.state.maskTooltip.message} </Tooltip>
                     <InputMask placeholder="Enter Contract Number" mask={this.state.mask} name="contractNumber" id="contractNumber" className="form-control"
                       onChange={this.handleContractChange} value={this.state.contractNumber}
                     // onClick={this.handlemask}
@@ -1566,13 +1577,13 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 {/* <Label>English Name</Label> */}
-                <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
+                <Input autoComplete="off" value={this.state.engName} onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
               </FormGroup>
             </Col>
             <Col md>
               <FormGroup>
                 {/* <Label>Chinese Name</Label> */}
-                <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3" placeholder="Please describe in Chinese (optional)" />
+                <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3" placeholder="Please describe in Chinese (optional)" />
               </FormGroup>
             </Col>
             <Col md>
