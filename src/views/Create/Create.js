@@ -1938,6 +1938,7 @@ class Create extends Component {
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect id="resPerson"
                         onBlur={this.checkDepartment}
+                        isClearable
                         classNamePrefix="rs"
                         loadOptions={loadOptions}
                         onChange={this.handleSelectOption("resPerson")}
