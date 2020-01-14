@@ -173,10 +173,10 @@ class Create extends Component {
       ],
       validateForm: [],
       noteInfo: '如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。 For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR.',
-      mask: [/(?!.*[A-HJ-QT-Z])[IS]/i,"-",/[A-Z]/i,/[A]/i,"-",/(?!.*[A-NQRT-Z])[PSO]/i,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/],
+      mask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[A-Z]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
       // mask: "a-a-a-9999-9999",
       selectInfo: '',
-      inputMask: {mask:"a-a-a-9999-9999"},
+      inputMask: { mask: "a-a-a-9999-9999" },
       maskTooltip: {}
 
     };
@@ -860,8 +860,22 @@ class Create extends Component {
     if (event.target.value) {
       event.target.className = "form-control"
     }
-    else {
-      event.target.className = "is-invalid form-control"
+    
+
+    if (name !== "numOfPages") {
+      this.setState({
+        [name]: event.target.value
+      },
+        () => { this.checkDepartment() }
+      );
+
+
+      if (event.target.value) {
+        event.target.className = "form-control"
+      }
+      else {
+        event.target.className = "is-invalid form-control"
+      }
     }
   };
 
@@ -1000,20 +1014,20 @@ class Create extends Component {
     //   mask: "a-a-a-9999-9999",
     //   value: value, 
     // }
-    var maskTooltip={
-        isOpen: false,
-        message: ''
+    var maskTooltip = {
+      isOpen: false,
+      message: ''
     }
     maskTooltip.isOpen = true
     maskTooltip.message = '[ I / S ]-[ A / L / IA / R ]-[ O / P / S ] \n\n e.g "S-A-O-9999-9999"'
     if (/^..[LIAR]/i.test(value)) {
-            // inputMask.mask = "a-aa-a-9999-9999"
+      // inputMask.mask = "a-aa-a-9999-9999"
       // value = value.replace("I-_", "IA-_")
-      } else {
-        
-      }
+    } else {
+
+    }
     // console.log(inputMask, inputMask.value);
-    this.setState({maskTooltip:maskTooltip,contractNumber: value})
+    this.setState({ maskTooltip: maskTooltip, contractNumber: value })
   }
 
   addContract(event) {
@@ -1040,7 +1054,7 @@ class Create extends Component {
       let maskTooltip = {
         isOpen: false
       }
-      this.setState({ contractNumber: "", maskTooltip:maskTooltip }, this.toggle('viewContract'))
+      this.setState({ contractNumber: "", maskTooltip: maskTooltip }, this.toggle('viewContract'))
     }
     else {
       Swal.fire({
@@ -1745,7 +1759,7 @@ class Create extends Component {
                 <Form className="form-horizontal" innerRef={this.formRef}>
                   {/* <FormGroup>
                     <Label>Employee Number
-                        <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted</i> </span>
+                        <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted.</i> </span>
                     </Label>
                     <div className="controls">
                       <InputGroup className="input-prepend">
@@ -1802,8 +1816,8 @@ class Create extends Component {
                   <Collapse isOpen={this.state.isLTI || this.state.isLTU}>
                     <FormGroup>
                       <Label>Entitled Team</Label>
-                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
-                        <option value="0" disabled>Please select a team</option>
+                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} value={this.state.teamSelected} type="select">
+                        <option value="" disabled>Please select a team</option>
                         {this.state.teams.map((team, index) =>
                           <option key={index} value={team.teamId}>{team.teamName}</option>
                         )}
@@ -1904,6 +1918,15 @@ class Create extends Component {
                       <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
                     </FormGroup>
                   </Collapse>
+
+                  {!this.state.isLTI
+                    ? <FormGroup>
+                      <Label>Connecting Chop (骑缝章) </Label>
+                      <Row />
+                      <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
+                    </FormGroup>
+                    : ""}
+
                   <Collapse isOpen={!this.state.isLTI && !this.state.isLTU}>
                     <FormGroup>
                       <Label>Use in Office</Label>
@@ -1960,6 +1983,7 @@ class Create extends Component {
                         id="pickUpBy"
                         isClearable
                         loadOptions={loadOptions}
+                        isClearable
                         onBlur={this.checkDepartment}
                         onChange={this.handleSelectOption("pickUpBy")}
                         menuPortalTarget={document.body}
@@ -2113,7 +2137,7 @@ class Create extends Component {
                         ? <Button className="mr-2" id="submit" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
                         : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
                         >Submit</Button>}
-                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} target="submitTooltip">please confirm the agree terms</Tooltip>
+                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} target="submitTooltip">Please confirm the agree terms</Tooltip>
                       <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
                       <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
                     </Col>

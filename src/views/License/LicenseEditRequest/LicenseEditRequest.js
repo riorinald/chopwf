@@ -217,7 +217,7 @@ class LicenseEditRequest extends Component {
     validate() {
         let data = this.state.taskDetails
         let keys = ["telephoneNum", "licenseNameId", "departmentId", "seniorManagers", "expDeliveryAddress", "expDeliveryReceiver",
-            "expDeliveryMobileNo", "documentType1", "documentType2"
+            "expDeliveryMobileNo", "documentType1", "documentType2", "plannedReturnDate", "watermark1", "watermark2"
         ]
 
         if (data.purposeType === "PS") {
@@ -229,16 +229,16 @@ class LicenseEditRequest extends Component {
             keys = keys.concat("licensePurpose1", "licensePurpose2", "licensePurpose3")
         }
 
-        if (data.documentTypeId === "ORIGINAL") {
-            keys = keys.concat("plannedReturnDate")
-        }
-        else {
-            keys = keys.filter(key => key !== "plannedReturnDate")
-        }
+        // if (data.documentTypeId === "ORIGINAL") {
+        //     keys = keys.concat("plannedReturnDate")
+        // }
+        // else {
+        //     keys = keys.filter(key => key !== "plannedReturnDate")
+        // }
 
         if (data.documentTypeId === "SCANCOPY") {
-            keys = keys.concat("watermark1")
-            keys = keys.concat("watermark2")
+            // keys = keys.concat("watermark1")
+            // keys = keys.concat("watermark2")
             if (data.needWatermark === "Y") {
                 keys = keys.concat("inputWatermark1")
             }
@@ -642,25 +642,30 @@ class LicenseEditRequest extends Component {
                                             showYearDropdown
                                             selected={returnDateView}
                                             onChange={this.dateChange("plannedReturnDate", "returnDateView")} />
-                                        {taskDetails.documentTypeId === "OC"
+                                        {taskDetails.documentTypeId === "ORIGINAL"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', taskDetails.plannedReturnDate, 'required')}</small>
                                             : null}
                                     </FormGroup>
+
+
+
+                                    <FormGroup onChange={this.handleChange("deliverWayId")} >
+                                        <Label>Deliver Way</Label>
+                                        <CustomInput type="radio" id="deliverWay1" defaultChecked={taskDetails.deliverWayId === "F2F"} name="deliverWayId" value="F2F" label="面对面城, Face to face" />
+                                        <CustomInput type="radio" id="deliverWay2" defaultChecked={taskDetails.deliverWayId === "EXPRESS"} name="deliverWayId" value="Express" label="快递 Express: Express Number" />
+                                        {taskDetails.documentTypeId === "ORIGINAL"
+                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', taskDetails.deliverWayId, 'required')}</small>
+                                            : null}
+                                    </FormGroup>
+
+                                    <FormGroup>
+                                        <Label>Address</Label>
+                                        <Input placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" />
+                                        {taskDetails.documentTypeId === "ORIGINAL"
+                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.expDeliveryAddress, 'required')}</small>
+                                            : null}
+                                    </FormGroup>
                                 </Collapse>
-
-
-                                <FormGroup onChange={this.handleChange("deliverWayId")} >
-                                    <Label>Deliver Way</Label>
-                                    <CustomInput type="radio" id="deliverWay1" defaultChecked={taskDetails.deliverWayId === "F2F"} name="deliverWayId" value="F2F" label="面对面城, Face to face" />
-                                    <CustomInput type="radio" id="deliverWay2" defaultChecked={taskDetails.deliverWayId === "EXPRESS"} name="deliverWayId" value="Express" label="快递 Express: Express Number" />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', taskDetails.deliverWayId, 'required')}</small>
-                                </FormGroup>
-
-                                <FormGroup>
-                                    <Label>Address</Label>
-                                    <Input placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.expDeliveryAddress, 'required')}</small>
-                                </FormGroup>
 
                                 <FormGroup>
                                     <Label>Reciever</Label>

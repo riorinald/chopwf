@@ -56,12 +56,12 @@ export const LTI = (props) => {
 
       <Col >
         <FormGroup>
-          <Input value={props.engName} onChange={props.handleChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
+          <Input value={props.engName} onChange={props.handleChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
         </FormGroup>
       </Col>
       <Col >
         <FormGroup>
-          <Input value={props.cnName} onChange={props.handleChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
+          <Input value={props.cnName} onChange={props.handleChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="Please describe in Chinese" />
         </FormGroup>
       </Col>
       <Col >

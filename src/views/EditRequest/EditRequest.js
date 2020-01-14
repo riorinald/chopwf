@@ -264,7 +264,7 @@ class EditRequest extends Component {
 
                         Swal.update({
                             title: "Request Deleted",
-                            text: `The request has been ${res.data.message}`,
+                            text: `The request has been deleted.`, //${res.data.message}
                             type: "success",
 
                         })
@@ -611,6 +611,7 @@ class EditRequest extends Component {
                 }
             }
         }
+
         if (event.target.value) {
 
             event.target.className = "form-control"
@@ -1488,7 +1489,7 @@ class EditRequest extends Component {
                                                 <Input disabled value={taskDetails.requestNum}></Input>
                                             </InputGroup>
                                         </FormGroup>
-                                        <FormGroup>
+                                        {/* <FormGroup>
                                             <Label>Employee Number
                         <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted</i> </span>
                                             </Label>
@@ -1499,9 +1500,9 @@ class EditRequest extends Component {
                                                     </InputGroupAddon>
                                                     <Input disabled id="prependedInput" value={taskDetails.employeeNum} size="16" type="text" />
                                                 </InputGroup>
-                                                {/* <p className="help-block">Here's some help text</p> */}
+
                                             </div>
-                                        </FormGroup>
+                                        </FormGroup> */}
                                         <FormGroup>
                                             <Label>Tel. </Label>
                                             <InputGroup>
@@ -1747,13 +1748,13 @@ class EditRequest extends Component {
                                                         <Col md>
                                                             <FormGroup>
                                                                 {/* <Label>English Name</Label> */}
-                                                                <Input value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="docName" maxLength="500" rows="3" placeholder="please describe in English" />
+                                                                <Input value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="docName" maxLength="500" rows="3" placeholder="Please describe in English" />
                                                             </FormGroup>
                                                         </Col>
                                                         <Col md>
                                                             <FormGroup>
                                                                 {/* <Label>Chinese Name</Label> */}
-                                                                <Input value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="500" placeholder="please describe in Chinese" />
+                                                                <Input value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="500" placeholder="Please describe in Chinese (Optional)" />
                                                             </FormGroup>
                                                         </Col>
                                                         <Col md>
@@ -1824,28 +1825,26 @@ class EditRequest extends Component {
                                         </FormGroup>
 
                                         <Collapse isOpen={taskDetails.applicationTypeId !== "LTI"}>
-                                            <FormGroup>
-                                                <Label>Connecting Chop (骑缝章) </Label>
-                                                <Row />
-                                                <AppSwitch id="connectChop" dataOn={'yes'} onChange={this.toggleConnection} checked={taskDetails.connectChop === "Y"} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
-                                                {/* <InputGroup>
-                                            <small style={{ color: '#F86C6B' }} >{this.validator.message('Connecting Chop', taskDetails.connectChop, 'required')}</small>
-                                        </InputGroup> */}
-                                            </FormGroup>
-                                            {/* </Collapse>
 
-                                <Collapse isOpen={!taskDetails.applicationTypeId === "LTI"}> */}
+
                                             <FormGroup>
                                                 <Label>Number of Pages to Be Chopped</Label>
                                                 <InputGroup>
                                                     <Input onChange={this.handleChange("numOfPages")} value={taskDetails.numOfPages} id="numOfPages" size="16" type="number" min="0" />
-                                                    {/* <FormFeedback>Invalid Number of pages </FormFeedback> */}
+
                                                 </InputGroup>
                                                 <InputGroup>
                                                     {taskDetails.applicationTypeId !== "LTI"
                                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages to be Chopped', taskDetails.numOfPages, 'required')}</small>
                                                         : null}
                                                 </InputGroup>
+                                            </FormGroup>
+
+                                            <FormGroup>
+                                                <Label>Connecting Chop (骑缝章) </Label>
+                                                <Row />
+                                                <AppSwitch id="connectChop" dataOn={'yes'} onChange={this.toggleConnection} checked={taskDetails.connectChop === "Y"} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
+
                                             </FormGroup>
                                         </Collapse>
 
@@ -1906,6 +1905,7 @@ class EditRequest extends Component {
                                                 <AsyncSelect
                                                     id="pickUpBy"
                                                     loadOptions={this.loadOptionsDept}
+                                                    isClearable
                                                     value={deptHeads[taskDetails.pickUpByOption]}
                                                     onChange={this.handleSelectOption("pickUpBy")}
                                                     menuPortalTarget={document.body}
@@ -1923,7 +1923,7 @@ class EditRequest extends Component {
                                         <FormGroup>
                                             <Label>Remark</Label>
                                             <InputGroup>
-                                                <Input onChange={this.handleChange("remark")} value={taskDetails.remark} id="remark" size="16" type="textbox" placeholder="Please enter the remarks" />
+                                                <Input onChange={this.handleChange("remark")} value={taskDetails.remark} id="remark" size="16" type="textbox" placeholder="Please enter the remarks, e.g. telephone number of pick up person." />
                                                 {/* <FormFeedback>Please add remarks</FormFeedback> */}
                                             </InputGroup>
                                             <InputGroup>
