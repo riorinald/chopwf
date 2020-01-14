@@ -2071,7 +2071,7 @@ class Create extends Component {
                       </FormGroup>
                       : <FormGroup>
                         <Label>Department Heads <i className="fa fa-user" /></Label>
-                        <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity</small>
+                        <small className="ml-2"> If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity.</small>
                         <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                         <AsyncSelect
                           id="deptHeadSelected"
