@@ -1980,9 +1980,9 @@ class Create extends Component {
                   </Collapse>
 
                   <FormGroup>
-                    <Label>Remark</Label>
+                    <Label>Remark <small className="ml-2">Notes: Please enter the remarks, e.g. telephone number of pick up person.</small> </Label>
                     <InputGroup>
-                      <Input maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
+                      <Input autoComplete="off" maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Remark', this.state.remarks, 'required')}</small>
                   </FormGroup>
