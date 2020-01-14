@@ -567,6 +567,11 @@ class EditRequest extends Component {
     }
 
     handleChange = name => event => {
+        this.setState(state => {
+            let taskDetails = this.state.taskDetails
+            taskDetails.isConfirm = "N"
+            return taskDetails
+        })
         if (name === "departmentId") {
             this.getTeams(event.target.value)
             console.log(this.state.taskDetails.applicationTypeId)
@@ -1269,10 +1274,15 @@ class EditRequest extends Component {
             details = details.filter(item => item !== "responsiblePerson" && item !== "returnDate")
         }
         // console.log(details)
+        let tempCheck = 0
         for (let i = 0; i < details.length; i++) {
             console.log(details[i])
             var element = document.getElementById(details[i])
             if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
+                if (tempCheck === 0) {
+                    element.focus()
+                }
+                tempCheck = 1
                 element.classList.contains("form-control")
                     ? element.className = "is-invalid form-control"
                     : element.className = "notValid"
@@ -1513,7 +1523,7 @@ class EditRequest extends Component {
                                             </InputGroup>
                                         </FormGroup>
                                         <FormGroup>
-                                            <Label>Dept</Label>
+                                            <Label>Dept.</Label>
                                             <Input id="departmentId" type="select" value={taskDetails.departmentId} onChange={this.handleChange("departmentId")} name="dept">
                                                 <option value="" >Please select a department</option>
                                                 {this.state.departments.map((option, index) => (
@@ -1597,7 +1607,7 @@ class EditRequest extends Component {
                                             ? <FormGroup>
                                                 <Label>Branch Company Chop</Label>
                                                 <Input onChange={this.handleChange("branchId")} type="select" value={taskDetails.branchId}>
-                                                    <option value="" disabled>Please specify your Brand Company Chop</option>
+                                                    <option value="" disabled>Please specify your Branch Company Chop</option>
                                                     {this.state.branches.map((branch, index) =>
                                                         <option value={branch.branchId} key={index}>{branch.branchName}</option>
                                                     )}
@@ -2039,7 +2049,7 @@ class EditRequest extends Component {
                                                         onClick={this.isValid}
                                                         id="confirm" value="option1">
                                                         <Label className="form-check-label" check >
-                                                            By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
+                                                            By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines
                                                             regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
                       </Label>
                                                     </CustomInput>

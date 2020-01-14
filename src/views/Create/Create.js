@@ -214,9 +214,6 @@ class Create extends Component {
 
   }
 
-  // componentWillReceiveProps() {
-  //   this.forceUpdate()
-  // }
 
   validate() {
     let { validateForm } = this.state
@@ -227,6 +224,7 @@ class Create extends Component {
         text: 'Please select an Application Type to get started !'
       })
     }
+    let tempCheck = 0
     for (let i = 0; i < validateForm.length; i++) {
       let field = this.state[validateForm[i]]
       var element = document.getElementById(validateForm[i])
@@ -239,6 +237,10 @@ class Create extends Component {
         // console.log(`${validateForm[i]} is Valid`)
       }
       else {
+        if (tempCheck === 0) {
+          element.focus()
+        }
+        tempCheck = 1
         element.classList.contains("form-control")
           ? element.className = "is-invalid form-control"
           : element.className = "notValid"
@@ -247,73 +249,7 @@ class Create extends Component {
 
     }
   }
-  // validate() {
-  //   console.log(this.state.reqInfo)
-  //   for (let i = 0; i < this.state.reqInfo.length; i++) {
-  //     // console.log(this.state.reqInfo[i])
-  //     if (this.state[this.state.reqInfo[i].id].length >= 1 && this.state[this.state.reqInfo[i].id] !== "") {
-  //       // console.log(this.state.reqInfo[i].id)
-  //       this.setState(state => {
-  //         const reqInfo = state.reqInfo.map((item, j) => {
-  //           if (j === i) {
-  //             var element = document.getElementById(this.state.reqInfo[i].id)
-  //             element.classList.contains("form-control")
-  //               ? element.className = "is-valid form-control"
-  //               : element.className = "isValid"
-  //             return { id: item.id, valid: true }
-  //           }
-  //           else { return item }
-  //         })
-  //         return { reqInfo }
-  //       })
-  //     }
-  //     else {
-  //       this.setState(state => {
-  //         console.log(this.state.reqInfo[i])
-  //         const reqInfo = state.reqInfo.map((item, j) => {
-  //           if (j === i) {
-  //             var element = document.getElementById(item.id)
-  //             element.classList.contains("form-control")
-  //               ? element.className = "is-invalid form-control"
-  //               : element.className = "notValid"
-  //             return { id: item.id, name: item.name, valid: false }
-  //           }
-  //           else { return item }
-  //         })
-  //         return { reqInfo }
-  //       })
-  //     }
-  //   }
-  //   if (!this.state.collapse) {
-  //     let dateValid = false;
-  //     let resValid = false;
-  //     if (this.state.returnDate !== "") {
-  //       document.getElementById("returnDate").className = "is-valid form-control"
-  //       dateValid = true
-  //     }
-  //     else {
-  //       document.getElementById("returnDate").className = "is-invalid form-control"
-  //       dateValid = false
-  //     }
-  //     if (this.state.resPerson !== "") {
-  //       document.getElementById("resPerson").className = "isValid"
-  //       resValid = true
-  //     }
-  //     else {
-  //       document.getElementById("resPerson").className = "notValid"
-  //       resValid = false
-  //     }
-  //     if (dateValid && resValid) {
-  //       this.setState({ inOffice: true })
-  //     }
-  //     else {
-  //       this.setState({ inOffice: false })
-  //     }
-  //   }
-  //   else {
-  //     this.setState({ inOffice: true })
-  //   }
-  // }
+ 
 
   checkDept() {
     if (this.state.deptSelected === "") {
@@ -327,15 +263,7 @@ class Create extends Component {
 
   async handleAgreeTerm(event) {
     await this.validate()
-    // for (let i = 0; i < this.state.reqInfo.length; i++) {
-    //   if (this.state.reqInfo[i].valid) {
-    //     this.setState({ valid: true })
-    //   }
-    //   else {
-    //     this.setState({ valid: false })
-    //     break;
-    //   }
-    // }
+   
     if (this.state.validateForm.length !== 0) {
       if (this.validator.allValid()) {
         console.log("All Valid")
@@ -347,9 +275,7 @@ class Create extends Component {
         this.forceUpdate()
       }
     }
-    // if (this.state.valid && this.state.inOffice) {
-
-    // }
+    
   }
 
   async isValid() {
@@ -471,7 +397,7 @@ class Create extends Component {
 
   checkDepartment = () => {
     if (this.state.deptSelected === "") {
-      this.setState({ selectInfo: 'Please select the Department' })
+      this.setState({ selectInfo: 'Please select department' })
     } else {
       this.setState({ selectInfo: '' })
     }
@@ -543,7 +469,8 @@ class Create extends Component {
   }
 
   async postData(formData, isSubmitted) {
-
+    // console.log(document.getElementById("remarks"))
+    document.getElementById("submit").blur()
 
     Swal.fire({
       title: `Creating your Request ... `,
@@ -853,7 +780,7 @@ class Create extends Component {
         })
       }
     }
-    
+
 
     if (name !== "numOfPages") {
       this.setState({
@@ -1091,6 +1018,7 @@ class Create extends Component {
   }
 
   addDocumentLTI() {
+
     var maxNumber = 45;
     var rand = Math.floor((Math.random() * maxNumber) + 1);
     let valid = true
@@ -1770,7 +1698,7 @@ class Create extends Component {
                     </InputGroup>
                   </FormGroup>
                   <FormGroup>
-                    <Label>Dept</Label>
+                    <Label>Dept.</Label>
                     <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
                       <option disabled value="0">Please Select . . .</option>
                       {this.state.department.map((option, index) => (
@@ -1861,7 +1789,7 @@ class Create extends Component {
                       onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
                       <option disabled value="0">Please Select ..</option>
                       {this.state.chopTypes.map((option, id) => (
-                        <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
+                        <option key={option.chopTypeId} value={option.chopTypeId}> {this.props.legalName} {option.chopTypeName}</option>
                       ))}
 
                     </Input>
@@ -1872,7 +1800,7 @@ class Create extends Component {
                     ? <FormGroup>
                       <Label>Branch Company Chop</Label>
                       <Input onChange={this.handleChange("branchSelected")} type="select" defaultValue="0">
-                        <option value="0" disabled>Please specify your Brand Company Chop</option>
+                        <option value="0" disabled>Please specify your Branch Company Chop</option>
                         {this.state.branches.map((branch, index) =>
                           <option value={branch.branchId} key={index}>{branch.branchName}</option>
                         )}
@@ -1891,7 +1819,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Purpose of Use</Label>
                     <InputGroup>
-                      <Input maxLength={500} ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                      <Input maxLength={500} ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the purpose of use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of Use', this.state.purposeOfUse, 'required')}</small>
                   </FormGroup>
@@ -2106,7 +2034,7 @@ class Create extends Component {
                           // onClick={this.isValid}
                           id="confirm" value="option1">
                           <Label className="form-check-label" check >
-                            By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
+                            By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines
                             regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action.
                       </Label>
                         </CustomInput>

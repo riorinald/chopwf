@@ -352,6 +352,17 @@ class TaskDetails extends Component {
                                             <Input disabled type="text" value={taskDetails.chopTypeName} id="chopTypeName" name="chopTypeName" placeholder="/" />
                                         </Col>
                                     </FormGroup>
+                                    {taskDetails.branchName !== ""
+                                        ? <FormGroup row >
+                                            <Col md="4" className="d-flex align-items-center" >
+                                                <Label>Branch Company Chop</Label>
+                                            </Col>
+                                            <Col xs="12" md="8">
+                                                <Input disabled type="text" value={taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
+                                            </Col>
+                                        </FormGroup>
+                                        : ""
+                                    }
                                     {appType === "LTI" ?
                                         <div>
                                             <FormGroup row >
@@ -395,17 +406,7 @@ class TaskDetails extends Component {
                                             </Col>
                                         </FormGroup>
                                         : null}
-                                    {taskDetails.branchName !== ""
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Branch Company Chop</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : ""
-                                    }
+
                                     {appType !== "LTI" ?
                                         <>
                                             <FormGroup row >
