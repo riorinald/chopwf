@@ -1883,7 +1883,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Purpose of Use</Label>
                     <InputGroup>
-                      <Input maxLength={500} ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                      <Input maxLength={500} spellCheck="true" ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of Use', this.state.purposeOfUse, 'required')}</small>
                   </FormGroup>
