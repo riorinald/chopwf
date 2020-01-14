@@ -853,6 +853,7 @@ class Create extends Component {
         })
       }
     }
+    
 
     if (name !== "numOfPages") {
       this.setState({
