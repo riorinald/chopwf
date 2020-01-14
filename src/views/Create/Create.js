@@ -89,6 +89,8 @@ class Create extends Component {
 
       //retrieve from DH table
       deptHead: [],
+      //retrieve userList
+      userList:[],
       teams: [],
       branches: [],
       viewContract: false,
@@ -599,6 +601,13 @@ class Create extends Component {
       })
   }
 
+  async getUsers(){
+    await axios.get(`${config.url}/users?category=normal`, { headers: { Pragma: 'no-cache' } })
+      .then(res => {
+        this.setState({ userList: res.data })
+      })
+  }
+
   async getDeptHead(companyId) {
     console.log(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
     await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`, { headers: { Pragma: 'no-cache' } })
@@ -752,6 +761,7 @@ class Create extends Component {
     else if (name === "deptSelected") {
       this.setState({ teamSelected: "" })
       this.getDeptHead(this.props.legalName)
+      this.getUsers();
       if (this.state.isLTU || this.state.isLTI) {
         this.getTeams(event.target.value)
       }
@@ -1360,11 +1370,16 @@ class Create extends Component {
     this.validator.purgeFields();
     const deptHeads = []
     const docCheckByUsers = []
+    const userLists = []
     var pointer;
-    const { hover, docCheckBy, deptHead } = this.state;
+    const { hover, docCheckBy, deptHead, userList } = this.state;
     for (let i = 0; i < deptHead.length; i++) {
       const obj = { value: deptHead[i].userId, label: deptHead[i].displayName }
       deptHeads.push(obj)
+    }
+    for (let i = 0; i < userList.length; i++) {
+      const obj = { value: userList[i].userId, label: userList[i].displayName }
+      userLists.push(obj)
     }
     docCheckBy.map(doc => {
       const obj = { value: doc.userId, label: doc.displayName }
@@ -1385,6 +1400,12 @@ class Create extends Component {
 
     const filterColors = (inputValue) => {
       return deptHeads.filter(i =>
+        i.label.toLowerCase().includes(inputValue.toLowerCase())
+      );
+    };
+
+    const filterUsers = (inputValue) => {
+      return userLists.filter(i =>
         i.label.toLowerCase().includes(inputValue.toLowerCase())
       );
     };
@@ -1420,6 +1441,13 @@ class Create extends Component {
       callback(filterColors(inputValue));
 
     }
+
+    const loadUsers = (inputValue, callback) => {
+
+      callback(filterUsers(inputValue));
+
+    }
+    
 
     const loadDocCheckBy = (inputValue, callback) => {
       callback(filterDocCheck(inputValue));
@@ -1884,7 +1912,7 @@ class Create extends Component {
                         onBlur={this.checkDepartment}
                         isClearable
                         classNamePrefix="rs"
-                        loadOptions={loadOptions}
+                        loadOptions={loadUsers}
                         onChange={this.handleSelectOption("resPerson")}
                         menuPortalTarget={document.body}
                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -1910,7 +1938,7 @@ class Create extends Component {
                       <AsyncSelect
                         id="pickUpBy"
                         isClearable
-                        loadOptions={loadOptions}
+                        loadOptions={loadUsers}
                         isClearable
                         onBlur={this.checkDepartment}
                         onChange={this.handleSelectOption("pickUpBy")}
