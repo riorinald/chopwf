@@ -1847,13 +1847,13 @@ class Create extends Component {
                     </FormGroup>
                   </Collapse>
 
-                  {!this.state.isLTI
+                  {/* {!this.state.isLTI
                     ? <FormGroup>
                       <Label>Connecting Chop (骑缝章) </Label>
                       <Row />
                       <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
                     </FormGroup>
-                    : ""}
+                    : ""} */}
 
                   <Collapse isOpen={!this.state.isLTI && !this.state.isLTU}>
                     <FormGroup>
