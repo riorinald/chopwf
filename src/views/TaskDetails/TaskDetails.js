@@ -760,7 +760,7 @@ class TaskDetails extends Component {
                             )}
 
                         </CardBody>
-                        <CardFooter>
+                        {/* <CardFooter>
                             <Row>
                                 <Col xs="1" >
                                     <div style={{ width: "10px", height: "10px", background: "#c8ced3" }} ></div>
@@ -785,7 +785,7 @@ class TaskDetails extends Component {
                                     <div>Next Stage</div>
                                 </Col>
                             </Row>
-                        </CardFooter>
+                        </CardFooter> */}
                     </Card>
                     : null
                 }

@@ -173,10 +173,10 @@ class Create extends Component {
       ],
       validateForm: [],
       noteInfo: '如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。 For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR.',
-      mask: [/(?!.*[A-HJ-QT-Z])[IS]/i,"-",/[A-Z]/i,/[A]/i,"-",/(?!.*[A-NQRT-Z])[PSO]/i,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/],
+      mask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[A-Z]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
       // mask: "a-a-a-9999-9999",
       selectInfo: '',
-      inputMask: {mask:"a-a-a-9999-9999"},
+      inputMask: { mask: "a-a-a-9999-9999" },
       maskTooltip: {}
 
     };
@@ -471,7 +471,7 @@ class Create extends Component {
 
   checkDepartment = () => {
     if (this.state.deptSelected === "") {
-      this.setState({ selectInfo: 'please select the Department' })
+      this.setState({ selectInfo: 'Please select the Department' })
     } else {
       this.setState({ selectInfo: '' })
     }
@@ -839,17 +839,35 @@ class Create extends Component {
       }
     }
 
-    this.setState({
-      [name]: event.target.value
-    },
-      () => { this.checkDepartment() }
-    );
-
-    if (event.target.value) {
-      event.target.className = "form-control"
+    else if (name === "numOfPages") {
+      if (event.target.value.length === 0 || event.target.value.length > 9) {
+        event.target.className = "is-invalid form-control"
+        this.setState({
+          [name]: []
+        })
+      }
+      else {
+        event.target.className = "form-control"
+        this.setState({
+          [name]: event.target.value
+        })
+      }
     }
-    else {
-      event.target.className = "is-invalid form-control"
+
+    if (name !== "numOfPages") {
+      this.setState({
+        [name]: event.target.value
+      },
+        () => { this.checkDepartment() }
+      );
+
+
+      if (event.target.value) {
+        event.target.className = "form-control"
+      }
+      else {
+        event.target.className = "is-invalid form-control"
+      }
     }
   };
 
@@ -988,20 +1006,20 @@ class Create extends Component {
     //   mask: "a-a-a-9999-9999",
     //   value: value, 
     // }
-    var maskTooltip={
-        isOpen: false,
-        message: ''
+    var maskTooltip = {
+      isOpen: false,
+      message: ''
     }
     maskTooltip.isOpen = true
     maskTooltip.message = '[ I / S ]-[ A / L / IA / R ]-[ O / P / S ] \n\n e.g "S-A-O-9999-9999"'
     if (/^..[LIAR]/i.test(value)) {
-            // inputMask.mask = "a-aa-a-9999-9999"
+      // inputMask.mask = "a-aa-a-9999-9999"
       // value = value.replace("I-_", "IA-_")
-      } else {
-        
-      }
+    } else {
+
+    }
     // console.log(inputMask, inputMask.value);
-    this.setState({maskTooltip:maskTooltip,contractNumber: value})
+    this.setState({ maskTooltip: maskTooltip, contractNumber: value })
   }
 
   addContract(event) {
@@ -1028,7 +1046,7 @@ class Create extends Component {
       let maskTooltip = {
         isOpen: false
       }
-      this.setState({ contractNumber: "", maskTooltip:maskTooltip }, this.toggle('viewContract'))
+      this.setState({ contractNumber: "", maskTooltip: maskTooltip }, this.toggle('viewContract'))
     }
     else {
       Swal.fire({
@@ -1731,9 +1749,9 @@ class Create extends Component {
                   {this.state.noteInfo}
                 </FormGroup>
                 <Form className="form-horizontal" innerRef={this.formRef}>
-                  <FormGroup>
+                  {/* <FormGroup>
                     <Label>Employee Number
-                        <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted</i> </span>
+                        <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted.</i> </span>
                     </Label>
                     <div className="controls">
                       <InputGroup className="input-prepend">
@@ -1743,7 +1761,7 @@ class Create extends Component {
                         <Input disabled ref={this.employeeId} onChange={this.handleChange("employeeId")} value={this.state.employeeId} id="prependedInput" size="16" type="text" />
                       </InputGroup>
                     </div>
-                  </FormGroup>
+                  </FormGroup> */}
                   <FormGroup>
                     <Label>Tel. </Label>
                     <InputGroup>
@@ -1876,14 +1894,6 @@ class Create extends Component {
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of Use', this.state.purposeOfUse, 'required')}</small>
                   </FormGroup>
-
-                  {!this.state.isLTI
-                    ? <FormGroup>
-                      <Label>Connecting Chop (骑缝章) </Label>
-                      <Row />
-                      <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
-                    </FormGroup>
-                    : ""}
                   <Collapse isOpen={!this.state.isLTI}>
                     <FormGroup>
                       <Label>Number of Pages to Be Chopped</Label>
@@ -1895,6 +1905,15 @@ class Create extends Component {
                         : null}
                     </FormGroup>
                   </Collapse>
+
+                  {!this.state.isLTI
+                    ? <FormGroup>
+                      <Label>Connecting Chop (骑缝章) </Label>
+                      <Row />
+                      <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
+                    </FormGroup>
+                    : ""}
+
                   <Collapse isOpen={!this.state.isLTI && !this.state.isLTU}>
                     <FormGroup>
                       <Label>Use in Office</Label>
@@ -1949,6 +1968,7 @@ class Create extends Component {
                       <AsyncSelect
                         id="pickUpBy"
                         loadOptions={loadOptions}
+                        isClearable
                         onBlur={this.checkDepartment}
                         onChange={this.handleSelectOption("pickUpBy")}
                         menuPortalTarget={document.body}
@@ -1965,7 +1985,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Remark</Label>
                     <InputGroup>
-                      <Input maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
+                      <Input maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks, e.g. telephone number of pick up person." />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Remark', this.state.remarks, 'required')}</small>
                   </FormGroup>
@@ -2054,7 +2074,7 @@ class Create extends Component {
                       </FormGroup>
                       : <FormGroup>
                         <Label>Department Heads <i className="fa fa-user" /></Label>
-                        <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity</small>
+                        <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity.</small>
                         <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                         <AsyncSelect
                           id="deptHeadSelected"
@@ -2086,7 +2106,7 @@ class Create extends Component {
                           id="confirm" value="option1">
                           <Label className="form-check-label" check >
                             By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
-                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
+                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action.
                       </Label>
                         </CustomInput>
                       </FormGroup>
@@ -2102,7 +2122,7 @@ class Create extends Component {
                         ? <Button className="mr-2" id="submit" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
                         : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
                         >Submit</Button>}
-                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} target="submitTooltip">please confirm the agree terms</Tooltip>
+                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} target="submitTooltip">Please confirm the agree terms</Tooltip>
                       <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
                       <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
                     </Col>
