@@ -222,6 +222,7 @@ class Create extends Component {
     let { validateForm } = this.state
     if (validateForm.length === 0) {
       Swal.fire({
+        title:'Appliction Type Required',
         type: 'info',
         label: 'required',
         text: 'Please select an Application Type to get started !'
@@ -471,7 +472,7 @@ class Create extends Component {
 
   checkDepartment = () => {
     if (this.state.deptSelected === "") {
-      this.setState({ selectInfo: 'please select the Department' })
+      this.setState({ selectInfo: 'Please select the Department.' })
     } else {
       this.setState({ selectInfo: '' })
     }
@@ -1501,7 +1502,7 @@ class Create extends Component {
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
-                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
+                <div style={{ textDecoration: "underline", color: "#20A8D8", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
@@ -1887,14 +1888,6 @@ class Create extends Component {
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of Use', this.state.purposeOfUse, 'required')}</small>
                   </FormGroup>
-
-                  {!this.state.isLTI
-                    ? <FormGroup>
-                      <Label>Connecting Chop (骑缝章) </Label>
-                      <Row />
-                      <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
-                    </FormGroup>
-                    : ""}
                   <Collapse isOpen={!this.state.isLTI}>
                     <FormGroup>
                       <Label>Number of Pages to Be Chopped</Label>
@@ -1965,6 +1958,7 @@ class Create extends Component {
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect
                         id="pickUpBy"
+                        isClearable
                         loadOptions={loadOptions}
                         onBlur={this.checkDepartment}
                         onChange={this.handleSelectOption("pickUpBy")}
@@ -2011,7 +2005,7 @@ class Create extends Component {
                   {this.state.isCNIPS
                     ? <FormGroup>
                       <Label>Contract Signed By: <i className="fa fa-user" /></Label>
-                      <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
+                      <small className="ml-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <Row>
                         <Col>
@@ -2101,9 +2095,9 @@ class Create extends Component {
                           onChange={this.handleAgreeTerm}
                           // onClick={this.isValid}
                           id="confirm" value="option1">
-                          <Label className="form-check-label" check >
+                          <Label onClick={this.handleAgreeTerm} className="form-check-label" check >
                             By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
-                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
+                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action.
                       </Label>
                         </CustomInput>
                       </FormGroup>
