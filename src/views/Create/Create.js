@@ -172,10 +172,12 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       validateForm: [],
-      noteInfo: [],
-      // inputMask: [/(?!.*[A-HJ-QT-Z])[IS]/,"-",/[IALR]/,/[A]/,"-",/(?!.*[A-NQRT-Z])[PSO]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/],
-      inputMask: "a-a-a-9999-9999",
-      selectInfo: ''
+      noteInfo: '如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。 For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR.',
+      mask: [/(?!.*[A-HJ-QT-Z])[IS]/i,"-",/[A-Z]/i,/[A]/i,"-",/(?!.*[A-NQRT-Z])[PSO]/i,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/],
+      // mask: "a-a-a-9999-9999",
+      selectInfo: '',
+      inputMask: {mask:"a-a-a-9999-9999"},
+      maskTooltip: {}
 
     };
 
@@ -202,7 +204,7 @@ class Create extends Component {
   };
 
   componentDidMount() {
-    this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
+    // this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
     this.getUserData();
     this.getData("department", `${config.url}/departments`);
     this.getData("applicationTypes", `${config.url}/apptypes`);
@@ -641,6 +643,11 @@ class Create extends Component {
     this.formRef.current.reset()
     window.location.reload();
   }
+
+  formRes() {
+    this.formRef.current.reset()
+  }
+
   convertExpDate(dateValue) {
     let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
     return regEx;
@@ -847,7 +854,7 @@ class Create extends Component {
   };
 
 
-  handleInputMask = () => {
+  handlemask = () => {
     // let value = ("" + event.target.value).toUpperCase();
     let first = /(?!.*[A-HJ-QT-Z])[IS]/;
     let third = /(?!.*[A-NQRT-Z])[PSO]/;
@@ -874,13 +881,13 @@ class Create extends Component {
     // }
 
     this.setState({
-      inputMask: mask, viewContract: true
+      mask: mask, viewContract: true
     });
   }
 
   validateConNum() {
-    let first = /(?!.*[A-HJ-QT-Z])[IS]/;
-    let third = /(?!.*[A-NQRT-Z])[PSO]/;
+    let first = /(?!.*[A-HJ-QT-Z])[IS]/i;
+    let third = /(?!.*[A-NQRT-Z])[PSO]/i;
     let digit = /[0-9]/;
     var isFirst = false
     var isThird = false
@@ -974,24 +981,33 @@ class Create extends Component {
 
     // if (/^..[AaLlRr]/.test(value)){
     //   this.setState({
-    //     inputMask: "a-a-a-9999-9999",
+    //     mask: "a-a-a-9999-9999",
     //     })
     //   }
-    let mask = "a-a-a-9999-9999"
-    if (/^..[Ii]/.test(value)) {
-      mask = "a-aA-a-9999-9999";
+    // var inputMask={
+    //   mask: "a-a-a-9999-9999",
+    //   value: value, 
+    // }
+    var maskTooltip={
+        isOpen: false,
+        message: ''
     }
-    this.setState({
-      viewContract: true,
-      inputMask: mask,
-      contractNumber: value
-    })
+    maskTooltip.isOpen = true
+    maskTooltip.message = '[ I / S ]-[ A / L / IA / R ]-[ O / P / S ] \n\n e.g "S-A-O-9999-9999"'
+    if (/^..[LIAR]/i.test(value)) {
+            // inputMask.mask = "a-aa-a-9999-9999"
+      // value = value.replace("I-_", "IA-_")
+      } else {
+        
+      }
+    // console.log(inputMask, inputMask.value);
+    this.setState({maskTooltip:maskTooltip,contractNumber: value})
   }
 
   addContract(event) {
     let valid = this.validateConNum()
     let digit = /[0-9]/;
-    let value = this.state.contractNumber
+    let value = this.state.contractNumber.toUpperCase();
     if (valid) {
       // if (this.props.match.params.company === "MBIA") {
       //   if (!digit.test(this.state.contractNumber[14])) {
@@ -1009,7 +1025,10 @@ class Create extends Component {
         conNum: [...state.conNum, value.replace(/_/g, '')]
       })
       )
-      this.setState({ contractNumber: "" }, this.toggle('viewContract'))
+      let maskTooltip = {
+        isOpen: false
+      }
+      this.setState({ contractNumber: "", maskTooltip:maskTooltip }, this.toggle('viewContract'))
     }
     else {
       Swal.fire({
@@ -1468,8 +1487,8 @@ class Create extends Component {
           {this.state.documentTableLTI.map((document, index) =>
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
-              <td><div>{document.engName}</div></td>
-              <td><div>{document.cnName}</div></td>
+              <td className="descTd">{document.engName}</td>
+              <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
                 <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
@@ -1534,9 +1553,10 @@ class Create extends Component {
 
                       </DropdownMenu>
                     </InputGroupButtonDropdown>
-                    <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
+                    <Tooltip placement="top" isOpen={this.state.maskTooltip.isOpen} target="contractNumber">{this.state.maskTooltip.message} </Tooltip>
+                    <InputMask placeholder="Enter Contract Number" mask={this.state.mask} name="contractNumber" id="contractNumber" className="form-control"
                       onChange={this.handleContractChange} value={this.state.contractNumber}
-                    // onClick={this.handleInputMask}
+                    // onClick={this.handlemask}
                     ></InputMask>
                     <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
                   </InputGroup>
@@ -1546,13 +1566,13 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 {/* <Label>English Name</Label> */}
-                <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" name="textarea-input" maxLength="500" id="docName" rows="3" placeholder="please describe in English" />
+                <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
               </FormGroup>
             </Col>
             <Col md>
               <FormGroup>
                 {/* <Label>Chinese Name</Label> */}
-                <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" name="textarea-input" maxLength="500" id="cnName" rows="3" placeholder="please describe in Chinese" />
+                <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3" placeholder="Please describe in Chinese (optional)" />
               </FormGroup>
             </Col>
             <Col md>
@@ -1708,7 +1728,7 @@ class Create extends Component {
                 <FormGroup>
                   <h5>NOTES :</h5>
                   {/* {this.state.noteInfo.notes || <Skeleton count={3}/>} */}
-                  {this.state.noteInfo.notes}
+                  {this.state.noteInfo}
                 </FormGroup>
                 <Form className="form-horizontal" innerRef={this.formRef}>
                   <FormGroup>

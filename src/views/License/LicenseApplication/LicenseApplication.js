@@ -73,6 +73,7 @@ class LicenseApplication extends Component {
         this.getData('seniorManagers');
         // this.getSeniorManagers();
         this.getData('departments');
+        this.getStatusList();
     }
 
     async getLicenseNames() {
@@ -118,6 +119,11 @@ class LicenseApplication extends Component {
                 this.setState({ licenseApplication: res.data, loading: false })
             })
     }
+    
+    async getStatusList() {
+        const res = await Axios.get(`${config.url}/statuses?category=license`)
+        this.setState({ statusName: res.data })
+      }
 
     onFilteredChangeCustom = (value, accessor) => {
         this.setState(state => {
@@ -339,7 +345,7 @@ class LicenseApplication extends Component {
                                             <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('status')} >
                                                 <option value="">Please Select a status</option>
                                                 {statusName.map((stat, index) =>
-                                                    <option key={index} value={stat} > {stat} </option>
+                                                    <option key={index} value={stat.statusName} > {statusName} </option>
                                                 )}
                                             </Input>
                                         )
