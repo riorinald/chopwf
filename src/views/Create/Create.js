@@ -1742,7 +1742,7 @@ class Create extends Component {
                   {this.state.noteInfo}
                 </FormGroup>
                 <Form className="form-horizontal" innerRef={this.formRef}>
-                  <FormGroup>
+                  {/* <FormGroup>
                     <Label>Employee Number
                         <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted</i> </span>
                     </Label>
@@ -1754,7 +1754,7 @@ class Create extends Component {
                         <Input disabled ref={this.employeeId} onChange={this.handleChange("employeeId")} value={this.state.employeeId} id="prependedInput" size="16" type="text" />
                       </InputGroup>
                     </div>
-                  </FormGroup>
+                  </FormGroup> */}
                   <FormGroup>
                     <Label>Tel. </Label>
                     <InputGroup>
