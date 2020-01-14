@@ -81,17 +81,18 @@ class LicenseEditRequest extends Component {
 
     }
     async getLicenseNames() {
-        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`)
+        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
         this.setState({ licenseNames: res.data })
     }
 
     async getData(name) {
-        let res = await axios.get(`${config.url}/${name}`)
+        let res = await axios.get(`${config.url}/${name}`, { headers: { Pragma: 'no-cache' } })
         this.setState({ [name]: res.data })
     }
 
     async getSeniorManagers() {
-        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
+            { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let arr1 = []
                 res.data.map(mgr => {
@@ -107,17 +108,18 @@ class LicenseEditRequest extends Component {
 
     convertDateView(date) {
         if (date === "" || date === "/") {
-            return ""
+            return new Date()
         }
         else {
-            let regEx = date.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
+            let regEx = date.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
             return new Date(regEx)
         }
     }
 
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem('userId')}`)
+        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem('userId')}`,
+            { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let temp = res.data
                 if (temp.documentTypeId === "ORIGINAL") {
@@ -129,13 +131,6 @@ class LicenseEditRequest extends Component {
 
     handleChange = name => event => {
         let id = event.target.id
-        if (this.state.taskDetails.isConfirm === "Y") {
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.isConfirm = "N"
-                return taskDetails
-            })
-        }
         var element = document.getElementById(id)
         if (id === "deliverWay1" || id === "deliverWay2") {
             document.getElementById('deliverWay1').className = "custom-control-input"
@@ -158,13 +153,6 @@ class LicenseEditRequest extends Component {
 
     handleRadio = name => event => {
         let id = event.target.id
-        if (this.state.taskDetails.isConfirm === "Y") {
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.isConfirm = "N"
-                return taskDetails
-            })
-        }
 
         let value = ""
         if (name === "needWatermark") {
@@ -217,11 +205,6 @@ class LicenseEditRequest extends Component {
         }
         else {
             element.className = "notValid css-2b097c-container"
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.isConfirm = "N"
-                return taskDetails
-            })
         }
         this.setState(state => {
             let taskDetails = this.state.taskDetails
@@ -230,7 +213,6 @@ class LicenseEditRequest extends Component {
         })
 
     }
-
 
     validate() {
         let data = this.state.taskDetails
@@ -328,22 +310,28 @@ class LicenseEditRequest extends Component {
         })
     }
 
-    handleAgreeTerms(event) {
-        let checked = event.target.checked
-        this.validate()
-        if (this.validator.allValid()) {
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.isConfirm = "Y"
-                return taskDetails
+
+    getOption(person) {
+        let i = 0
+        if (person !== "") {
+            this.state.seniorManagersList.map((head, index) => {
+                if (head.label === person) {
+                    i = index
+                }
             })
         }
         else {
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.isConfirm = "N"
-                return taskDetails
-            })
+            i = null
+        }
+        return i
+    }
+
+    handleAgreeTerms(event) {
+        this.validate()
+        if (this.validator.allValid()) {
+            this.submitRequest("Y")
+        }
+        else {
             // alert("Invalid Fields")
             this.validator.showMessages()
             this.forceUpdate()
@@ -357,7 +345,7 @@ class LicenseEditRequest extends Component {
         postReq.append("TelephoneNumber", this.state.taskDetails.telephoneNum);
         postReq.append("CompanyId", this.props.legalName);
         postReq.append("DepartmentId", this.state.taskDetails.departmentId);
-        postReq.append("LicenseName", this.state.taskDetails.licenseNameId);
+        postReq.append("LicenseNameId", this.state.taskDetails.licenseNameId);
         postReq.append("PurposeType", this.state.taskDetails.purposeType);
         postReq.append("PurposeComment", this.state.taskDetails.purposeComment);
         postReq.append("DocumentTypeId", this.state.taskDetails.documentTypeId);
@@ -370,7 +358,7 @@ class LicenseEditRequest extends Component {
         // postReq.append("LicenseAdmin", this.state.taskDetails.licenseAdmins);
         postReq.append("isConfirm", this.state.taskDetails.isConfirm);
         postReq.append("ExpDeliveryAddress", this.state.taskDetails.expDeliveryAddress);
-        postReq.append("ExpDeliveryReciever", this.state.taskDetails.expDeliveryReceiver);
+        postReq.append("ExpDeliveryReceiver", this.state.taskDetails.expDeliveryReceiver);
         postReq.append("ExpDeliveryMobileNo", this.state.taskDetails.expDeliveryMobileNo);
 
         for (let i = 0; i < this.state.taskDetails.seniorManagers.length; i++) {
@@ -385,38 +373,119 @@ class LicenseEditRequest extends Component {
     }
 
     async postData(formData, isSubmitted) {
-        await axios.put(`${config.url}/licenses/${this.state.taskDetails.licenseId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-            .then(res => {
-                if (isSubmitted === "Y") {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Submitted' : "",
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is being processed and is waiting for the approval',
-                        type: 'success',
-                        onClose: () => { this.goBack() }
+        Swal.fire({
+            title: `Creating your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.goBack() },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                axios.put(`${config.url}/licenses/${this.state.taskDetails.licenseId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+                    .then(res => {
+
+                        Swal.update({
+                            title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
+                            text: 'Request Number : ' + res.data.requestNum,
+                            footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
+                            type: isSubmitted === "Y" ? "success" : "info",
+
+                        })
+                        Swal.hideLoading()
                     })
-                }
-                else {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Saved' : '',
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is saved as draft.',
-                        type: 'info',
-                        onClose: () => { this.goBack() }
+                    .catch(error => {
+                        let err = "Please contact the IT Admin !"
+                        let err2 = []
+                        let err3 = ""
+                        if (error.response) {
+                            console.log(error.response)
+                            let keys = Object.keys(error.response.data.errors)
+                            err = keys.join(',')
+                            keys.map(key => {
+                                // console.log(error.response.data.errors[key].join(','))
+                                err2.push(error.response.data.errors[key].join(','))
+                            })
+                            err3 = err2.join(';')
+                        }
+                        Swal.hideLoading()
+                        Swal.update({
+                            title: "Error",
+                            type: "error",
+                            text: err,
+                            html: err3,
+
+                        })
                     })
-                }
-            })
+            }
+        })
+        // await axios.put(`${config.url}/licenses/${this.state.taskDetails.licenseId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        //     .then(res => {
+        //         if (isSubmitted === "Y") {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Submitted' : "",
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is being processed and is waiting for the approval',
+        //                 type: 'success',
+        //                 onClose: () => { this.goBack() }
+        //             })
+        //         }
+        //         else {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Saved' : '',
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is saved as draft.',
+        //                 type: 'info',
+        //                 onClose: () => { this.goBack() }
+        //             })
+        //         }
+        //     })
     }
 
     async deleteTask() {
-        await axios.delete(`${config.url}/licenses/${this.state.taskDetails.licenseId}`).then(res => {
-            Swal.fire({
-                title: "REQUEST DELETED",
-                html: res.data.message,
-                type: "success",
-                onClose: () => { this.goBack() }
-            })
+        Swal.fire({
+            title: `Deleting your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                axios.delete(`${config.url}/licenses/${this.state.taskDetails.licenseId}`)
+                    .then(res => {
+
+                        Swal.update({
+                            title: "Request Deleted",
+                            text: `The request has been successfully deleted`,
+                            type: "success",
+
+                        })
+                        Swal.hideLoading()
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
+            }
         })
+        // await axios.delete(`${config.url}/licenses/${this.state.taskDetails.licenseId}`).then(res => {
+        //     Swal.fire({
+        //         title: "REQUEST DELETED",
+        //         html: res.data.message,
+        //         type: "success",
+        //         onClose: () => { this.goBack() }
+        //     })
+        // })
     }
 
     handleSelectReciever(event) {
@@ -427,11 +496,6 @@ class LicenseEditRequest extends Component {
         }
         else {
             element.className = "notValid css-2b097c-container"
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.isConfirm = "N"
-                return taskDetails
-            })
         }
         this.setState(state => {
             let taskDetails = this.state.taskDetails
@@ -538,8 +602,8 @@ class LicenseEditRequest extends Component {
 
                                 <FormGroup onChange={this.handleChange("documentTypeId")} >
                                     <Label>Select Document Type</Label>
-                                    <CustomInput defaultChecked={taskDetails.documentTypeId === "SCANCOPY"} type="radio" id="documentType1" name="documentTypeId" value="SCANCOPY" label="城电子版 Scan Copy" />
-                                    <CustomInput defaultChecked={taskDetails.documentTypeId === "ORIGINAL"} type="radio" id="documentType2" name="documentTypeId" value="ORIGINAL" label="城原件 Original Copy" />
+                                    <CustomInput defaultChecked={taskDetails.documentTypeId === "SCANCOPY"} type="radio" id="documentType1" name="documentTypeId" value="SCANCOPY" label="电子版 Scan Copy" />
+                                    <CustomInput defaultChecked={taskDetails.documentTypeId === "ORIGINAL"} type="radio" id="documentType2" name="documentTypeId" value="ORIGINAL" label="原件 Original Copy" />
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Type', taskDetails.documentTypeId, 'required')}</small>
                                 </FormGroup>
 
@@ -547,7 +611,7 @@ class LicenseEditRequest extends Component {
                                 <Collapse isOpen={taskDetails.documentTypeId === "SCANCOPY"}>
                                     <FormGroup onChange={this.handleRadio("needWatermark")}>
                                         <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
-                                        <CustomInput defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="城电. Please specify watermark here:">
+                                        <CustomInput defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes, Please specify watermark here:">
                                             <Collapse isOpen={taskDetails.needWatermark === "Y"}>
                                                 <Input id="inputWatermark1" type="text" value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
                                                 {taskDetails.needWatermark === "Y"
@@ -555,7 +619,7 @@ class LicenseEditRequest extends Component {
                                                     : null}
                                             </Collapse>
                                         </CustomInput>
-                                        <CustomInput defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="城原, No. Please specify the reason of not adding watermark:">
+                                        <CustomInput defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No, Please specify the reason of not adding watermark:">
                                             <Collapse isOpen={taskDetails.needWatermark === "N"}>
                                                 <Input id="inputWatermark2" type="text" value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
                                                 {taskDetails.needWatermark === "N"
@@ -604,6 +668,7 @@ class LicenseEditRequest extends Component {
                                         id="expDeliveryReceiver"
                                         loadOptions={loadOptions}
                                         isClearable
+                                        value={seniorManagersList[this.getOption(taskDetails.expDeliveryReceiver)]}
                                         onChange={this.handleSelectReciever}
                                         menuPortalTarget={document.body}
                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -613,7 +678,8 @@ class LicenseEditRequest extends Component {
 
                                 <FormGroup>
                                     <Label>Reciever Mobile Phone</Label>
-                                    <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="text" />
+                                    {/* <input type="number" id="phoneNumber"></input> */}
+                                    <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="number" />
                                     <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.expDeliveryMobileNo, 'required')}</small>
                                 </FormGroup>
 
@@ -633,7 +699,7 @@ class LicenseEditRequest extends Component {
                                 </FormGroup>
 
                             </Form>
-                            <Col md="16">
+                            {/* <Col md="16">
                                 <FormGroup check>
                                     <FormGroup>
                                         <CustomInput
@@ -649,17 +715,18 @@ class LicenseEditRequest extends Component {
                                         </CustomInput>
                                     </FormGroup>
                                 </FormGroup>
-                            </Col>
+                            </Col> */}
                         </CardBody>
                         <CardFooter>
                             <div className="form-actions">
                                 <Row>
                                     <Col className="d-flex justify-content-start">
-                                        {taskDetails.isConfirm === "Y"
-                                            ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
-                                            : <Button type="submit" color="success"
-                                                // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })}
-                                                id="disabledSubmit" disabled >Submit</Button>}
+                                        {/* {taskDetails.isConfirm === "Y"
+                                            ?  */}
+                                        <Button type="submit" color="success" onClick={() => { this.handleAgreeTerms() }}>Submit</Button>
+                                        {/* : <Button type="submit" color="success" */}
+                                        {/* // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} */}
+                                        {/* id="disabledSubmit" disabled >Submit</Button>} */}
                                         {/* <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit"> */}
                                         {/* please confirm the agree terms </Tooltip> */}
                                         <span>&nbsp;</span>

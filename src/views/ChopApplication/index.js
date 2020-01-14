@@ -99,20 +99,22 @@ class ChopApplication extends Component {
     this.getApplications(1, 20);
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
+    this.getStatusList();
 
   }
 
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: !this.state.loading })
-    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`).then(res => {
-      this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.pageCount === 0 ? 1 : res.data.pageCount })
-      console.log(res.data)
-    })
+    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
+      { headers: { Pragma: 'no-cache' } }).then(res => {
+        this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.pageCount === 0 ? 1 : res.data.pageCount })
+        console.log(res.data)
+      })
   }
 
   async getData(state, url) {
     try {
-      const response = await Axios.get(url);
+      const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } });
       this.setState({
         [state]: response.data
       })
@@ -136,6 +138,11 @@ class ChopApplication extends Component {
     }
 
     return Math.min(maxWidth, Math.max(max, headerText.length) * magicSpacing);
+  }
+
+  async getStatusList() {
+    const res = await Axios.get(`${config.url}/statuses?category=chop`)
+    this.setState({ status: res.data })
   }
 
   getDeptHeads(heads) {
@@ -253,11 +260,18 @@ class ChopApplication extends Component {
     })
   };
 
-  exportLogs() {
+  async exportLogs() {
     let from = this.state.exportDate.exportFrom
     let to = this.state.exportDate.exportTo
+    console.log(from, to)
     if (from !== "" && to !== "") {
-      console.log(`Exporting Logs from ${this.convertDate(from)} to ${this.convertDate(to)}`)
+      let url = `${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${localStorage.getItem('userId')}`
+      window.open(url, "_blank")
+      console.log(`Exporting Logs from ${from} to ${to}`)
+      // await Axios.get(`${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${localStorage.getItem('userId')}`)
+      //   .then(res => {
+      //     // console.log(res.data.fileContents)
+      //   })
       this.toggleModal()
       this.setState({ validDate: true })
       return true;
@@ -414,7 +428,7 @@ class ChopApplication extends Component {
                       <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
                         <option value="" >Please Select a status</option>
                         {this.state.status.map((stat, index) =>
-                          <option key={index} value={stat} >{stat}</option>
+                          <option key={index} value={stat.statusName} >{stat.statusName}</option>
                         )}
                       </Input>
                     )
@@ -556,7 +570,8 @@ class ChopApplication extends Component {
               </div>
               : null
             }
-            <CSVLink
+            <Button color="primary" onClick={this.exportLogs} >Export Logs</Button>
+            {/* <CSVLink
               data={applications}
               filename={`CHOP${this.props.legalName}${this.getCurrentDate()}.csv`}
               className="btn btn-primary"
@@ -565,7 +580,7 @@ class ChopApplication extends Component {
                 return this.exportLogs()
               }}
             >
-              Export Logs </CSVLink>
+              Export Logs </CSVLink> */}
             {/* <Button color="primary" onClick={this.exportLogs}>Export Logs</Button>{' '} */}
             <Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
           </ModalFooter>

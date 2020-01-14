@@ -118,27 +118,76 @@ class LicenseCreate extends Component {
     }
 
     async postData(formData, isSubmitted) {
-        await axios.post(`${config.url}/licenses`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-            .then(res => {
-                if (isSubmitted === "Y") {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Submitted' : "",
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is being processed and is waiting for the approval',
-                        type: 'success',
-                        onClose: () => { this.formReset() }
+        //added call request inside swal to prevent issues when response time is very high
+        Swal.fire({
+            title: `Creating your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.formReset() },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                axios.post(`${config.url}/licenses`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+                    .then(res => {
+
+                        Swal.update({
+                            title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
+                            text: 'Request Number : ' + res.data.requestNum,
+                            footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
+                            type: isSubmitted === "Y" ? "success" : "info",
+
+                        })
+                        Swal.hideLoading()
                     })
-                }
-                else {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Saved' : '',
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is saved as draft.',
-                        type: 'info',
-                        onClose: () => { this.formReset() }
+                    .catch(error => {
+                        let err = "Please contact the IT Admin !"
+                        let err2 = []
+                        let err3 = ""
+                        if (error.response) {
+                            console.log(error.response)
+                            let keys = Object.keys(error.response.data.errors)
+                            err = keys.join(',')
+                            keys.map(key => {
+                                // console.log(error.response.data.errors[key].join(','))
+                                err2.push(error.response.data.errors[key].join(','))
+                            })
+                            err3 = err2.join(';')
+                        }
+                        Swal.hideLoading()
+                        Swal.update({
+                            title: "Error",
+                            type: "error",
+                            text: err,
+                            html: err3,
+
+                        })
                     })
-                }
-            })
+            }
+        })
+        // await axios.post(`${config.url}/licenses`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        //     .then(res => {
+        //         if (isSubmitted === "Y") {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Submitted' : "",
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is being processed and is waiting for the approval',
+        //                 type: 'success',
+        //                 onClose: () => { this.formReset() }
+        //             })
+        //         }
+        //         else {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Saved' : '',
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is saved as draft.',
+        //                 type: 'info',
+        //                 onClose: () => { this.formReset() }
+        //             })
+        //         }
+        //     })
     }
 
 
@@ -192,14 +241,6 @@ class LicenseCreate extends Component {
 
     handleRadio = name => event => {
         let id = event.target.id
-        if (this.state.formData.isConfirm === "Y") {
-            this.setState(state => {
-                let formData = this.state.formData
-                formData.isConfirm = "N"
-                return formData
-            })
-        }
-
         let value = ""
         if (name === "isWatermark") {
             document.getElementById("watermark1").className = "custom-control-input"
@@ -242,23 +283,33 @@ class LicenseCreate extends Component {
     };
 
     handleSelectReciever(event) {
+        let value = event ? event.value : ""
+        console.log(value)
+        var element = document.getElementById("reciever")
+        if (value !== "") {
+            element.className = "css-2b097c-container"
+        }
+        else {
+            element.className = "notValid css-2b097c-container"
+        }
         this.setState(state => {
             let formData = this.state.formData
-            formData.reciever = event.value
+            formData.reciever = value
             return formData
         })
     }
 
     //validation
     handleAgreeTerms(event) {
-        let checked = event.target.checked
         this.validate()
         if (this.validator.allValid()) {
-            this.setState(state => {
-                let formData = this.state.formData
-                formData.isConfirm = "Y"
-                return formData
-            })
+            // this.setState(state => {
+            //     let formData = this.state.formData
+            //     formData.isConfirm = "Y"
+            //     return formData
+            // })
+            this.submitRequest("Y")
+            // console.log("ALL VALIDATED")
         }
         else {
             // alert("Invalid Fields")
@@ -355,6 +406,7 @@ class LicenseCreate extends Component {
         postReq.append("CompanyId", this.props.legalName);
         postReq.append("DepartmentId", this.state.formData.department);
         postReq.append("LicenseName", this.state.formData.licenseName);
+        postReq.append("LicenseNameId", this.state.formData.licenseName);
         postReq.append("PurposeType", this.state.formData.licensePurpose);
         postReq.append("PurposeComment", this.state.formData.specificPurpose);
         postReq.append("DocumentTypeId", this.state.formData.documentType);
@@ -367,7 +419,7 @@ class LicenseCreate extends Component {
         // postReq.append("LicenseAdmin", "quincy@otds.admin");
         postReq.append("isConfirm", this.state.formData.isConfirm);
         postReq.append("ExpDeliveryAddress", this.state.formData.address);
-        postReq.append("ExpDeliveryReciever", this.state.formData.reciever);
+        postReq.append("ExpDeliveryReceiver", this.state.formData.reciever);
         postReq.append("ExpDeliveryMobileNo", this.state.formData.recieverPhone);
 
         for (let i = 0; i < this.state.formData.seniorManager.length; i++) {
@@ -434,7 +486,7 @@ class LicenseCreate extends Component {
                                     <Input id="department" onChange={this.handleChange("department")} defaultValue="0" type="select">
                                         <option value="0">Please selet a department</option>
                                         {departments.map((dept, index) =>
-                                            <option key={index} value={dept.deptId.toUpperCase()} > {dept.deptName} </option>
+                                            <option key={index} value={dept.deptId} > {dept.deptName} </option>
                                         )}
                                     </Input>
                                 </InputGroup>
@@ -470,8 +522,8 @@ class LicenseCreate extends Component {
 
                             <FormGroup onChange={this.handleChange("documentType")} >
                                 <Label>Select Document Type</Label>
-                                <CustomInput type="radio" id="documentType1" name="documentType" value="SCANCOPY" label="城电子版 Scan Copy" />
-                                <CustomInput type="radio" id="documentType2" name="documentType" value="ORIGINAL" label="城原件 Original Copy" />
+                                <CustomInput type="radio" id="documentType1" name="documentType" value="SCANCOPY" label="电子版 Scan Copy" />
+                                <CustomInput type="radio" id="documentType2" name="documentType" value="ORIGINAL" label="原件 Original Copy" />
                                 <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Type', formData.documentType, 'required')}</small>
                             </FormGroup>
 
@@ -479,7 +531,7 @@ class LicenseCreate extends Component {
                             <Collapse isOpen={formData.documentType === "SCANCOPY"}>
                                 <FormGroup onChange={this.handleRadio("isWatermark")}>
                                     <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
-                                    <CustomInput type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="城电. Please specify watermark here:">
+                                    <CustomInput type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes, Please specify watermark here:">
                                         <Collapse isOpen={formData.isWatermark === "Y"}>
                                             <Input id="inputWatermark1" type="text" value={formData.watermark} onChange={this.handleChange("watermark")} />
                                             {formData.isWatermark === "Y"
@@ -487,7 +539,7 @@ class LicenseCreate extends Component {
                                                 : null}
                                         </Collapse>
                                     </CustomInput>
-                                    <CustomInput type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="城原, No. Please specify the reason of not adding watermark:">
+                                    <CustomInput type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No, Please specify the reason of not adding watermark:">
                                         <Collapse isOpen={formData.isWatermark === "N"}>
                                             <Input id="inputWatermark2" type="text" value={formData.watermark} onChange={this.handleChange("watermark")} />
                                             {formData.isWatermark === "N"
@@ -569,34 +621,17 @@ class LicenseCreate extends Component {
                                 /> */}
                                 <small style={{ color: '#F86C6B' }} >{this.validator.message('Senior Manager', formData.seniorManager, 'required')}</small>
                             </FormGroup>
-
                         </Form>
-                        <Col md="16">
-                            <FormGroup check>
-                                <FormGroup>
-                                    <CustomInput
-                                        className="form-check-input"
-                                        type="checkbox"
-                                        checked={formData.isConfirm === "Y"}
-                                        onChange={this.handleAgreeTerms}
-                                        id="confirm" value="option1">
-                                        <Label className="form-check-label" check >
-                                            By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
-                                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
-                      </Label>
-                                    </CustomInput>
-                                </FormGroup>
-                            </FormGroup>
-                        </Col>
                     </CardBody>
                     <CardFooter>
                         <div className="form-actions" >
-                            <Row noGutters className="float-left">
+                            <Row noGutters className="align-items-left">
                                 <Col className="mr-2" >
-                                    {formData.isConfirm === "Y"
-                                        ? <Button className="mr-2" type="submit" onClick={() => this.submitRequest("Y")} color="success">Submit</Button>
-                                        : <Button className="mr-2" type="submit" disabled color="secondary">Submit</Button>
-                                    }
+                                    {/* {formData.isConfirm === "Y" */}
+                                    {/* ?  */}
+                                    <Button className="mr-2" type="submit" onClick={() => this.handleAgreeTerms()} color="success">Submit</Button>
+                                    {/* : <Button className="mr-2" type="submit" disabled color="secondary">Submit</Button> */}
+                                    {/* } */}
                                     <Button type="submit" onClick={() => this.submitRequest("N")} color="primary" > Save </Button>
 
                                 </Col>

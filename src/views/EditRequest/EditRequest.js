@@ -22,7 +22,7 @@ import config from '../../config';
 import Axios from 'axios';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import InputMask from "react-input-mask";
 import deleteBin from '../../assets/img/deletebin.png'
 import { AppSwitch } from '@coreui/react';
@@ -33,7 +33,7 @@ import ReactTable from "react-table";
 import "react-table/react-table.css"
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import PropTypes from "prop-types";
-import { resetMounted } from '../MyPendingTasks/MyPendingTasks';
+// import { resetMounted } from '../MyPendingTasks/MyPendingTasks';
 import SimpleReactValidator from 'simple-react-validator';
 import LegalEntity from '../../context';
 
@@ -182,8 +182,9 @@ class EditRequest extends Component {
         this.validator = new SimpleReactValidator();
     }
 
-    async getDocCheckBy(deptId, teamId) {
-        const res = await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`)
+    async getDocCheckBy(deptId, teamId, callback) {
+        const res = await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
+            { headers: { Pragma: 'no-cache' } })
         for (let i = 0; i < res.data.length; i++) {
             const obj = { value: res.data[i].userId, label: res.data[i].displayName }
             this.setState(state => {
@@ -193,11 +194,13 @@ class EditRequest extends Component {
                 }
             })
         }
+        callback()
     }
 
     async getDeptHeads() {
         this.setState({ deptHeads: [] })
-        await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`)
+        await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
+            { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 for (let i = 0; i < res.data.length; i++) {
                     const obj = { value: res.data[i].userId, label: res.data[i].displayName }
@@ -213,14 +216,14 @@ class EditRequest extends Component {
 
     async getTeams(deptId) {
         let url = `${config.url}/teams?companyid=` + this.props.legalName + "&departmentId=" + deptId
-        await Axios.get(url).then(res => {
+        await Axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
             this.setState({ teams: res.data })
         })
     }
 
     async getData(state, url) {
         try {
-            const response = await Axios.get(url);
+            const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } });
             this.setState({
                 [state]: response.data
             })
@@ -244,17 +247,51 @@ class EditRequest extends Component {
 
     async deleteTask() {
         // console.log(this.state.taskDetails.taskId)
-        resetMounted.setMounted()
-        Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res => {
-            // console.log(res.data)
+        // resetMounted.setMounted()
+        Swal.fire({
+            title: `Deleting your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`)
+                    .then(res => {
 
-            Swal.fire({
-                title: "REQUEST DELETED",
-                html: res.data.message,
-                type: "success",
-                onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) }
-            })
+                        Swal.update({
+                            title: "Request Deleted",
+                            text: `The request has been ${res.data.message}`,
+                            type: "success",
+
+                        })
+                        Swal.hideLoading()
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
+            }
         })
+
+        // Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res => {
+        //     // console.log(res.data)
+
+        //     Swal.fire({
+        //         title: "REQUEST DELETED",
+        //         html: res.data.message,
+        //         type: "success",
+        //         onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) }
+        //     })
+        // })
     }
 
     convertExpDate(dateValue) {
@@ -269,11 +306,14 @@ class EditRequest extends Component {
     }
 
     getDocCheckByOption(person) {
+        console.log(person)
         let i = 0
-        if (person.length !== 0) {
-
+        if (person.length === 1) {
+            console.log("akath keri")
             this.state.docCheckBy.map((head, index) => {
+                console.log(head.value)
                 if (head.value === person[0]) {
+                    console.log(index)
                     i = index
                 }
             })
@@ -303,7 +343,7 @@ class EditRequest extends Component {
 
     async getTaskDetails(id) {
         this.setState({ loading: true })
-        const response = await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`)
+        const response = await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`, { headers: { Pragma: 'no-cache' } })
         let temporary = response.data
         if (temporary.departmentId !== "") {
             this.getTeams(temporary.departmentId)
@@ -323,11 +363,12 @@ class EditRequest extends Component {
 
         //LTU
         else if (temporary.applicationTypeId === "LTU") {
-            if (temporary.teamId !== "") {
-                this.getDocCheckBy(temporary.departmentId, temporary.teamId)
+            if (temporary.teamId !== "" && temporary.departmentId !== "") {
+                this.getDocCheckBy(temporary.departmentId, temporary.teamId, (callback) => {
+                    temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
+                })
             }
             temporary.effectivePeriod = temporary.effectivePeriod !== "" ? this.convertDate(temporary.effectivePeriod, 'dateView1') : null
-            temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
         }
 
         else if (temporary.applicationTypeId === "LTI") {
@@ -364,7 +405,7 @@ class EditRequest extends Component {
 
         let apptypeId = this.state.taskDetails.applicationTypeId
         details = details.filter(function (item) {
-            return item !== "taskId" && item !== "telephoneNum" && item !== "companyId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption" && item !== "createdBy" && item !== "createdByPhotoUrl" && item !== "contractSignedByFirstPersonOption" && item !== "contractSignedBySecondPersonOption" && item !== "departmentHeadsName"
+            return item !== "taskId" && item !== "telephoneNum" && item !== "companyId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption" && item !== "createdBy" && item !== "createdByPhotoUrl" && item !== "contractSignedByFirstPersonOption" && item !== "contractSignedBySecondPersonOption" && item !== "departmentHeadsName" && item !== "pickUpByName"
         })
 
         switch (apptypeId) {
@@ -412,7 +453,7 @@ class EditRequest extends Component {
         let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
         // console.log(url)
         try {
-            await Axios.get(url).then(res => {
+            await Axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
                 this.setState({ documents: res.data })
             })
         } catch (error) {
@@ -483,6 +524,7 @@ class EditRequest extends Component {
                 }
             }
         })
+        console.log(this.state.selectedDocCheckBy)
     }
 
     toggle = name => event => {
@@ -540,8 +582,10 @@ class EditRequest extends Component {
             }
         }
         else if (name === "teamId") {
-            console.log(this.state.taskDetails.applicationTypeId)
-            this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value)
+            // console.log(this.state.taskDetails.applicationTypeId)
+            this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value, (callback) => {
+
+            })
             if (this.state.taskDetails.applicationTypeId === "LTU") {
                 if (this.state.taskDetails.chopTypeId !== "") {
                     this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, event.target.value)
@@ -622,6 +666,7 @@ class EditRequest extends Component {
                 return { editRequestForm }
             })
         }
+        event.target.value = null
     }
 
     deleteContractNumber(i) {
@@ -674,6 +719,8 @@ class EditRequest extends Component {
                 }
 
                 if (valid) {
+
+
                     const obj = {
                         taskId: this.state.taskDetails.taskId,
                         documentFileName: this.state.editRequestForm.docAttachedName,
@@ -684,6 +731,8 @@ class EditRequest extends Component {
                         updated: "",
                         documentType: "",
                         documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
+                        documentFileType: this.state.editRequestForm.docSelected.type,
+                        documentBase64String: "",
                         expiryDate: null,
                         departmentHeads: null,
                         documentId: rand,
@@ -692,6 +741,12 @@ class EditRequest extends Component {
                         docSelected: this.state.editRequestForm.docSelected,
                         contractNums: this.state.conNum
                     }
+
+                    this.getBase64(this.state.editRequestForm.docSelected, (result) => {
+                        obj.documentBase64String = result
+                    })
+
+                    console.log(obj)
 
                     this.setState(state => {
                         let taskDetails = this.state.taskDetails
@@ -766,7 +821,7 @@ class EditRequest extends Component {
             case 'MBAFC':
                 mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
                 break;
-            case 'CAR2GO':
+            case 'DMT':
                 mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
                 break;
             default:
@@ -992,11 +1047,10 @@ class EditRequest extends Component {
     }
 
     dateChange = (name, view) => date => {
-        let month = date.getMonth()
-
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+            let tempDate = format(date, "yyyy-MM-dd").split('T')[0];//right
+            dates = tempDate.replace(/-/g, "")
         }
         this.setState({
             [view]: date
@@ -1101,59 +1155,111 @@ class EditRequest extends Component {
 
     async postData(formData, isSubmitted) {
         let url = `${config.url}/tasks/${this.props.location.state.id}`
-        await Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-            .then(res => {
-                if (isSubmitted === 'N') {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Saved' : '',
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is saved as a draft',
-                        type: 'info',
-                        onClose: () => {
-                            this.props.history.push(`/${this.props.match.params.page}`)
-                        }
-                    })
 
-                }
-                if (isSubmitted === 'Y') {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Submitted' : "",
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is being processed and is waiting for the approval',
-                        type: 'success',
-                        onClose: () => {
-                            this.props.history.push(`/${this.props.match.params.page}`)
-                        }
+        Swal.fire({
+            title: `Creating your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.props.history.push(`/${this.props.match.params.page}`) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+                    .then(res => {
 
-                    })
+                        Swal.update({
+                            title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
+                            text: 'Request Number : ' + res.data.requestNum,
+                            footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
+                            type: isSubmitted === "Y" ? "success" : "info",
 
-                }
-            })
-            .catch(error => {
-                console.log(error.response.data)
-                let stat = error.response.data.status !== "failed" && error.response.data.status !== "error"
-                let msg = ""
-                if (stat) {
-                    if (error.response.data.errors) {
-                        let keys = Object.keys(error.response.data.errors)
-                        keys.map((key, index) => {
-                            msg = index + 1 + '.' + ' ' + msg + error.response.data.errors[key]
                         })
-                    }
-                    else if (error.response.data.message) {
-                        msg = error.response.data.message
-                    }
-                }
+                        Swal.hideLoading()
+                    })
+                    .catch(error => {
+                        console.log(error.response.data)
+                        let stat = error.response.data.status !== "failed" && error.response.data.status !== "error"
+                        let msg = ""
+                        if (stat) {
+                            if (error.response.data.errors) {
+                                let keys = Object.keys(error.response.data.errors)
+                                keys.map((key, index) => {
+                                    msg = index + 1 + '.' + ' ' + msg + error.response.data.errors[key]
+                                })
+                            }
+                            else if (error.response.data.message) {
+                                msg = error.response.data.message
+                            }
+                        }
 
-                else {
-                    msg = "Validation Errors occured"
-                }
-                Swal.fire({
-                    title: stat ? error.response.data.title : "ERROR",
-                    text: msg,
-                    type: 'error'
-                })
-            })
+                        else {
+                            msg = "Validation Errors occured"
+                        }
+                        Swal.update({
+                            title: stat ? error.response.data.title : "ERROR",
+                            text: msg,
+                            type: 'error'
+                        })
+                    })
+            }
+        })
+
+        // await Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        //     .then(res => {
+        //         if (isSubmitted === 'N') {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Saved' : '',
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is saved as a draft',
+        //                 type: 'info',
+        //                 onClose: () => {
+        //                     this.props.history.push(`/${this.props.match.params.page}`)
+        //                 }
+        //             })
+
+        //         }
+        //         if (isSubmitted === 'Y') {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Submitted' : "",
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is being processed and is waiting for the approval',
+        //                 type: 'success',
+        //                 onClose: () => {
+        //                     this.props.history.push(`/${this.props.match.params.page}`)
+        //                 }
+
+        //             })
+
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.log(error.response.data)
+        //         let stat = error.response.data.status !== "failed" && error.response.data.status !== "error"
+        //         let msg = ""
+        //         if (stat) {
+        //             if (error.response.data.errors) {
+        //                 let keys = Object.keys(error.response.data.errors)
+        //                 keys.map((key, index) => {
+        //                     msg = index + 1 + '.' + ' ' + msg + error.response.data.errors[key]
+        //                 })
+        //             }
+        //             else if (error.response.data.message) {
+        //                 msg = error.response.data.message
+        //             }
+        //         }
+
+        //         else {
+        //             msg = "Validation Errors occured"
+        //         }
+        //         Swal.fire({
+        //             title: stat ? error.response.data.title : "ERROR",
+        //             text: msg,
+        //             type: 'error'
+        //         })
+        //     })
     }
 
     async validate() {
@@ -1161,8 +1267,9 @@ class EditRequest extends Component {
         if (this.state.taskDetails.isUseInOffice === "Y") {
             details = details.filter(item => item !== "responsiblePerson" && item !== "returnDate")
         }
-        console.log(details)
+        // console.log(details)
         for (let i = 0; i < details.length; i++) {
+            console.log(details[i])
             var element = document.getElementById(details[i])
             if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
                 element.classList.contains("form-control")
@@ -1189,21 +1296,30 @@ class EditRequest extends Component {
     async handleAgreeTerm(event) {
         let checked = event.target.checked
         await this.setValidForm()
-        await this.validate()
+        if (this.state.taskDetails.applicationTypeId !== "") {
+            await this.validate()
+            if (this.validator.allValid()) {
+                this.setState(state => {
+                    let taskDetails = this.state.taskDetails
+                    if (checked) { taskDetails.isConfirm = "Y" }
+                    return { taskDetails }
+                })
+            } else {
+                this.validator.showMessages();
+                this.forceUpdate()
+            }
+        }
+        else {
+            Swal.fire({
+                title: "Application Type not Selected",
+                html: 'Please select an application type to continue!',
+                type: "warning"
+            })
+        }
+
         // console.log(this.state.isValid)
         // console.log(this.validator.allValid())
-        if (this.validator.allValid()) {
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                if (checked) { taskDetails.isConfirm = "Y" }
-                return { taskDetails }
-            })
-        } else {
-            this.validator.showMessages();
-            // rerender to show messages for the first time
-            // you can use the autoForceUpdate option to do this automatically`
-            this.forceUpdate()
-        }
+
     }
 
     async submitRequest(isSubmitted) {
@@ -1293,16 +1409,55 @@ class EditRequest extends Component {
 
         if (isSubmitted === "N") {
             this.postData(postReq, isSubmitted)
-            resetMounted.setMounted()
+            // resetMounted.setMounted()
         }
         else {
             //if all valid = isConfirmed || All Fields are filled
             // console.log(this.state.taskDetails)
             this.postData(postReq, isSubmitted)
-            resetMounted.setMounted()
+            // resetMounted.setMounted()
         }
     }
 
+    dataURLtoFile(dataurl, filename) {
+        console.log(dataurl.split(','))
+        var arr = dataurl.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]),
+            n = bstr.length,
+            u8arr = new Uint8Array(n);
+
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+
+        return new File([u8arr], filename, { type: mime });
+    }
+
+    viewOrDownloadFile(b64, type, name, url) {
+        if (b64 !== "") {
+            let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+            var blobUrl = new Blob([file], { type: type })
+            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                window.navigator.msSaveOrOpenBlob(blobUrl, name)
+                return;
+            }
+            else {
+                window.open(url, "_blank")
+            }
+        }
+        else {
+            alert("BASE 64 String is empty !!!")
+        }
+    }
+
+    getBase64(file, callback) {
+        let reader = new FileReader();
+        reader.onload = function () {
+            callback(reader.result.replace(/^data:.+;base64,/, ''))
+        };
+        reader.readAsDataURL(file)
+    }
 
 
 
@@ -1375,6 +1530,7 @@ class EditRequest extends Component {
                                         <FormGroup>
                                             <Label>Application Type</Label>
                                             <Input type="select" id="appTypeSelected" onChange={this.handleChange("applicationTypeId")} value={taskDetails.applicationTypeId} name="appType">
+                                                <option value="" disabled>Please select an application type</option>
                                                 {appTypes.map((type, index) =>
                                                     <option key={index} value={type.appTypeId} > {type.appTypeName} </option>
                                                 )}
@@ -1540,10 +1696,12 @@ class EditRequest extends Component {
                                                                             <td>{document.documentNameEnglish}</td>
                                                                             <td>{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a>
+                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.convertExpDate(document.expiryDate)} </div>
+                                                                                {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                                                                             </td>
                                                                             <td id="viewDoc">
-                                                                                <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a>
+                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.changeDeptHeads(document.departmentHeads)} </div>
+                                                                                {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
                                                                             </td>
                                                                             <td class="smallTd" ><img width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} src={deleteBin} /></td>
                                                                         </tr>
@@ -1589,13 +1747,13 @@ class EditRequest extends Component {
                                                         <Col md>
                                                             <FormGroup>
                                                                 {/* <Label>English Name</Label> */}
-                                                                <Input value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
+                                                                <Input value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="docName" maxLength="500" rows="3" placeholder="please describe in English" />
                                                             </FormGroup>
                                                         </Col>
                                                         <Col md>
                                                             <FormGroup>
                                                                 {/* <Label>Chinese Name</Label> */}
-                                                                <Input value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
+                                                                <Input value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="500" placeholder="please describe in Chinese" />
                                                             </FormGroup>
                                                         </Col>
                                                         <Col md>
@@ -1641,7 +1799,8 @@ class EditRequest extends Component {
                                                                             <td>{document.documentNameEnglish}</td>
                                                                             <td>{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a>
+                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
+                                                                                {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a> */}
                                                                             </td>
                                                                             <td className="smallTd"><img width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} src={deleteBin} /></td>
                                                                         </tr>
@@ -1848,7 +2007,7 @@ class EditRequest extends Component {
                                     </FormGroup>
                                 </Collapse> */}
 
-                                        <Collapse isOpen={taskDetails.applicationTypeId === "STU" || taskDetails.applicationTypeId === "LTI"}>
+                                        <Collapse isOpen={taskDetails.applicationTypeId === "STU" || taskDetails.applicationTypeId === "LTI" || taskDetails.applicationTypeId === ""}>
                                             <FormGroup>
                                                 <Label>Department Heads <i className="fa fa-user" /></Label>
                                                 <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.legalName} entity</small>

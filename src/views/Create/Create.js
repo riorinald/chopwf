@@ -6,15 +6,16 @@ import Swal from 'sweetalert2';
 import theme from './theme.css'
 import deleteBin from '../../assets/img/deletebin.png'
 import InputMask from "react-input-mask";
+import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
 import makeAnimated from 'react-select/animated';
 import SimpleReactValidator from 'simple-react-validator';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import config from '../../config';
 import { STU, LTU, LTI, CNIPS } from '../../config/validation';
-import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
+// import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
 import ReactTable from "react-table";
 import "react-table/react-table.css"
 import selectTableHOC from "react-table/lib/hoc/selectTable";
@@ -59,6 +60,7 @@ const SelectTable = selectTableHOC(ReactTable);
 
 const animatedComponents = makeAnimated();
 
+// var NewFormData = require('formdata-polyfill')
 
 class Create extends Component {
 
@@ -170,9 +172,12 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       validateForm: [],
-      noteInfo: [],
-      inputMask: [],
-      selectInfo: ''
+      noteInfo: '如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。 For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR.',
+      mask: [/(?!.*[A-HJ-QT-Z])[IS]/i,"-",/[A-Z]/i,/[A]/i,"-",/(?!.*[A-NQRT-Z])[PSO]/i,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/],
+      // mask: "a-a-a-9999-9999",
+      selectInfo: '',
+      inputMask: {mask:"a-a-a-9999-9999"},
+      maskTooltip: {}
 
     };
 
@@ -190,7 +195,7 @@ class Create extends Component {
     this.isValid = this.isValid.bind(this);
     this.checkDept = this.checkDept.bind(this);
 
-    this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
+    this.validator = new SimpleReactValidator({autoForceUpdate: this, locale: 'en'});
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
     this.toggleConnection = this.toggleConnection.bind(this);
@@ -199,12 +204,12 @@ class Create extends Component {
   };
 
   componentDidMount() {
-    this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
+    // this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
     this.getUserData();
     this.getData("department", `${config.url}/departments`);
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=` + this.props.legalName);
-    resetMounted.setMounted()
+    // resetMounted.setMounted()
 
 
   }
@@ -364,6 +369,7 @@ class Create extends Component {
   }
 
   async submitRequest(isSubmitted) {
+    console.log("SUBMIT")
     let useInOffice = "Y"
     let isConnectChop = "N"
     let IsConfirmed = "N"
@@ -371,7 +377,6 @@ class Create extends Component {
     useInOffice = this.state.collapse ? "Y" : "N"
     isConnectChop = this.state.connectingChop ? "Y" : "N"
     IsConfirmed = this.state.agreeTerms ? "Y" : "N"
-
     let postReq = new FormData();
     postReq.append("UserId", this.state.userId);
     postReq.append("EmployeeNum", this.state.employeeId);
@@ -515,7 +520,7 @@ class Create extends Component {
   Axios
   async getData(state, url) {
     try {
-      const response = await axios.get(url);
+      const response = await axios.get(url, { headers: { Pragma: 'no-cache' } });
       this.setState({
         [state]: response.data
       })
@@ -529,7 +534,7 @@ class Create extends Component {
 
     let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
     try {
-      await axios.get(url).then(res => {
+      await axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ documents: res.data })
       })
     } catch (error) {
@@ -538,53 +543,111 @@ class Create extends Component {
   }
 
   async postData(formData, isSubmitted) {
-    try {
-      await axios.post(`${config.url}/tasks`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-        .then(res => {
-          if (isSubmitted === 'N') {
-            Swal.fire({
-              title: res.data.status === 200 ? 'Request Saved' : '',
+
+
+    Swal.fire({
+      title: `Creating your Request ... `,
+      type: "info",
+      text: '',
+      footer: '',
+      allowOutsideClick: false,
+      onClose: () => { this.formReset() },
+      onBeforeOpen: () => {
+        Swal.showLoading()
+      },
+      onOpen: () => {
+        axios.post(`${config.url}/tasks`, formData)
+          .then(res => {
+
+            Swal.update({
+              title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
               text: 'Request Number : ' + res.data.requestNum,
-              footer: 'Your request is saved as draft.',
-              type: 'info',
-              onClose: () => { this.formReset() }
+              footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
+              type: isSubmitted === "Y" ? "success" : "info",
+
             })
-          }
-          if (isSubmitted === 'Y') {
-            Swal.fire({
-              title: res.data.status === 200 ? 'Request Submitted' : "",
-              text: 'Request Number : ' + res.data.requestNum,
-              footer: 'Your request is being processed and is waiting for the approval',
-              type: 'success',
-              onClose: () => { this.formReset() }
+            Swal.hideLoading()
+          })
+          .catch(error => {
+            let err = "Please contact the IT Admin !"
+            let err2 = []
+            let err3 = ""
+            if (error.response) {
+              console.log(error.response)
+              let keys = Object.keys(error.response.data.errors)
+              err = keys.join(',')
+              keys.map(key => {
+                // console.log(error.response.data.errors[key].join(','))
+                err2.push(error.response.data.errors[key].join(','))
+              })
+              err3 = err2.join(';')
+            }
+            Swal.hideLoading()
+            Swal.update({
+              title: "Error",
+              type: "error",
+              text: err,
+              html: err3,
+
             })
-          }
-        })
-    } catch (error) {
-      if (error.response && isSubmitted === 'N') {
-        Swal.fire({
-          title: error.response.statusText,
-          text: error.response.data.message,
-          footer: JSON.stringify(error.response.data),
-          type: 'error',
-        })
+          })
       }
-      if (error.response && isSubmitted === 'Y') {
-        Swal.fire({
-          title: error.response.statusText,
-          text: JSON.stringify(error.response.data),
-          footer: 'traceId : ' + error.response.data.traceId,
-          type: 'error',
-        })
-      }
-      console.error(error.response);
-    }
+    })
+
+
+    // try {
+    //   // await axios.post(`${config.url}/tasks`, formData)
+    //   await axios.post(`${config.url}/tasks`, formData)
+    //     .then(res => {
+    //       if (isSubmitted === 'N') {
+    //         Swal.fire({
+    //           title: res.data.status === 200 ? 'Request Saved' : '',
+    //           text: 'Request Number : ' + res.data.requestNum,
+    //           footer: 'Your request is saved as draft.',
+    //           type: 'info',
+    //           onClose: () => { this.formReset() }
+    //         })
+    //       }
+    //       if (isSubmitted === 'Y') {
+    //         Swal.fire({
+    //           title: res.data.status === 200 ? 'Request Submitted' : "",
+    //           text: 'Request Number : ' + res.data.requestNum,
+    //           footer: 'Your request is being processed and is waiting for the approval',
+    //           type: 'success',
+    //           onClose: () => { this.formReset() }
+    //         })
+    //       }
+    //     })
+    // } catch (error) {
+    //   if (error.response && isSubmitted === 'N') {
+    //     Swal.fire({
+    //       title: error.response.statusText,
+    //       text: error.response.data.message,
+    //       footer: JSON.stringify(error.response.data),
+    //       type: 'error',
+    //     })
+    //   }
+    //   if (error.response && isSubmitted === 'Y') {
+    //     Swal.fire({
+    //       title: error.response.statusText,
+    //       text: JSON.stringify(error.response.data),
+    //       footer: 'traceId : ' + error.response.data.traceId,
+    //       type: 'error',
+    //     })
+    //   }
+    //   console.error(error.response);
+    // }
   }
 
   formReset() {
     this.formRef.current.reset()
     window.location.reload();
   }
+
+  formRes() {
+    this.formRef.current.reset()
+  }
+
   convertExpDate(dateValue) {
     let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
     return regEx;
@@ -609,15 +672,16 @@ class Create extends Component {
   }
 
   async getDeptHead(companyId) {
-
-    await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
+    console.log(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
+    await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`, { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ deptHead: res.data })
       })
   }
 
   async getDocCheckBy(teamId) {
-    await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`)
+    await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`,
+      { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ docCheckBy: res.data })
       })
@@ -625,13 +689,13 @@ class Create extends Component {
 
   async getTeams(deptId) {
     let url = `${config.url}/teams?companyid=` + this.props.legalName + "&departmentId=" + deptId
-    await axios.get(url).then(res => {
+    await axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
       this.setState({ teams: res.data })
     })
   }
 
   async getChopTypes(companyId, appTypeId) {
-    await axios.get(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`)
+    await axios.get(`${config.url}/choptypes?companyid=${companyId}&apptypeid=${appTypeId}`, { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ chopTypes: res.data })
       })
@@ -733,6 +797,7 @@ class Create extends Component {
 
     //CHOP TYPE
     else if (name === "chopTypeSelected") {
+      console.log(event.target.value)
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected)
       }
@@ -755,6 +820,7 @@ class Create extends Component {
 
     //DEPARTMENT
     else if (name === "deptSelected") {
+      this.setState({ teamSelected: "" })
       this.getDeptHead(this.props.legalName)
       if (this.state.isLTU || this.state.isLTI) {
         this.getTeams(event.target.value)
@@ -766,6 +832,7 @@ class Create extends Component {
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
+      // console.log(event.target.value)
       this.getDocCheckBy(event.target.value)
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value)
@@ -787,61 +854,63 @@ class Create extends Component {
   };
 
 
-  handleInputMask = () => {
+  handlemask = () => {
     // let value = ("" + event.target.value).toUpperCase();
     let first = /(?!.*[A-HJ-QT-Z])[IS]/;
     let third = /(?!.*[A-NQRT-Z])[PSO]/;
     let digit = /[0-9]/;
-    let center = /[A-Za-z]/;
-    let mask = []
-    switch (this.props.match.params.company) {
-      case 'MBIA':
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-      case 'MBLC':
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-      case 'MBAFC':
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-      case 'CAR2GO':
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-      default:
-        mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
-        break;
-    }
+    let center = /[IALR]/;
+    let centers = /[A]/;
+    let mask = [first, "-", center, centers, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit]
+    // switch (this.props.match.params.company) {
+    //   case 'MBIA':
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    //   case 'MBLC':
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    //   case 'MBAFC':
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    //   case 'CAR2GO':
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    //   default:
+    //     mask = [first, "-", center, "-", third, "-", digit, digit, digit, digit, "-", digit, digit, digit, digit];
+    //     break;
+    // }
+
     this.setState({
-      inputMask: mask, viewContract: true
+      mask: mask, viewContract: true
     });
   }
 
   validateConNum() {
-    let first = /(?!.*[A-HJ-QT-Z])[IS]/;
-    let third = /(?!.*[A-NQRT-Z])[PSO]/;
+    let first = /(?!.*[A-HJ-QT-Z])[IS]/i;
+    let third = /(?!.*[A-NQRT-Z])[PSO]/i;
     let digit = /[0-9]/;
     var isFirst = false
     var isThird = false
     var isDigit = false
     let valid = false
     isFirst = first.test(this.state.contractNumber[0])
-    if (this.props.match.params.company === "MBIA") {
-      isThird = third.test(this.state.contractNumber[5])
-      for (let i = 7; i < 11; i++) {
+    // if (this.props.match.params.company === "MBIA") {
+    isThird = third.test(this.state.contractNumber[5])
+    for (let i = 7; i < 11; i++) {
+      isDigit = digit.test(this.state.contractNumber[i])
+      if (!isDigit) {
+        break;
+      }
+    }
+    if (isDigit) {
+      for (let i = 12; i < 16; i++) {
         isDigit = digit.test(this.state.contractNumber[i])
         if (!isDigit) {
           break;
         }
       }
-      if (isDigit) {
-        for (let i = 12; i < 15; i++) {
-          isDigit = digit.test(this.state.contractNumber[i])
-          if (!isDigit) {
-            break;
-          }
-        }
-      }
     }
+    // }
 
     else {
       isThird = third.test(this.state.contractNumber[4])
@@ -865,14 +934,14 @@ class Create extends Component {
       if (this.state.conNum.length !== 0) {
         for (let i = 0; i < this.state.conNum.length; i++) {
           let value = this.state.contractNumber
-          if (this.props.match.params.company === "MBIA") {
+          // if (this.props.match.params.company === "MBIA") {
+          if (!digit.test(value[16])) {
+            value = value.substr(0, 16)
+          }
+          // }
+          else {
             if (!digit.test(value[15])) {
               value = value.substr(0, 15)
-            }
-          }
-          else {
-            if (!digit.test(value[14])) {
-              value = value.substr(0, 14)
             }
           }
           if (this.state.conNum[i] === value) {
@@ -902,28 +971,64 @@ class Create extends Component {
     return valid
   }
 
+
+  handleContractChange = (event) => {
+
+    // let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
+    // let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
+
+    var value = event.target.value;
+
+    // if (/^..[AaLlRr]/.test(value)){
+    //   this.setState({
+    //     mask: "a-a-a-9999-9999",
+    //     })
+    //   }
+    // var inputMask={
+    //   mask: "a-a-a-9999-9999",
+    //   value: value, 
+    // }
+    var maskTooltip={
+        isOpen: false,
+        message: ''
+    }
+    maskTooltip.isOpen = true
+    maskTooltip.message = '[ I / S ]-[ A / L / IA / R ]-[ O / P / S ] \n\n e.g "S-A-O-9999-9999"'
+    if (/^..[LIAR]/i.test(value)) {
+            // inputMask.mask = "a-aa-a-9999-9999"
+      // value = value.replace("I-_", "IA-_")
+      } else {
+        
+      }
+    // console.log(inputMask, inputMask.value);
+    this.setState({maskTooltip:maskTooltip,contractNumber: value})
+  }
+
   addContract(event) {
     let valid = this.validateConNum()
     let digit = /[0-9]/;
-    let value = this.state.contractNumber
+    let value = this.state.contractNumber.toUpperCase();
     if (valid) {
-      if (this.props.match.params.company === "MBIA") {
-        if (!digit.test(this.state.contractNumber[15])) {
-          value = this.state.contractNumber.substr(0, 15)
-        }
-      }
-      else {
-        if (!digit.test(this.state.contractNumber[14])) {
-          value = this.state.contractNumber.substr(0, 14)
-        }
+      // if (this.props.match.params.company === "MBIA") {
+      //   if (!digit.test(this.state.contractNumber[14])) {
+      //     value = this.state.contractNumber.substr(0, 15)
+      //   }
+      // // }
+      // else {
+      //   if (!digit.test(this.state.contractNumber[14])) {
+      //     value = this.state.contractNumber.substr(0, 14)
+      //   }
 
-      }
-
+      // }
+      // console.log(value.replace(/_/g, ''))
       this.setState(state => ({
-        conNum: [...state.conNum, value]
+        conNum: [...state.conNum, value.replace(/_/g, '')]
       })
       )
-      this.setState({ contractNumber: "" }, this.toggle('viewContract'))
+      let maskTooltip = {
+        isOpen: false
+      }
+      this.setState({ contractNumber: "", maskTooltip:maskTooltip }, this.toggle('viewContract'))
     }
     else {
       Swal.fire({
@@ -934,6 +1039,14 @@ class Create extends Component {
     }
   }
 
+  deleteContract(i) {
+    this.setState(state => {
+      const conNum = state.conNum.filter((item, index) => i !== index)
+      return {
+        conNum
+      }
+    })
+  }
 
   deleteDocument(table, i) {
     this.setState(state => {
@@ -947,6 +1060,12 @@ class Create extends Component {
         const documentTableLTI = state.documentTableLTI.filter((item, index) => i !== index)
         return {
           documentTableLTI
+        }
+      }
+      else if (table === "documentTableCNIPS") {
+        const documentTableCNIPS = state.documentTableCNIPS.filter((item, index) => i !== index)
+        return {
+          documentTableCNIPS
         }
       }
     })
@@ -988,6 +1107,11 @@ class Create extends Component {
             docURL: URL.createObjectURL(this.state.docSelected),
             // contractNumbers: this.state.contractNumbers
           }
+          this.getBase64(this.state.docSelected, (result) => {
+            obj.documentBase64String = result
+          })
+
+          console.log(obj.docURL)
           this.setState(state => {
             const documentTableLTI = state.documentTableLTI.concat(obj)
             return {
@@ -1022,6 +1146,15 @@ class Create extends Component {
       })
     }
   }
+
+  getBase64(file, callback) {
+    let reader = new FileReader();
+    reader.onload = function () {
+      callback(reader.result.replace(/^data:.+;base64,/, ''))
+    };
+    reader.readAsDataURL(file)
+  }
+
 
   addDocumentCNIPS = () => {
     var maxNumber = 45;
@@ -1175,25 +1308,27 @@ class Create extends Component {
 
       })
     }
+    event.target.value = null
   }
 
   handleSelectOption = sname => newValue => {
-    if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
-      if (newValue) {
-        this.setState({ [sname]: newValue })
-        document.getElementById(sname).className = "css-2b097c-container"
+    if (newValue)
+      if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
+        if (newValue) {
+          this.setState({ [sname]: newValue })
+          document.getElementById(sname).className = "css-2b097c-container"
+        }
+        else {
+          this.setState({ [sname]: [] })
+        }
+
       }
       else {
-        this.setState({ [sname]: [] })
+        if (newValue.value) {
+          document.getElementById(sname).className = "css-2b097c-container"
+        }
+        this.setState({ [sname]: newValue.value })
       }
-
-    }
-    else {
-      if (newValue.value) {
-        document.getElementById(sname).className = "css-2b097c-container"
-      }
-      this.setState({ [sname]: newValue.value })
-    }
 
   }
 
@@ -1216,11 +1351,10 @@ class Create extends Component {
   }
 
   dateChange = (name, view) => date => {
-    let month = date.getMonth()
-
     let dates = ""
     if (date) {
-      dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+      let tempDate = format(date, "yyyy-MM-dd").split('T')[0];//right
+      dates = tempDate.replace(/-/g, "")
     }
     console.log(dates)
     this.setState({
@@ -1231,6 +1365,42 @@ class Create extends Component {
 
   //scroll To Function
   // scrollToRef = (ref) => window.scrollTo(0, ref)
+
+  viewOrDownloadFile(file) {
+    if (file) {
+      var blobUrl = new Blob([file], { type: file.type })
+      if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveOrOpenBlob(blobUrl, file.name)
+        return;
+      }
+      else {
+        window.open(URL.createObjectURL(file), "_blank")
+      }
+    }
+    else {
+      alert("No File detected! :( ")
+    }
+  }
+
+  dataURLtoFile(dataurl, filename) {
+    if (dataurl !== "") {
+      var arr = dataurl.split(','),
+        mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]),
+        n = bstr.length,
+        u8arr = new Uint8Array(n);
+
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+
+      return new File([u8arr], filename, { type: mime });
+    }
+    else {
+      alert("BASE64 String is empty :(")
+      return null
+    }
+  }
 
   render() {
     this.validator.purgeFields();
@@ -1317,10 +1487,10 @@ class Create extends Component {
           {this.state.documentTableLTI.map((document, index) =>
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
-              <td><div>{document.engName}</div></td>
-              <td><div>{document.cnName}</div></td>
+              <td className="descTd">{document.engName}</td>
+              <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
-                <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
@@ -1345,11 +1515,11 @@ class Create extends Component {
           {this.state.documentTableCNIPS.map((document, index) =>
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
-              <td><div>{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</div></td>
-              <td><div>{document.engName}</div></td>
-              <td><div>{document.cnName}</div></td>
+              <td className="mediumTd">{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</td>
+              <td className="descTd">{document.engName}</td>
+              <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
-                <a href={document.docURL} target='_blank' rel="noopener noreferrer">{document.docName}</a>
+                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableCNIPS", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
@@ -1375,7 +1545,7 @@ class Create extends Component {
                           ? this.state.conNum.map((
                             (conNum, index) => (
                               <span key={index}>
-                                <DropdownItem >{conNum}</DropdownItem>
+                                <DropdownItem style={{ cursor: 'default' }}>{conNum} <span style={{ cursor: 'pointer' }} onClick={() => this.deleteContract(index)} className="float-right"><i className="mx-0 fa fa-trash" /></span></DropdownItem>
                               </span>
                             )))
                           : <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
@@ -1383,9 +1553,11 @@ class Create extends Component {
 
                       </DropdownMenu>
                     </InputGroupButtonDropdown>
-                    <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
-                      onChange={this.handleChange('contractNumber')} value={this.state.contractNumber}
-                      onClick={this.handleInputMask}></InputMask>
+                    <Tooltip placement="top" isOpen={this.state.maskTooltip.isOpen} target="contractNumber">{this.state.maskTooltip.message} </Tooltip>
+                    <InputMask placeholder="Enter Contract Number" mask={this.state.mask} name="contractNumber" id="contractNumber" className="form-control"
+                      onChange={this.handleContractChange} value={this.state.contractNumber}
+                    // onClick={this.handlemask}
+                    ></InputMask>
                     <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
                   </InputGroup>
                 </FormGroup></Col>
@@ -1394,13 +1566,13 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 {/* <Label>English Name</Label> */}
-                <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
+                <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
               </FormGroup>
             </Col>
             <Col md>
               <FormGroup>
                 {/* <Label>Chinese Name</Label> */}
-                <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
+                <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3" placeholder="Please describe in Chinese (optional)" />
               </FormGroup>
             </Col>
             <Col md>
@@ -1412,7 +1584,7 @@ class Create extends Component {
             <Col xl={1}>
               <FormGroup>
                 {this.state.isCNIPS
-                  ? <Button id="addDocs" block onMouseEnter={this.toggle('viewContract')} onMouseLeave={this.toggle('viewContract')} onClick={this.addDocumentCNIPS}>Add</Button>
+                  ? <Button id="addDocs" block onClick={this.addDocumentCNIPS}>Add</Button>
                   : <Button id="addDocs" block onClick={this.addDocumentLTI}>Add</Button>
                 }
               </FormGroup>
@@ -1473,7 +1645,9 @@ class Create extends Component {
                   Header: 'Expiry Date',
                   accessor: 'expiryDate',
                   Cell: row => (
-                    <div> {this.convertExpDate(row.original.expiryDate)} </div>
+                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                      {this.convertExpDate(row.original.expiryDate)}
+                    </div>
                   ),
                   // style: { textAlign: "center" },
                 },
@@ -1481,7 +1655,10 @@ class Create extends Component {
                   Header: 'DH Approved',
                   accessor: 'departmentHeads',
                   Cell: row => (
-                    <div> {this.changeDeptHeads(row.original.departmentHeads)} </div>
+                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                      {this.changeDeptHeads(row.original.departmentHeads)}
+                    </div>
+
                   ),
                   // style: { textAlign: "center" },
                 },
@@ -1518,10 +1695,16 @@ class Create extends Component {
                     <td>{document.documentNameEnglish}</td>
                     <td>{document.documentNameChinese}</td>
                     <td id="viewDoc">
-                      <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a>
+                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
+                        {this.convertExpDate(document.expiryDate)}
+                      </div>
+                      {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                     </td>
                     <td id="viewDoc">
-                      <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a>
+                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
+                        {this.changeDeptHeads(document.departmentHeads)}
+                      </div>
+                      {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
                     </td>
                     <td><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
                   </tr>
@@ -1545,7 +1728,7 @@ class Create extends Component {
                 <FormGroup>
                   <h5>NOTES :</h5>
                   {/* {this.state.noteInfo.notes || <Skeleton count={3}/>} */}
-                  {this.state.noteInfo.notes}
+                  {this.state.noteInfo}
                 </FormGroup>
                 <Form className="form-horizontal" innerRef={this.formRef}>
                   <FormGroup>
@@ -1571,14 +1754,22 @@ class Create extends Component {
                     <Label>Dept</Label>
                     <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
                       <option disabled value="0">Please Select . . .</option>
-
                       {this.state.department.map((option, index) => (
-                        <option value={option.deptId} key={option.deptId}>
+                        <option value={option.deptId} label={option.dept} key={option.deptId}>
                           {option.deptName}
-
                         </option>
                       ))}
                     </Input>
+                    {/* <Select id="deptSelected"
+                      onChange={this.handleSelectOption("deptSelected")}
+                      options={this.state.department.map((option, index) => {
+                        return { value: option.deptId, label: option.deptName }
+                      }
+                      )}
+                      placeholder="Please Select..."
+                      isSearchable={false}
+                      menuPortalTarget={document.body}
+                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} /> */}
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Department', this.state.deptSelected, 'required')}</small>
                   </FormGroup>
                   <FormGroup>
@@ -1845,8 +2036,16 @@ class Create extends Component {
                       ? <FormGroup>
                         <Label>Document Check By <i className="fa fa-user" /></Label>
                         <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-                        <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
-                          loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} />
+                        <Select
+                          id="docCheckBySelected"
+                          options={docCheckByUsers}
+                          isClearable
+                          menuPortalTarget={document.body}
+                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                          onChange={this.handleSelectOption("docCheckBySelected")}
+                        />
+                        {/* <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
+                          loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} /> */}
                         <InputGroup>
                           {this.state.isLTU
                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Check By ', this.state.docCheckBySelected, 'required')}</small>

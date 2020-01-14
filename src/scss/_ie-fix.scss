@@ -9,8 +9,13 @@ html body .app.flex-row.align-items-center {
     flex-direction: column;
   }
   .IE-margin-top {
-    margin-top: 55vh !important;
+    margin-top: 50vh !important;
   }
+
+  .ReactTable {
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+  }
+  
 }
 
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) and (max-height: 500px) {

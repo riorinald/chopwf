@@ -16,8 +16,7 @@ import {
   // AppBreadcrumb2 as AppBreadcrumb,
 } from '@coreui/react';
 // sidebar nav config
-import ChopKeeperNav from '../../_nav';
-import RequestorNav from '../../_Rnav';
+import ChopNav from '../../_ChopNav';
 import LicenseNav from '../../_LicenseNav';
 // routes config
 import routes from '../../routes';
@@ -33,7 +32,9 @@ class DefaultLayout extends Component {
   loading = () => <div className="animated fadeIn pt-1 text-center"><Spinner /></div>
 
   signOut(e) {
-    e.preventDefault()
+    if(e){
+      e.preventDefault()
+    }
     this.props.history.push('/login')
   }
 
@@ -42,6 +43,8 @@ class DefaultLayout extends Component {
     this.state = {
       legalEntity: localStorage.getItem('legalEntity'),
       roleId: localStorage.getItem("roleId"),
+      cAdmin: localStorage.getItem("isChopKeeper"),
+      lAdmin: localStorage.getItem('isLicenseAdmin'),
       application: localStorage.getItem('application'),
     }
     this.handleLegalEntity = this.handleLegalEntity.bind(this)
@@ -57,7 +60,7 @@ class DefaultLayout extends Component {
     if (value === "LICENSE") {
       this.props.history.push(`/${value.toLowerCase()}/create`)
     }
-    else{
+    else {
       this.props.history.push('/create')
     }
     this.setState({
@@ -65,22 +68,23 @@ class DefaultLayout extends Component {
     },
       localStorage.setItem("application", value));
   }
-  
+
   changeEntity = workflow => event => {
     if (workflow === "LICENSE") {
       this.props.history.push(`/${workflow.toLowerCase()}/create`)
-      }
-      else{
+    }
+    else {
       this.props.history.push(`/create/${event.target.value}`)
-      }
+      window.location.reload();
+    }
 
     this.setState({
       legalEntity: event.target.value,
       application: workflow,
-      },
-        localStorage.setItem("application", workflow),
-        localStorage.setItem("legalEntity", event.target.value)
-        )
+    },
+      localStorage.setItem("application", workflow),
+      localStorage.setItem("legalEntity", event.target.value)
+    )
   }
 
   toggle = (name) => () => {
@@ -92,17 +96,24 @@ class DefaultLayout extends Component {
   handleSideBarNav(application) {
     switch (application) {
       case 'CHOP':
-        if (this.state.roleId === 'REQUESTOR')
-          return RequestorNav;
-        if (this.state.roleId === 'CHOPKEEPER' || 'CHOPOWNER')
-          return ChopKeeperNav;
-        else return console.log('error! Roles not match, no sideBarNav');
+        if (this.state.cAdmin === 'N')
+          return ChopNav.requestor;
+        if (this.state.cAdmin === 'Y')
+          return ChopNav.admin;
+        else return this.signOut();
+          console.log('error! Roles not match, no sideBarNav');
 
       case 'LICENSE':
-        return LicenseNav;
+        if (this.state.lAdmin === 'N')
+          return LicenseNav.requestor;
+        if (this.state.lAdmin === 'Y')
+          return LicenseNav.admin;
+        else return this.signOut();
+          console.log('error! Roles not match, no sideBarNav');
 
-      default:
-        return console.log('error! workflow application not match, no sideBarNav');
+        default:
+          return this.signOut(); 
+          console.log('error! workflow application not match, no sideBarNav');
     }
   }
 
@@ -147,7 +158,7 @@ class DefaultLayout extends Component {
                           )} />
                       ) : (null);
                     })}
-                    <Redirect from="/" to={{ pathname: "/404" }} />
+                    {/* <Redirect from="/" to={{ pathname: "/404" }} /> */}
                   </Switch>
                 </Suspense>
               </Container>
