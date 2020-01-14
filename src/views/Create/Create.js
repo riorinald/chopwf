@@ -219,6 +219,7 @@ class Create extends Component {
     let { validateForm } = this.state
     if (validateForm.length === 0) {
       Swal.fire({
+        title:'Appliction Type Required',
         type: 'info',
         label: 'required',
         text: 'Please select an Application Type to get started !'
@@ -659,6 +660,8 @@ class Create extends Component {
   //handle value on changes
   handleChange = name => event => {
     //APPLICATION TYPE
+    let value = event.target.value
+    
     if (name === "appTypeSelected") {
       this.setValidateForm(event.target.value)
       //Clear Doc Table and agreeTerms
@@ -766,19 +769,23 @@ class Create extends Component {
       }
     }
 
-    else if (name === "numOfPages") {
-      if (event.target.value.length === 0 || event.target.value.length > 9) {
-        event.target.className = "is-invalid form-control"
-        this.setState({
-          [name]: []
-        })
-      }
-      else {
-        event.target.className = "form-control"
-        this.setState({
-          [name]: event.target.value
-        })
-      }
+    //Handle engName
+    if (name === "engName" && value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)){
+      Swal.fire({
+              title: "invalid",
+              html: 'Please input english character',
+              type: "warning"
+            })
+    }
+
+    this.setState({
+      [name]: value
+    },
+      () => { this.checkDepartment() }
+    );
+
+    if (event.target.value) {
+      event.target.className = "form-control"
     }
 
 
@@ -1025,7 +1032,7 @@ class Create extends Component {
     let typeValid = false
     let doc = this.state.documentTableLTI
     if (this.state.docSelected !== null) {
-      if (this.state.engName !== "" && this.state.cnName !== "") {
+      if (this.state.engName !== "") {
         typeValid = true
       }
       else {
@@ -1437,7 +1444,7 @@ class Create extends Component {
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
-                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
+                <div style={{ textDecoration: "underline", color: "#20A8D8", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
@@ -1500,7 +1507,7 @@ class Create extends Component {
 
                       </DropdownMenu>
                     </InputGroupButtonDropdown>
-                    <Tooltip placement="top" isOpen={this.state.maskTooltip.isOpen} target="contractNumber">{this.state.maskTooltip.message} </Tooltip>
+                    <Tooltip autoComplete="off" autoCapitalize="on" placement="top" isOpen={this.state.maskTooltip.isOpen} target="contractNumber">{this.state.maskTooltip.message} </Tooltip>
                     <InputMask placeholder="Enter Contract Number" mask={this.state.mask} name="contractNumber" id="contractNumber" className="form-control"
                       onChange={this.handleContractChange} value={this.state.contractNumber}
                     // onClick={this.handlemask}
@@ -1513,13 +1520,13 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 {/* <Label>English Name</Label> */}
-                <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
+                <Input autoComplete="off" value={this.state.engName} onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
               </FormGroup>
             </Col>
             <Col md>
               <FormGroup>
                 {/* <Label>Chinese Name</Label> */}
-                <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3" placeholder="Please describe in Chinese (optional)" />
+                <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3" placeholder="Please describe in Chinese (optional)" />
               </FormGroup>
             </Col>
             <Col md>
@@ -1819,7 +1826,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Purpose of Use</Label>
                     <InputGroup>
-                      <Input maxLength={500} ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the purpose of use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                      <Input maxLength={500} spellCheck="true" ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of Use', this.state.purposeOfUse, 'required')}</small>
                   </FormGroup>
@@ -1832,6 +1839,11 @@ class Create extends Component {
                       {!this.state.isLTI
                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages to Be Chopped', this.state.numOfPages, 'required')}</small>
                         : null}
+                    </FormGroup>
+                    <FormGroup>
+                      <Label>Connecting Chop (骑缝章) </Label>
+                      <Row />
+                      <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
                     </FormGroup>
                   </Collapse>
 
@@ -1870,6 +1882,7 @@ class Create extends Component {
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect id="resPerson"
                         onBlur={this.checkDepartment}
+                        isClearable
                         classNamePrefix="rs"
                         loadOptions={loadOptions}
                         onChange={this.handleSelectOption("resPerson")}
@@ -1896,6 +1909,7 @@ class Create extends Component {
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect
                         id="pickUpBy"
+                        isClearable
                         loadOptions={loadOptions}
                         isClearable
                         onBlur={this.checkDepartment}
@@ -1912,9 +1926,9 @@ class Create extends Component {
                   </Collapse>
 
                   <FormGroup>
-                    <Label>Remark</Label>
+                    <Label>Remark <small className="ml-2">Notes: Please enter the remarks, e.g. telephone number of pick up person.</small> </Label>
                     <InputGroup>
-                      <Input maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks, e.g. telephone number of pick up person." />
+                      <Input autoComplete="off" maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Remark', this.state.remarks, 'required')}</small>
                   </FormGroup>
@@ -1943,7 +1957,7 @@ class Create extends Component {
                   {this.state.isCNIPS
                     ? <FormGroup>
                       <Label>Contract Signed By: <i className="fa fa-user" /></Label>
-                      <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
+                      <small className="ml-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <Row>
                         <Col>
@@ -2003,7 +2017,7 @@ class Create extends Component {
                       </FormGroup>
                       : <FormGroup>
                         <Label>Department Heads <i className="fa fa-user" /></Label>
-                        <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity.</small>
+                        <small className="ml-2"> If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity.</small>
                         <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                         <AsyncSelect
                           id="deptHeadSelected"
@@ -2033,7 +2047,7 @@ class Create extends Component {
                           onChange={this.handleAgreeTerm}
                           // onClick={this.isValid}
                           id="confirm" value="option1">
-                          <Label className="form-check-label" check >
+                          <Label onClick={this.handleAgreeTerm} className="form-check-label" check >
                             By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines
                             regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action.
                       </Label>

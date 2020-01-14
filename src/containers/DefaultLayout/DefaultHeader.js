@@ -61,7 +61,7 @@ class DefaultHeader extends Component {
         <Nav className="ml-auto" navbar>
           <Dropdown isOpen={state.viewChop} toggle={this.props.toggle('viewChop')} nav direction="down" >
             <DropdownToggle color="ghost" className="btn-pill" caret>
-              CHOP WF
+              SWITCH CHOP ENTITY
                 </DropdownToggle>
             <DropdownMenu className="mt-2">
               <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBAFC"
@@ -84,7 +84,7 @@ class DefaultHeader extends Component {
           </Dropdown>
           <Dropdown className="mr-2" isOpen={state.viewLicense} toggle={this.props.toggle('viewLicense')} nav direction="down" >
             <DropdownToggle color="ghost" className="btn-pill" caret>
-              LICENSE WF
+              SWITCH LICENSE ENTITY
                 </DropdownToggle>
             <DropdownMenu className="mt-2">
               <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBAFC"
