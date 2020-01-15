@@ -545,14 +545,14 @@ class TaskDetails extends Component {
                                                         <Label>Purpose of Use</Label>
                                                     </Col>
                                                     <Col xs="12" md="8">
-                                                        <Input disabled type="text" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
+                                                        <Input disabled type="textarea" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
                                                     </Col>
                                                 </FormGroup> : "" : <FormGroup row >
                                                 <Col md="4" className="d-flex align-items-center" >
                                                     <Label>Purpose of Use</Label>
                                                 </Col>
                                                 <Col xs="12" md="8">
-                                                    <Input disabled type="text" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
+                                                    <Input disabled type="textarea" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
                                                 </Col>
                                             </FormGroup>
                                     }
@@ -571,7 +571,7 @@ class TaskDetails extends Component {
                                             <Label>Address to</Label>
                                         </Col>
                                         <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
+                                            <Input disabled type="textarea" value={taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
                                         </Col>
                                     </FormGroup>
                                     <FormGroup row >
@@ -628,7 +628,7 @@ class TaskDetails extends Component {
                                                     <Label>Department Heads</Label>
                                                 </Col>
                                                 <Col id="deptHead" xs="12" md="8">
-                                                    <Input disabled type="text" value={this.setArray(taskDetails.departmentHeadsName)} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
+                                                    <Input disabled type="textarea" value={this.setArray(taskDetails.departmentHeadsName)} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
                                                     <UncontrolledTooltip placement="right" target="deptHead">{this.setArray(taskDetails.departmentHeadsName)}</UncontrolledTooltip>
                                                 </Col>
                                             </FormGroup>
