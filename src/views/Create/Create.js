@@ -174,12 +174,16 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       validateForm: [],
-      noteInfo: '如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。 For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR.',
+      noteInfo: { 
+                  chinese:"如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
+                  english:"For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
+                },
       mask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[A-Z]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
       // mask: "a-a-a-9999-9999",
       selectInfo: '',
       inputMask: { mask: "a-a-a-9999-9999" },
-      maskTooltip: {}
+      msgTooltip: '[I / S ]-[ A / L / IA / R ]-[ O / P / S] \n e.g "S-A-O-9999-9999"',
+      ioTooltip: false,
 
     };
 
@@ -458,7 +462,8 @@ class Create extends Component {
 
   async postData(formData, isSubmitted) {
     // console.log(document.getElementById("remarks"))
-    document.getElementById("submit").blur()
+    let elementId = (isSubmitted === 'Y') ? "submit" : "saveAction" 
+    document.getElementById(elementId).blur()
 
     Swal.fire({
       title: `Creating your Request ... `,
@@ -928,7 +933,6 @@ class Create extends Component {
 
     // let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
     // let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
-
     var value = event.target.value;
 
     // if (/^..[AaLlRr]/.test(value)){
@@ -940,12 +944,8 @@ class Create extends Component {
     //   mask: "a-a-a-9999-9999",
     //   value: value, 
     // }
-    var maskTooltip = {
-      isOpen: false,
-      message: ''
-    }
-    maskTooltip.isOpen = true
-    maskTooltip.message = '[ I / S ]-[ A / L / IA / R ]-[ O / P / S ] \n\n e.g "S-A-O-9999-9999"'
+
+     let message = '[I / S ]-[ A / L / IA / R ]-[ O / P / S] e.g "S-A-O-9999-9999"'
     if (/^..[LIAR]/i.test(value)) {
       // inputMask.mask = "a-aa-a-9999-9999"
       // value = value.replace("I-_", "IA-_")
@@ -953,7 +953,19 @@ class Create extends Component {
 
     }
     // console.log(inputMask, inputMask.value);
-    this.setState({ maskTooltip: maskTooltip, contractNumber: value })
+    this.setState({ viewContract:true, msgTooltip: message, ioTooltip:true, contractNumber: value })
+  }
+
+  beforeMaskedStateChange({nextState}){
+   let { value } = nextState;
+      if (/^..[LIAR]/i.test(value)) {
+        value = value.slice(0, -1);
+      }
+
+      return {
+        ...nextState,
+        value
+   };
   }
 
   addContract(event) {
@@ -977,10 +989,7 @@ class Create extends Component {
         conNum: [...state.conNum, value.replace(/_/g, '')]
       })
       )
-      let maskTooltip = {
-        isOpen: false
-      }
-      this.setState({ contractNumber: "", maskTooltip: maskTooltip }, this.toggle('viewContract'))
+      this.setState({ viewContract:true, contractNumber: "" }, this.toggle('viewContract'))
     }
     else {
       Swal.fire({
@@ -1490,7 +1499,7 @@ class Create extends Component {
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
-                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
+                <div style={{  textDecoration: "underline", color: "#20A8D8", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableCNIPS", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
@@ -1524,9 +1533,10 @@ class Create extends Component {
 
                       </DropdownMenu>
                     </InputGroupButtonDropdown>
-                    <Tooltip autoComplete="off" autoCapitalize="on" placement="top" isOpen={this.state.maskTooltip.isOpen} target="contractNumber">{this.state.maskTooltip.message} </Tooltip>
-                    <InputMask placeholder="Enter Contract Number" mask={this.state.mask} name="contractNumber" id="contractNumber" className="form-control"
-                      onChange={this.handleContractChange} value={this.state.contractNumber}
+                    <Tooltip toggle={this.toggle('ioTooltip')} placement="top" isOpen={this.state.ioTooltip} target="contractNumber">
+                      {this.state.msgTooltip} </Tooltip>
+                    <InputMask autoComplete="off" autoCapitalize="character" placeholder="Enter Contract Name" mask={this.state.mask} name="contractNumber" id="contractNumber" className="form-control"
+                      onChange={this.handleContractChange} beforeMaskedStateChange={this.beforeMaskedStateChange} value={this.state.contractNumber}
                     // onClick={this.handlemask}
                     ></InputMask>
                     <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
@@ -1666,13 +1676,13 @@ class Create extends Component {
                     <td>{document.documentNameEnglish}</td>
                     <td>{document.documentNameChinese}</td>
                     <td id="viewDoc">
-                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
+                      <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
                         {this.convertExpDate(document.expiryDate)}
                       </div>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                     </td>
                     <td id="viewDoc">
-                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
+                      <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
                         {this.changeDeptHeads(document.departmentHeads)}
                       </div>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
@@ -1699,7 +1709,8 @@ class Create extends Component {
                 <FormGroup>
                   <h5>NOTES :</h5>
                   {/* {this.state.noteInfo.notes || <Skeleton count={3}/>} */}
-                  {this.state.noteInfo}
+                  <p>{this.state.noteInfo.chinese}</p>
+                  <p>{this.state.noteInfo.english}</p>
                 </FormGroup>
                 <Form className="form-horizontal" innerRef={this.formRef}>
                   {/* <FormGroup>
@@ -1977,7 +1988,7 @@ class Create extends Component {
                   {this.state.isCNIPS
                     ? <FormGroup>
                       <Label>Contract Signed By: <i className="fa fa-user" /></Label>
-                      <small className="ml-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
+                      <small className="ml-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval.</small>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <Row>
                         <Col>
