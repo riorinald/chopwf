@@ -54,6 +54,7 @@ class LicenseEditRequest extends Component {
             licenseNames: [],
             seniorManagersList: [],
             departments: [],
+            receivers: [],
 
             returnDateView: new Date(),
 
@@ -103,6 +104,19 @@ class LicenseEditRequest extends Component {
                     arr1.push(obj)
                 })
                 this.setState({ seniorManagersList: arr1 })
+            })
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}`,
+            { headers: { Pragma: 'no-cache' } })
+            .then(res => {
+                let arr1 = []
+                res.data.map(mgr => {
+                    let obj = {
+                        value: mgr.userId,
+                        label: mgr.displayName
+                    }
+                    arr1.push(obj)
+                })
+                this.setState({ receivers: arr1 })
             })
     }
 
@@ -511,7 +525,7 @@ class LicenseEditRequest extends Component {
     }
 
     render() {
-        const { taskDetails, loading, licenseNames, returnDateView, departments, seniorManagersList } = this.state
+        const { taskDetails, loading, licenseNames, returnDateView, departments, seniorManagersList, receivers } = this.state
         this.validator.purgeFields();
 
         const filterColors = (inputValue) => {
@@ -524,6 +538,16 @@ class LicenseEditRequest extends Component {
         const loadOptions = (inputValue, callback) => {
 
             callback(filterColors(inputValue));
+        }
+
+        const filterReceiver = (inputValue) => {
+            return receivers.filter(i =>
+                i.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        }
+
+        const loadReciever = (inputValue, callback) => {
+            callback(filterReceiver(inputValue));
         }
 
         return (

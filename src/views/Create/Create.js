@@ -89,6 +89,7 @@ class Create extends Component {
 
       //retrieve from DH table
       deptHead: [],
+      usersList: [],
       teams: [],
       branches: [],
       viewContract: false,
@@ -192,7 +193,6 @@ class Create extends Component {
     this.addDocumentLTU = this.addDocumentLTU.bind(this);
     this.toggleHover = this.toggleHover.bind(this);
     this.handleSelectOption = this.handleSelectOption.bind(this);
-    this.isValid = this.isValid.bind(this);
     this.checkDept = this.checkDept.bind(this);
 
     this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
@@ -219,7 +219,7 @@ class Create extends Component {
     let { validateForm } = this.state
     if (validateForm.length === 0) {
       Swal.fire({
-        title:'Appliction Type Required',
+        title: 'Appliction Type Required',
         type: 'info',
         label: 'required',
         text: 'Please select an Application Type to get started !'
@@ -250,7 +250,7 @@ class Create extends Component {
 
     }
   }
- 
+
 
   checkDept() {
     if (this.state.deptSelected === "") {
@@ -264,7 +264,7 @@ class Create extends Component {
 
   async handleAgreeTerm(event) {
     await this.validate()
-   
+
     if (this.state.validateForm.length !== 0) {
       if (this.validator.allValid()) {
         console.log("All Valid")
@@ -276,24 +276,10 @@ class Create extends Component {
         this.forceUpdate()
       }
     }
-    
+
   }
 
-  async isValid() {
-    await this.validate()
-    for (let i = 0; i < this.state.reqInfo.length; i++) {
-      if (this.state.reqInfo[i].valid) {
-        this.setState({ valid: true })
-      }
-      else {
-        this.setState({ valid: false, agreeTerms: false })
-        break;
-      }
-    }
-    if (this.state.valid && this.state.inOffice) {
-      this.setState({ agreeTerms: true })
-    }
-  }
+
 
   async submitRequest(isSubmitted) {
     console.log("SUBMIT")
@@ -600,10 +586,14 @@ class Create extends Component {
   }
 
   async getDeptHead(companyId) {
-    console.log(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
+    // console.log(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
     await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`, { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ deptHead: res.data })
+      })
+    await axios.get(`${config.url}/users?category=normal&companyid=${companyId}`, { headers: { Pragma: 'no-cache' } })
+      .then(res => {
+        this.setState({ usersList: res.data })
       })
   }
 
@@ -661,7 +651,7 @@ class Create extends Component {
   handleChange = name => event => {
     //APPLICATION TYPE
     let value = event.target.value
-    
+
     if (name === "appTypeSelected") {
       this.setValidateForm(event.target.value)
       //Clear Doc Table and agreeTerms
@@ -770,12 +760,12 @@ class Create extends Component {
     }
 
     //Handle engName
-    if (name === "engName" && value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)){
+    if (name === "engName" && value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)) {
       Swal.fire({
-              title: "invalid",
-              html: 'Please input english character',
-              type: "warning"
-            })
+        title: "invalid",
+        html: 'Please input english character',
+        type: "warning"
+      })
     }
 
     this.setState({
@@ -1360,8 +1350,9 @@ class Create extends Component {
     this.validator.purgeFields();
     const deptHeads = []
     const docCheckByUsers = []
+    const usersListFilter = []
     var pointer;
-    const { hover, docCheckBy, deptHead } = this.state;
+    const { hover, docCheckBy, deptHead, usersList } = this.state;
     for (let i = 0; i < deptHead.length; i++) {
       const obj = { value: deptHead[i].userId, label: deptHead[i].displayName }
       deptHeads.push(obj)
@@ -1369,6 +1360,10 @@ class Create extends Component {
     docCheckBy.map(doc => {
       const obj = { value: doc.userId, label: doc.displayName }
       docCheckByUsers.push(obj)
+    })
+    usersList.map(user => {
+      const obj = { value: user.userId, label: user.displayName }
+      usersListFilter.push(obj)
     })
 
     if (hover) {
@@ -1389,8 +1384,8 @@ class Create extends Component {
       );
     };
 
-    const filterDocCheck = (inputValue) => {
-      return docCheckByUsers.filter(i => i.label.toLowerCase().includes(inputValue.toLowerCase())
+    const filterUsersList = (inputValue) => {
+      return usersListFilter.filter(i => i.label.toLowerCase().includes(inputValue.toLowerCase())
       );
     }
 
@@ -1421,8 +1416,8 @@ class Create extends Component {
 
     }
 
-    const loadDocCheckBy = (inputValue, callback) => {
-      callback(filterDocCheck(inputValue));
+    const loadUsersList = (inputValue, callback) => {
+      callback(filterUsersList(inputValue));
     }
 
 
@@ -1532,7 +1527,7 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 {/* <Label>File Name</Label> */}
-                <CustomInput id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
+                <CustomInput id="docFileName" onChange={this.uploadDocument} accept=".xls, .xlsx, .doc, .docx, .pdf, .jpeg, .jpg" type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
               </FormGroup>
             </Col>
             <Col xl={1}>
@@ -1741,21 +1736,6 @@ class Create extends Component {
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Application Type', this.state.appTypeSelected, 'required')}</small>
                   </FormGroup>
 
-                  <Collapse isOpen={this.state.isLTI || this.state.isLTU}>
-                    <FormGroup>
-                      <Label>Entitled Team</Label>
-                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} value={this.state.teamSelected} type="select">
-                        <option value="" disabled>Please select a team</option>
-                        {this.state.teams.map((team, index) =>
-                          <option key={index} value={team.teamId}>{team.teamName}</option>
-                        )}
-                      </Input>
-                      {this.state.isLTI || this.state.isLTU
-                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Entitled Team', this.state.teamSelected, 'required')}</small>
-                        : null}
-                    </FormGroup>
-                  </Collapse>
-
                   <Collapse isOpen={this.state.isLTI}>
                     <FormGroup>
                       <Label>Effective Period</Label>
@@ -1773,6 +1753,24 @@ class Create extends Component {
                         : null}
                     </FormGroup>
                   </Collapse>
+
+                  <Collapse isOpen={this.state.isLTI || this.state.isLTU}>
+                    <FormGroup>
+                      <Label>Entitled Team - </Label>
+                      <small className="ml-2">Please select your team's name from dropdown list, if your team is not included, please contact respective chop keeper. </small>
+                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} value={this.state.teamSelected} type="select">
+                        <option value="" disabled>Please select a team</option>
+                        {this.state.teams.map((team, index) =>
+                          <option key={index} value={team.teamId}>{team.teamName}</option>
+                        )}
+                      </Input>
+                      {this.state.isLTI || this.state.isLTU
+                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Entitled Team', this.state.teamSelected, 'required')}</small>
+                        : null}
+                    </FormGroup>
+                  </Collapse>
+
+
                   {/* 
                   <Collapse isOpen={this.state.isLTU}>
                     <FormGroup>
@@ -1884,7 +1882,7 @@ class Create extends Component {
                         onBlur={this.checkDepartment}
                         isClearable
                         classNamePrefix="rs"
-                        loadOptions={loadOptions}
+                        loadOptions={loadUsersList}
                         onChange={this.handleSelectOption("resPerson")}
                         menuPortalTarget={document.body}
                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -1910,7 +1908,7 @@ class Create extends Component {
                       <AsyncSelect
                         id="pickUpBy"
                         isClearable
-                        loadOptions={loadOptions}
+                        loadOptions={loadUsersList}
                         isClearable
                         onBlur={this.checkDepartment}
                         onChange={this.handleSelectOption("pickUpBy")}

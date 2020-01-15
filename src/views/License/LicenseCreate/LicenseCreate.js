@@ -31,6 +31,7 @@ class LicenseCreate extends Component {
             licenseNames: [],
             seniorManagers: [],
             departments: [],
+            receivers: [],
 
             //data to submit
             formData: {
@@ -102,7 +103,7 @@ class LicenseCreate extends Component {
     }
 
     async getSeniorManagers() {
-        console.log(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+        // console.log(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
         await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
             .then(res => {
                 let arr1 = []
@@ -114,6 +115,18 @@ class LicenseCreate extends Component {
                     arr1.push(obj)
                 })
                 this.setState({ seniorManagers: arr1 })
+            })
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}`)
+            .then(res => {
+                let arr1 = []
+                res.data.map(mgr => {
+                    let obj = {
+                        value: mgr.userId,
+                        label: mgr.displayName
+                    }
+                    arr1.push(obj)
+                })
+                this.setState({ receivers: arr1 })
             })
     }
 
@@ -440,7 +453,7 @@ class LicenseCreate extends Component {
     }
 
     render() {
-        const { formData, licenseNames, returnDateView, seniorManagers, departments } = this.state
+        const { formData, licenseNames, returnDateView, seniorManagers, departments, receivers } = this.state
         this.validator.purgeFields();
 
 
@@ -449,11 +462,19 @@ class LicenseCreate extends Component {
                 i.label.toLowerCase().includes(inputValue.toLowerCase())
             );
         };
-
-
         const loadOptions = (inputValue, callback) => {
 
             callback(filterColors(inputValue));
+        }
+
+        const filterReceiver = (inputValue) => {
+            return receivers.filter(i =>
+                i.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        }
+
+        const loadReciever = (inputValue, callback) => {
+            callback(filterReceiver(inputValue));
         }
 
         return (
@@ -591,7 +612,7 @@ class LicenseCreate extends Component {
                                 <Label>Reciever</Label>
                                 <AsyncSelect
                                     id="reciever"
-                                    loadOptions={loadOptions}
+                                    loadOptions={loadReciever}
                                     isClearable
                                     onChange={this.handleSelectReciever}
                                     menuPortalTarget={document.body}
