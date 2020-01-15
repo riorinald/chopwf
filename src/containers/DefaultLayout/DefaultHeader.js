@@ -57,11 +57,11 @@ class DefaultHeader extends Component {
       <React.Fragment>
         <AppSidebarToggler className="d-lg-none" display="sm" mobile />
         <AppSidebarMinimizer className="customMT d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
-        <Nav className="h5 d-sm-down-none"><b className="ml-2">{state.application} Use WORKFLOW for {state.legalEntity}</b></Nav>
+        <Nav className="h5 d-sm-down-none"><b className="ml-2">{state.application} USE WORKFLOW FOR {state.legalEntity}</b></Nav>
         <Nav className="ml-auto" navbar>
           <Dropdown isOpen={state.viewChop} toggle={this.props.toggle('viewChop')} nav direction="down" >
             <DropdownToggle color="ghost" className="btn-pill" caret>
-              CHOP WF
+              SWITCH CHOP ENTITY
                 </DropdownToggle>
             <DropdownMenu className="mt-2">
               <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBAFC"
@@ -84,7 +84,7 @@ class DefaultHeader extends Component {
           </Dropdown>
           <Dropdown className="mr-2" isOpen={state.viewLicense} toggle={this.props.toggle('viewLicense')} nav direction="down" >
             <DropdownToggle color="ghost" className="btn-pill" caret>
-              LICENSE WF
+              SWITCH LICENSE ENTITY
                 </DropdownToggle>
             <DropdownMenu className="mt-2">
               <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBAFC"

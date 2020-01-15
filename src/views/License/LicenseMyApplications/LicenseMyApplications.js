@@ -74,6 +74,7 @@ class LicenseMyApplications extends Component {
         this.getData('seniorManagers');
         // this.getSeniorManagers();
         this.getData('departments');
+        this.getStatusList()
     }
 
     async getLicenseNames() {
@@ -122,6 +123,11 @@ class LicenseMyApplications extends Component {
                 this.setState({ applications: res.data, loading: false })
             })
     }
+
+    async getStatusList() {
+        const res = await Axios.get(`${config.url}/statuses?category=license`)
+        this.setState({ statusName: res.data })
+      }
 
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
@@ -350,7 +356,7 @@ class LicenseMyApplications extends Component {
                                                 <option value="">Please Select a status</option>
 
                                                 {statusName.map((stat, index) =>
-                                                    <option key={index} value={stat} > {stat} </option>
+                                                    <option key={index} value={stat.statusName} > {stat.statusName} </option>
                                                 )}
                                             </Input>
                                         )

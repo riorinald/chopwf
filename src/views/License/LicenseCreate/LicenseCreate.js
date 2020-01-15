@@ -31,6 +31,7 @@ class LicenseCreate extends Component {
             licenseNames: [],
             seniorManagers: [],
             departments: [],
+            receivers: [],
 
             //data to submit
             formData: {
@@ -53,7 +54,7 @@ class LicenseCreate extends Component {
                 isConfirm: "N"
             },
 
-            validateForm: ["telephoneNum", "department", "licenseName", "licensePurpose1", "licensePurpose2", "licensePurpose3", "documentType1", "documentType2", "deliverWay1", "deliverWay2", "address", "reciever", "recieverPhone", "seniorManager"],
+            validateForm: ["telephoneNum", "department", "licenseName", "licensePurpose1", "licensePurpose2", "licensePurpose3", "documentType1", "documentType2", "watermark1", "watermark2", "returnDate", "deliverWay1", "deliverWay2", "address", "reciever", "recieverPhone", "seniorManager"],
 
 
             returnDateView: null,
@@ -102,7 +103,7 @@ class LicenseCreate extends Component {
     }
 
     async getSeniorManagers() {
-        console.log(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+        // console.log(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
         await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
             .then(res => {
                 let arr1 = []
@@ -114,6 +115,18 @@ class LicenseCreate extends Component {
                     arr1.push(obj)
                 })
                 this.setState({ seniorManagers: arr1 })
+            })
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}`)
+            .then(res => {
+                let arr1 = []
+                res.data.map(mgr => {
+                    let obj = {
+                        value: mgr.userId,
+                        label: mgr.displayName
+                    }
+                    arr1.push(obj)
+                })
+                this.setState({ receivers: arr1 })
             })
     }
 
@@ -326,19 +339,19 @@ class LicenseCreate extends Component {
             keys = keys.filter(key => key !== "licensePurpose1" && key !== "licensePurpose2" && key !== "licensePurpose3")
             keys = keys.concat("specificPurpose")
         }
-        if (data.documentType === "ORIGINAL") {
-            keys = keys.concat("returnDate")
-        }
-        else {
-            keys = keys.filter(key => key !== "returnDate")
-        }
-        if (data.documentType === "SCANCOPY") {
-            keys = keys.concat("watermark1")
-            keys = keys.concat("watermark2")
-        }
-        else {
-            keys = keys.filter(key => key !== "watermark1" || key !== "watermark2")
-        }
+        // if (data.documentType === "ORIGINAL") {
+        //     keys = keys.concat("returnDate")
+        // }
+        // else {
+        //     keys = keys.filter(key => key !== "returnDate")
+        // }
+        // if (data.documentType === "SCANCOPY") {
+        //     keys = keys.concat("watermark1")
+        //     keys = keys.concat("watermark2")
+        // }
+        // else {
+        //     keys = keys.filter(key => key !== "watermark1" || key !== "watermark2")
+        // }
         if (data.isWatermark === "Y") {
             keys = keys.concat("inputWatermark1")
         }
@@ -440,7 +453,7 @@ class LicenseCreate extends Component {
     }
 
     render() {
-        const { formData, licenseNames, returnDateView, seniorManagers, departments } = this.state
+        const { formData, licenseNames, returnDateView, seniorManagers, departments, receivers } = this.state
         this.validator.purgeFields();
 
 
@@ -449,11 +462,19 @@ class LicenseCreate extends Component {
                 i.label.toLowerCase().includes(inputValue.toLowerCase())
             );
         };
-
-
         const loadOptions = (inputValue, callback) => {
 
             callback(filterColors(inputValue));
+        }
+
+        const filterReceiver = (inputValue) => {
+            return receivers.filter(i =>
+                i.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        }
+
+        const loadReciever = (inputValue, callback) => {
+            callback(filterReceiver(inputValue));
         }
 
         return (
@@ -566,27 +587,32 @@ class LicenseCreate extends Component {
                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', formData.returnDate, 'required')}</small>
                                         : null}
                                 </FormGroup>
+                                {/* </Collapse>
+
+                            <Collapse isOpen={formData.documentType === "ORIGINAL"}> */}
+                                <FormGroup onChange={this.handleChange("deliverWay")} >
+                                    <Label>Deliver Way</Label>
+                                    <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                    <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number" />
+                                    {formData.documentType === "ORIGINAL"
+                                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', formData.deliverWay, 'required')}</small>
+                                        : null}
+                                </FormGroup>
+
+                                <FormGroup>
+                                    <Label>Address</Label>
+                                    <Input placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
+                                    {formData.documentType === "ORIGINAL"
+                                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
+                                        : null}
+                                </FormGroup>
                             </Collapse>
-
-
-                            <FormGroup onChange={this.handleChange("deliverWay")} >
-                                <Label>Deliver Way</Label>
-                                <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
-                                <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number" />
-                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', formData.deliverWay, 'required')}</small>
-                            </FormGroup>
-
-                            <FormGroup>
-                                <Label>Address</Label>
-                                <Input placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
-                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
-                            </FormGroup>
 
                             <FormGroup>
                                 <Label>Reciever</Label>
                                 <AsyncSelect
                                     id="reciever"
-                                    loadOptions={loadOptions}
+                                    loadOptions={loadReciever}
                                     isClearable
                                     onChange={this.handleSelectReciever}
                                     menuPortalTarget={document.body}

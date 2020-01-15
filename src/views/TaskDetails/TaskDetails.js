@@ -114,24 +114,59 @@ class TaskDetails extends Component {
             comments: this.state.comments
         }
 
-        Axios.post(`${config.url}/tasks/${this.state.taskDetails.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
-            .then(res => {
-                Swal.fire({
-                    title: res.data.message,
-                    html: `The request has been ${res.data.message}`,
-                    type: "success",
-                    onClose: () => { this.goBack(true) }
-                })
-            })
-            .catch(error => {
-                if (error.response) {
-                    Swal.fire({
-                        title: "ERROR",
-                        html: error.response.data.message,
-                        type: "error"
+        Swal.fire({
+            title: `Creating your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.goBack(true) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                Axios.post(`${config.url}/tasks/${this.state.taskDetails.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
+                    .then(res => {
+
+                        Swal.update({
+                            title: res.data.message,
+                            text: `The request has been ${res.data.message}`,
+                            type: "success",
+
+                        })
+                        Swal.hideLoading()
                     })
-                }
-            })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
+            }
+        })
+
+
+        // Axios.post(`${config.url}/tasks/${this.state.taskDetails.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
+        //     .then(res => {
+        //         Swal.fire({
+        //             title: res.data.message,
+        //             html: `The request has been ${res.data.message}`,
+        //             type: "success",
+        //             onClose: () => { this.goBack(true) }
+        //         })
+        //     })
+        //     .catch(error => {
+        //         if (error.response) {
+        //             Swal.fire({
+        //                 title: "ERROR",
+        //                 html: error.response.data.message,
+        //                 type: "error"
+        //             })
+        //         }
+        //     })
 
 
     }
@@ -204,28 +239,33 @@ class TaskDetails extends Component {
                             {/* <Button onClick={this.goBack} > Back &nbsp; </Button>  {taskDetails.requestNum} */}
                             <Row className="align-items-left">
                                 <Button className="ml-1 mr-1" color="primary" onClick={() => this.goBack(this.state.updated)}><i className="fa fa-angle-left" /> Back </Button>
-                                {taskDetails.actions.map(((action, index) =>
-                                    <span key={index}>
-                                        {this.handleButton(action)}
-                                    </span>
-                                ))}
+                                {page === "myapps"
+                                    ? taskDetails.actions.map(((action, index) =>
+                                        <span key={index}>
+                                            {this.handleButton(action)}
+                                        </span>
+                                    ))
+                                    : null
+                                }
                             </Row>
                         </CardHeader>
                         <CardBody color="dark">
                             <Col className="mb-4" onClick={() => this.setState({ progressModal: !this.state.progressModal })}>
                                 <Progress multi>
                                     {taskDetails.allStages.map((stage, index) =>
-                                        <React.Fragment key={index}>
-                                            <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
-                                            <Progress
-                                                className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
-                                                bar
-                                                animated={stage.state === "CURRENT" ? true : false}
-                                                striped={stage.state === "FINISHED"}
-                                                color={stage.state === "CURRENT" ? "green" : stage.state === "FINISHED" ? "secondary" : "warning"}
-                                                value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
-                                            </Progress>
-                                        </React.Fragment>
+                                        stage.statusId !== "CREATED" && stage.statusId !== "COMPLETED"
+                                            ? <React.Fragment key={index}>
+                                                <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
+                                                <Progress
+                                                    className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
+                                                    bar
+                                                    animated={stage.state === "CURRENT" ? true : false}
+                                                    striped={stage.state === "FINISHED"}
+                                                    color={stage.state === "CURRENT" ? "green" : stage.state === "FINISHED" ? "secondary" : "warning"}
+                                                    value={100 / (taskDetails.allStages.length - 2)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
+                                                </Progress>
+                                            </React.Fragment>
+                                            : null
                                     )}
                                 </Progress>
                             </Col>
@@ -270,9 +310,9 @@ class TaskDetails extends Component {
                                         {/* <Col xs={12} sm={12} md={4} lg={2}>
                                             <img src={taskDetails.createdByPhotoUrl} className="img-avaa img-responsive center-block" alt="picture" />
                                         </Col> */}
-                                        <Col md><h5> {taskDetails.employeeName} </h5>
+                                        <Col md><h5> {taskDetails.requestorUser.displayName} </h5>
                                             <Row>
-                                                <Col md><h6> DFS/CN, {taskDetails.companyId} </h6></Col>
+                                                <Col md><h6> DFS/CN, {taskDetails.requestorUser.companyCode} </h6></Col>
                                             </Row>
                                             <Row>
                                                 <Col xs={12} sm={12} md={6} lg={6}>
@@ -284,10 +324,10 @@ class TaskDetails extends Component {
                                 </Col>
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col md><h5><i className="fa fa-tablet mr-2" /> +86 10 {taskDetails.telephoneNum} </h5></Col>
+                                        <Col md><h5><i className="fa fa-tablet mr-2" /> {taskDetails.requestorUser.telephoneNum} </h5></Col>
                                     </Row>
                                     <Row>
-                                        <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.email}</h5></Col>
+                                        <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.requestorUser.email}</h5></Col>
                                     </Row>
                                 </Col>
                             </Row>
@@ -298,7 +338,7 @@ class TaskDetails extends Component {
                                             <Label>Employee Number</Label>
                                         </Col>
                                         <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.employeeNum} id="employeeNum" name="employeeNum" placeholder="/" />
+                                            <Input disabled type="text" value={taskDetails.requestorUser.employeeNum} id="employeeNum" name="employeeNum" placeholder="/" />
                                         </Col>
                                     </FormGroup>
                                     <FormGroup row >
@@ -309,6 +349,17 @@ class TaskDetails extends Component {
                                             <Input disabled type="text" value={taskDetails.departmentName} id="departmentName" name="departmentName" placeholder="/" />
                                         </Col>
                                     </FormGroup>
+                                    {appType === "LTI"
+                                        ? <FormGroup row >
+                                            <Col md="4" className="d-flex align-items-center" >
+                                                <Label>Effective Period</Label>
+                                            </Col>
+                                            <Col xs="12" md="8">
+                                                <Input disabled type="text" value={this.convertDate(taskDetails.effectivePeriod)} id="effectivePeriod" name="effectivePeriod" placeholder="/" />
+                                            </Col>
+                                        </FormGroup>
+                                        : null
+                                    }
                                     <FormGroup row >
                                         <Col md="4" className="d-flex align-items-center" >
                                             <Label>Chop Type</Label>
@@ -317,6 +368,17 @@ class TaskDetails extends Component {
                                             <Input disabled type="text" value={taskDetails.chopTypeName} id="chopTypeName" name="chopTypeName" placeholder="/" />
                                         </Col>
                                     </FormGroup>
+                                    {taskDetails.branchName !== ""
+                                        ? <FormGroup row >
+                                            <Col md="4" className="d-flex align-items-center" >
+                                                <Label>Branch Company Chop</Label>
+                                            </Col>
+                                            <Col xs="12" md="8">
+                                                <Input disabled type="text" value={taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
+                                            </Col>
+                                        </FormGroup>
+                                        : ""
+                                    }
                                     {appType === "LTI" ?
                                         <div>
                                             <FormGroup row >
@@ -360,17 +422,7 @@ class TaskDetails extends Component {
                                             </Col>
                                         </FormGroup>
                                         : null}
-                                    {taskDetails.branchName !== ""
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Branch Company Chop</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : ""
-                                    }
+
                                     {appType !== "LTI" ?
                                         <>
                                             <FormGroup row >
@@ -393,8 +445,39 @@ class TaskDetails extends Component {
                                                 : ""}
                                         </>
                                         : null}
+                                    {appType === 'CNIPS'
+                                        ? <FormGroup row >
+                                            <Col md="4" className="d-flex align-items-center" >
+                                                <Label>Contract Signed By (First Person) :  </Label>
+                                            </Col>
+                                            <Col xs="12" md="8">
+                                                <Input disabled type="text" value={taskDetails.contractSignedByFirstPersonName} id="contractSignedByFirstPersonName" name="contractSignedByFirstPersonName" placeholder="/" />
+                                            </Col>
+                                        </FormGroup>
+                                        : ''}
+                                    <FormGroup row >
+                                        <Col md="4" className="d-flex align-items-center" >
+                                            <Label>Remark (e.g. tel.)</Label>
+                                        </Col>
+                                        <Col xs="12" md="8">
+                                            <Input disabled type="text" value={taskDetails.remark} id="remark" name="remark" placeholder="/" />
+                                        </Col>
+                                    </FormGroup>
 
-                                    {appType !== "LTI"
+                                    {appType === "LTI"
+                                        ? <FormGroup row >
+                                            <Col md="4" className="d-flex align-items-center" >
+                                                <Label>Document Check By</Label>
+                                            </Col>
+                                            <Col id="docCheck" xs="12" md="8">
+                                                <Input disabled type="text" value={this.setArray(taskDetails.documentCheckByName)} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
+                                                <UncontrolledTooltip placement="right" target="docCheck">{this.setArray(taskDetails.documentCheckByName)}</UncontrolledTooltip>
+                                            </Col>
+                                        </FormGroup>
+                                        : null
+                                    }
+
+                                    {appType !== "LTI" && appType !== "CNIPS"
                                         ? <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
                                                 <Label>Pick Up By</Label>
@@ -406,18 +489,44 @@ class TaskDetails extends Component {
                                         : null}
 
 
-                                    {appType === "LTI"
+                                    {/* Drop HERE */}
+
+
+
+
+
+
+                                    {appType === 'LTU' || appType === 'CNIPS'
                                         ? <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Effective Period</Label>
+                                                <Label>Confirm</Label>
                                             </Col>
                                             <Col xs="12" md="8">
-                                                <Input disabled type="text" value={this.convertDate(taskDetails.effectivePeriod)} id="effectivePeriod" name="effectivePeriod" placeholder="/" />
+                                                <Input disabled type="text" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
                                             </Col>
                                         </FormGroup>
-                                        : null
+                                        : ''
                                     }
 
+
+                                </Col>
+                                <Col>
+                                    <FormGroup row >
+                                        <Col md="4" className="d-flex align-items-center" >
+                                            <Label>Tel</Label>
+                                        </Col>
+                                        <Col xs="12" md="8">
+                                            <Input disabled type="text" value={taskDetails.requestorUser.telephoneNum} id="telephoneNum" name="telephoneNum" placeholder="/" />
+                                        </Col>
+                                    </FormGroup>
+                                    <FormGroup row >
+                                        <Col md="4" className="d-flex align-items-center" >
+                                            <Label>Application Type</Label>
+                                        </Col>
+                                        <Col xs="12" md="8">
+                                            <Input disabled type="text" value={taskDetails.applicationTypeName} id="applicationTypeName" name="applicationTypeName" placeholder="/" />
+                                        </Col>
+                                    </FormGroup>
 
                                     {appType === "LTU" || appType === "LTI"
                                         ? <FormGroup row >
@@ -430,45 +539,6 @@ class TaskDetails extends Component {
                                         </FormGroup>
                                         : null
                                     }
-                                    {appType === 'CNIPS'
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Contract Signed By (First Person) :  </Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.contractSignedByFirstPersonName} id="contractSignedByFirstPersonName" name="contractSignedByFirstPersonName" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : ''}
-                                    {appType === 'LTU'
-                                        ? ''
-                                        : <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Confirm</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                    }
-                                </Col>
-                                <Col>
-                                    <FormGroup row >
-                                        <Col md="4" className="d-flex align-items-center" >
-                                            <Label>Tel</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.telephoneNum} id="telephoneNum" name="telephoneNum" placeholder="/" />
-                                        </Col>
-                                    </FormGroup>
-                                    <FormGroup row >
-                                        <Col md="4" className="d-flex align-items-center" >
-                                            <Label>Application Type</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.applicationTypeName} id="applicationTypeName" name="applicationTypeName" placeholder="/" />
-                                        </Col>
-                                    </FormGroup>
                                     {appType === "LTI"
                                         ? taskDetails.isUseInOffice === "N"
                                             ? <FormGroup row >
@@ -509,14 +579,14 @@ class TaskDetails extends Component {
                                                         <Label>Purpose of Use</Label>
                                                     </Col>
                                                     <Col xs="12" md="8">
-                                                        <Input disabled type="text" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
+                                                        <Input disabled type="textarea" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
                                                     </Col>
                                                 </FormGroup> : "" : <FormGroup row >
                                                 <Col md="4" className="d-flex align-items-center" >
                                                     <Label>Purpose of Use</Label>
                                                 </Col>
                                                 <Col xs="12" md="8">
-                                                    <Input disabled type="text" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
+                                                    <Input disabled type="textarea" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
                                                 </Col>
                                             </FormGroup>
                                     }
@@ -535,29 +605,11 @@ class TaskDetails extends Component {
                                             <Label>Address to</Label>
                                         </Col>
                                         <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
+                                            <Input disabled type="textarea" value={taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
                                         </Col>
                                     </FormGroup>
-                                    <FormGroup row >
-                                        <Col md="4" className="d-flex align-items-center" >
-                                            <Label>Remark (e.g. tel.)</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.remark} id="remark" name="remark" placeholder="/" />
-                                        </Col>
-                                    </FormGroup>
-                                    {appType === "LTI"
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Document Check By</Label>
-                                            </Col>
-                                            <Col id="docCheck" xs="12" md="8">
-                                                <Input disabled type="text" value={this.setArray(taskDetails.documentCheckByName)} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
-                                                <UncontrolledTooltip placement="right" target="docCheck">{this.setArray(taskDetails.documentCheckByName)}</UncontrolledTooltip>
-                                            </Col>
-                                        </FormGroup>
-                                        : null
-                                    }
+
+
                                     {taskDetails.isUseInOffice === "N"
                                         ? <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
@@ -592,13 +644,24 @@ class TaskDetails extends Component {
                                                     <Label>Department Heads</Label>
                                                 </Col>
                                                 <Col id="deptHead" xs="12" md="8">
-                                                    <Input disabled type="text" value={this.setArray(taskDetails.departmentHeadsName)} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
+                                                    <Input disabled type="textarea" value={this.setArray(taskDetails.departmentHeadsName)} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
                                                     <UncontrolledTooltip placement="right" target="deptHead">{this.setArray(taskDetails.departmentHeadsName)}</UncontrolledTooltip>
                                                 </Col>
                                             </FormGroup>
                                     }
-                                    {appType === 'LTU'
+                                    {appType === "CNIPS"
                                         ? <FormGroup row >
+                                            <Col md="4" className="d-flex align-items-center" >
+                                                <Label>Pick Up By</Label>
+                                            </Col>
+                                            <Col xs="12" md="8">
+                                                <Input disabled type="text" value={taskDetails.pickUpByName} id="pickUpBy" name="pickUpBy" placeholder="EMPTY DATA" />
+                                            </Col>
+                                        </FormGroup>
+                                        : null}
+                                    {appType === 'LTU' || appType === 'CNIPS'
+                                        ? ''
+                                        : <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
                                                 <Label>Confirm</Label>
                                             </Col>
@@ -606,7 +669,6 @@ class TaskDetails extends Component {
                                                 <Input disabled type="text" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
                                             </Col>
                                         </FormGroup>
-                                        : ''
                                     }
 
 
@@ -693,20 +755,28 @@ class TaskDetails extends Component {
                                         </Col>
                                     </Row>
 
-                                    <Row className="mb-4">
-                                        <Col>
-                                            {taskDetails.actions.map((action, index) =>
-                                                <Button className="mx-1" key={index} color={action.action === "approve" ? "success" : "danger"} onClick={() => this.approve(action.action)} > {action.actionName}</Button>
-                                            )}
-                                        </Col>
-                                    </Row>
+                                    {page === "mypendingtask"
+                                        ? <Row className="mb-4">
+                                            <Col>
+                                                {taskDetails.actions.map((action, index) =>
+                                                    <>
+                                                        {action.action !== "copy" && action.action !== "recall" && action.action !== "remind"
+                                                            ? <Button className="mx-1" key={index} color={action.action === "approve" ? "success" : "danger"} onClick={() => this.approve(action.action)} > {action.actionName}</Button>
+                                                            : null}
+                                                    </>
+                                                )}
+                                            </Col>
+                                        </Row>
+                                        : null
+                                    }
                                 </div>
                                 : null}
 
-                            <Row>
-                                <Col> <h4>Approval Histories</h4></Col>
-                            </Row>
-
+                            {taskDetails.histories.length !== 0
+                                ? <Row>
+                                    <Col> <h4>Approval Histories</h4></Col>
+                                </Row>
+                                : null}
 
                             {taskDetails.histories.map((history, index) =>
                                 <div key={index}>
@@ -716,7 +786,7 @@ class TaskDetails extends Component {
                                             <img src={history.approvedByAvatarUrl} className="img-avaa img-responsive" alt="Avatar" />
                                         </Col> */}
                                         <Col sm md="10" lg>
-                                            <h5>{history.approvedByName} (000)<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
+                                            <h5>{history.approvedByName}<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
                                             <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
                                             <Col className="p-0"> <p>{history.comments}</p> </Col>
                                         </Col>
@@ -725,7 +795,7 @@ class TaskDetails extends Component {
                             )}
 
                         </CardBody>
-                        <CardFooter>
+                        {/* <CardFooter>
                             <Row>
                                 <Col xs="1" >
                                     <div style={{ width: "10px", height: "10px", background: "#c8ced3" }} ></div>
@@ -750,7 +820,7 @@ class TaskDetails extends Component {
                                     <div>Next Stage</div>
                                 </Col>
                             </Row>
-                        </CardFooter>
+                        </CardFooter> */}
                     </Card>
                     : null
                 }

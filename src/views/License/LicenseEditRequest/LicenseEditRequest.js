@@ -54,6 +54,7 @@ class LicenseEditRequest extends Component {
             licenseNames: [],
             seniorManagersList: [],
             departments: [],
+            receivers: [],
 
             returnDateView: new Date(),
 
@@ -103,6 +104,19 @@ class LicenseEditRequest extends Component {
                     arr1.push(obj)
                 })
                 this.setState({ seniorManagersList: arr1 })
+            })
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}`,
+            { headers: { Pragma: 'no-cache' } })
+            .then(res => {
+                let arr1 = []
+                res.data.map(mgr => {
+                    let obj = {
+                        value: mgr.userId,
+                        label: mgr.displayName
+                    }
+                    arr1.push(obj)
+                })
+                this.setState({ receivers: arr1 })
             })
     }
 
@@ -217,7 +231,7 @@ class LicenseEditRequest extends Component {
     validate() {
         let data = this.state.taskDetails
         let keys = ["telephoneNum", "licenseNameId", "departmentId", "seniorManagers", "expDeliveryAddress", "expDeliveryReceiver",
-            "expDeliveryMobileNo", "documentType1", "documentType2"
+            "expDeliveryMobileNo", "documentType1", "documentType2", "plannedReturnDate", "watermark1", "watermark2"
         ]
 
         if (data.purposeType === "PS") {
@@ -229,16 +243,16 @@ class LicenseEditRequest extends Component {
             keys = keys.concat("licensePurpose1", "licensePurpose2", "licensePurpose3")
         }
 
-        if (data.documentTypeId === "ORIGINAL") {
-            keys = keys.concat("plannedReturnDate")
-        }
-        else {
-            keys = keys.filter(key => key !== "plannedReturnDate")
-        }
+        // if (data.documentTypeId === "ORIGINAL") {
+        //     keys = keys.concat("plannedReturnDate")
+        // }
+        // else {
+        //     keys = keys.filter(key => key !== "plannedReturnDate")
+        // }
 
         if (data.documentTypeId === "SCANCOPY") {
-            keys = keys.concat("watermark1")
-            keys = keys.concat("watermark2")
+            // keys = keys.concat("watermark1")
+            // keys = keys.concat("watermark2")
             if (data.needWatermark === "Y") {
                 keys = keys.concat("inputWatermark1")
             }
@@ -373,38 +387,119 @@ class LicenseEditRequest extends Component {
     }
 
     async postData(formData, isSubmitted) {
-        await axios.put(`${config.url}/licenses/${this.state.taskDetails.licenseId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-            .then(res => {
-                if (isSubmitted === "Y") {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Submitted' : "",
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is being processed and is waiting for the approval',
-                        type: 'success',
-                        onClose: () => { this.goBack() }
+        Swal.fire({
+            title: `Creating your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.goBack() },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                axios.put(`${config.url}/licenses/${this.state.taskDetails.licenseId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+                    .then(res => {
+
+                        Swal.update({
+                            title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
+                            text: 'Request Number : ' + res.data.requestNum,
+                            footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
+                            type: isSubmitted === "Y" ? "success" : "info",
+
+                        })
+                        Swal.hideLoading()
                     })
-                }
-                else {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Saved' : '',
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is saved as draft.',
-                        type: 'info',
-                        onClose: () => { this.goBack() }
+                    .catch(error => {
+                        let err = "Please contact the IT Admin !"
+                        let err2 = []
+                        let err3 = ""
+                        if (error.response) {
+                            console.log(error.response)
+                            let keys = Object.keys(error.response.data.errors)
+                            err = keys.join(',')
+                            keys.map(key => {
+                                // console.log(error.response.data.errors[key].join(','))
+                                err2.push(error.response.data.errors[key].join(','))
+                            })
+                            err3 = err2.join(';')
+                        }
+                        Swal.hideLoading()
+                        Swal.update({
+                            title: "Error",
+                            type: "error",
+                            text: err,
+                            html: err3,
+
+                        })
                     })
-                }
-            })
+            }
+        })
+        // await axios.put(`${config.url}/licenses/${this.state.taskDetails.licenseId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        //     .then(res => {
+        //         if (isSubmitted === "Y") {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Submitted' : "",
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is being processed and is waiting for the approval',
+        //                 type: 'success',
+        //                 onClose: () => { this.goBack() }
+        //             })
+        //         }
+        //         else {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Saved' : '',
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is saved as draft.',
+        //                 type: 'info',
+        //                 onClose: () => { this.goBack() }
+        //             })
+        //         }
+        //     })
     }
 
     async deleteTask() {
-        await axios.delete(`${config.url}/licenses/${this.state.taskDetails.licenseId}`).then(res => {
-            Swal.fire({
-                title: "REQUEST DELETED",
-                html: res.data.message,
-                type: "success",
-                onClose: () => { this.goBack() }
-            })
+        Swal.fire({
+            title: `Deleting your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                axios.delete(`${config.url}/licenses/${this.state.taskDetails.licenseId}`)
+                    .then(res => {
+
+                        Swal.update({
+                            title: "Request Deleted",
+                            text: `The request has been successfully deleted`,
+                            type: "success",
+
+                        })
+                        Swal.hideLoading()
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
+            }
         })
+        // await axios.delete(`${config.url}/licenses/${this.state.taskDetails.licenseId}`).then(res => {
+        //     Swal.fire({
+        //         title: "REQUEST DELETED",
+        //         html: res.data.message,
+        //         type: "success",
+        //         onClose: () => { this.goBack() }
+        //     })
+        // })
     }
 
     handleSelectReciever(event) {
@@ -430,7 +525,7 @@ class LicenseEditRequest extends Component {
     }
 
     render() {
-        const { taskDetails, loading, licenseNames, returnDateView, departments, seniorManagersList } = this.state
+        const { taskDetails, loading, licenseNames, returnDateView, departments, seniorManagersList, receivers } = this.state
         this.validator.purgeFields();
 
         const filterColors = (inputValue) => {
@@ -443,6 +538,16 @@ class LicenseEditRequest extends Component {
         const loadOptions = (inputValue, callback) => {
 
             callback(filterColors(inputValue));
+        }
+
+        const filterReceiver = (inputValue) => {
+            return receivers.filter(i =>
+                i.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        }
+
+        const loadReciever = (inputValue, callback) => {
+            callback(filterReceiver(inputValue));
         }
 
         return (
@@ -561,25 +666,30 @@ class LicenseEditRequest extends Component {
                                             showYearDropdown
                                             selected={returnDateView}
                                             onChange={this.dateChange("plannedReturnDate", "returnDateView")} />
-                                        {taskDetails.documentTypeId === "OC"
+                                        {taskDetails.documentTypeId === "ORIGINAL"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', taskDetails.plannedReturnDate, 'required')}</small>
                                             : null}
                                     </FormGroup>
+
+
+
+                                    <FormGroup onChange={this.handleChange("deliverWayId")} >
+                                        <Label>Deliver Way</Label>
+                                        <CustomInput type="radio" id="deliverWay1" defaultChecked={taskDetails.deliverWayId === "F2F"} name="deliverWayId" value="F2F" label="面对面城, Face to face" />
+                                        <CustomInput type="radio" id="deliverWay2" defaultChecked={taskDetails.deliverWayId === "EXPRESS"} name="deliverWayId" value="Express" label="快递 Express: Express Number" />
+                                        {taskDetails.documentTypeId === "ORIGINAL"
+                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', taskDetails.deliverWayId, 'required')}</small>
+                                            : null}
+                                    </FormGroup>
+
+                                    <FormGroup>
+                                        <Label>Address</Label>
+                                        <Input placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" />
+                                        {taskDetails.documentTypeId === "ORIGINAL"
+                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.expDeliveryAddress, 'required')}</small>
+                                            : null}
+                                    </FormGroup>
                                 </Collapse>
-
-
-                                <FormGroup onChange={this.handleChange("deliverWayId")} >
-                                    <Label>Deliver Way</Label>
-                                    <CustomInput type="radio" id="deliverWay1" defaultChecked={taskDetails.deliverWayId === "F2F"} name="deliverWayId" value="F2F" label="面对面城, Face to face" />
-                                    <CustomInput type="radio" id="deliverWay2" defaultChecked={taskDetails.deliverWayId === "EXPRESS"} name="deliverWayId" value="Express" label="快递 Express: Express Number" />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', taskDetails.deliverWayId, 'required')}</small>
-                                </FormGroup>
-
-                                <FormGroup>
-                                    <Label>Address</Label>
-                                    <Input placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.expDeliveryAddress, 'required')}</small>
-                                </FormGroup>
 
                                 <FormGroup>
                                     <Label>Reciever</Label>

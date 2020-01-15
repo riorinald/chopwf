@@ -14,6 +14,7 @@ import {
     CustomInput,
     Spinner,
     InputGroupButtonDropdown,
+    Tooltip,
     DropdownToggle,
     DropdownMenu,
     DropdownItem
@@ -72,7 +73,7 @@ class EditRequest extends Component {
             selectAll: false,
             selection: [],
 
-            loading: false,
+            loading: true,
             taskDetails: {
                 taskId: "",
                 requestNum: "",
@@ -140,8 +141,12 @@ class EditRequest extends Component {
             showDoc: false,
             selectedDocs: [],
 
+            invalidEnglish: false,
+            invalidChinese: false,
+
             docCheckBy: [],
             deptHeads: [],
+            usersList: [],
             selectedDeptHeads: [],
             selectedDocCheckBy: [],
             dateView1: new Date(),
@@ -151,6 +156,8 @@ class EditRequest extends Component {
             chopTypes: [],
             documents: [],
             teams: [],
+            msgTooltip: '[I / S ]-[ A / L / IA / R ]-[ O / P / S] \n e.g "S-A-O-9999-9999"',
+            ioTooltip: false
         }
         this.getTaskDetails = this.getTaskDetails.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -171,7 +178,8 @@ class EditRequest extends Component {
 
     componentDidMount() {
         if (this.props.location.state !== undefined) {
-            this.getDeptHeads()
+            this.getDeptHeads("deptHeads")
+            this.getDeptHeads("usersList")
             this.getTaskDetails(this.props.location.state.id)
         }
         else {
@@ -182,7 +190,7 @@ class EditRequest extends Component {
         this.validator = new SimpleReactValidator();
     }
 
-    async getDocCheckBy(deptId, teamId) {
+    async getDocCheckBy(deptId, teamId, callback) {
         const res = await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
             { headers: { Pragma: 'no-cache' } })
         for (let i = 0; i < res.data.length; i++) {
@@ -194,22 +202,28 @@ class EditRequest extends Component {
                 }
             })
         }
+        callback()
     }
 
-    async getDeptHeads() {
+    async getDeptHeads(category) {
         this.setState({ deptHeads: [] })
-        await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
-            { headers: { Pragma: 'no-cache' } })
+        let url = ""
+        if (category === "deptHeads") {
+            url = `${config.url}/users?category=normal&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`
+        }
+        else {
+            url = `${config.url}/users?category=normal&companyid=${this.props.legalName}`
+        }
+        await Axios.get(url, { headers: { Pragma: 'no-cache' } })
             .then(res => {
+                let arr1 = []
                 for (let i = 0; i < res.data.length; i++) {
                     const obj = { value: res.data[i].userId, label: res.data[i].displayName }
-                    this.setState(state => {
-                        const deptHeads = this.state.deptHeads.concat(obj)
-                        return {
-                            deptHeads
-                        }
-                    })
+                    arr1.push(obj)
                 }
+                this.setState({
+                    [category]: arr1
+                })
             })
     }
 
@@ -247,16 +261,50 @@ class EditRequest extends Component {
     async deleteTask() {
         // console.log(this.state.taskDetails.taskId)
         // resetMounted.setMounted()
-        Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res => {
-            // console.log(res.data)
+        Swal.fire({
+            title: `Deleting your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`)
+                    .then(res => {
 
-            Swal.fire({
-                title: "REQUEST DELETED",
-                html: res.data.message,
-                type: "success",
-                onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) }
-            })
+                        Swal.update({
+                            title: "Request Deleted",
+                            text: `The request has been deleted.`, //${res.data.message}
+                            type: "success",
+
+                        })
+                        Swal.hideLoading()
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
+            }
         })
+
+        // Axios.delete(`${config.url}/tasks/${this.state.taskDetails.taskId}`).then(res => {
+        //     // console.log(res.data)
+
+        //     Swal.fire({
+        //         title: "REQUEST DELETED",
+        //         html: res.data.message,
+        //         type: "success",
+        //         onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) }
+        //     })
+        // })
     }
 
     convertExpDate(dateValue) {
@@ -271,17 +319,35 @@ class EditRequest extends Component {
     }
 
     getDocCheckByOption(person) {
+        console.log(person)
         let i = 0
-        if (person.length !== 0) {
-
+        if (person.length === 1) {
+            console.log("akath keri")
             this.state.docCheckBy.map((head, index) => {
+                console.log(head.value)
                 if (head.value === person[0]) {
+                    console.log(index)
                     i = index
                 }
             })
         }
         else {
 
+            i = null
+        }
+        return i
+    }
+
+    getOptionAllUsers(person) {
+        let i = 0
+        if (person !== "") {
+            this.state.usersList.map((head, index) => {
+                if (head.value === person) {
+                    i = index
+                }
+            })
+        }
+        else {
             i = null
         }
         return i
@@ -314,8 +380,8 @@ class EditRequest extends Component {
         //     this.convertDate(temporary.returnDate, 'dateView2')
         // }
         temporary.returnDate = temporary.returnDate === '' ? this.convertDate(temporary.returnDate, 'dateView2') : this.dateChanged(new Date())
-        temporary.responsiblePersonOption = this.getOption(temporary.responsiblePerson)
-        temporary.pickUpByOption = this.getOption(temporary.pickUpBy)
+        temporary.responsiblePersonOption = this.getOptionAllUsers(temporary.responsiblePerson)
+        temporary.pickUpByOption = this.getOptionAllUsers(temporary.pickUpBy)
 
         //CNIPS
         if (temporary.applicationTypeId === "CNIPS") {
@@ -325,11 +391,12 @@ class EditRequest extends Component {
 
         //LTU
         else if (temporary.applicationTypeId === "LTU") {
-            if (temporary.teamId !== "") {
-                this.getDocCheckBy(temporary.departmentId, temporary.teamId)
+            if (temporary.teamId !== "" && temporary.departmentId !== "") {
+                this.getDocCheckBy(temporary.departmentId, temporary.teamId, (callback) => {
+                    temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
+                })
             }
             temporary.effectivePeriod = temporary.effectivePeriod !== "" ? this.convertDate(temporary.effectivePeriod, 'dateView1') : null
-            temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
         }
 
         else if (temporary.applicationTypeId === "LTI") {
@@ -358,7 +425,9 @@ class EditRequest extends Component {
             }
         }
         temporary.departmentId = temporary.departmentId.toLowerCase()
+        console.log(temporary.requestorUser)
         this.setState({ taskDetails: temporary, loading: false })
+
     }
 
     setValidForm() {
@@ -366,7 +435,7 @@ class EditRequest extends Component {
 
         let apptypeId = this.state.taskDetails.applicationTypeId
         details = details.filter(function (item) {
-            return item !== "taskId" && item !== "telephoneNum" && item !== "companyId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption" && item !== "createdBy" && item !== "createdByPhotoUrl" && item !== "contractSignedByFirstPersonOption" && item !== "contractSignedBySecondPersonOption" && item !== "departmentHeadsName"
+            return item !== "taskId" && item !== "telephoneNum" && item !== "companyId" && item !== "requestNum" && item !== "employeeName" && item !== "employeeNum" && item !== "email" && item !== "departmentName" && item !== "chopTypeName" && item !== "departmentName" && item !== "applicationTypeName" && item !== "applicationTypeId" && item !== "responsiblePersonName" && item !== "contractSignedByFirstPersonName" && item !== "contractSignedBySecondPersonName" && item !== "documentCheckByName" && item !== "isConfirm" && item !== "newReturnDate" && item !== "reasonForExtension" && item !== "currentStatusId" && item !== "currentStatusName" && item !== "nextStatusId" && item !== "nextStatusName" && item !== "teamName" && item !== "actions" && item !== "histories" && item !== "responsiblePersonOption" && item !== "pickUpByOption" && item !== "branchName" && item !== "connectChop" && item !== "isUseInOffice" && item !== "allStages" && item !== "docCheckByOption" && item !== "createdBy" && item !== "createdByPhotoUrl" && item !== "contractSignedByFirstPersonOption" && item !== "contractSignedBySecondPersonOption" && item !== "departmentHeadsName" && item !== "pickUpByName" && item !== "requestorUser"
         })
 
         switch (apptypeId) {
@@ -433,13 +502,13 @@ class EditRequest extends Component {
     };
     filterColors1 = (inputValue) => {
         return this.state.deptHeads.filter(i =>
-            i.value !== this.state.taskDetails.contractSignedByFirstPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
+            i.value !== this.state.taskDetails.contractSignedBySecondPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
         );
     };
 
     filterColors2 = (inputValue) => {
         return this.state.deptHeads.filter(i =>
-            i.value !== this.state.taskDetails.contractSignedBySecondPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
+            i.value !== this.state.taskDetails.contractSignedByFirstPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
         );
     };
 
@@ -448,6 +517,16 @@ class EditRequest extends Component {
             i.label.toLowerCase().includes(inputValue.toLowerCase())
         );
     };
+
+    filterAllUsers = (inputValue) => {
+        return this.state.usersList.filter(i =>
+            i.label.toLowerCase().includes(inputValue.toLowerCase())
+        );
+    }
+
+    loadAllUsers = (inputValue, callback) => {
+        callback(this.filterAllUsers(inputValue));
+    }
 
     loadOptionsDept = (inputValue, callback) => {
         callback(this.filterColors(inputValue));
@@ -485,6 +564,7 @@ class EditRequest extends Component {
                 }
             }
         })
+        console.log(this.state.selectedDocCheckBy)
     }
 
     toggle = name => event => {
@@ -526,7 +606,33 @@ class EditRequest extends Component {
         });
     }
 
+    handleUserChange = name => event => {
+        this.setState(state => {
+            let taskDetails = this.state.taskDetails
+            taskDetails.isConfirm = "N"
+            return taskDetails
+        })
+        let value = event.target.value
+        this.setState(state => {
+            let taskDetails = this.state.taskDetails
+            taskDetails.requestorUser[name] = value
+            return taskDetails
+        })
+        if (event.target.value) {
+
+            event.target.className = "form-control"
+        }
+        else {
+            event.target.className = "is-invalid form-control"
+        }
+    }
+
     handleChange = name => event => {
+        this.setState(state => {
+            let taskDetails = this.state.taskDetails
+            taskDetails.isConfirm = "N"
+            return taskDetails
+        })
         if (name === "departmentId") {
             this.getTeams(event.target.value)
             console.log(this.state.taskDetails.applicationTypeId)
@@ -542,8 +648,10 @@ class EditRequest extends Component {
             }
         }
         else if (name === "teamId") {
-            console.log(this.state.taskDetails.applicationTypeId)
-            this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value)
+            // console.log(this.state.taskDetails.applicationTypeId)
+            this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value, (callback) => {
+
+            })
             if (this.state.taskDetails.applicationTypeId === "LTU") {
                 if (this.state.taskDetails.chopTypeId !== "") {
                     this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, event.target.value)
@@ -569,6 +677,7 @@ class EditRequest extends Component {
                 }
             }
         }
+
         if (event.target.value) {
 
             event.target.className = "form-control"
@@ -588,12 +697,58 @@ class EditRequest extends Component {
 
     handleDocumentChange = name => event => {
         let value = event.target.value
-        this.setState(state => {
-            let editRequestForm = this.state.editRequestForm
-            editRequestForm[name] = value
-            return { editRequestForm };
+        //Handle engName
+        if (name === "engName") {
+            if (value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)) {
+                this.setState(state => {
+                    let { editRequestForm, invalidEnglish } = this.state
+                    editRequestForm[name] = this.state.editRequestForm[name]
+                    invalidEnglish = true
+                    return { editRequestForm, invalidEnglish };
 
-        })
+                })
+                // this.setState({ engName: this.state.engName, invalidEnglish: true })
+                // event.target.className = "form-control is-invalid"
+            }
+            else {
+                // event.target.className = "form-control"
+                this.setState(state => {
+                    let { editRequestForm, invalidEnglish } = this.state
+                    editRequestForm[name] = value
+                    invalidEnglish = false
+                    return { editRequestForm, invalidEnglish };
+
+                })
+                // this.setState({ engName: value, invalidEnglish: false })
+            }
+        }
+
+        //Handle cnName
+        else if (name === "cnName") {
+            // console.log(value.match(/^[A-Za-z]/))
+            // if (value.match(/^[A-Za-z0-9_]+$/gm)) {
+            // if (value.match(/[A-Za-z]+/g)) {
+            // this.setState(state => {
+            // let { editRequestForm, invalidChinese } = this.state
+            // editRequestForm[name] = this.state.editRequestForm[name]
+            // invalidChinese = true
+            // return { editRequestForm, invalidChinese };
+
+            // })
+            // event.target.className = "form-control is-invalid"
+            // }
+            // else {
+            this.setState(state => {
+                let { editRequestForm, invalidChinese } = this.state
+                editRequestForm[name] = value
+                invalidChinese = false
+                return { editRequestForm, invalidChinese };
+
+            })
+            // event.target.className = "form-control"
+            // }
+            // }
+        }
     }
 
     toggleUIO() {
@@ -649,7 +804,7 @@ class EditRequest extends Component {
 
         if (this.state.editRequestForm.docSelected !== null) {
             if (this.state.taskDetails.applicationTypeId !== "CNIPS") {
-                if (this.state.editRequestForm.engName !== "" && this.state.editRequestForm.cnName !== "") {
+                if (this.state.editRequestForm.engName !== "") {
                     typeValid = true
                 }
                 else {
@@ -657,7 +812,7 @@ class EditRequest extends Component {
                 }
             }
             else {
-                if (this.state.editRequestForm.engName !== "" && this.state.editRequestForm.cnName !== "" && this.state.conNum.length !== 0) {
+                if (this.state.editRequestForm.engName !== "" && this.state.conNum.length !== 0) {
                     typeValid = true
                 }
                 else {
@@ -707,9 +862,11 @@ class EditRequest extends Component {
                     console.log(obj)
 
                     this.setState(state => {
-                        let taskDetails = this.state.taskDetails
+                        let { taskDetails, invalidChinese, invalidEnglish } = this.state
                         taskDetails.documents.push(obj)
-                        return { taskDetails }
+                        invalidChinese = false
+                        invalidEnglish = false
+                        return { taskDetails, invalidChinese, invalidEnglish }
                     })
                     document.getElementById("documents").className = ""
                 }
@@ -943,6 +1100,12 @@ class EditRequest extends Component {
 
 
     handleSelectOption = sname => newValue => {
+        this.setState(state => {
+            let taskDetails = this.state.taskDetails
+            taskDetails.isConfirm = "N"
+            return taskDetails
+        })
+        console.log(newValue)
         if (sname === "documentCheckBy1") {
             var element = document.getElementById("documentCheckBy")
             element.classList.contains("form-control")
@@ -989,18 +1152,49 @@ class EditRequest extends Component {
             })
         }
 
-        else {
-
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                this.state.deptHeads.map((head, index) => {
-                    if (head.value === newValue.value) {
-                        taskDetails[sname + "Option"] = index
-                    }
+        else if (sname === "responsiblePerson" || sname === "pickUpBy") {
+            if (newValue) {
+                this.setState(state => {
+                    let taskDetails = this.state.taskDetails
+                    this.state.usersList.map((head, index) => {
+                        if (head.value === newValue.value) {
+                            taskDetails[sname + "Option"] = index
+                        }
+                    })
+                    taskDetails[sname] = newValue.value
+                    return { taskDetails }
                 })
-                taskDetails[sname] = newValue.value
-                return { taskDetails }
-            })
+            }
+            else {
+                this.setState(state => {
+                    let taskDetails = this.state.taskDetails
+                    taskDetails[sname + "Option"] = ""
+                    taskDetails[sname] = ""
+                    return taskDetails
+                })
+            }
+        }
+        else {
+            if (newValue) {
+                this.setState(state => {
+                    let taskDetails = this.state.taskDetails
+                    this.state.deptHeads.map((head, index) => {
+                        if (head.value === newValue.value) {
+                            taskDetails[sname + "Option"] = index
+                        }
+                    })
+                    taskDetails[sname] = newValue.value
+                    return { taskDetails }
+                }, console.log(this.state.taskDetails.contractSignedByFirstPerson))
+            }
+            else {
+                this.setState(state => {
+                    let taskDetails = this.state.taskDetails
+                    taskDetails[sname + "Option"] = ""
+                    taskDetails[sname] = ""
+                    return taskDetails
+                })
+            }
         }
     }
 
@@ -1113,59 +1307,111 @@ class EditRequest extends Component {
 
     async postData(formData, isSubmitted) {
         let url = `${config.url}/tasks/${this.props.location.state.id}`
-        await Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-            .then(res => {
-                if (isSubmitted === 'N') {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Saved' : '',
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is saved as a draft',
-                        type: 'info',
-                        onClose: () => {
-                            this.props.history.push(`/${this.props.match.params.page}`)
-                        }
-                    })
 
-                }
-                if (isSubmitted === 'Y') {
-                    Swal.fire({
-                        title: res.data.status === 200 ? 'Request Submitted' : "",
-                        text: 'Request Number : ' + res.data.requestNum,
-                        footer: 'Your request is being processed and is waiting for the approval',
-                        type: 'success',
-                        onClose: () => {
-                            this.props.history.push(`/${this.props.match.params.page}`)
-                        }
+        Swal.fire({
+            title: `Creating your Request ... `,
+            type: "info",
+            text: '',
+            footer: '',
+            allowOutsideClick: false,
+            onClose: () => { this.props.history.push(`/${this.props.match.params.page}`) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+                    .then(res => {
 
-                    })
+                        Swal.update({
+                            title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
+                            text: 'Request Number : ' + res.data.requestNum,
+                            footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
+                            type: isSubmitted === "Y" ? "success" : "info",
 
-                }
-            })
-            .catch(error => {
-                console.log(error.response.data)
-                let stat = error.response.data.status !== "failed" && error.response.data.status !== "error"
-                let msg = ""
-                if (stat) {
-                    if (error.response.data.errors) {
-                        let keys = Object.keys(error.response.data.errors)
-                        keys.map((key, index) => {
-                            msg = index + 1 + '.' + ' ' + msg + error.response.data.errors[key]
                         })
-                    }
-                    else if (error.response.data.message) {
-                        msg = error.response.data.message
-                    }
-                }
+                        Swal.hideLoading()
+                    })
+                    .catch(error => {
+                        console.log(error.response.data)
+                        let stat = error.response.data.status !== "failed" && error.response.data.status !== "error"
+                        let msg = ""
+                        if (stat) {
+                            if (error.response.data.errors) {
+                                let keys = Object.keys(error.response.data.errors)
+                                keys.map((key, index) => {
+                                    msg = index + 1 + '.' + ' ' + msg + error.response.data.errors[key]
+                                })
+                            }
+                            else if (error.response.data.message) {
+                                msg = error.response.data.message
+                            }
+                        }
 
-                else {
-                    msg = "Validation Errors occured"
-                }
-                Swal.fire({
-                    title: stat ? error.response.data.title : "ERROR",
-                    text: msg,
-                    type: 'error'
-                })
-            })
+                        else {
+                            msg = "Validation Errors occured"
+                        }
+                        Swal.update({
+                            title: stat ? error.response.data.title : "ERROR",
+                            text: msg,
+                            type: 'error'
+                        })
+                    })
+            }
+        })
+
+        // await Axios.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        //     .then(res => {
+        //         if (isSubmitted === 'N') {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Saved' : '',
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is saved as a draft',
+        //                 type: 'info',
+        //                 onClose: () => {
+        //                     this.props.history.push(`/${this.props.match.params.page}`)
+        //                 }
+        //             })
+
+        //         }
+        //         if (isSubmitted === 'Y') {
+        //             Swal.fire({
+        //                 title: res.data.status === 200 ? 'Request Submitted' : "",
+        //                 text: 'Request Number : ' + res.data.requestNum,
+        //                 footer: 'Your request is being processed and is waiting for the approval',
+        //                 type: 'success',
+        //                 onClose: () => {
+        //                     this.props.history.push(`/${this.props.match.params.page}`)
+        //                 }
+
+        //             })
+
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.log(error.response.data)
+        //         let stat = error.response.data.status !== "failed" && error.response.data.status !== "error"
+        //         let msg = ""
+        //         if (stat) {
+        //             if (error.response.data.errors) {
+        //                 let keys = Object.keys(error.response.data.errors)
+        //                 keys.map((key, index) => {
+        //                     msg = index + 1 + '.' + ' ' + msg + error.response.data.errors[key]
+        //                 })
+        //             }
+        //             else if (error.response.data.message) {
+        //                 msg = error.response.data.message
+        //             }
+        //         }
+
+        //         else {
+        //             msg = "Validation Errors occured"
+        //         }
+        //         Swal.fire({
+        //             title: stat ? error.response.data.title : "ERROR",
+        //             text: msg,
+        //             type: 'error'
+        //         })
+        //     })
     }
 
     async validate() {
@@ -1173,10 +1419,16 @@ class EditRequest extends Component {
         if (this.state.taskDetails.isUseInOffice === "Y") {
             details = details.filter(item => item !== "responsiblePerson" && item !== "returnDate")
         }
-        console.log(details)
+        // console.log(details)
+        let tempCheck = 0
         for (let i = 0; i < details.length; i++) {
+            console.log(details[i])
             var element = document.getElementById(details[i])
             if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
+                if (tempCheck === 0) {
+                    element.focus()
+                }
+                tempCheck = 1
                 element.classList.contains("form-control")
                     ? element.className = "is-invalid form-control"
                     : element.className = "notValid"
@@ -1325,7 +1577,7 @@ class EditRequest extends Component {
     }
 
     dataURLtoFile(dataurl, filename) {
-
+        console.log(dataurl.split(','))
         var arr = dataurl.split(','),
             mime = arr[0].match(/:(.*?);/)[1],
             bstr = atob(arr[1]),
@@ -1367,7 +1619,7 @@ class EditRequest extends Component {
 
 
     render() {
-        const { taskDetails, appTypes, dateView1, deptHeads, docCheckBy, selectedDeptHeads, selectedDocCheckBy, editRequestForm } = this.state
+        const { taskDetails, appTypes, dateView1, deptHeads, usersList, docCheckBy, selectedDeptHeads, selectedDocCheckBy, editRequestForm } = this.state
 
         this.validator.purgeFields();
 
@@ -1393,7 +1645,7 @@ class EditRequest extends Component {
                                                 <Input disabled value={taskDetails.requestNum}></Input>
                                             </InputGroup>
                                         </FormGroup>
-                                        <FormGroup>
+                                        {/* <FormGroup>
                                             <Label>Employee Number
                         <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted</i> </span>
                                             </Label>
@@ -1404,20 +1656,20 @@ class EditRequest extends Component {
                                                     </InputGroupAddon>
                                                     <Input disabled id="prependedInput" value={taskDetails.employeeNum} size="16" type="text" />
                                                 </InputGroup>
-                                                {/* <p className="help-block">Here's some help text</p> */}
+
                                             </div>
-                                        </FormGroup>
+                                        </FormGroup> */}
                                         <FormGroup>
                                             <Label>Tel. </Label>
                                             <InputGroup>
-                                                <Input onChange={this.handleChange("telephoneNum")} name="telephoneNum" value={taskDetails.telephoneNum} id="telephoneNum" size="16" type="text" />
+                                                <Input onChange={this.handleUserChange("telephoneNum")} name="telephoneNum" value={taskDetails.requestorUser.telephoneNum} id="telephoneNum" size="16" type="text" />
                                             </InputGroup>
                                             <InputGroup>
-                                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Telephone Number', taskDetails.telephoneNum, 'required|numeric')}</small>
+                                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Telephone Number', taskDetails.requestorUser.telephoneNum, 'required')}</small>
                                             </InputGroup>
                                         </FormGroup>
                                         <FormGroup>
-                                            <Label>Dept</Label>
+                                            <Label>Dept.</Label>
                                             <Input id="departmentId" type="select" value={taskDetails.departmentId} onChange={this.handleChange("departmentId")} name="dept">
                                                 <option value="" >Please select a department</option>
                                                 {this.state.departments.map((option, index) => (
@@ -1501,7 +1753,7 @@ class EditRequest extends Component {
                                             ? <FormGroup>
                                                 <Label>Branch Company Chop</Label>
                                                 <Input onChange={this.handleChange("branchId")} type="select" value={taskDetails.branchId}>
-                                                    <option value="" disabled>Please specify your Brand Company Chop</option>
+                                                    <option value="" disabled>Please specify your Branch Company Chop</option>
                                                     {this.state.branches.map((branch, index) =>
                                                         <option value={branch.branchId} key={index}>{branch.branchName}</option>
                                                     )}
@@ -1601,11 +1853,11 @@ class EditRequest extends Component {
                                                                             <td>{document.documentNameEnglish}</td>
                                                                             <td>{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.convertExpDate(document.expiryDate)} </div>
+                                                                                <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.convertExpDate(document.expiryDate)} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                                                                             </td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.changeDeptHeads(document.departmentHeads)} </div>
+                                                                                <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.changeDeptHeads(document.departmentHeads)} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
                                                                             </td>
                                                                             <td class="smallTd" ><img width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} src={deleteBin} /></td>
@@ -1640,6 +1892,7 @@ class EditRequest extends Component {
 
                                                                             </DropdownMenu>
                                                                         </InputGroupButtonDropdown>
+                                                                        <Tooltip toggle={this.toggle('ioTooltip')} placement="top" isOpen={this.state.ioTooltip} target="contractNumber">{this.state.msgTooltip} </Tooltip>
                                                                         <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
                                                                             onChange={this.handleContractNumber('contractNumber')} value={this.state.contractNumber}
                                                                             onClick={this.handleInputMask}></InputMask>
@@ -1652,13 +1905,21 @@ class EditRequest extends Component {
                                                         <Col md>
                                                             <FormGroup>
                                                                 {/* <Label>English Name</Label> */}
-                                                                <Input value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
+                                                                <Input value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="docName" maxLength="500" rows="3" placeholder="Please describe in English" />
+                                                                {this.state.invalidEnglish
+                                                                    ? <small style={{ color: '#F86C6B' }}> Please input only English characters </small>
+                                                                    : null
+                                                                }
                                                             </FormGroup>
                                                         </Col>
                                                         <Col md>
                                                             <FormGroup>
                                                                 {/* <Label>Chinese Name</Label> */}
-                                                                <Input value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
+                                                                <Input value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="500" placeholder="Please describe in Chinese (Optional)" />
+                                                                {this.state.invalidChinese
+                                                                    ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
+                                                                    : null
+                                                                }
                                                             </FormGroup>
                                                         </Col>
                                                         <Col md>
@@ -1701,10 +1962,10 @@ class EditRequest extends Component {
                                                                                     <div key={index} > {number} </div>
                                                                                 )} </td>
                                                                                 : null}
-                                                                            <td>{document.documentNameEnglish}</td>
-                                                                            <td>{document.documentNameChinese}</td>
+                                                                            <td className="descTd">{document.documentNameEnglish}</td>
+                                                                            <td className="descTd">{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
+                                                                                <div style={{  textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a> */}
                                                                             </td>
                                                                             <td className="smallTd"><img width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} src={deleteBin} /></td>
@@ -1729,28 +1990,26 @@ class EditRequest extends Component {
                                         </FormGroup>
 
                                         <Collapse isOpen={taskDetails.applicationTypeId !== "LTI"}>
-                                            <FormGroup>
-                                                <Label>Connecting Chop (骑缝章) </Label>
-                                                <Row />
-                                                <AppSwitch id="connectChop" dataOn={'yes'} onChange={this.toggleConnection} checked={taskDetails.connectChop === "Y"} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
-                                                {/* <InputGroup>
-                                            <small style={{ color: '#F86C6B' }} >{this.validator.message('Connecting Chop', taskDetails.connectChop, 'required')}</small>
-                                        </InputGroup> */}
-                                            </FormGroup>
-                                            {/* </Collapse>
 
-                                <Collapse isOpen={!taskDetails.applicationTypeId === "LTI"}> */}
+
                                             <FormGroup>
                                                 <Label>Number of Pages to Be Chopped</Label>
                                                 <InputGroup>
                                                     <Input onChange={this.handleChange("numOfPages")} value={taskDetails.numOfPages} id="numOfPages" size="16" type="number" min="0" />
-                                                    {/* <FormFeedback>Invalid Number of pages </FormFeedback> */}
+
                                                 </InputGroup>
                                                 <InputGroup>
                                                     {taskDetails.applicationTypeId !== "LTI"
                                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages to be Chopped', taskDetails.numOfPages, 'required')}</small>
                                                         : null}
                                                 </InputGroup>
+                                            </FormGroup>
+
+                                            <FormGroup>
+                                                <Label>Connecting Chop (骑缝章) </Label>
+                                                <Row />
+                                                <AppSwitch id="connectChop" dataOn={'yes'} onChange={this.toggleConnection} checked={taskDetails.connectChop === "Y"} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
+
                                             </FormGroup>
                                         </Collapse>
 
@@ -1781,8 +2040,9 @@ class EditRequest extends Component {
                                                 <Label>Responsible Person <i className="fa fa-user" /></Label>
                                                 <AsyncSelect id="responsiblePerson"
                                                     classNamePrefix="rs"
-                                                    loadOptions={this.loadOptionsDept}
-                                                    value={deptHeads[taskDetails.responsiblePersonOption]}
+                                                    loadOptions={this.loadAllUsers}
+                                                    isClearable
+                                                    value={usersList[taskDetails.responsiblePersonOption]}
                                                     onChange={this.handleSelectOption("responsiblePerson")}
                                                     menuPortalTarget={document.body}
                                                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -1810,8 +2070,9 @@ class EditRequest extends Component {
                                                 <Label>Pick Up By <i className="fa fa-user" /> </Label>
                                                 <AsyncSelect
                                                     id="pickUpBy"
-                                                    loadOptions={this.loadOptionsDept}
-                                                    value={deptHeads[taskDetails.pickUpByOption]}
+                                                    loadOptions={this.loadAllUsers}
+                                                    isClearable
+                                                    value={usersList[taskDetails.pickUpByOption]}
                                                     onChange={this.handleSelectOption("pickUpBy")}
                                                     menuPortalTarget={document.body}
                                                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -1828,7 +2089,7 @@ class EditRequest extends Component {
                                         <FormGroup>
                                             <Label>Remark</Label>
                                             <InputGroup>
-                                                <Input onChange={this.handleChange("remark")} value={taskDetails.remark} id="remark" size="16" type="textbox" placeholder="Please enter the remarks" />
+                                                <Input onChange={this.handleChange("remark")} value={taskDetails.remark} id="remark" size="16" type="textbox" placeholder="Please enter the remarks, e.g. telephone number of pick up person." />
                                                 {/* <FormFeedback>Please add remarks</FormFeedback> */}
                                             </InputGroup>
                                             <InputGroup>
@@ -1944,7 +2205,7 @@ class EditRequest extends Component {
                                                         onClick={this.isValid}
                                                         id="confirm" value="option1">
                                                         <Label className="form-check-label" check >
-                                                            By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
+                                                            By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines
                                                             regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
                       </Label>
                                                     </CustomInput>

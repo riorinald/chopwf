@@ -89,6 +89,8 @@ class Create extends Component {
 
       //retrieve from DH table
       deptHead: [],
+      //retrieve userList
+      userList: [],
       teams: [],
       branches: [],
       viewContract: false,
@@ -159,6 +161,9 @@ class Create extends Component {
       dateView1: "",
       dateView2: "",
 
+      invalidEnglish: false,
+      invalidChinese: false,
+
       reqInfo: [
         { id: "deptSelected", valid: false },
         { id: "appTypeSelected", valid: false },
@@ -172,10 +177,16 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       validateForm: [],
-      noteInfo: [],
-      // inputMask: [/(?!.*[A-HJ-QT-Z])[IS]/,"-",/[IALR]/,/[A]/,"-",/(?!.*[A-NQRT-Z])[PSO]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/,"-",/[0-9]/,/[0-9]/,/[0-9]/,/[0-9]/],
-      inputMask: "a-a-a-9999-9999",
-      selectInfo: ''
+      noteInfo: { 
+                  chinese:"如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
+                  english:"For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
+                },
+      mask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[A-Z]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
+      // mask: "a-a-a-9999-9999",
+      selectInfo: '',
+      inputMask: { mask: "a-a-a-9999-9999" },
+      msgTooltip: '[I / S ]-[ A / L / IA / R ]-[ O / P / S] \n e.g "S-A-O-9999-9999"',
+      ioTooltip: false,
 
     };
 
@@ -190,7 +201,6 @@ class Create extends Component {
     this.addDocumentLTU = this.addDocumentLTU.bind(this);
     this.toggleHover = this.toggleHover.bind(this);
     this.handleSelectOption = this.handleSelectOption.bind(this);
-    this.isValid = this.isValid.bind(this);
     this.checkDept = this.checkDept.bind(this);
 
     this.validator = new SimpleReactValidator({autoForceUpdate: this, locale: 'en'});
@@ -202,7 +212,7 @@ class Create extends Component {
   };
 
   componentDidMount() {
-    this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
+    // this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
     this.getUserData();
     this.getData("department", `${config.url}/departments`);
     this.getData("applicationTypes", `${config.url}/apptypes`);
@@ -212,19 +222,18 @@ class Create extends Component {
 
   }
 
-  // componentWillReceiveProps() {
-  //   this.forceUpdate()
-  // }
 
   validate() {
     let { validateForm } = this.state
     if (validateForm.length === 0) {
       Swal.fire({
+        title: 'Appliction Type Required',
         type: 'info',
         label: 'required',
         text: 'Please select an Application Type to get started !'
       })
     }
+    let tempCheck = 0
     for (let i = 0; i < validateForm.length; i++) {
       let field = this.state[validateForm[i]]
       var element = document.getElementById(validateForm[i])
@@ -237,6 +246,10 @@ class Create extends Component {
         // console.log(`${validateForm[i]} is Valid`)
       }
       else {
+        if (tempCheck === 0) {
+          element.focus()
+        }
+        tempCheck = 1
         element.classList.contains("form-control")
           ? element.className = "is-invalid form-control"
           : element.className = "notValid"
@@ -245,73 +258,7 @@ class Create extends Component {
 
     }
   }
-  // validate() {
-  //   console.log(this.state.reqInfo)
-  //   for (let i = 0; i < this.state.reqInfo.length; i++) {
-  //     // console.log(this.state.reqInfo[i])
-  //     if (this.state[this.state.reqInfo[i].id].length >= 1 && this.state[this.state.reqInfo[i].id] !== "") {
-  //       // console.log(this.state.reqInfo[i].id)
-  //       this.setState(state => {
-  //         const reqInfo = state.reqInfo.map((item, j) => {
-  //           if (j === i) {
-  //             var element = document.getElementById(this.state.reqInfo[i].id)
-  //             element.classList.contains("form-control")
-  //               ? element.className = "is-valid form-control"
-  //               : element.className = "isValid"
-  //             return { id: item.id, valid: true }
-  //           }
-  //           else { return item }
-  //         })
-  //         return { reqInfo }
-  //       })
-  //     }
-  //     else {
-  //       this.setState(state => {
-  //         console.log(this.state.reqInfo[i])
-  //         const reqInfo = state.reqInfo.map((item, j) => {
-  //           if (j === i) {
-  //             var element = document.getElementById(item.id)
-  //             element.classList.contains("form-control")
-  //               ? element.className = "is-invalid form-control"
-  //               : element.className = "notValid"
-  //             return { id: item.id, name: item.name, valid: false }
-  //           }
-  //           else { return item }
-  //         })
-  //         return { reqInfo }
-  //       })
-  //     }
-  //   }
-  //   if (!this.state.collapse) {
-  //     let dateValid = false;
-  //     let resValid = false;
-  //     if (this.state.returnDate !== "") {
-  //       document.getElementById("returnDate").className = "is-valid form-control"
-  //       dateValid = true
-  //     }
-  //     else {
-  //       document.getElementById("returnDate").className = "is-invalid form-control"
-  //       dateValid = false
-  //     }
-  //     if (this.state.resPerson !== "") {
-  //       document.getElementById("resPerson").className = "isValid"
-  //       resValid = true
-  //     }
-  //     else {
-  //       document.getElementById("resPerson").className = "notValid"
-  //       resValid = false
-  //     }
-  //     if (dateValid && resValid) {
-  //       this.setState({ inOffice: true })
-  //     }
-  //     else {
-  //       this.setState({ inOffice: false })
-  //     }
-  //   }
-  //   else {
-  //     this.setState({ inOffice: true })
-  //   }
-  // }
+
 
   checkDept() {
     if (this.state.deptSelected === "") {
@@ -325,15 +272,7 @@ class Create extends Component {
 
   async handleAgreeTerm(event) {
     await this.validate()
-    // for (let i = 0; i < this.state.reqInfo.length; i++) {
-    //   if (this.state.reqInfo[i].valid) {
-    //     this.setState({ valid: true })
-    //   }
-    //   else {
-    //     this.setState({ valid: false })
-    //     break;
-    //   }
-    // }
+
     if (this.state.validateForm.length !== 0) {
       if (this.validator.allValid()) {
         console.log("All Valid")
@@ -345,26 +284,10 @@ class Create extends Component {
         this.forceUpdate()
       }
     }
-    // if (this.state.valid && this.state.inOffice) {
 
-    // }
   }
 
-  async isValid() {
-    await this.validate()
-    for (let i = 0; i < this.state.reqInfo.length; i++) {
-      if (this.state.reqInfo[i].valid) {
-        this.setState({ valid: true })
-      }
-      else {
-        this.setState({ valid: false, agreeTerms: false })
-        break;
-      }
-    }
-    if (this.state.valid && this.state.inOffice) {
-      this.setState({ agreeTerms: true })
-    }
-  }
+
 
   async submitRequest(isSubmitted) {
     console.log("SUBMIT")
@@ -469,7 +392,7 @@ class Create extends Component {
 
   checkDepartment = () => {
     if (this.state.deptSelected === "") {
-      this.setState({ selectInfo: 'please select the Department' })
+      this.setState({ selectInfo: 'Please select department' })
     } else {
       this.setState({ selectInfo: '' })
     }
@@ -541,54 +464,114 @@ class Create extends Component {
   }
 
   async postData(formData, isSubmitted) {
-    try {
-      // await axios.post(`${config.url}/tasks`, formData)
-      await axios.post(`${config.url}/tasks`, formData)
-        .then(res => {
-          if (isSubmitted === 'N') {
-            Swal.fire({
-              title: res.data.status === 200 ? 'Request Saved' : '',
+    // console.log(document.getElementById("remarks"))
+    let elementId = (isSubmitted === 'Y') ? "submit" : "saveAction" 
+    document.getElementById(elementId).blur()
+
+    Swal.fire({
+      title: `Creating your Request ... `,
+      type: "info",
+      text: '',
+      footer: '',
+      allowOutsideClick: false,
+      onClose: () => { this.formReset() },
+      onBeforeOpen: () => {
+        Swal.showLoading()
+      },
+      onOpen: () => {
+        axios.post(`${config.url}/tasks`, formData)
+          .then(res => {
+
+            Swal.update({
+              title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
               text: 'Request Number : ' + res.data.requestNum,
-              footer: 'Your request is saved as draft.',
-              type: 'info',
-              onClose: () => { this.formReset() }
+              footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
+              type: isSubmitted === "Y" ? "success" : "info",
+
             })
-          }
-          if (isSubmitted === 'Y') {
-            Swal.fire({
-              title: res.data.status === 200 ? 'Request Submitted' : "",
-              text: 'Request Number : ' + res.data.requestNum,
-              footer: 'Your request is being processed and is waiting for the approval',
-              type: 'success',
-              onClose: () => { this.formReset() }
+            Swal.hideLoading()
+          })
+          .catch(error => {
+            let err = "Please contact the IT Admin !"
+            let err2 = []
+            let err3 = ""
+            if (error.response) {
+              console.log(error.response)
+              let keys = Object.keys(error.response.data.errors)
+              err = keys.join(',')
+              keys.map(key => {
+                // console.log(error.response.data.errors[key].join(','))
+                err2.push(error.response.data.errors[key].join(','))
+              })
+              err3 = err2.join(';')
+            }
+            Swal.update({
+              title: "Error",
+              type: "error",
+              text: err,
+              html: err3,
+
             })
-          }
-        })
-    } catch (error) {
-      if (error.response && isSubmitted === 'N') {
-        Swal.fire({
-          title: error.response.statusText,
-          text: error.response.data.message,
-          footer: JSON.stringify(error.response.data),
-          type: 'error',
-        })
+            Swal.hideLoading()
+
+          })
       }
-      if (error.response && isSubmitted === 'Y') {
-        Swal.fire({
-          title: error.response.statusText,
-          text: JSON.stringify(error.response.data),
-          footer: 'traceId : ' + error.response.data.traceId,
-          type: 'error',
-        })
-      }
-      console.error(error.response);
-    }
+    })
+
+
+    // try {
+    //   // await axios.post(`${config.url}/tasks`, formData)
+    //   await axios.post(`${config.url}/tasks`, formData)
+    //     .then(res => {
+    //       if (isSubmitted === 'N') {
+    //         Swal.fire({
+    //           title: res.data.status === 200 ? 'Request Saved' : '',
+    //           text: 'Request Number : ' + res.data.requestNum,
+    //           footer: 'Your request is saved as draft.',
+    //           type: 'info',
+    //           onClose: () => { this.formReset() }
+    //         })
+    //       }
+    //       if (isSubmitted === 'Y') {
+    //         Swal.fire({
+    //           title: res.data.status === 200 ? 'Request Submitted' : "",
+    //           text: 'Request Number : ' + res.data.requestNum,
+    //           footer: 'Your request is being processed and is waiting for the approval',
+    //           type: 'success',
+    //           onClose: () => { this.formReset() }
+    //         })
+    //       }
+    //     })
+    // } catch (error) {
+    //   if (error.response && isSubmitted === 'N') {
+    //     Swal.fire({
+    //       title: error.response.statusText,
+    //       text: error.response.data.message,
+    //       footer: JSON.stringify(error.response.data),
+    //       type: 'error',
+    //     })
+    //   }
+    //   if (error.response && isSubmitted === 'Y') {
+    //     Swal.fire({
+    //       title: error.response.statusText,
+    //       text: JSON.stringify(error.response.data),
+    //       footer: 'traceId : ' + error.response.data.traceId,
+    //       type: 'error',
+    //     })
+    //   }
+    //   console.error(error.response);
+    // }
   }
 
   formReset() {
     this.formRef.current.reset()
     window.location.reload();
   }
+
+  formRes() {
+    this.formRef.current.reset()
+  }
+
   convertExpDate(dateValue) {
     let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
     return regEx;
@@ -612,8 +595,15 @@ class Create extends Component {
       })
   }
 
+  async getUsers() {
+    await axios.get(`${config.url}/users?category=normal`, { headers: { Pragma: 'no-cache' } })
+      .then(res => {
+        this.setState({ userList: res.data })
+      })
+  }
+
   async getDeptHead(companyId) {
-    console.log(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
+    // console.log(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`)
     await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`, { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ deptHead: res.data })
@@ -673,6 +663,8 @@ class Create extends Component {
   //handle value on changes
   handleChange = name => event => {
     //APPLICATION TYPE
+    let value = event.target.value
+
     if (name === "appTypeSelected") {
       this.setValidateForm(event.target.value)
       //Clear Doc Table and agreeTerms
@@ -738,6 +730,7 @@ class Create extends Component {
 
     //CHOP TYPE
     else if (name === "chopTypeSelected") {
+      console.log(event.target.value)
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected)
       }
@@ -760,7 +753,9 @@ class Create extends Component {
 
     //DEPARTMENT
     else if (name === "deptSelected") {
+      this.setState({ teamSelected: "" })
       this.getDeptHead(this.props.legalName)
+      this.getUsers();
       if (this.state.isLTU || this.state.isLTI) {
         this.getTeams(event.target.value)
       }
@@ -771,28 +766,69 @@ class Create extends Component {
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
+      // console.log(event.target.value)
       this.getDocCheckBy(event.target.value)
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
         this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value)
       }
     }
 
-    this.setState({
-      [name]: event.target.value
-    },
-      () => { this.checkDepartment() }
-    );
-
-    if (event.target.value) {
-      event.target.className = "form-control"
+    //Handle engName
+    else if (name === "engName") {
+      if (value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)) {
+        this.setState({ engName: this.state.engName, invalidEnglish: true })
+        event.target.className = "form-control is-invalid"
+      }
+      else {
+        event.target.className = "form-control"
+        this.setState({ engName: value, invalidEnglish: false })
+      }
     }
-    else {
-      event.target.className = "is-invalid form-control"
+
+    //Handle cnName
+    else if (name === "cnName") {
+      // console.log(value.match(/^[A-Za-z]/))
+      // if (value.match(/^[A-Za-z0-9_]+$/gm)) {
+      // if (value.match(/[A-Za-z]+/g)) {
+      this.setState({ cnName: value, invalidChinese: false })
+      // event.target.className = "form-control is-invalid"
+      // }
+      // else {
+      // this.setState({ cnName: value, invalidChinese: false })
+      // event.target.className = "form-control"
+      // }
+    }
+
+    // this.setState({
+    //   [name]: value
+    // },
+    //   () => { this.checkDepartment() }
+    // );
+
+    // if (event.target.value) {
+    //   event.target.className = "form-control"
+    // }
+
+
+    if (name !== "numOfPages" && name !== "engName" && name !== "cnName") {
+      this.setState({
+        [name]: value
+      },
+        () => { this.checkDepartment() }
+      );
+
+
+      if (value) {
+        event.target.className = "form-control"
+      }
+      else {
+        event.target.className = "is-invalid form-control"
+      }
     }
   };
 
 
-  handleInputMask = () => {
+  handlemask = () => {
     // let value = ("" + event.target.value).toUpperCase();
     let first = /(?!.*[A-HJ-QT-Z])[IS]/;
     let third = /(?!.*[A-NQRT-Z])[PSO]/;
@@ -819,13 +855,13 @@ class Create extends Component {
     // }
 
     this.setState({
-      inputMask: mask, viewContract: true
+      mask: mask, viewContract: true
     });
   }
 
   validateConNum() {
-    let first = /(?!.*[A-HJ-QT-Z])[IS]/;
-    let third = /(?!.*[A-NQRT-Z])[PSO]/;
+    let first = /(?!.*[A-HJ-QT-Z])[IS]/i;
+    let third = /(?!.*[A-NQRT-Z])[PSO]/i;
     let digit = /[0-9]/;
     var isFirst = false
     var isThird = false
@@ -914,29 +950,45 @@ class Create extends Component {
 
     // let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
     // let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
-
     var value = event.target.value;
 
     // if (/^..[AaLlRr]/.test(value)){
     //   this.setState({
-    //     inputMask: "a-a-a-9999-9999",
+    //     mask: "a-a-a-9999-9999",
     //     })
     //   }
-    let mask = "a-a-a-9999-9999"
-    if (/^..[Ii]/.test(value)) {
-      mask = "a-aA-a-9999-9999";
+    // var inputMask={
+    //   mask: "a-a-a-9999-9999",
+    //   value: value, 
+    // }
+
+     let message = '[I / S ]-[ A / L / IA / R ]-[ O / P / S] e.g "S-A-O-9999-9999"'
+    if (/^..[LIAR]/i.test(value)) {
+      // inputMask.mask = "a-aa-a-9999-9999"
+      // value = value.replace("I-_", "IA-_")
+    } else {
+
     }
-    this.setState({
-      viewContract: true,
-      inputMask: mask,
-      contractNumber: value
-    })
+    // console.log(inputMask, inputMask.value);
+    this.setState({ viewContract:true, msgTooltip: message, ioTooltip:true, contractNumber: value })
+  }
+
+  beforeMaskedStateChange({nextState}){
+   let { value } = nextState;
+      if (/^..[LIAR]/i.test(value)) {
+        value = value.slice(0, -1);
+      }
+
+      return {
+        ...nextState,
+        value
+   };
   }
 
   addContract(event) {
     let valid = this.validateConNum()
     let digit = /[0-9]/;
-    let value = this.state.contractNumber
+    let value = this.state.contractNumber.toUpperCase();
     if (valid) {
       // if (this.props.match.params.company === "MBIA") {
       //   if (!digit.test(this.state.contractNumber[14])) {
@@ -954,7 +1006,7 @@ class Create extends Component {
         conNum: [...state.conNum, value.replace(/_/g, '')]
       })
       )
-      this.setState({ contractNumber: "" }, this.toggle('viewContract'))
+      this.setState({ viewContract:true, contractNumber: "" }, this.toggle('viewContract'))
     }
     else {
       Swal.fire({
@@ -998,13 +1050,14 @@ class Create extends Component {
   }
 
   addDocumentLTI() {
+
     var maxNumber = 45;
     var rand = Math.floor((Math.random() * maxNumber) + 1);
     let valid = true
     let typeValid = false
     let doc = this.state.documentTableLTI
     if (this.state.docSelected !== null) {
-      if (this.state.engName !== "" && this.state.cnName !== "") {
+      if (this.state.engName !== "") {
         typeValid = true
       }
       else {
@@ -1038,6 +1091,9 @@ class Create extends Component {
           })
 
           console.log(obj.docURL)
+          this.setState({
+            invalidEnglish: false, invalidChinese: false
+          })
           this.setState(state => {
             const documentTableLTI = state.documentTableLTI.concat(obj)
             return {
@@ -1332,11 +1388,16 @@ class Create extends Component {
     this.validator.purgeFields();
     const deptHeads = []
     const docCheckByUsers = []
+    const userLists = []
     var pointer;
-    const { hover, docCheckBy, deptHead } = this.state;
+    const { hover, docCheckBy, deptHead, userList } = this.state;
     for (let i = 0; i < deptHead.length; i++) {
       const obj = { value: deptHead[i].userId, label: deptHead[i].displayName }
       deptHeads.push(obj)
+    }
+    for (let i = 0; i < userList.length; i++) {
+      const obj = { value: userList[i].userId, label: userList[i].displayName }
+      userLists.push(obj)
     }
     docCheckBy.map(doc => {
       const obj = { value: doc.userId, label: doc.displayName }
@@ -1357,6 +1418,12 @@ class Create extends Component {
 
     const filterColors = (inputValue) => {
       return deptHeads.filter(i =>
+        i.label.toLowerCase().includes(inputValue.toLowerCase())
+      );
+    };
+
+    const filterUsers = (inputValue) => {
+      return userLists.filter(i =>
         i.label.toLowerCase().includes(inputValue.toLowerCase())
       );
     };
@@ -1393,6 +1460,13 @@ class Create extends Component {
 
     }
 
+    const loadUsers = (inputValue, callback) => {
+
+      callback(filterUsers(inputValue));
+
+    }
+
+
     const loadDocCheckBy = (inputValue, callback) => {
       callback(filterDocCheck(inputValue));
     }
@@ -1413,10 +1487,10 @@ class Create extends Component {
           {this.state.documentTableLTI.map((document, index) =>
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
-              <td><div>{document.engName}</div></td>
-              <td><div>{document.cnName}</div></td>
+              <td className="descTd">{document.engName}</td>
+              <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
-                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
+                <div style={{ textDecoration: "underline", color: "#20A8D8", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
@@ -1445,7 +1519,7 @@ class Create extends Component {
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
-                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
+                <div style={{  textDecoration: "underline", color: "#20A8D8", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableCNIPS", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
@@ -1479,9 +1553,11 @@ class Create extends Component {
 
                       </DropdownMenu>
                     </InputGroupButtonDropdown>
-                    <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
-                      onChange={this.handleContractChange} value={this.state.contractNumber}
-                    // onClick={this.handleInputMask}
+                    <Tooltip toggle={this.toggle('ioTooltip')} placement="top" isOpen={this.state.ioTooltip} target="contractNumber">
+                      {this.state.msgTooltip} </Tooltip>
+                    <InputMask autoComplete="off" autoCapitalize="character" placeholder="Enter Contract Name" mask={this.state.mask} name="contractNumber" id="contractNumber" className="form-control"
+                      onChange={this.handleContractChange} beforeMaskedStateChange={this.beforeMaskedStateChange} value={this.state.contractNumber}
+                    // onClick={this.handlemask}
                     ></InputMask>
                     <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
                   </InputGroup>
@@ -1491,19 +1567,29 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 {/* <Label>English Name</Label> */}
-                <Input value={this.state.engName} onChange={this.handleChange("engName")} type="text" name="textarea-input" id="docName" rows="3" placeholder="please describe in English" />
+                <Input autoComplete="off" value={this.state.engName} onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
+                {this.state.invalidEnglish
+                  ? <small style={{ color: '#F86C6B' }}> Please input only English characters </small>
+                  : null
+                }
               </FormGroup>
             </Col>
             <Col md>
               <FormGroup>
                 {/* <Label>Chinese Name</Label> */}
-                <Input value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" placeholder="please describe in Chinese" />
+                <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3" placeholder="Please describe in Chinese (optional)" />
+                {this.state.invalidChinese
+                  ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
+                  : null
+                }
               </FormGroup>
             </Col>
             <Col md>
               <FormGroup>
                 {/* <Label>File Name</Label> */}
-                <CustomInput id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
+                <CustomInput id="docFileName" onChange={this.uploadDocument}
+                  accept=".ipg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, docx, .pdf, .pdfx, .bmp"
+                  type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
               </FormGroup>
             </Col>
             <Col xl={1}>
@@ -1515,10 +1601,13 @@ class Create extends Component {
               </FormGroup>
             </Col>
           </Row>
+
+
           <Collapse isOpen={this.state.documentTableLTI.length !== 0 || this.state.documentTableCNIPS.length !== 0}>
             {this.state.isCNIPS ? CNIPSTable : DocTable}
           </Collapse>
         </div>
+
         {this.state.isCNIPS
           ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Documents', this.state.documentTableCNIPS, 'required')}</small>
           : this.state.isLTI || this.state.isSTU
@@ -1570,7 +1659,7 @@ class Create extends Component {
                   Header: 'Expiry Date',
                   accessor: 'expiryDate',
                   Cell: row => (
-                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(row.original.documentBase64String, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
                       {this.convertExpDate(row.original.expiryDate)}
                     </div>
                   ),
@@ -1580,7 +1669,7 @@ class Create extends Component {
                   Header: 'DH Approved',
                   accessor: 'departmentHeads',
                   Cell: row => (
-                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(row.original.documentBase64String, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
                       {this.changeDeptHeads(row.original.departmentHeads)}
                     </div>
 
@@ -1620,13 +1709,13 @@ class Create extends Component {
                     <td>{document.documentNameEnglish}</td>
                     <td>{document.documentNameChinese}</td>
                     <td id="viewDoc">
-                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(document.documentBase64String, document.documentFileName))} >
+                      <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
                         {this.convertExpDate(document.expiryDate)}
                       </div>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                     </td>
                     <td id="viewDoc">
-                      <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(document.documentBase64String, document.documentFileName))} >
+                      <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
                         {this.changeDeptHeads(document.departmentHeads)}
                       </div>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
@@ -1653,12 +1742,13 @@ class Create extends Component {
                 <FormGroup>
                   <h5>NOTES :</h5>
                   {/* {this.state.noteInfo.notes || <Skeleton count={3}/>} */}
-                  {this.state.noteInfo.notes}
+                  <p>{this.state.noteInfo.chinese}</p>
+                  <p>{this.state.noteInfo.english}</p>
                 </FormGroup>
                 <Form className="form-horizontal" innerRef={this.formRef}>
-                  <FormGroup>
+                  {/* <FormGroup>
                     <Label>Employee Number
-                        <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted</i> </span>
+                        <span> <i> &ensp; Requestor of chop usage needs to be permanent staff. Intern or external staff's application will NOT be accepted.</i> </span>
                     </Label>
                     <div className="controls">
                       <InputGroup className="input-prepend">
@@ -1668,7 +1758,7 @@ class Create extends Component {
                         <Input disabled ref={this.employeeId} onChange={this.handleChange("employeeId")} value={this.state.employeeId} id="prependedInput" size="16" type="text" />
                       </InputGroup>
                     </div>
-                  </FormGroup>
+                  </FormGroup> */}
                   <FormGroup>
                     <Label>Tel. </Label>
                     <InputGroup>
@@ -1676,7 +1766,7 @@ class Create extends Component {
                     </InputGroup>
                   </FormGroup>
                   <FormGroup>
-                    <Label>Dept</Label>
+                    <Label>Dept.</Label>
                     <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
                       <option disabled value="0">Please Select . . .</option>
                       {this.state.department.map((option, index) => (
@@ -1712,21 +1802,6 @@ class Create extends Component {
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Application Type', this.state.appTypeSelected, 'required')}</small>
                   </FormGroup>
 
-                  <Collapse isOpen={this.state.isLTI || this.state.isLTU}>
-                    <FormGroup>
-                      <Label>Entitled Team</Label>
-                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
-                        <option value="0" disabled>Please select a team</option>
-                        {this.state.teams.map((team, index) =>
-                          <option key={index} value={team.teamId}>{team.teamName}</option>
-                        )}
-                      </Input>
-                      {this.state.isLTI || this.state.isLTU
-                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Entitled Team', this.state.teamSelected, 'required')}</small>
-                        : null}
-                    </FormGroup>
-                  </Collapse>
-
                   <Collapse isOpen={this.state.isLTI}>
                     <FormGroup>
                       <Label>Effective Period</Label>
@@ -1744,6 +1819,24 @@ class Create extends Component {
                         : null}
                     </FormGroup>
                   </Collapse>
+
+                  <Collapse isOpen={this.state.isLTI || this.state.isLTU}>
+                    <FormGroup>
+                      <Label>Entitled Team - </Label>
+                      <small className="ml-2">Please select your team's name from dropdown list, if your team is not included, please contact respective chop keeper. </small>
+                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} value={this.state.teamSelected} type="select">
+                        <option value="" disabled>Please select a team</option>
+                        {this.state.teams.map((team, index) =>
+                          <option key={index} value={team.teamId}>{team.teamName}</option>
+                        )}
+                      </Input>
+                      {this.state.isLTI || this.state.isLTU
+                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Entitled Team', this.state.teamSelected, 'required')}</small>
+                        : null}
+                    </FormGroup>
+                  </Collapse>
+
+
                   {/* 
                   <Collapse isOpen={this.state.isLTU}>
                     <FormGroup>
@@ -1767,7 +1860,7 @@ class Create extends Component {
                       onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
                       <option disabled value="0">Please Select ..</option>
                       {this.state.chopTypes.map((option, id) => (
-                        <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
+                        <option key={option.chopTypeId} value={option.chopTypeId}> {this.props.legalName} {option.chopTypeName}</option>
                       ))}
 
                     </Input>
@@ -1778,7 +1871,7 @@ class Create extends Component {
                     ? <FormGroup>
                       <Label>Branch Company Chop</Label>
                       <Input onChange={this.handleChange("branchSelected")} type="select" defaultValue="0">
-                        <option value="0" disabled>Please specify your Brand Company Chop</option>
+                        <option value="0" disabled>Please specify your Branch Company Chop</option>
                         {this.state.branches.map((branch, index) =>
                           <option value={branch.branchId} key={index}>{branch.branchName}</option>
                         )}
@@ -1797,18 +1890,10 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Purpose of Use</Label>
                     <InputGroup>
-                      <Input maxLength={500} ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                      <Input maxLength={500} spellCheck="true" ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of Use', this.state.purposeOfUse, 'required')}</small>
                   </FormGroup>
-
-                  {!this.state.isLTI
-                    ? <FormGroup>
-                      <Label>Connecting Chop (骑缝章) </Label>
-                      <Row />
-                      <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
-                    </FormGroup>
-                    : ""}
                   <Collapse isOpen={!this.state.isLTI}>
                     <FormGroup>
                       <Label>Number of Pages to Be Chopped</Label>
@@ -1819,7 +1904,21 @@ class Create extends Component {
                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages to Be Chopped', this.state.numOfPages, 'required')}</small>
                         : null}
                     </FormGroup>
+                    <FormGroup>
+                      <Label>Connecting Chop (骑缝章) </Label>
+                      <Row />
+                      <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
+                    </FormGroup>
                   </Collapse>
+
+                  {/* {!this.state.isLTI
+                    ? <FormGroup>
+                      <Label>Connecting Chop (骑缝章) </Label>
+                      <Row />
+                      <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
+                    </FormGroup>
+                    : ""} */}
+
                   <Collapse isOpen={!this.state.isLTI && !this.state.isLTU}>
                     <FormGroup>
                       <Label>Use in Office</Label>
@@ -1847,8 +1946,9 @@ class Create extends Component {
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect id="resPerson"
                         onBlur={this.checkDepartment}
+                        isClearable
                         classNamePrefix="rs"
-                        loadOptions={loadOptions}
+                        loadOptions={loadUsers}
                         onChange={this.handleSelectOption("resPerson")}
                         menuPortalTarget={document.body}
                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -1873,7 +1973,9 @@ class Create extends Component {
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect
                         id="pickUpBy"
-                        loadOptions={loadOptions}
+                        isClearable
+                        loadOptions={loadUsers}
+                        isClearable
                         onBlur={this.checkDepartment}
                         onChange={this.handleSelectOption("pickUpBy")}
                         menuPortalTarget={document.body}
@@ -1888,9 +1990,9 @@ class Create extends Component {
                   </Collapse>
 
                   <FormGroup>
-                    <Label>Remark</Label>
+                    <Label>Remark <small className="ml-2">Notes: Please enter the remarks, e.g. telephone number of pick up person.</small> </Label>
                     <InputGroup>
-                      <Input maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
+                      <Input autoComplete="off" maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Remark', this.state.remarks, 'required')}</small>
                   </FormGroup>
@@ -1919,7 +2021,7 @@ class Create extends Component {
                   {this.state.isCNIPS
                     ? <FormGroup>
                       <Label>Contract Signed By: <i className="fa fa-user" /></Label>
-                      <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
+                      <small className="ml-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval.</small>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <Row>
                         <Col>
@@ -1979,7 +2081,7 @@ class Create extends Component {
                       </FormGroup>
                       : <FormGroup>
                         <Label>Department Heads <i className="fa fa-user" /></Label>
-                        <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity</small>
+                        <small className="ml-2"> If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity.</small>
                         <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                         <AsyncSelect
                           id="deptHeadSelected"
@@ -2009,9 +2111,9 @@ class Create extends Component {
                           onChange={this.handleAgreeTerm}
                           // onClick={this.isValid}
                           id="confirm" value="option1">
-                          <Label className="form-check-label" check >
-                            By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines &
-                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
+                          <Label onClick={this.handleAgreeTerm} className="form-check-label" check >
+                            By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines
+                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action.
                       </Label>
                         </CustomInput>
                       </FormGroup>
@@ -2027,7 +2129,7 @@ class Create extends Component {
                         ? <Button className="mr-2" id="submit" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
                         : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
                         >Submit</Button>}
-                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} target="submitTooltip">please confirm the agree terms</Tooltip>
+                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} target="submitTooltip">Please confirm the agree terms</Tooltip>
                       <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
                       <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
                     </Col>
