@@ -724,28 +724,28 @@ class EditRequest extends Component {
         else if (name === "cnName") {
             // console.log(value.match(/^[A-Za-z]/))
             // if (value.match(/^[A-Za-z0-9_]+$/gm)) {
-            if (value.match(/[A-Za-z]+/g)) {
-                this.setState(state => {
-                    let { editRequestForm, invalidChinese } = this.state
-                    // editRequestForm[name] = this.state.editRequestForm[name]
-                    invalidChinese = true
-                    return { editRequestForm, invalidChinese };
+            // if (value.match(/[A-Za-z]+/g)) {
+            // this.setState(state => {
+            // let { editRequestForm, invalidChinese } = this.state
+            // editRequestForm[name] = this.state.editRequestForm[name]
+            // invalidChinese = true
+            // return { editRequestForm, invalidChinese };
 
-                })
-                // event.target.className = "form-control is-invalid"
-            }
-            else {
-                this.setState(state => {
-                    let { editRequestForm, invalidChinese } = this.state
-                    editRequestForm[name] = value
-                    invalidChinese = false
-                    return { editRequestForm, invalidChinese };
+            // })
+            // event.target.className = "form-control is-invalid"
+            // }
+            // else {
+            this.setState(state => {
+                let { editRequestForm, invalidChinese } = this.state
+                editRequestForm[name] = value
+                invalidChinese = false
+                return { editRequestForm, invalidChinese };
 
-                })
-                // event.target.className = "form-control"
-            }
+            })
+            // event.target.className = "form-control"
+            // }
+            // }
         }
-
     }
 
     toggleUIO() {

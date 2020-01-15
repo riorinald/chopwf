@@ -784,14 +784,14 @@ class Create extends Component {
     else if (name === "cnName") {
       // console.log(value.match(/^[A-Za-z]/))
       // if (value.match(/^[A-Za-z0-9_]+$/gm)) {
-      if (value.match(/[A-Za-z]+/g)) {
-        this.setState({ cnName: this.state.cnName, invalidChinese: true })
-        event.target.className = "form-control is-invalid"
-      }
-      else {
-        this.setState({ cnName: value, invalidChinese: false })
-        event.target.className = "form-control"
-      }
+      // if (value.match(/[A-Za-z]+/g)) {
+      this.setState({ cnName: value, invalidChinese: false })
+      // event.target.className = "form-control is-invalid"
+      // }
+      // else {
+      // this.setState({ cnName: value, invalidChinese: false })
+      // event.target.className = "form-control"
+      // }
     }
 
     // this.setState({
