@@ -90,7 +90,7 @@ class Create extends Component {
       //retrieve from DH table
       deptHead: [],
       //retrieve userList
-      userList:[],
+      userList: [],
       teams: [],
       branches: [],
       viewContract: false,
@@ -160,6 +160,9 @@ class Create extends Component {
 
       dateView1: "",
       dateView2: "",
+
+      invalidEnglish: false,
+      invalidChinese: false,
 
       reqInfo: [
         { id: "deptSelected", valid: false },
@@ -502,7 +505,6 @@ class Create extends Component {
               })
               err3 = err2.join(';')
             }
-            Swal.hideLoading()
             Swal.update({
               title: "Error",
               type: "error",
@@ -510,6 +512,8 @@ class Create extends Component {
               html: err3,
 
             })
+            Swal.hideLoading()
+
           })
       }
     })
@@ -591,7 +595,7 @@ class Create extends Component {
       })
   }
 
-  async getUsers(){
+  async getUsers() {
     await axios.get(`${config.url}/users?category=normal`, { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ userList: res.data })
@@ -603,10 +607,6 @@ class Create extends Component {
     await axios.get(`${config.url}/users?category=normal&companyid=${companyId}&displayname=&userid=${this.state.userId}`, { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ deptHead: res.data })
-      })
-    await axios.get(`${config.url}/users?category=normal&companyid=${companyId}`, { headers: { Pragma: 'no-cache' } })
-      .then(res => {
-        this.setState({ usersList: res.data })
       })
   }
 
@@ -774,34 +774,51 @@ class Create extends Component {
     }
 
     //Handle engName
-    if (name === "engName" && value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)) {
-      Swal.fire({
-        title: "invalid",
-        html: 'Please input english character',
-        type: "warning"
-      })
+    else if (name === "engName") {
+      if (value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)) {
+        this.setState({ engName: this.state.engName, invalidEnglish: true })
+        event.target.className = "form-control is-invalid"
+      }
+      else {
+        event.target.className = "form-control"
+        this.setState({ engName: value, invalidEnglish: false })
+      }
     }
 
-    this.setState({
-      [name]: value
-    },
-      () => { this.checkDepartment() }
-    );
-
-    if (event.target.value) {
-      event.target.className = "form-control"
+    //Handle cnName
+    else if (name === "cnName") {
+      // console.log(value.match(/^[A-Za-z]/))
+      // if (value.match(/^[A-Za-z0-9_]+$/gm)) {
+      // if (value.match(/[A-Za-z]+/g)) {
+      this.setState({ cnName: value, invalidChinese: false })
+      // event.target.className = "form-control is-invalid"
+      // }
+      // else {
+      // this.setState({ cnName: value, invalidChinese: false })
+      // event.target.className = "form-control"
+      // }
     }
 
+    // this.setState({
+    //   [name]: value
+    // },
+    //   () => { this.checkDepartment() }
+    // );
 
-    if (name !== "numOfPages") {
+    // if (event.target.value) {
+    //   event.target.className = "form-control"
+    // }
+
+
+    if (name !== "numOfPages" && name !== "engName" && name !== "cnName") {
       this.setState({
-        [name]: event.target.value
+        [name]: value
       },
         () => { this.checkDepartment() }
       );
 
 
-      if (event.target.value) {
+      if (value) {
         event.target.className = "form-control"
       }
       else {
@@ -1074,6 +1091,9 @@ class Create extends Component {
           })
 
           console.log(obj.docURL)
+          this.setState({
+            invalidEnglish: false, invalidChinese: false
+          })
           this.setState(state => {
             const documentTableLTI = state.documentTableLTI.concat(obj)
             return {
@@ -1445,7 +1465,7 @@ class Create extends Component {
       callback(filterUsers(inputValue));
 
     }
-    
+
 
     const loadDocCheckBy = (inputValue, callback) => {
       callback(filterDocCheck(inputValue));
@@ -1548,18 +1568,28 @@ class Create extends Component {
               <FormGroup>
                 {/* <Label>English Name</Label> */}
                 <Input autoComplete="off" value={this.state.engName} onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
+                {this.state.invalidEnglish
+                  ? <small style={{ color: '#F86C6B' }}> Please input only English characters </small>
+                  : null
+                }
               </FormGroup>
             </Col>
             <Col md>
               <FormGroup>
                 {/* <Label>Chinese Name</Label> */}
                 <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3" placeholder="Please describe in Chinese (optional)" />
+                {this.state.invalidChinese
+                  ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
+                  : null
+                }
               </FormGroup>
             </Col>
             <Col md>
               <FormGroup>
                 {/* <Label>File Name</Label> */}
-                <CustomInput id="docFileName" onChange={this.uploadDocument} accept=".xls, .xlsx, .doc, .docx, .pdf, .jpeg, .jpg" type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
+                <CustomInput id="docFileName" onChange={this.uploadDocument}
+                  accept=".ipg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, docx, .pdf, .pdfx, .bmp"
+                  type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
               </FormGroup>
             </Col>
             <Col xl={1}>
@@ -1571,10 +1601,13 @@ class Create extends Component {
               </FormGroup>
             </Col>
           </Row>
+
+
           <Collapse isOpen={this.state.documentTableLTI.length !== 0 || this.state.documentTableCNIPS.length !== 0}>
             {this.state.isCNIPS ? CNIPSTable : DocTable}
           </Collapse>
         </div>
+
         {this.state.isCNIPS
           ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Documents', this.state.documentTableCNIPS, 'required')}</small>
           : this.state.isLTI || this.state.isSTU
