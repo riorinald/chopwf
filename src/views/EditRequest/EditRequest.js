@@ -14,6 +14,7 @@ import {
     CustomInput,
     Spinner,
     InputGroupButtonDropdown,
+    Tooltip,
     DropdownToggle,
     DropdownMenu,
     DropdownItem
@@ -151,6 +152,8 @@ class EditRequest extends Component {
             chopTypes: [],
             documents: [],
             teams: [],
+            msgTooltip: '[I / S ]-[ A / L / IA / R ]-[ O / P / S] \n e.g "S-A-O-9999-9999"',
+            ioTooltip: false
         }
         this.getTaskDetails = this.getTaskDetails.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -1730,11 +1733,11 @@ class EditRequest extends Component {
                                                                             <td>{document.documentNameEnglish}</td>
                                                                             <td>{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.convertExpDate(document.expiryDate)} </div>
+                                                                                <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.convertExpDate(document.expiryDate)} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                                                                             </td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.changeDeptHeads(document.departmentHeads)} </div>
+                                                                                <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.changeDeptHeads(document.departmentHeads)} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
                                                                             </td>
                                                                             <td class="smallTd" ><img width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} src={deleteBin} /></td>
@@ -1769,6 +1772,7 @@ class EditRequest extends Component {
 
                                                                             </DropdownMenu>
                                                                         </InputGroupButtonDropdown>
+                                                                        <Tooltip toggle={this.toggle('ioTooltip')} placement="top" isOpen={this.state.ioTooltip} target="contractNumber">{this.state.msgTooltip} </Tooltip>
                                                                         <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
                                                                             onChange={this.handleContractNumber('contractNumber')} value={this.state.contractNumber}
                                                                             onClick={this.handleInputMask}></InputMask>
@@ -1830,10 +1834,10 @@ class EditRequest extends Component {
                                                                                     <div key={index} > {number} </div>
                                                                                 )} </td>
                                                                                 : null}
-                                                                            <td>{document.documentNameEnglish}</td>
-                                                                            <td>{document.documentNameChinese}</td>
+                                                                            <td className="descTd">{document.documentNameEnglish}</td>
+                                                                            <td className="descTd">{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
+                                                                                <div style={{  textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a> */}
                                                                             </td>
                                                                             <td className="smallTd"><img width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} src={deleteBin} /></td>
