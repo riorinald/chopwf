@@ -345,7 +345,7 @@ class LicenseApplication extends Component {
                                             <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('status')} >
                                                 <option value="">Please Select a status</option>
                                                 {statusName.map((stat, index) =>
-                                                    <option key={index} value={stat.statusName} > {statusName} </option>
+                                                    <option key={index} value={stat.statusName} > {stat.statusName} </option>
                                                 )}
                                             </Input>
                                         )

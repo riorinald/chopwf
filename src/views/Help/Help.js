@@ -12,6 +12,7 @@ import {
 } from 'reactstrap';
 
 import Axios from 'axios';
+import config from '../../config'
 
 
 class Help extends Component {
@@ -75,7 +76,7 @@ class Help extends Component {
     }
 
     async getData(){
-        const response = Axios.get('http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/3')
+        const response = Axios.get(`${config.url}/helps/chop`)
         this.setState({chopKeepers: response.data.chopKeepers, QA: response.data.QA })
     }
 
