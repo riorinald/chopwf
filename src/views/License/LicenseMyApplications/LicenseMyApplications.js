@@ -125,7 +125,7 @@ class LicenseMyApplications extends Component {
     }
 
     async getStatusList() {
-        const res = await Axios.get(`${config.url}/statuses?category=license`)
+        const res = await Axios.get(`${config.url}/statuses?category=license`,{ headers: { Pragma: 'no-cache' } })
         this.setState({ statusName: res.data })
       }
 

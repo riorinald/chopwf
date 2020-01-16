@@ -590,7 +590,7 @@ class Create extends Component {
     let userId = localStorage.getItem('userId')
     // let userId = "josh@otds.admin"
     // let userId = "daniel@otds.admin"
-    await axios.get(`${config.url}/users/` + userId, { headers: { 'ticket': ticket } })
+    await axios.get(`${config.url}/users/` + userId, { headers: { Pragma: 'no-cache','ticket': ticket } })
       .then(res => {
         this.setState({ employeeId: res.data.employeeNum, telNumber: res.data.telephoneNum, userId: userId })
       })
@@ -955,17 +955,17 @@ class Create extends Component {
 
     // let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
     // let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
-    var value = event.target.value;
+    var value = event.target.value.toUpperCase();
 
-    // if (/^..[AaLlRr]/.test(value)){
-    //   this.setState({
-    //     mask: "a-a-a-9999-9999",
-    //     })
-    //   }
     // var inputMask={
     //   mask: "a-a-a-9999-9999",
     //   value: value, 
     // }
+    if (/^[IS]/.test(value)){
+      this.setState({
+        msgTooltip: "First Charcter should [I / S]",
+        })
+      }
 
     let message = '[I / S ]-[ A / L / IA / R ]-[ O / P / S] e.g "S-A-O-9999-9999"'
     if (/^..[LIAR]/i.test(value)) {
@@ -1512,9 +1512,9 @@ class Create extends Component {
         <thead>
           <tr>
             <th className="smallTd" >No.</th>
-            <th className="mediumTd">Contract Number</th>
-            <th>Document Name in English</th>
-            <th>Document Name in Chinese</th>
+            <th className="mediumTd">Contract Name</th>
+            <th>Contract Name in English</th>
+            <th>Contract Name in Chinese</th>
             <th>Attached File</th>
             <th className="smallTd"></th>
           </tr>
@@ -1544,8 +1544,8 @@ class Create extends Component {
             {this.state.isCNIPS
               ? <Col >
                 <FormGroup>
-                  <InputGroup>
-                    <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
+                  {/* <InputGroup> */}
+                    {/* <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
                       <DropdownToggle><i className="fa fa-list-ul" /></DropdownToggle>
                       <DropdownMenu>
                         <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
@@ -1560,15 +1560,17 @@ class Create extends Component {
                         }
 
                       </DropdownMenu>
-                    </InputGroupButtonDropdown>
-                    <Tooltip toggle={this.toggle('ioTooltip')} placement="top" isOpen={this.state.ioTooltip} target="contractNumber">
+                    </InputGroupButtonDropdown> */}
+                    <Tooltip toggle={this.toggle('ioTooltip')} placement="left" isOpen={this.state.ioTooltip} target="contractNumber">
                       {this.state.msgTooltip} </Tooltip>
-                    <InputMask autoComplete="off" autoCapitalize="character" placeholder="Enter Contract Name" mask={this.state.mask} name="contractNumber" id="contractNumber" className="form-control"
-                      onChange={this.handleContractChange} beforeMaskedStateChange={this.beforeMaskedStateChange} value={this.state.contractNumber}
-                    // onClick={this.handlemask}
-                    ></InputMask>
-                    <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
-                  </InputGroup>
+                    <Input type="text"
+                    autoComplete="off" autoCapitalize="character" 
+                    name="contractNumber" id="contractNumber" className="form-control"
+                    placeholder="Enter Contract Name" 
+                    onChange={this.handleContractChange} value={this.state.contractNumber}
+                    />
+                    {/* <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon> */}
+                  {/* </InputGroup> */}
                 </FormGroup></Col>
               : ""}
 
@@ -1890,7 +1892,10 @@ class Create extends Component {
                   }
 
                   <FormGroup check={false}>
-                    <Label>Document Name</Label>
+                    {this.state.isCNIPS 
+                      ? <><Label>Contract Name</Label><small className="ml-2">Please upload the sign-off sheet of your contract</small></>
+                      : <Label>Document Name</Label> 
+                    }
                     {this.state.isLTU ? documentForLTU : documentForLTI}
 
                   </FormGroup>

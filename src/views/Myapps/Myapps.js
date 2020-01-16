@@ -73,7 +73,7 @@ class Myapps extends Component {
   }
 
   async getStatusList() {
-    const res = await Axios.get(`${config.url}/statuses?category=chop`)
+    const res = await Axios.get(`${config.url}/statuses?category=chop`, { headers: { Pragma: 'no-cache' } })
     this.setState({ status: res.data })
   }
 

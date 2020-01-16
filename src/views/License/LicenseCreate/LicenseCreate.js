@@ -79,7 +79,7 @@ class LicenseCreate extends Component {
     }
 
     async getLicenseNames() {
-        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`)
+        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`,{ headers: { Pragma: 'no-cache' } })
         this.setState({ licenseNames: res.data })
     }
 
@@ -92,7 +92,7 @@ class LicenseCreate extends Component {
     async getUserData() {
         let ticket = localStorage.getItem('ticket')
         let userId = localStorage.getItem('userId')
-        const res = await axios.get(`${config.url}/users/` + userId, { headers: { 'ticket': ticket } })
+        const res = await axios.get(`${config.url}/users/` + userId, { headers: { Pragma: 'no-cache','ticket': ticket } })
         this.setState(state => {
             let formData = this.state.formData
             formData.userId = userId
@@ -104,7 +104,8 @@ class LicenseCreate extends Component {
 
     async getSeniorManagers() {
         // console.log(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
-        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
+        { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let arr1 = []
                 res.data.map(mgr => {
@@ -116,7 +117,7 @@ class LicenseCreate extends Component {
                 })
                 this.setState({ seniorManagers: arr1 })
             })
-        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}`)
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}`,{ headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let arr1 = []
                 res.data.map(mgr => {
