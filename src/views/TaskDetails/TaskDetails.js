@@ -260,9 +260,9 @@ class TaskDetails extends Component {
                                                 className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
                                                 bar
                                                 animated={stage.state === "CURRENT" ? true : false}
-                                                striped={stage.state === "FINISHED"}
+                                                striped={stage.state !== "CURRENT"}
                                                 color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
-                                                value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
+                                                value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                             </Progress>
                                         </React.Fragment>
 
