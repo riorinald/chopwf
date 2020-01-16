@@ -810,7 +810,7 @@ class Create extends Component {
     // }
 
 
-    if (name !== "numOfPages" && name !== "engName" && name !== "cnName") {
+    if ( name !== "engName" && name !== "cnName") {
       this.setState({
         [name]: value
       },
@@ -1898,7 +1898,7 @@ class Create extends Component {
                     <FormGroup>
                       <Label>Number of Pages to Be Chopped</Label>
                       <InputGroup>
-                        <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
+                        <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' maxLength='9' />
                       </InputGroup>
                       {!this.state.isLTI
                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages to Be Chopped', this.state.numOfPages, 'required')}</small>
