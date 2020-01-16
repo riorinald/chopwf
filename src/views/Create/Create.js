@@ -165,6 +165,8 @@ class Create extends Component {
       invalidChinese: false,
       invalidNumberOfPages: false,
 
+      checkDetails: { deptSelected: "null", chopTypeSelected: "null", teamSelected: "null" },
+
       reqInfo: [
         { id: "deptSelected", valid: false },
         { id: "appTypeSelected", valid: false },
@@ -188,6 +190,7 @@ class Create extends Component {
       inputMask: { mask: "a-a-a-9999-9999" },
       msgTooltip: '[I / S ]-[ A / L / IA / R ]-[ O / P / S] \n e.g "S-A-O-9999-9999"',
       ioTooltip: false,
+      contractNumNotes: ""
 
     };
 
@@ -207,9 +210,11 @@ class Create extends Component {
     this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
+    this.hideDoc = this.hideDoc.bind(this);
     this.toggleConnection = this.toggleConnection.bind(this);
     this.getDocuments = this.getDocuments.bind(this);
     this.addContract = this.addContract.bind(this);
+    this.setContractNotes = this.setContractNotes.bind(this);
   };
 
   componentDidMount() {
@@ -219,8 +224,28 @@ class Create extends Component {
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=` + this.props.legalName);
     // resetMounted.setMounted()
+    this.setContractNotes();
 
 
+  }
+
+  setContractNotes() {
+    switch (this.props.legalName) {
+      case "MBAFC":
+        this.setState({ contractNumNotes: "Enter Contract Number, e.g. I-A-P-2020-1035" })
+        break;
+      case "MBLC":
+        this.setState({ contractNumNotes: "Enter Contract Number, e.g. I-L-P-2020-1035" })
+        break;
+      case "MBIA":
+        this.setState({ contractNumNotes: "Enter Contract Number, e.g. I-IA-P-2020-1035" })
+        break;
+      case "DMT":
+        this.setState({ contractNumNotes: "Enter Contract Number, e.g. I-R-P-2020-1035" })
+        break;
+      default:
+        break;
+    }
   }
 
 
@@ -450,16 +475,18 @@ class Create extends Component {
     }
   }
 
-  async getDocuments(companyId, deptId, chopTypeId, teamId) {
+  async getDocuments(companyId, deptId, chopTypeId, teamId, callback) {
     // let url = `${config.url}/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit`
 
     let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
     try {
       await axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ documents: res.data })
+        callback(res.data.length)
       })
     } catch (error) {
       console.error(error)
+      callback("No Documents")
     }
   }
 
@@ -700,7 +727,9 @@ class Create extends Component {
         if (this.state.deptSelected !== "") {
           this.getTeams(this.state.deptSelected)
           if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.deptSelected !== "") {
-            this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, this.state.teamSelected)
+            this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, this.state.teamSelected, (callback) => {
+
+            })
           }
         }
       }
@@ -732,7 +761,9 @@ class Create extends Component {
     else if (name === "chopTypeSelected") {
       console.log(event.target.value)
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
-        this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected)
+        this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
+
+        })
       }
 
       if (event.target.value === "BCSCHOP") {
@@ -760,7 +791,9 @@ class Create extends Component {
         this.getTeams(event.target.value)
       }
       if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.isLTU) {
-        this.getDocuments(this.props.legalName, event.target.value, this.state.chopTypeSelected, this.state.teamSelected)
+        this.getDocuments(this.props.legalName, event.target.value, this.state.chopTypeSelected, this.state.teamSelected, (callback) => {
+
+        })
       }
     }
 
@@ -769,7 +802,9 @@ class Create extends Component {
       // console.log(event.target.value)
       this.getDocCheckBy(event.target.value)
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
-        this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value)
+        this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value, (callback) => {
+
+        })
       }
     }
 
@@ -1137,7 +1172,7 @@ class Create extends Component {
     let conName = [this.state.contractNumber]
 
     if (this.state.docSelected !== null) {
-      if (this.state.engName !== "" && this.state.cnName !== "") {
+      if (this.state.engName !== "" && this.state.conNum.length !== 0) {
         for (let i = 0; i < doc.length; i++) {
           if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
             valid = false
@@ -1310,21 +1345,49 @@ class Create extends Component {
   // addDocCheck(row) {
   //   this.setState({ selectedDocs: row })
   // }
-
+  hideDoc() {
+    this.setState({ showDoc: false })
+  }
   selectDocument() {
-    if (this.state.documents.length === 0) {
-      Swal.fire({
-        title: "No Documents",
-        html: 'No documents to select from!',
-        type: "warning",
-        onBeforeOpen: () => {
-          Swal.showLoading()
-        }
-      })
+    document.getElementById('selectDocuments').blur()
+    let { deptSelected, teamSelected, chopTypeSelected, checkDetails } = this.state
+    // if (this.state.documents.length === 0) {
+    if (checkDetails.deptSelected === deptSelected && checkDetails.chopTypeSelected === chopTypeSelected && checkDetails.teamSelected === teamSelected) {
+      this.setState({ showDoc: true })
     }
     else {
-      this.setState({ showDoc: !this.state.showDoc })
-
+      Swal.fire({
+        title: "Retrieving",
+        html: 'Please wait while we retrive the list of documents available.',
+        type: "info",
+        onBeforeOpen: () => {
+          Swal.showLoading()
+        },
+        onOpen: () => {
+          this.getDocuments(this.props.legalName, deptSelected, chopTypeSelected, teamSelected, (numberOfDocuments) => {
+            if (numberOfDocuments === 0) {
+              Swal.update({
+                title: "No Documents",
+                html: 'No documents to select from!',
+                type: "warning"
+              })
+              Swal.hideLoading()
+            }
+            else {
+              // Swal.hideLoading();
+              Swal.close();
+              this.setState({ showDoc: true })
+            }
+            this.setState(state => {
+              let checkDetails = this.state.checkDetails
+              checkDetails.deptSelected = deptSelected
+              checkDetails.chopTypeSelected = chopTypeSelected
+              checkDetails.teamSelected = teamSelected
+              return checkDetails
+            })
+          })
+        }
+      })
     }
   }
 
@@ -1563,6 +1626,7 @@ class Create extends Component {
                 </FormGroup></Col>
               : ""}
 
+
             <Col md>
               <FormGroup>
                 {/* <Label>English Name</Label> */}
@@ -1621,7 +1685,7 @@ class Create extends Component {
       <div>
         <InputGroup id="documentTableLTU"  >
           <InputGroupAddon addonType="prepend">
-            <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
+            <Button color="primary" id="selectDocuments" onClick={this.selectDocument}>Select Documents</Button>
           </InputGroupAddon>
           {/* <div  id="documentTableLTU" /> */}
         </InputGroup>
@@ -1630,7 +1694,7 @@ class Create extends Component {
             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Documents', this.state.documentTableLTU, 'required')}</small>
             : null}
         </InputGroup>
-        <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
+        <Modal color="info" size="xl" toggle={this.hideDoc} isOpen={this.state.showDoc} >
           <ModalHeader className="center"> Select Documents </ModalHeader>
           <ModalBody>
             <SelectTable
@@ -1681,7 +1745,7 @@ class Create extends Component {
             />
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" block size="md" onClick={() => { this.addDocumentLTU(); this.selectDocument() }}>  Add </Button>
+            <Button color="primary" block size="md" onClick={() => { this.addDocumentLTU(); this.hideDoc() }}>  Add </Button>
           </ModalFooter>
         </Modal>
 

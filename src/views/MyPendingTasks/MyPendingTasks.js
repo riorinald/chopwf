@@ -137,7 +137,7 @@ class MyPendingTasks extends Component {
         this.setState({ loading: !this.state.loading })
         let userId = localStorage.getItem('userId')
         // let userId = "josh@otds.admin"
-        let url = `${config.url}/tasks?category=pending&companyid=${this.props.legalName}&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`
+        let url = `${config.url}/tasks?category=pending&companyid=${this.props.legalName}&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`
         const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } })
         this.setState({ pendingTasks: response.data.tasks, totalPages: response.data.pageCount, loading: !this.state.loading })
         // array = response.data
@@ -335,7 +335,7 @@ class MyPendingTasks extends Component {
                                             <Input type="select" value={this.state.searchOption.applicationTypeName} onChange={this.handleSearch('applicationTypeName')} >
                                                 <option value="">Please Select an application Type</option>
                                                 {this.state.applicationTypes.map(type =>
-                                                    <option key={type.appTypeId} value={type.appTypeName} >{type.appTypeName}</option>
+                                                    <option key={type.appTypeId} value={type.appTypeId} >{type.appTypeName}</option>
                                                 )}
                                             </Input>
 
@@ -357,7 +357,7 @@ class MyPendingTasks extends Component {
                                             <Input type="select" value={this.state.searchOption.chopTypeName} onChange={this.handleSearch('chopTypeName')} >
                                                 <option value="">Please Select a Chop Type</option>
                                                 {this.state.chopTypes.map(type =>
-                                                    <option key={type.chopTypeId} value={type.chopTypeName} >{type.chopTypeName}</option>
+                                                    <option key={type.chopTypeId} value={type.chopTypeId} >{type.chopTypeName}</option>
                                                 )}
                                             </Input>
 
