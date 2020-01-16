@@ -282,7 +282,7 @@ class TaskDetails extends Component {
                                 {/* </Col> */}
 
                             </Row>
-                            <Modal style={{ maxWidth: 1500 }} size="xl" color="info" toggle={() => this.setState({ progressModal: !this.state.progressModal })} isOpen={this.state.progressModal} >
+                            {/* <Modal style={{ maxWidth: 1500 }} size="xl" color="info" toggle={() => this.setState({ progressModal: !this.state.progressModal })} isOpen={this.state.progressModal} >
                                 <ModalBody>
                                     <Col style={{ width: "100%" }} >
                                         <Progress multi style={{ height: "5rem" }}>
@@ -302,7 +302,7 @@ class TaskDetails extends Component {
                                         </Progress>
                                     </Col>
                                 </ModalBody>
-                            </Modal>
+                            </Modal> */}
 
                             <Row className="mb-4">
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
@@ -379,7 +379,7 @@ class TaskDetails extends Component {
                                         </FormGroup>
                                         : ""
                                     }
-                                    {appType === "LTI" ?
+                                    {/* {appType === "LTI" ?
                                         <div>
                                             <FormGroup row >
                                                 <Col md="4" className="d-flex align-items-center" >
@@ -411,7 +411,7 @@ class TaskDetails extends Component {
 
                                                 : ""}
                                         </div>
-                                        : null}
+                                        : null} */}
                                     {appType !== "LTI" ?
                                         <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
@@ -470,7 +470,7 @@ class TaskDetails extends Component {
                                                 <Label>Document Check By</Label>
                                             </Col>
                                             <Col id="docCheck" xs="12" md="8">
-                                                <Input disabled type="text" value={this.setArray(taskDetails.documentCheckByName)} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
+                                                <Input disabled type="textarea" value={this.setArray(taskDetails.documentCheckByName)} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
                                                 <UncontrolledTooltip placement="right" target="docCheck">{this.setArray(taskDetails.documentCheckByName)}</UncontrolledTooltip>
                                             </Col>
                                         </FormGroup>
@@ -496,7 +496,7 @@ class TaskDetails extends Component {
 
 
 
-                                    {appType === 'LTU' || appType === 'CNIPS'
+                                    {appType !== "STU"
                                         ? <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
                                                 <Label>Confirm</Label>
@@ -659,7 +659,7 @@ class TaskDetails extends Component {
                                             </Col>
                                         </FormGroup>
                                         : null}
-                                    {appType === 'LTU' || appType === 'CNIPS'
+                                    {appType !== "STU"
                                         ? ''
                                         : <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
@@ -759,11 +759,11 @@ class TaskDetails extends Component {
                                         ? <Row className="mb-4">
                                             <Col>
                                                 {taskDetails.actions.map((action, index) =>
-                                                    <>
+                                                    <React.Fragment key={index}>
                                                         {action.action !== "copy" && action.action !== "recall" && action.action !== "remind"
                                                             ? <Button className="mx-1" key={index} color={action.action === "approve" ? "success" : "danger"} onClick={() => this.approve(action.action)} > {action.actionName}</Button>
                                                             : null}
-                                                    </>
+                                                    </React.Fragment>
                                                 )}
                                             </Col>
                                         </Row>
@@ -795,32 +795,6 @@ class TaskDetails extends Component {
                             )}
 
                         </CardBody>
-                        {/* <CardFooter>
-                            <Row>
-                                <Col xs="1" >
-                                    <div style={{ width: "10px", height: "10px", background: "#c8ced3" }} ></div>
-                                </Col>
-                                <Col>
-                                    <div>Finished Stage</div>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col xs="1" >
-                                    <div style={{ width: "10px", height: "10px", background: "#4dbd74" }} >  </div>
-                                </Col>
-                                <Col>
-                                    <div>Current Stage</div>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col xs="1" >
-                                    <div style={{ width: "10px", height: "10px", background: "#ffc107" }} >  </div>
-                                </Col>
-                                <Col>
-                                    <div>Next Stage</div>
-                                </Col>
-                            </Row>
-                        </CardFooter> */}
                     </Card>
                     : null
                 }
