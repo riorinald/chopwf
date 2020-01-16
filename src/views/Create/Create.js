@@ -1171,10 +1171,11 @@ class Create extends Component {
     let doc = this.state.documentTableCNIPS
     let conName = [this.state.contractNumber]
 
-    if (this.state.docSelected !== null) {
-      if (this.state.engName !== "" && this.state.conNum.length !== 0) {
+    if (this.state.docSelected !== null  && this.state.contractNumber !== "") {
+      if (this.state.engName !== "") {
         for (let i = 0; i < doc.length; i++) {
-          if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
+          if(doc[i].docName === this.state.docAttachedName && doc[i].conNum[0] === this.state.contractNumber){
+          // if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName) {
             valid = false
             break
           }
@@ -1208,7 +1209,7 @@ class Create extends Component {
         else {
           Swal.fire({
             title: "Document Exists",
-            html: 'DOcument already exists in the list!',
+            html: 'Document and contract number already exists in the list',
             type: "warning"
           })
         }
@@ -1216,16 +1217,17 @@ class Create extends Component {
       }
       else {
         Swal.fire({
-          title: "Invalid Data",
-          html: 'Please input valid data!',
+          title: "English Contract Name is Required",
+          html: 'Please input Contract Name in English',
           type: "warning"
         })
       }
     }
     else {
       Swal.fire({
-        title: "Document Not Selected",
-        html: 'Please select a valid document!',
+        title: "Contract Number & Document is required.",
+        width: '700px',
+        html: 'Please input Contract Number & select a valid Document',
         type: "warning"
       })
     }
@@ -1946,7 +1948,7 @@ class Create extends Component {
 
                   <FormGroup check={false}>
                     {this.state.isCNIPS 
-                      ? <><Label>Contract Name</Label><small className="ml-2">Please upload the sign-off sheet of your contract</small></>
+                      ? <><Label>Contract Name</Label><small className="ml-2">Please upload the sign-off sheet of your contract.</small></>
                       : <Label>Document Name</Label> 
                     }
                     {this.state.isLTU ? documentForLTU : documentForLTI}
