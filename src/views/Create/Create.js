@@ -351,7 +351,6 @@ class Create extends Component {
       for (let j = 0; j < this.state.documentTableCNIPS[i].contractNumbers.length; j++) {
         postReq.append(`Documents[${i}].ContractNums[${j}]`, this.state.documentTableCNIPS[i].contractNumbers[j]);
       }
-
     }
 
     //for existing documents in LTU
@@ -961,33 +960,20 @@ class Create extends Component {
     //   mask: "a-a-a-9999-9999",
     //   value: value, 
     // }
+    var message = '[I / S ]-[ A / L / IA / R ]-[ O / P / S] e.g "S-A-O-9999-9999"'
     if (/^[IS]/.test(value)){
-      this.setState({
-        msgTooltip: "First Charcter should [I / S]",
-        })
-      }
-
-    let message = '[I / S ]-[ A / L / IA / R ]-[ O / P / S] e.g "S-A-O-9999-9999"'
-    if (/^..[LIAR]/i.test(value)) {
-      // inputMask.mask = "a-aa-a-9999-9999"
-      // value = value.replace("I-_", "IA-_")
-    } else {
-
+    
+    }
+    // if (/^..[LIAR]/i.test(value)) {
+      //   mask = "a-aa-a-9999-9999"
+      //   value = value.replace("I-_", "IA-_")
+      // } 
+      else {
+        message = "First Charcter should be [ I / S ]"
+        value = ""
     }
     // console.log(inputMask, inputMask.value);
     this.setState({ viewContract: true, msgTooltip: message, ioTooltip: true, contractNumber: value })
-  }
-
-  beforeMaskedStateChange({ nextState }) {
-    let { value } = nextState;
-    if (/^..[LIAR]/i.test(value)) {
-      value = value.slice(0, -1);
-    }
-
-    return {
-      ...nextState,
-      value
-    };
   }
 
   addContract(event) {
@@ -1148,8 +1134,10 @@ class Create extends Component {
     var rand = Math.floor((Math.random() * maxNumber) + 1);
     let valid = true
     let doc = this.state.documentTableCNIPS
+    let conName = [this.state.contractNumber]
+
     if (this.state.docSelected !== null) {
-      if (this.state.engName !== "" && this.state.cnName !== "" && this.state.conNum.length !== 0) {
+      if (this.state.engName !== "" && this.state.cnName !== "") {
         for (let i = 0; i < doc.length; i++) {
           if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
             valid = false
@@ -1163,13 +1151,13 @@ class Create extends Component {
         if (valid) {
           const obj = {
             id: rand,
-            conNum: this.state.conNum,
+            conNum: conName,
             engName: this.state.engName,
             cnName: this.state.cnName,
             docSelected: this.state.docSelected,
             docName: this.state.docAttachedName,
             docURL: URL.createObjectURL(this.state.docSelected),
-            contractNumbers: this.state.conNum
+            contractNumbers: conName
           }
 
           this.setState(state => {
@@ -1179,7 +1167,7 @@ class Create extends Component {
               documentTableCNIPS
             }
           })
-          this.setState({ conNum: [], engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
+          this.setState({ contractNumber:"", conNum: [], engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
           document.getElementById("documentTableCNIPS").className = ""
         }
         else {
@@ -1512,7 +1500,7 @@ class Create extends Component {
         <thead>
           <tr>
             <th className="smallTd" >No.</th>
-            <th className="mediumTd">Contract Name</th>
+            <th className="mediumTd">Contract Number</th>
             <th>Contract Name in English</th>
             <th>Contract Name in Chinese</th>
             <th>Attached File</th>
@@ -1523,7 +1511,8 @@ class Create extends Component {
           {this.state.documentTableCNIPS.map((document, index) =>
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
-              <td className="mediumTd">{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</td>
+              {/* <td className="mediumTd">{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</td> */}
+              <td className="mediumTd">{document.conNum}</td>
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
@@ -1561,12 +1550,12 @@ class Create extends Component {
 
                       </DropdownMenu>
                     </InputGroupButtonDropdown> */}
-                    <Tooltip toggle={this.toggle('ioTooltip')} placement="left" isOpen={this.state.ioTooltip} target="contractNumber">
+                    <Tooltip toggle={this.toggle('ioTooltip')} placement="bottom" isOpen={this.state.ioTooltip} target="contractNumber">
                       {this.state.msgTooltip} </Tooltip>
                     <Input type="text"
                     autoComplete="off" autoCapitalize="character" 
                     name="contractNumber" id="contractNumber" className="form-control"
-                    placeholder="Enter Contract Name" 
+                    placeholder="Enter Contract Number" 
                     onChange={this.handleContractChange} value={this.state.contractNumber}
                     />
                     {/* <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon> */}
