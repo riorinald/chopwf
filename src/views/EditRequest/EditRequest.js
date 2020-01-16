@@ -1783,11 +1783,11 @@ class EditRequest extends Component {
                                             <Label>Document Name</Label>
                                             {taskDetails.applicationTypeId === "LTU"
                                                 ? <div id="documents">
-                                                    <InputGroup >
+                                                    <InputGroup id="documentTableLTU" >
                                                         <InputGroupAddon addonType="prepend">
                                                             <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
                                                         </InputGroupAddon>
-                                                        <Input id="documentTableLTU" disabled />
+                                                        {/* <Input id="documentTableLTU" disabled /> */}
                                                         {/* <FormFeedback>Invalid Input a valid Document Name</FormFeedback> */}
                                                     </InputGroup>
                                                     <InputGroup>
@@ -2015,7 +2015,7 @@ class EditRequest extends Component {
                                                 </InputGroup>
                                                 <InputGroup>
                                                     {this.state.invalidNumberOfPages
-                                                        ?  <small style={{ color: '#F86C6B' }} >Number of pages cannot be more than 9</small>
+                                                        ? <small style={{ color: '#F86C6B' }} >Number of pages cannot be more than 9</small>
                                                         : null
                                                     }
                                                     {taskDetails.applicationTypeId !== "LTI"

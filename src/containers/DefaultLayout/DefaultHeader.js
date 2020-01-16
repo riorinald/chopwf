@@ -107,12 +107,13 @@ class DefaultHeader extends Component {
           </Dropdown>
           <UncontrolledDropdown nav direction="down" >
             <DropdownToggle nav>
-              {username}<img src={userDetails.photoUrl} className="img-avatar" alt={userDetails.firstName} />
+              {userDetails.displayName}
             </DropdownToggle>
             <DropdownMenu right className="mt-2">
               <AuthButton />
             </DropdownMenu>
           </UncontrolledDropdown>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         </Nav>
       </React.Fragment>
     );
