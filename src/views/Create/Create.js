@@ -163,6 +163,7 @@ class Create extends Component {
 
       invalidEnglish: false,
       invalidChinese: false,
+      invalidNumberOfPages: false,
 
       reqInfo: [
         { id: "deptSelected", valid: false },
@@ -177,10 +178,10 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       validateForm: [],
-      noteInfo: { 
-                  chinese:"如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
-                  english:"For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
-                },
+      noteInfo: {
+        chinese: "如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
+        english: "For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
+      },
       mask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[A-Z]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
       // mask: "a-a-a-9999-9999",
       selectInfo: '',
@@ -465,7 +466,7 @@ class Create extends Component {
 
   async postData(formData, isSubmitted) {
     // console.log(document.getElementById("remarks"))
-    let elementId = (isSubmitted === 'Y') ? "submit" : "saveAction" 
+    let elementId = (isSubmitted === 'Y') ? "submit" : "saveAction"
     document.getElementById(elementId).blur()
 
     Swal.fire({
@@ -791,23 +792,27 @@ class Create extends Component {
       // if (value.match(/^[A-Za-z0-9_]+$/gm)) {
       // if (value.match(/[A-Za-z]+/g)) {
       this.setState({ cnName: value, invalidChinese: false })
-      // event.target.className = "form-control is-invalid"
-      // }
-      // else {
-      // this.setState({ cnName: value, invalidChinese: false })
-      // event.target.className = "form-control"
-      // }
+
     }
 
-    // this.setState({
-    //   [name]: value
-    // },
-    //   () => { this.checkDepartment() }
-    // );
+    else if (name === "numOfPages") {
+      if (value.length > 9) {
+        this.setState({ numOfPages: this.state.numOfPages, invalidNumberOfPages: true })
 
-    // if (event.target.value) {
-    //   event.target.className = "form-control"
-    // }
+        // event.target.className = "form-control is-invalid"
+      }
+      else {
+        this.setState({ numOfPages: value, invalidNumberOfPages: false })
+        // event.target.className = "form-control"
+      }
+      if (value) {
+        event.target.className = "form-control"
+      }
+      else {
+        event.target.className = "is-invalid form-control"
+      }
+    }
+
 
 
     if ( name !== "engName" && name !== "cnName") {
@@ -962,7 +967,7 @@ class Create extends Component {
     //   value: value, 
     // }
 
-     let message = '[I / S ]-[ A / L / IA / R ]-[ O / P / S] e.g "S-A-O-9999-9999"'
+    let message = '[I / S ]-[ A / L / IA / R ]-[ O / P / S] e.g "S-A-O-9999-9999"'
     if (/^..[LIAR]/i.test(value)) {
       // inputMask.mask = "a-aa-a-9999-9999"
       // value = value.replace("I-_", "IA-_")
@@ -970,19 +975,19 @@ class Create extends Component {
 
     }
     // console.log(inputMask, inputMask.value);
-    this.setState({ viewContract:true, msgTooltip: message, ioTooltip:true, contractNumber: value })
+    this.setState({ viewContract: true, msgTooltip: message, ioTooltip: true, contractNumber: value })
   }
 
-  beforeMaskedStateChange({nextState}){
-   let { value } = nextState;
-      if (/^..[LIAR]/i.test(value)) {
-        value = value.slice(0, -1);
-      }
+  beforeMaskedStateChange({ nextState }) {
+    let { value } = nextState;
+    if (/^..[LIAR]/i.test(value)) {
+      value = value.slice(0, -1);
+    }
 
-      return {
-        ...nextState,
-        value
-   };
+    return {
+      ...nextState,
+      value
+    };
   }
 
   addContract(event) {
@@ -1006,7 +1011,7 @@ class Create extends Component {
         conNum: [...state.conNum, value.replace(/_/g, '')]
       })
       )
-      this.setState({ viewContract:true, contractNumber: "" }, this.toggle('viewContract'))
+      this.setState({ viewContract: true, contractNumber: "" }, this.toggle('viewContract'))
     }
     else {
       Swal.fire({
@@ -1519,7 +1524,7 @@ class Create extends Component {
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
-                <div style={{  textDecoration: "underline", color: "#20A8D8", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
+                <div style={{ textDecoration: "underline", color: "#20A8D8", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableCNIPS", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
@@ -1898,8 +1903,12 @@ class Create extends Component {
                     <FormGroup>
                       <Label>Number of Pages to Be Chopped</Label>
                       <InputGroup>
-                        <Input ref={this.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' maxLength='9' />
+                        <Input ref={this.numOfPages} value={this.state.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
                       </InputGroup>
+                      {this.state.invalidNumberOfPages
+                        ? <small style={{ color: '#F86C6B' }} >Number of pages cannot be more than 9</small>
+                        : null
+                      }
                       {!this.state.isLTI
                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages to Be Chopped', this.state.numOfPages, 'required')}</small>
                         : null}

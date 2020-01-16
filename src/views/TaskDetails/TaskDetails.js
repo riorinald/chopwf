@@ -253,19 +253,19 @@ class TaskDetails extends Component {
                             <Col className="mb-4" onClick={() => this.setState({ progressModal: !this.state.progressModal })}>
                                 <Progress multi>
                                     {taskDetails.allStages.map((stage, index) =>
-                                        stage.statusId !== "CREATED" && stage.statusId !== "COMPLETED"
-                                            ? <React.Fragment key={index}>
-                                                <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
-                                                <Progress
-                                                    className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
-                                                    bar
-                                                    animated={stage.state === "CURRENT" ? true : false}
-                                                    striped={stage.state === "FINISHED"}
-                                                    color={stage.state === "CURRENT" ? "green" : stage.state === "FINISHED" ? "secondary" : "warning"}
-                                                    value={100 / (taskDetails.allStages.length - 2)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
-                                                </Progress>
-                                            </React.Fragment>
-                                            : null
+
+                                        <React.Fragment key={index}>
+                                            <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
+                                            <Progress
+                                                className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
+                                                bar
+                                                animated={stage.state === "CURRENT" ? true : false}
+                                                striped={stage.state === "FINISHED"}
+                                                color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
+                                            </Progress>
+                                        </React.Fragment>
+
                                     )}
                                 </Progress>
                             </Col>

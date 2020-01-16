@@ -144,6 +144,7 @@ class EditRequest extends Component {
 
             invalidEnglish: false,
             invalidChinese: false,
+            invalidNumberOfPages: false,
 
             docCheckBy: [],
             deptHeads: [],
@@ -633,6 +634,7 @@ class EditRequest extends Component {
     }
 
     handleChange = name => event => {
+        let value = event.target.value
         this.setState(state => {
             let taskDetails = this.state.taskDetails
             taskDetails.isConfirm = "N"
@@ -682,22 +684,36 @@ class EditRequest extends Component {
                 }
             }
         }
+        else if (name === "numOfPages") {
+            if (value.length > 9) {
+                this.setState({ invalidNumberOfPages: true })
+                // event.target.className = "form-control is-invalid"
+            }
+            else {
+                this.setState(state => {
+                    let { taskDetails, invalidNumberOfPages } = this.state
+                    taskDetails[name] = value
+                    invalidNumberOfPages = false
+                    return { taskDetails, invalidNumberOfPages }
+                })
+                // event.target.className = "form-control"
+            }
+        }
 
         if (event.target.value) {
-
             event.target.className = "form-control"
         }
         else {
             event.target.className = "is-invalid form-control"
         }
-        // console.log(name + " + " + event.target.value)
-        let value = event.target.value
-        this.setState(state => {
-            let taskDetails = this.state.taskDetails
-            taskDetails[name] = value
-            return { taskDetails };
 
-        })
+        if (name !== "numOfPages") {
+            this.setState(state => {
+                let taskDetails = this.state.taskDetails
+                taskDetails[name] = value
+                return { taskDetails };
+            })
+        }
     }
 
     handleDocumentChange = name => event => {
@@ -1971,7 +1987,7 @@ class EditRequest extends Component {
                                                                             <td className="descTd">{document.documentNameEnglish}</td>
                                                                             <td className="descTd">{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{  textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
+                                                                                <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a> */}
                                                                             </td>
                                                                             <td className="smallTd"><img width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} src={deleteBin} /></td>
@@ -2002,9 +2018,12 @@ class EditRequest extends Component {
                                                 <Label>Number of Pages to Be Chopped</Label>
                                                 <InputGroup>
                                                     <Input onChange={this.handleChange("numOfPages")} value={taskDetails.numOfPages} id="numOfPages" size="16" type="number" min="0" />
-
                                                 </InputGroup>
                                                 <InputGroup>
+                                                    {this.state.invalidNumberOfPages
+                                                        ?  <small style={{ color: '#F86C6B' }} >Number of pages cannot be more than 9</small>
+                                                        : null
+                                                    }
                                                     {taskDetails.applicationTypeId !== "LTI"
                                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages to be Chopped', taskDetails.numOfPages, 'required')}</small>
                                                         : null}
