@@ -69,7 +69,7 @@ class Instruction extends Component {
     }
 
     async getUserInstructions(sectionId, name) {
-        const res = await Axios.get(`${config.url}/userinstructions/chop/${sectionId}`)
+        const res = await Axios.get(`${config.url}/userinstructions/chop/${sectionId}`,{ headers: { Pragma: 'no-cache' } })
         if (sectionId === "APPLICANT" || sectionId === "APPROVERS") {
             let temp = res.data
             temp.sectionData = temp.sectionData.split(',')
