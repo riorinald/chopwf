@@ -105,7 +105,7 @@ class ChopApplication extends Component {
 
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: !this.state.loading })
-    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
+    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.pageCount === 0 ? 1 : res.data.pageCount })
         console.log(res.data)
@@ -141,7 +141,7 @@ class ChopApplication extends Component {
   }
 
   async getStatusList() {
-    const res = await Axios.get(`${config.url}/statuses?category=chop`)
+    const res = await Axios.get(`${config.url}/statuses?category=chop`,{ headers: { Pragma: 'no-cache' } })
     this.setState({ status: res.data })
   }
 
@@ -340,7 +340,7 @@ class ChopApplication extends Component {
                       <Input type="select" value={this.state.searchOption.applicationTypeName} onChange={this.handleSearch('applicationTypeName')} >
                         <option value="">Please Select</option>
                         {this.state.applicationTypes.map(type =>
-                          <option key={type.appTypeId} value={type.appTypeName} >{type.appTypeName}</option>
+                          <option key={type.appTypeId} value={type.appTypeId} >{type.appTypeName}</option>
                         )}
                       </Input>
 
@@ -362,7 +362,7 @@ class ChopApplication extends Component {
                       <Input type="select" value={this.state.searchOption.chopTypeName} onChange={this.handleSearch('chopTypeName')} >
                         <option value="">Please Select</option>
                         {this.state.chopTypes.map(type =>
-                          <option key={type.chopTypeId} value={type.chopTypeName} >{type.chopTypeName}</option>
+                          <option key={type.chopTypeId} value={type.chopTypeId} >{type.chopTypeName}</option>
                         )}
                       </Input>
 

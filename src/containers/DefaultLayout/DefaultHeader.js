@@ -42,7 +42,7 @@ class DefaultHeader extends Component {
 
   async getUserDetails() {
     this.setState({ loading: true })
-    await Axios.get(`${config.url}/users/${localStorage.getItem('userId')}`).then(res => {
+    await Axios.get(`${config.url}/users/${localStorage.getItem('userId')}`,{ headers: { Pragma: 'no-cache' } }).then(res => {
       this.setState({ userDetails: res.data, loading: false })
     })
   }

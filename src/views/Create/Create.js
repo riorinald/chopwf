@@ -165,6 +165,8 @@ class Create extends Component {
       invalidChinese: false,
       invalidNumberOfPages: false,
 
+      checkDetails: { deptSelected: "null", chopTypeSelected: "null", teamSelected: "null" },
+
       reqInfo: [
         { id: "deptSelected", valid: false },
         { id: "appTypeSelected", valid: false },
@@ -188,6 +190,7 @@ class Create extends Component {
       inputMask: { mask: "a-a-a-9999-9999" },
       msgTooltip: '[I / S ]-[ A / L / IA / R ]-[ O / P / S] \n e.g "S-A-O-9999-9999"',
       ioTooltip: false,
+      contractNumNotes: ""
 
     };
 
@@ -207,9 +210,11 @@ class Create extends Component {
     this.validator = new SimpleReactValidator({autoForceUpdate: this, locale: 'en'});
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
+    this.hideDoc = this.hideDoc.bind(this);
     this.toggleConnection = this.toggleConnection.bind(this);
     this.getDocuments = this.getDocuments.bind(this);
     this.addContract = this.addContract.bind(this);
+    this.setContractNotes = this.setContractNotes.bind(this);
   };
 
   componentDidMount() {
@@ -219,8 +224,28 @@ class Create extends Component {
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=` + this.props.legalName);
     // resetMounted.setMounted()
+    this.setContractNotes();
 
 
+  }
+
+  setContractNotes() {
+    switch (this.props.legalName) {
+      case "MBAFC":
+        this.setState({ contractNumNotes: "Enter Contract Number, e.g. I-A-P-2020-1035" })
+        break;
+      case "MBLC":
+        this.setState({ contractNumNotes: "Enter Contract Number, e.g. I-L-P-2020-1035" })
+        break;
+      case "MBIA":
+        this.setState({ contractNumNotes: "Enter Contract Number, e.g. I-IA-P-2020-1035" })
+        break;
+      case "DMT":
+        this.setState({ contractNumNotes: "Enter Contract Number, e.g. I-R-P-2020-1035" })
+        break;
+      default:
+        break;
+    }
   }
 
 
@@ -351,7 +376,6 @@ class Create extends Component {
       for (let j = 0; j < this.state.documentTableCNIPS[i].contractNumbers.length; j++) {
         postReq.append(`Documents[${i}].ContractNums[${j}]`, this.state.documentTableCNIPS[i].contractNumbers[j]);
       }
-
     }
 
     //for existing documents in LTU
@@ -451,16 +475,18 @@ class Create extends Component {
     }
   }
 
-  async getDocuments(companyId, deptId, chopTypeId, teamId) {
+  async getDocuments(companyId, deptId, chopTypeId, teamId, callback) {
     // let url = `${config.url}/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit`
 
     let url = `${config.url}/documents?companyid=` + companyId + '&departmentid=' + deptId + '&choptypeid=' + chopTypeId + '&teamid=' + teamId;
     try {
       await axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ documents: res.data })
+        callback(res.data.length)
       })
     } catch (error) {
       console.error(error)
+      callback("No Documents")
     }
   }
 
@@ -590,7 +616,7 @@ class Create extends Component {
     let userId = localStorage.getItem('userId')
     // let userId = "josh@otds.admin"
     // let userId = "daniel@otds.admin"
-    await axios.get(`${config.url}/users/` + userId, { headers: { 'ticket': ticket } })
+    await axios.get(`${config.url}/users/` + userId, { headers: { Pragma: 'no-cache','ticket': ticket } })
       .then(res => {
         this.setState({ employeeId: res.data.employeeNum, telNumber: res.data.telephoneNum, userId: userId })
       })
@@ -701,7 +727,9 @@ class Create extends Component {
         if (this.state.deptSelected !== "") {
           this.getTeams(this.state.deptSelected)
           if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.deptSelected !== "") {
-            this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, this.state.teamSelected)
+            this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, this.state.teamSelected, (callback) => {
+
+            })
           }
         }
       }
@@ -733,7 +761,9 @@ class Create extends Component {
     else if (name === "chopTypeSelected") {
       console.log(event.target.value)
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
-        this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected)
+        this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
+
+        })
       }
 
       if (event.target.value === "BCSCHOP") {
@@ -761,7 +791,9 @@ class Create extends Component {
         this.getTeams(event.target.value)
       }
       if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.isLTU) {
-        this.getDocuments(this.props.legalName, event.target.value, this.state.chopTypeSelected, this.state.teamSelected)
+        this.getDocuments(this.props.legalName, event.target.value, this.state.chopTypeSelected, this.state.teamSelected, (callback) => {
+
+        })
       }
     }
 
@@ -770,7 +802,9 @@ class Create extends Component {
       // console.log(event.target.value)
       this.getDocCheckBy(event.target.value)
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
-        this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value)
+        this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value, (callback) => {
+
+        })
       }
     }
 
@@ -955,39 +989,26 @@ class Create extends Component {
 
     // let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
     // let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
-    var value = event.target.value;
+    var value = event.target.value.toUpperCase();
 
-    // if (/^..[AaLlRr]/.test(value)){
-    //   this.setState({
-    //     mask: "a-a-a-9999-9999",
-    //     })
-    //   }
     // var inputMask={
     //   mask: "a-a-a-9999-9999",
     //   value: value, 
     // }
-
-    let message = '[I / S ]-[ A / L / IA / R ]-[ O / P / S] e.g "S-A-O-9999-9999"'
-    if (/^..[LIAR]/i.test(value)) {
-      // inputMask.mask = "a-aa-a-9999-9999"
-      // value = value.replace("I-_", "IA-_")
-    } else {
-
+    var message = '[I / S ]-[ A / L / IA / R ]-[ O / P / S] e.g "S-A-O-9999-9999"'
+    if (/^[IS]/.test(value)){
+    
+    }
+    // if (/^..[LIAR]/i.test(value)) {
+      //   mask = "a-aa-a-9999-9999"
+      //   value = value.replace("I-_", "IA-_")
+      // } 
+      else {
+        message = "First Charcter should be [ I / S ]"
+        value = ""
     }
     // console.log(inputMask, inputMask.value);
     this.setState({ viewContract: true, msgTooltip: message, ioTooltip: true, contractNumber: value })
-  }
-
-  beforeMaskedStateChange({ nextState }) {
-    let { value } = nextState;
-    if (/^..[LIAR]/i.test(value)) {
-      value = value.slice(0, -1);
-    }
-
-    return {
-      ...nextState,
-      value
-    };
   }
 
   addContract(event) {
@@ -1148,10 +1169,13 @@ class Create extends Component {
     var rand = Math.floor((Math.random() * maxNumber) + 1);
     let valid = true
     let doc = this.state.documentTableCNIPS
-    if (this.state.docSelected !== null) {
-      if (this.state.engName !== "" && this.state.cnName !== "" && this.state.conNum.length !== 0) {
+    let conName = [this.state.contractNumber]
+
+    if (this.state.docSelected !== null  && this.state.contractNumber !== "") {
+      if (this.state.engName !== "") {
         for (let i = 0; i < doc.length; i++) {
-          if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName && doc[i].docName === this.state.docAttachedName) {
+          if(doc[i].docName === this.state.docAttachedName && doc[i].conNum[0] === this.state.contractNumber){
+          // if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName) {
             valid = false
             break
           }
@@ -1163,13 +1187,13 @@ class Create extends Component {
         if (valid) {
           const obj = {
             id: rand,
-            conNum: this.state.conNum,
+            conNum: conName,
             engName: this.state.engName,
             cnName: this.state.cnName,
             docSelected: this.state.docSelected,
             docName: this.state.docAttachedName,
             docURL: URL.createObjectURL(this.state.docSelected),
-            contractNumbers: this.state.conNum
+            contractNumbers: conName
           }
 
           this.setState(state => {
@@ -1179,13 +1203,13 @@ class Create extends Component {
               documentTableCNIPS
             }
           })
-          this.setState({ conNum: [], engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
+          this.setState({ contractNumber:"", conNum: [], engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
           document.getElementById("documentTableCNIPS").className = ""
         }
         else {
           Swal.fire({
             title: "Document Exists",
-            html: 'DOcument already exists in the list!',
+            html: 'Document and contract number already exists in the list',
             type: "warning"
           })
         }
@@ -1193,16 +1217,17 @@ class Create extends Component {
       }
       else {
         Swal.fire({
-          title: "Invalid Data",
-          html: 'Please input valid data!',
+          title: "English Contract Name is Required",
+          html: 'Please input Contract Name in English',
           type: "warning"
         })
       }
     }
     else {
       Swal.fire({
-        title: "Document Not Selected",
-        html: 'Please select a valid document!',
+        title: "Contract Number & Document is required.",
+        width: '700px',
+        html: 'Please input Contract Number & select a valid Document',
         type: "warning"
       })
     }
@@ -1322,21 +1347,49 @@ class Create extends Component {
   // addDocCheck(row) {
   //   this.setState({ selectedDocs: row })
   // }
-
+  hideDoc() {
+    this.setState({ showDoc: false })
+  }
   selectDocument() {
-    if (this.state.documents.length === 0) {
-      Swal.fire({
-        title: "No Documents",
-        html: 'No documents to select from!',
-        type: "warning",
-        onBeforeOpen: () => {
-          Swal.showLoading()
-        }
-      })
+    document.getElementById('selectDocuments').blur()
+    let { deptSelected, teamSelected, chopTypeSelected, checkDetails } = this.state
+    // if (this.state.documents.length === 0) {
+    if (checkDetails.deptSelected === deptSelected && checkDetails.chopTypeSelected === chopTypeSelected && checkDetails.teamSelected === teamSelected) {
+      this.setState({ showDoc: true })
     }
     else {
-      this.setState({ showDoc: !this.state.showDoc })
-
+      Swal.fire({
+        title: "Retrieving",
+        html: 'Please wait while we retrive the list of documents available.',
+        type: "info",
+        onBeforeOpen: () => {
+          Swal.showLoading()
+        },
+        onOpen: () => {
+          this.getDocuments(this.props.legalName, deptSelected, chopTypeSelected, teamSelected, (numberOfDocuments) => {
+            if (numberOfDocuments === 0) {
+              Swal.update({
+                title: "No Documents",
+                html: 'No documents to select from!',
+                type: "warning"
+              })
+              Swal.hideLoading()
+            }
+            else {
+              // Swal.hideLoading();
+              Swal.close();
+              this.setState({ showDoc: true })
+            }
+            this.setState(state => {
+              let checkDetails = this.state.checkDetails
+              checkDetails.deptSelected = deptSelected
+              checkDetails.chopTypeSelected = chopTypeSelected
+              checkDetails.teamSelected = teamSelected
+              return checkDetails
+            })
+          })
+        }
+      })
     }
   }
 
@@ -1513,8 +1566,8 @@ class Create extends Component {
           <tr>
             <th className="smallTd" >No.</th>
             <th className="mediumTd">Contract Number</th>
-            <th>Document Name in English</th>
-            <th>Document Name in Chinese</th>
+            <th>Contract Name in English</th>
+            <th>Contract Name in Chinese</th>
             <th>Attached File</th>
             <th className="smallTd"></th>
           </tr>
@@ -1523,7 +1576,8 @@ class Create extends Component {
           {this.state.documentTableCNIPS.map((document, index) =>
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
-              <td className="mediumTd">{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</td>
+              {/* <td className="mediumTd">{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</td> */}
+              <td className="mediumTd">{document.conNum}</td>
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
@@ -1544,8 +1598,8 @@ class Create extends Component {
             {this.state.isCNIPS
               ? <Col >
                 <FormGroup>
-                  <InputGroup>
-                    <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
+                  {/* <InputGroup> */}
+                    {/* <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
                       <DropdownToggle><i className="fa fa-list-ul" /></DropdownToggle>
                       <DropdownMenu>
                         <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
@@ -1560,17 +1614,20 @@ class Create extends Component {
                         }
 
                       </DropdownMenu>
-                    </InputGroupButtonDropdown>
-                    <Tooltip toggle={this.toggle('ioTooltip')} placement="top" isOpen={this.state.ioTooltip} target="contractNumber">
+                    </InputGroupButtonDropdown> */}
+                    <Tooltip toggle={this.toggle('ioTooltip')} placement="bottom" isOpen={this.state.ioTooltip} target="contractNumber">
                       {this.state.msgTooltip} </Tooltip>
-                    <InputMask autoComplete="off" autoCapitalize="character" placeholder="Enter Contract Name" mask={this.state.mask} name="contractNumber" id="contractNumber" className="form-control"
-                      onChange={this.handleContractChange} beforeMaskedStateChange={this.beforeMaskedStateChange} value={this.state.contractNumber}
-                    // onClick={this.handlemask}
-                    ></InputMask>
-                    <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
-                  </InputGroup>
+                    <Input type="text"
+                    autoComplete="off" autoCapitalize="character" 
+                    name="contractNumber" id="contractNumber" className="form-control"
+                    placeholder="Enter Contract Number" 
+                    onChange={this.handleContractChange} value={this.state.contractNumber}
+                    />
+                    {/* <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon> */}
+                  {/* </InputGroup> */}
                 </FormGroup></Col>
               : ""}
+
 
             <Col md>
               <FormGroup>
@@ -1630,7 +1687,7 @@ class Create extends Component {
       <div>
         <InputGroup id="documentTableLTU"  >
           <InputGroupAddon addonType="prepend">
-            <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
+            <Button color="primary" id="selectDocuments" onClick={this.selectDocument}>Select Documents</Button>
           </InputGroupAddon>
           {/* <div  id="documentTableLTU" /> */}
         </InputGroup>
@@ -1639,7 +1696,7 @@ class Create extends Component {
             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Documents', this.state.documentTableLTU, 'required')}</small>
             : null}
         </InputGroup>
-        <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
+        <Modal color="info" size="xl" toggle={this.hideDoc} isOpen={this.state.showDoc} >
           <ModalHeader className="center"> Select Documents </ModalHeader>
           <ModalBody>
             <SelectTable
@@ -1690,7 +1747,7 @@ class Create extends Component {
             />
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" block size="md" onClick={() => { this.addDocumentLTU(); this.selectDocument() }}>  Add </Button>
+            <Button color="primary" block size="md" onClick={() => { this.addDocumentLTU(); this.hideDoc() }}>  Add </Button>
           </ModalFooter>
         </Modal>
 
@@ -1890,7 +1947,10 @@ class Create extends Component {
                   }
 
                   <FormGroup check={false}>
-                    <Label>Document Name</Label>
+                    {this.state.isCNIPS 
+                      ? <><Label>Contract Name</Label><small className="ml-2">Please upload the sign-off sheet of your contract.</small></>
+                      : <Label>Document Name</Label> 
+                    }
                     {this.state.isLTU ? documentForLTU : documentForLTI}
 
                   </FormGroup>
