@@ -45,22 +45,7 @@ class LicenseApplication extends Component {
             seniorManagers: [],
             departments: [],
             licenseNames: [],
-            statusName: [
-                "Recalled",
-                "Pending for Senior Manager or above approval",
-                "Pending for License Administrator Acknowledge Lend Out",
-                "Send Back to Requestor",
-                "Rejected",
-                "Requestor Received",
-                "Pending Requestor Return/ Extend",
-                "Completed",
-                "Draft",
-                "Pending for License Administrator acknowledge return",
-                "Pending Senior Manager Approval for extension",
-                "Pending License Administrator Approval for extension",
-                "License request expired after 30 days",
-                "Pending Requestor Return"
-            ]
+            statusName: []
         }
         this.onFilteredChangeCustom = this.onFilteredChangeCustom.bind(this)
         this.getLicenseApplications = this.getLicenseApplications.bind(this)
@@ -122,6 +107,7 @@ class LicenseApplication extends Component {
     
     async getStatusList() {
         const res = await Axios.get(`${config.url}/statuses?category=license`)
+        console.log(res.data)
         this.setState({ statusName: res.data })
       }
 
@@ -345,7 +331,7 @@ class LicenseApplication extends Component {
                                             <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('status')} >
                                                 <option value="">Please Select a status</option>
                                                 {statusName.map((stat, index) =>
-                                                    <option key={index} value={stat.statusName} > {statusName} </option>
+                                                    <option key={index} value={stat.statusName} > {stat.statusName} </option>
                                                 )}
                                             </Input>
                                         )
