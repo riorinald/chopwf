@@ -258,7 +258,7 @@ class Login extends Component {
                 <Navbar color="light" light expand="md">
                     <NavbarBrand>Chop Workflow System</NavbarBrand>
                     <Nav className="ml-auto" navbar>
-                        <NavItem>DEMO</NavItem>
+                        <NavItem></NavItem>
                     </Nav>
                 </Navbar>
 

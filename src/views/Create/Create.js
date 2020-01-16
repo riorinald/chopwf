@@ -1328,7 +1328,10 @@ class Create extends Component {
       Swal.fire({
         title: "No Documents",
         html: 'No documents to select from!',
-        type: "warning"
+        type: "warning",
+        onBeforeOpen: () => {
+          Swal.showLoading()
+        }
       })
     }
     else {
@@ -1625,11 +1628,11 @@ class Create extends Component {
 
     const documentForLTU =
       <div>
-        <InputGroup >
+        <InputGroup id="documentTableLTU"  >
           <InputGroupAddon addonType="prepend">
             <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
           </InputGroupAddon>
-          <Input id="documentTableLTU" disabled />
+          {/* <div  id="documentTableLTU" /> */}
         </InputGroup>
         <InputGroup>
           {this.state.isLTU
