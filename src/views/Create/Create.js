@@ -768,7 +768,7 @@ class Create extends Component {
 
       if (event.target.value === "BCSCHOP") {
         this.setState({ showBranches: true })
-        this.getData("branches", `${config.url}/branches?companyid=mblc`)
+        this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
       }
 
       else {
