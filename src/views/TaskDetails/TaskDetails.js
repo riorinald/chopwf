@@ -567,7 +567,8 @@ class TaskDetails extends Component {
                                                 <Input disabled type="text" value={taskDetails.numOfPages} id="numOfPages" name="numOfPages" placeholder="/" />
                                             </Col>
                                         </FormGroup>
-                                        : null}
+                                        : null
+                                    }
                                     {taskDetails.isUseInOffice === "N"
                                         ? <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
@@ -577,7 +578,8 @@ class TaskDetails extends Component {
                                                 <Input disabled type="text" value={this.convertDate(taskDetails.returnDate)} id="returnDate" name="returnDate" placeholder="/" />
                                             </Col>
                                         </FormGroup>
-                                        : ""}
+                                        : ""
+                                    }
                                     <FormGroup row >
                                         <Col md="4" className="d-flex align-items-center" >
                                             <Label>Address to</Label>
@@ -749,7 +751,7 @@ class TaskDetails extends Component {
 
                             {taskDetails.histories.map((history, index) =>
                                 <div key={index}>
-                                    <Row className="bottom-border"></Row>
+                                    <hr></hr>
                                     <Row className="text-md-left text-center">
                                         {/* <Col xs="12" sm="12" md="2" lg="1">
                                             <img src={history.approvedByAvatarUrl} className="img-avaa img-responsive" alt="Avatar" />
