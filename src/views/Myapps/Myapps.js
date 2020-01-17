@@ -233,7 +233,7 @@ class Myapps extends Component {
       <div className="animated fadeIn">
         <h4>My Applications</h4>
         <Card>
-          <CardHeader>MY APPLICATIONS <Button className="float-right" onClick={this.search} >Search</Button>
+          <CardHeader>My Applications <Button className="float-right" onClick={this.search} >Search</Button>
           </CardHeader>
           <CardBody onKeyDown={this.onKeyPressed}>
             <ReactTable
@@ -416,7 +416,7 @@ class Myapps extends Component {
                   style: { textAlign: "center" }
                 },
               ]}
-              defaultPageSize={20}
+              defaultPageSize={10}
               manual
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {

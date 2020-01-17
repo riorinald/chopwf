@@ -79,7 +79,7 @@ class LicenseCreate extends Component {
     }
 
     async getLicenseNames() {
-        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`,{ headers: { Pragma: 'no-cache' } })
+        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
         this.setState({ licenseNames: res.data })
     }
 
@@ -92,7 +92,7 @@ class LicenseCreate extends Component {
     async getUserData() {
         let ticket = localStorage.getItem('ticket')
         let userId = localStorage.getItem('userId')
-        const res = await axios.get(`${config.url}/users/` + userId, { headers: { Pragma: 'no-cache','ticket': ticket } })
+        const res = await axios.get(`${config.url}/users/` + userId, { headers: { Pragma: 'no-cache', 'ticket': ticket } })
         this.setState(state => {
             let formData = this.state.formData
             formData.userId = userId
@@ -105,7 +105,7 @@ class LicenseCreate extends Component {
     async getSeniorManagers() {
         // console.log(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
         await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
-        { headers: { Pragma: 'no-cache' } })
+            { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let arr1 = []
                 res.data.map(mgr => {
@@ -117,7 +117,7 @@ class LicenseCreate extends Component {
                 })
                 this.setState({ seniorManagers: arr1 })
             })
-        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}`,{ headers: { Pragma: 'no-cache' } })
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let arr1 = []
                 res.data.map(mgr => {
@@ -593,42 +593,44 @@ class LicenseCreate extends Component {
                             <Collapse isOpen={formData.documentType === "ORIGINAL"}> */}
                                 <FormGroup onChange={this.handleChange("deliverWay")} >
                                     <Label>Deliver Way</Label>
-                                    <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                    <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                     <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number" />
                                     {formData.documentType === "ORIGINAL"
                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', formData.deliverWay, 'required')}</small>
                                         : null}
                                 </FormGroup>
 
-                                <FormGroup>
-                                    <Label>Address</Label>
-                                    <Input placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
-                                    {formData.documentType === "ORIGINAL"
-                                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
-                                        : null}
-                                </FormGroup>
+                                <Collapse isOpen={formData.deliverWay === "F2F"}>
+                                    <FormGroup>
+                                        <Label>Address</Label>
+                                        <Input placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
+                                        {formData.documentType === "ORIGINAL"
+                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
+                                            : null}
+                                    </FormGroup>
+
+
+                                    <FormGroup>
+                                        <Label>Reciever</Label>
+                                        <AsyncSelect
+                                            id="reciever"
+                                            loadOptions={loadReciever}
+                                            isClearable
+                                            onChange={this.handleSelectReciever}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        />
+                                        {/* <Input placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" /> */}
+                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
+                                    </FormGroup>
+
+                                    <FormGroup>
+                                        <Label>Reciever Mobile Phone</Label>
+                                        <Input placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
+                                        <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, formData.recieverPhone, 'required')}</small>
+                                    </FormGroup>
+                                </Collapse>
                             </Collapse>
-
-                            <FormGroup>
-                                <Label>Reciever</Label>
-                                <AsyncSelect
-                                    id="reciever"
-                                    loadOptions={loadReciever}
-                                    isClearable
-                                    onChange={this.handleSelectReciever}
-                                    menuPortalTarget={document.body}
-                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                />
-                                {/* <Input placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" /> */}
-                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
-                            </FormGroup>
-
-                            <FormGroup>
-                                <Label>Reciever Mobile Phone</Label>
-                                <Input placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
-                                <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, formData.recieverPhone, 'required')}</small>
-                            </FormGroup>
-
                             <FormGroup>
                                 <Label>Senior Manager or above of requestor department</Label>
                                 <AsyncSelect

@@ -225,7 +225,7 @@ class LicenseMyPendingTasks extends Component {
             <div className="animated fadeIn">
                 <h4>My Pending Tasks</h4>
                 <Card onKeyDown={this.handleKeyDown}>
-                    <CardHeader>MY PENDING TASKS <Button className="float-right" onClick={this.getPendingTasks} >Search</Button></CardHeader>
+                    <CardHeader>My Pending Tasks <Button className="float-right" onClick={this.getPendingTasks} >Search</Button></CardHeader>
                     <CardBody>
                         <ReactTable
                             data={pendingTasks}
@@ -432,7 +432,7 @@ class LicenseMyPendingTasks extends Component {
                                     style: { textAlign: "center" }
                                 }
                             ]}
-                            defaultPageSize={20}
+                            defaultPageSize={10}
                             // pages={this.state.page}
                             // manual
                             // onPageChange={(e)=>{this.setState({page: e})}}

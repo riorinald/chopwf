@@ -164,8 +164,11 @@ class Create extends Component {
       invalidEnglish: false,
       invalidChinese: false,
       invalidNumberOfPages: false,
+      isNumber: true,
 
       checkDetails: { deptSelected: "null", chopTypeSelected: "null", teamSelected: "null" },
+
+      tempContractNumber: "",
 
       reqInfo: [
         { id: "deptSelected", valid: false },
@@ -215,6 +218,7 @@ class Create extends Component {
     this.getDocuments = this.getDocuments.bind(this);
     this.addContract = this.addContract.bind(this);
     this.setContractNotes = this.setContractNotes.bind(this);
+    this.handleContractNumber = this.handleContractNumber.bind(this);
   };
 
   componentDidMount() {
@@ -544,50 +548,6 @@ class Create extends Component {
           })
       }
     })
-
-
-    // try {
-    //   // await axios.post(`${config.url}/tasks`, formData)
-    //   await axios.post(`${config.url}/tasks`, formData)
-    //     .then(res => {
-    //       if (isSubmitted === 'N') {
-    //         Swal.fire({
-    //           title: res.data.status === 200 ? 'Request Saved' : '',
-    //           text: 'Request Number : ' + res.data.requestNum,
-    //           footer: 'Your request is saved as draft.',
-    //           type: 'info',
-    //           onClose: () => { this.formReset() }
-    //         })
-    //       }
-    //       if (isSubmitted === 'Y') {
-    //         Swal.fire({
-    //           title: res.data.status === 200 ? 'Request Submitted' : "",
-    //           text: 'Request Number : ' + res.data.requestNum,
-    //           footer: 'Your request is being processed and is waiting for the approval',
-    //           type: 'success',
-    //           onClose: () => { this.formReset() }
-    //         })
-    //       }
-    //     })
-    // } catch (error) {
-    //   if (error.response && isSubmitted === 'N') {
-    //     Swal.fire({
-    //       title: error.response.statusText,
-    //       text: error.response.data.message,
-    //       footer: JSON.stringify(error.response.data),
-    //       type: 'error',
-    //     })
-    //   }
-    //   if (error.response && isSubmitted === 'Y') {
-    //     Swal.fire({
-    //       title: error.response.statusText,
-    //       text: JSON.stringify(error.response.data),
-    //       footer: 'traceId : ' + error.response.data.traceId,
-    //       type: 'error',
-    //     })
-    //   }
-    //   console.error(error.response);
-    // }
   }
 
   formReset() {
@@ -616,7 +576,7 @@ class Create extends Component {
     let userId = localStorage.getItem('userId')
     // let userId = "josh@otds.admin"
     // let userId = "daniel@otds.admin"
-    await axios.get(`${config.url}/users/` + userId, { headers: { Pragma: 'no-cache','ticket': ticket } })
+    await axios.get(`${config.url}/users/` + userId, { headers: { Pragma: 'no-cache', 'ticket': ticket } })
       .then(res => {
         this.setState({ employeeId: res.data.employeeNum, telNumber: res.data.telephoneNum, userId: userId })
       })
@@ -768,7 +728,7 @@ class Create extends Component {
 
       if (event.target.value === "BCSCHOP") {
         this.setState({ showBranches: true })
-        this.getData("branches", `${config.url}/branches?companyid=mblc`)
+        this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
       }
 
       else {
@@ -996,16 +956,16 @@ class Create extends Component {
     //   value: value, 
     // }
     var message = '[I / S ]-[ A / L / IA / R ]-[ O / P / S] e.g "S-A-O-9999-9999"'
-    if (/^[IS]/.test(value)){
-    
+    if (/^[IS]/.test(value)) {
+
     }
     // if (/^..[LIAR]/i.test(value)) {
-      //   mask = "a-aa-a-9999-9999"
-      //   value = value.replace("I-_", "IA-_")
-      // } 
-      else {
-        message = "First Charcter should be [ I / S ]"
-        value = ""
+    //   mask = "a-aa-a-9999-9999"
+    //   value = value.replace("I-_", "IA-_")
+    // } 
+    else {
+      message = "First Charcter should be [ I / S ]"
+      value = ""
     }
     // console.log(inputMask, inputMask.value);
     this.setState({ viewContract: true, msgTooltip: message, ioTooltip: true, contractNumber: value })
@@ -1083,11 +1043,21 @@ class Create extends Component {
     let typeValid = false
     let doc = this.state.documentTableLTI
     if (this.state.docSelected !== null) {
-      if (this.state.engName !== "") {
-        typeValid = true
+      if (this.state.isLTI) {
+        if (this.state.engName !== "" && this.state.cnName !== "") {
+          typeValid = true
+        }
+        else {
+          typeValid = false
+        }
       }
       else {
-        typeValid = false
+        if (this.state.engName !== "") {
+          typeValid = true
+        }
+        else {
+          typeValid = false
+        }
       }
 
       if (typeValid) {
@@ -1163,71 +1133,102 @@ class Create extends Component {
     reader.readAsDataURL(file)
   }
 
+  validateContractNumber() {
+    let { tempContractNumber } = this.state
+    let valid = false
+    if (tempContractNumber[2] === "I") {
+      if (tempContractNumber.length === 15 || tempContractNumber.length === 16) {
+        valid = true
+      }
+      else {
+        valid = false
+      }
+    }
+    else {
+      if (tempContractNumber.length === 14 || tempContractNumber.length === 15) {
+        valid = true
+      }
+      else {
+        valid = false
+      }
+    }
+    return valid
+  }
 
   addDocumentCNIPS = () => {
     var maxNumber = 45;
     var rand = Math.floor((Math.random() * maxNumber) + 1);
     let valid = true
     let doc = this.state.documentTableCNIPS
-    let conName = [this.state.contractNumber]
+    let conName = [this.state.tempContractNumber]
 
-    if (this.state.docSelected !== null  && this.state.contractNumber !== "") {
-      if (this.state.engName !== "") {
-        for (let i = 0; i < doc.length; i++) {
-          if(doc[i].docName === this.state.docAttachedName && doc[i].conNum[0] === this.state.contractNumber){
-          // if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName) {
-            valid = false
-            break
+    if (this.state.docSelected !== null) {
+      if (this.validateContractNumber()) {
+        if (this.state.engName !== "") {
+          for (let i = 0; i < doc.length; i++) {
+            if (doc[i].docName === this.state.docAttachedName && doc[i].conNum[0] === this.state.tempContractNumber) {
+              // if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName) {
+              valid = false
+              break
+            }
+            else {
+              valid = true
+            }
+          }
+
+          if (valid) {
+            const obj = {
+              id: rand,
+              conNum: conName,
+              engName: this.state.engName,
+              cnName: this.state.cnName,
+              docSelected: this.state.docSelected,
+              docName: this.state.docAttachedName,
+              docURL: URL.createObjectURL(this.state.docSelected),
+              contractNumbers: conName
+            }
+
+            this.setState(state => {
+              const documentTableCNIPS = state.documentTableCNIPS.concat(obj)
+
+              return {
+                documentTableCNIPS
+              }
+            })
+            this.setState({ tempContractNumber: "", conNum: [], engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
+            document.getElementById("documentTableCNIPS").className = ""
           }
           else {
-            valid = true
-          }
-        }
-
-        if (valid) {
-          const obj = {
-            id: rand,
-            conNum: conName,
-            engName: this.state.engName,
-            cnName: this.state.cnName,
-            docSelected: this.state.docSelected,
-            docName: this.state.docAttachedName,
-            docURL: URL.createObjectURL(this.state.docSelected),
-            contractNumbers: conName
+            Swal.fire({
+              title: "Document Exists",
+              html: 'Document and contract number already exists in the list',
+              type: "warning"
+            })
           }
 
-          this.setState(state => {
-            const documentTableCNIPS = state.documentTableCNIPS.concat(obj)
-
-            return {
-              documentTableCNIPS
-            }
-          })
-          this.setState({ contractNumber:"", conNum: [], engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
-          document.getElementById("documentTableCNIPS").className = ""
         }
+
         else {
           Swal.fire({
-            title: "Document Exists",
-            html: 'Document and contract number already exists in the list',
+            title: "English Contract Name is Required",
+            html: 'Please input Contract Name in English',
             type: "warning"
           })
         }
-
       }
       else {
         Swal.fire({
-          title: "English Contract Name is Required",
-          html: 'Please input Contract Name in English',
+          title: "Contract number is required.",
+          html: 'Please input a valid contract number.',
           type: "warning"
         })
       }
     }
     else {
       Swal.fire({
-        title: "Contract Number & Document is required.",
+        title: "Document is required.",
         width: '700px',
-        html: 'Please input Contract Number & select a valid Document',
+        html: 'Please attach a valid Document.',
         type: "warning"
       })
     }
@@ -1445,6 +1446,252 @@ class Create extends Component {
     }
   }
 
+  handleContractNumber(event) {
+    let value = event.target.value.toUpperCase()
+    let { tempContractNumber } = this.state
+    let regex = /[0-9]/
+    let regAlph = /[a-zA-Z]/
+    if (value.length === 1) {
+      if (value[0] === 'I' || value[0] === 'S') {
+        if (tempContractNumber !== "") {
+          this.setState({ tempContractNumber: "" })
+        }
+        else {
+          this.setState({ tempContractNumber: value + "-" })
+        }
+      }
+    }
+    else if (value.length === 3) {
+      if (regAlph.test(value[2])) {
+        if (value[2] === "I") {
+          this.setState({ tempContractNumber: value + "A-" })
+        }
+        else {
+          if (tempContractNumber.length === 2) {
+            this.setState({ tempContractNumber: value + "-" })
+          }
+          else {
+            this.setState({ tempContractNumber: value.substr(0, 2) })
+          }
+        }
+      }
+    }
+    else if (value.length === 4) {
+      this.setState({ tempContractNumber: value.substr(0, 2) })
+    }
+    else if (value.length === 5) {
+      if (regAlph.test(value[4])) {
+        if (value[2] === "I") {
+
+        }
+        else {
+          if (tempContractNumber.length === 4) {
+            this.setState({ tempContractNumber: value + "-" })
+          }
+          else {
+            this.setState({ tempContractNumber: value.substr(0, 4) })
+          }
+        }
+      }
+    }
+    else if (value.length === 6) {
+      if (regAlph.test(value[5])) {
+        if (value[2] === "I") {
+          if (tempContractNumber.length === 5) {
+            this.setState({ tempContractNumber: value + "-" })
+          }
+          else {
+            this.setState({ tempContractNumber: value.substr(0, 5) })
+          }
+        }
+        else {
+          this.setState({ tempContractNumber: value })
+        }
+      }
+      else{
+        this.setState({ tempContractNumber: tempContractNumber.substr(0,4)})
+      }
+    }
+    else if (value.length === 8) {
+      if (regex.test(value[7])) {
+        this.setState({ tempContractNumber: value, isNumber: true })
+      }
+      else {
+        this.setState({ isNumber: false })
+      }
+
+    }
+    else if (value.length === 7 || value.length === 9) {
+      if (value[2] === "I") {
+        if (value.length === 9) {
+          if (regex.test(value[8])) {
+            this.setState({ tempContractNumber: value, isNumber: true })
+          }
+          else {
+            this.setState({ isNumber: false })
+          }
+        }
+        else if (value.length === 7) {
+          this.setState({ tempContractNumber: value.substr(0, 7) })
+        }
+      }
+      else {
+        switch (value.length) {
+          case 7:
+            if (regex.test(value[6])) {
+              this.setState({ tempContractNumber: value, isNumber: true })
+            }
+            else {
+              this.setState({ isNumber: false })
+            }
+            break;
+          case 9:
+            if (regex.test(value[8])) {
+              this.setState({ tempContractNumber: value, isNumber: true })
+            }
+            else {
+              this.setState({ isNumber: false })
+            }
+            break;
+        }
+      }
+    }
+    else if (value.length === 10) {
+      if (value[2] === "I") {
+        if (regex.test(value[9])) {
+          this.setState({ tempContractNumber: value, isNumber: true })
+        }
+        else {
+          this.setState({ isNumber: false })
+
+        }
+      }
+      else {
+        if (regex.test(value[9])) {
+          if (tempContractNumber.length === 9) {
+            this.setState({ tempContractNumber: value + "-" })
+          }
+          else {
+            this.setState({ tempContractNumber: value.substr(0, 9), isNumber: true })
+          }
+        }
+        else {
+          this.setState({ isNumber: false })
+
+        }
+      }
+    }
+    else if ((value.length === 11 || value.length < 16) && value.length !== 13) {
+      if (value[2] === "I") {
+        switch (value.length) {
+          case 11:
+            if (regex.test(value[10])) {
+              if (tempContractNumber.length === 10) {
+                this.setState({ tempContractNumber: value + "-" })
+              }
+              else {
+                this.setState({ tempContractNumber: value.substr(0, 10), isNumber: true })
+              }
+            }
+            else {
+              this.setState({ isNumber: false })
+
+            }
+            break;
+          case 12:
+            this.setState({ tempContractNumber: value.substr(0, 12), isNumber: true })
+            break;
+          case 14:
+            if (regex.test(value[13])) {
+              this.setState({ tempContractNumber: value, isNumber: true })
+            }
+            else {
+              this.setState({ isNumber: false })
+
+            }
+            break;
+          case 15:
+            if (regex.test(value[14])) {
+              this.setState({ tempContractNumber: value, isNumber: true })
+            }
+            else {
+              this.setState({ isNumber: false })
+
+            }
+            break;
+        }
+      }
+      else {
+        switch (value.length) {
+          case 11:
+            this.setState({ tempContractNumber: value })
+            break;
+          case 12:
+            if (regex.test(value[11])) {
+              this.setState({ tempContractNumber: value, isNumber: true })
+            }
+            else {
+              this.setState({ isNumber: false })
+
+            }
+            break;
+
+          case 14:
+            if (regex.test(value[13])) {
+              this.setState({ tempContractNumber: value, isNumber: true })
+            }
+            else {
+              this.setState({ isNumber: false })
+
+            }
+            break;
+          case 15:
+            if (regex.test(value[14])) {
+              this.setState({ tempContractNumber: value, isNumber: true })
+            }
+            else {
+              this.setState({ isNumber: false })
+
+            }
+            break;
+        }
+      }
+    }
+    else if (value.length === 13) {
+      if (value[2] === "I") {
+        if (regex.test(value[12])) {
+          this.setState({ tempContractNumber: value, isNumber: true })
+        }
+        else {
+          this.setState({ isNumber: false })
+
+        }
+      }
+      else {
+        if (regex.test(value[12])) {
+          this.setState({ tempContractNumber: value, isNumber: true })
+        }
+        else {
+          this.setState({ isNumber: false })
+
+        }
+      }
+    }
+    else if (value.length === 16) {
+      if (value[2] === "I") {
+        if (regex.test(value[15])) {
+          this.setState({ tempContractNumber: value, isNumber: true })
+        }
+        else {
+          this.setState({ isNumber: false })
+
+        }
+      }
+    }
+    console.log(value.length)
+  }
+
+
   render() {
     this.validator.purgeFields();
     const deptHeads = []
@@ -1565,7 +1812,7 @@ class Create extends Component {
         <thead>
           <tr>
             <th className="smallTd" >No.</th>
-            <th className="mediumTd">Contract Number</th>
+            <th>Contract Number</th>
             <th>Contract Name in English</th>
             <th>Contract Name in Chinese</th>
             <th>Attached File</th>
@@ -1577,7 +1824,7 @@ class Create extends Component {
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
               {/* <td className="mediumTd">{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</td> */}
-              <td className="mediumTd">{document.conNum}</td>
+              <td>{document.conNum}</td>
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
@@ -1599,7 +1846,7 @@ class Create extends Component {
               ? <Col >
                 <FormGroup>
                   {/* <InputGroup> */}
-                    {/* <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
+                  {/* <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
                       <DropdownToggle><i className="fa fa-list-ul" /></DropdownToggle>
                       <DropdownMenu>
                         <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
@@ -1615,16 +1862,27 @@ class Create extends Component {
 
                       </DropdownMenu>
                     </InputGroupButtonDropdown> */}
-                    <Tooltip toggle={this.toggle('ioTooltip')} placement="bottom" isOpen={this.state.ioTooltip} target="contractNumber">
-                      {this.state.msgTooltip} </Tooltip>
-                    <Input type="text"
+                  {/* <Tooltip toggle={this.toggle('ioTooltip')} placement="bottom" isOpen={this.state.ioTooltip} target="contractNumber">
+                    {this.state.msgTooltip} </Tooltip> */}
+
+
+                  {/* <Input type="text"
                     autoComplete="off" autoCapitalize="character" 
                     name="contractNumber" id="contractNumber" className="form-control"
                     placeholder="Enter Contract Number" 
                     onChange={this.handleContractChange} value={this.state.contractNumber}
-                    />
-                    {/* <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon> */}
+                    /> */}
+
+                  <Input autoComplete="off" type="text" value={this.state.tempContractNumber} onChange={this.handleContractNumber} id="contractNumber" placeholder={this.state.contractNumNotes}></Input>
+                  {!this.state.isNumber
+                    ? <small style={{ color: '#F86C6B' }} > Please enter only Digits. </small>
+                    : null
+                  }
+
+                  {/* <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon> */}
                   {/* </InputGroup> */}
+
+
                 </FormGroup></Col>
               : ""}
 
@@ -1802,7 +2060,7 @@ class Create extends Component {
           <div style={{ fontFamily: "sans-serif" }} className="animated fadeIn">
             <h4>Create</h4>
             <Card>
-              <CardHeader>CREATE NEW REQUEST</CardHeader>
+              <CardHeader>Create new request</CardHeader>
               <CardBody>
                 <FormGroup>
                   <h5>NOTES :</h5>
@@ -1887,7 +2145,7 @@ class Create extends Component {
 
                   <Collapse isOpen={this.state.isLTI || this.state.isLTU}>
                     <FormGroup>
-                      <Label>Entitled Team - </Label>
+                      <Label>Entitled Team</Label>
                       <small className="ml-2">Please select your team's name from dropdown list, if your team is not included, please contact respective chop keeper. </small>
                       <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} value={this.state.teamSelected} type="select">
                         <option value="" disabled>Please select a team</option>
@@ -1947,9 +2205,9 @@ class Create extends Component {
                   }
 
                   <FormGroup check={false}>
-                    {this.state.isCNIPS 
+                    {this.state.isCNIPS
                       ? <><Label>Contract Name</Label><small className="ml-2">Please upload the sign-off sheet of your contract.</small></>
-                      : <Label>Document Name</Label> 
+                      : <Label>Document Name</Label>
                     }
                     {this.state.isLTU ? documentForLTU : documentForLTI}
 
