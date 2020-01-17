@@ -1508,6 +1508,9 @@ class Create extends Component {
           this.setState({ tempContractNumber: value })
         }
       }
+      else{
+        this.setState({ tempContractNumber: tempContractNumber.substr(0,4)})
+      }
     }
     else if (value.length === 8) {
       if (regex.test(value[7])) {
