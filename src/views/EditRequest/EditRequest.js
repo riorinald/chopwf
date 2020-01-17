@@ -17,7 +17,8 @@ import {
     Tooltip,
     DropdownToggle,
     DropdownMenu,
-    DropdownItem
+    DropdownItem,
+    Badge
 } from 'reactstrap';
 import config from '../../config';
 import Axios from 'axios';
@@ -158,11 +159,14 @@ class EditRequest extends Component {
             documents: [],
             teams: [],
             msgTooltip: '[I / S ]-[ A / L / IA / R ]-[ O / P / S] \n e.g "S-A-O-9999-9999"',
-            ioTooltip: false
+            ioTooltip: false,
+            tempContractNumber: "",
+            isNumber: true,
+            contractNumNotes: "",
+            checkDetails: { deptSelected: "null", chopTypeSelected: "null", teamSelected: "null" },
         }
         this.getTaskDetails = this.getTaskDetails.bind(this);
         this.handleChange = this.handleChange.bind(this);
-        this.handleContractNumber = this.handleContractNumber.bind(this);
         this.goBack = this.goBack.bind(this)
         this.handleDocumentChange = this.handleDocumentChange.bind(this);
         this.toggleConnection = this.toggleConnection.bind(this);
@@ -175,6 +179,8 @@ class EditRequest extends Component {
         this.deleteTask = this.deleteTask.bind(this);
         this.addContract = this.addContract.bind(this);
         this.toggleModal = this.toggleModal.bind(this);
+        this.handleContractNumber = this.handleContractNumber.bind(this);
+        this.hideDoc = this.hideDoc.bind(this);
     }
 
     componentDidMount() {
@@ -189,6 +195,26 @@ class EditRequest extends Component {
             })
         }
         this.validator = new SimpleReactValidator();
+        this.setContractNotes()
+    }
+
+    setContractNotes() {
+        switch (this.props.legalName) {
+            case "MBAFC":
+                this.setState({ contractNumNotes: "Enter Contract Number, e.g. I-A-P-2020-1035" })
+                break;
+            case "MBLC":
+                this.setState({ contractNumNotes: "Enter Contract Number, e.g. I-L-P-2020-1035" })
+                break;
+            case "MBIA":
+                this.setState({ contractNumNotes: "Enter Contract Number, e.g. I-IA-P-2020-1035" })
+                break;
+            case "DMT":
+                this.setState({ contractNumNotes: "Enter Contract Number, e.g. I-R-P-2020-1035" })
+                break;
+            default:
+                break;
+        }
     }
 
     async getDocCheckBy(deptId, teamId, callback) {
@@ -422,7 +448,9 @@ class EditRequest extends Component {
 
         if (temporary.applicationTypeId === "LTU") {
             if (temporary.departmentId !== "" && temporary.chopTypeId !== "" && temporary.teamId !== "") {
-                this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
+                this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId, (callback) => {
+
+                })
             }
         }
         temporary.departmentId = temporary.departmentId.toLowerCase()
@@ -475,7 +503,7 @@ class EditRequest extends Component {
     }
 
 
-    async getDocuments(companyId, deptId, chopTypeId, teamId) {
+    async getDocuments(companyId, deptId, chopTypeId, teamId, callback) {
 
         //change to 2nd URL -  1st URL for dev
         // let url = `${config.url}/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit`
@@ -486,8 +514,10 @@ class EditRequest extends Component {
         try {
             await Axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
                 this.setState({ documents: res.data })
+                callback(true)
             })
         } catch (error) {
+            callback(false)
             console.error(error)
         }
     }
@@ -595,12 +625,6 @@ class EditRequest extends Component {
         })
     }
 
-    handleContractNumber = name => event => {
-        this.setState({
-            [name]: event.target.value
-        })
-    }
-
     toggleModal() {
         this.setState({
             modal: !this.state.modal,
@@ -640,7 +664,9 @@ class EditRequest extends Component {
             console.log(this.state.taskDetails.applicationTypeId)
             if (this.state.taskDetails.applicationTypeId === "LTU") {
                 if (this.state.taskDetails.chopTypeId !== "" && this.state.taskDetails.teamId !== "") {
-                    this.getDocuments(this.props.legalName, event.target.value, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId)
+                    this.getDocuments(this.props.legalName, event.target.value, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId, (callback) => {
+
+                    })
                 }
                 this.setState(state => {
                     const taskDetails = this.state.taskDetails
@@ -656,7 +682,9 @@ class EditRequest extends Component {
             })
             if (this.state.taskDetails.applicationTypeId === "LTU") {
                 if (this.state.taskDetails.chopTypeId !== "") {
-                    this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, event.target.value)
+                    this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, event.target.value, (callback) => {
+
+                    })
                 }
             }
         }
@@ -675,7 +703,9 @@ class EditRequest extends Component {
             }
             if (this.state.taskDetails.applicationTypeId === "LTU") {
                 if (this.state.taskDetails.departmentId !== "" && this.state.taskDetails.teamId !== "") {
-                    this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.teamId)
+                    this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.teamId, (callback) => {
+
+                    })
                 }
             }
         }
@@ -808,6 +838,34 @@ class EditRequest extends Component {
         })
     }
 
+    validateContractNumber() {
+        let { tempContractNumber } = this.state
+        let valid = false
+        if (tempContractNumber[2] === "I") {
+            if (tempContractNumber.length === 15 || tempContractNumber.length === 16) {
+                valid = true
+            }
+            else {
+                valid = false
+            }
+        }
+        else {
+            if (tempContractNumber.length === 14 || tempContractNumber.length === 15) {
+                valid = true
+            }
+            else {
+                valid = false
+            }
+        }
+        return valid
+    }
+
+    convertApprovedDate(dateValue) {
+
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\w{2})/g, '$1/$2/$3 $4:$5 $6')
+        return regEx
+    }
+
     addDocumentLTI() {
         var maxNumber = 45;
         var rand = Math.floor((Math.random() * maxNumber) + 1);
@@ -819,7 +877,7 @@ class EditRequest extends Component {
         let typeValid = false
 
         if (this.state.editRequestForm.docSelected !== null) {
-            if (this.state.taskDetails.applicationTypeId !== "CNIPS") {
+            if (this.state.taskDetails.applicationTypeId === "STU") {
                 if (this.state.editRequestForm.engName !== "") {
                     typeValid = true
                 }
@@ -827,92 +885,24 @@ class EditRequest extends Component {
                     typeValid = false
                 }
             }
-            else {
-                if (this.state.editRequestForm.engName !== "" && this.state.conNum.length !== 0) {
+            else if (this.state.taskDetails.applicationTypeId === "CNIPS") {
+                if (this.state.editRequestForm.engName !== "" && this.validateContractNumber()) {
                     typeValid = true
                 }
                 else {
                     typeValid = false
                 }
             }
-
-            if (typeValid) {
-                for (let i = 0; i < doc.length; i++) {
-                    if (doc[i].documentNameEnglish === this.state.editRequestForm.engName && doc[i].documentNameChinese === this.state.editRequestForm.cnName && doc[i].documentFileName === this.state.editRequestForm.docAttachedName) {
-                        valid = false
-                        break
-                    }
-                    else {
-                        valid = true
-                    }
-                }
-
-                if (valid) {
-
-
-                    const obj = {
-                        taskId: this.state.taskDetails.taskId,
-                        documentFileName: this.state.editRequestForm.docAttachedName,
-                        documentCode: "",
-                        contractNumber: this.state.editRequestForm.contractNum,
-                        description: "",
-                        created: date,
-                        updated: "",
-                        documentType: "",
-                        documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
-                        documentFileType: this.state.editRequestForm.docSelected.type,
-                        documentBase64String: "",
-                        expiryDate: null,
-                        departmentHeads: null,
-                        documentId: rand,
-                        documentNameEnglish: this.state.editRequestForm.engName,
-                        documentNameChinese: this.state.editRequestForm.cnName,
-                        docSelected: this.state.editRequestForm.docSelected,
-                        contractNums: this.state.conNum
-                    }
-
-                    this.getBase64(this.state.editRequestForm.docSelected, (result) => {
-                        obj.documentBase64String = result
-                    })
-
-                    console.log(obj)
-
-                    this.setState(state => {
-                        let { taskDetails, invalidChinese, invalidEnglish } = this.state
-                        taskDetails.documents.push(obj)
-                        invalidChinese = false
-                        invalidEnglish = false
-                        return { taskDetails, invalidChinese, invalidEnglish }
-                    })
-                    document.getElementById("documents").className = ""
+            else if (this.state.taskDetails.applicationTypeId === "LTI") {
+                if (this.state.editRequestForm.engName !== "" && this.state.editRequestForm.cnName !== "") {
+                    typeValid = true
                 }
                 else {
-                    Swal.fire({
-                        title: "Document Exists",
-                        html: 'The selected document already exists!',
-                        type: "warning"
-                    })
+                    typeValid = false
                 }
-
-                this.setState(state => {
-                    let editRequestForm = this.state.editRequestForm
-                    editRequestForm.docAttachedName = ""
-                    editRequestForm.contractNum = ""
-                    editRequestForm.docSelected = null
-                    editRequestForm.engName = ""
-                    editRequestForm.cnName = ""
-                    return editRequestForm
-                })
-                this.setState({ conNum: [] })
-            }
-            else {
-                Swal.fire({
-                    title: "Invalid Data",
-                    html: 'Please input valid data!',
-                    type: "warning"
-                })
             }
         }
+
         else {
             Swal.fire({
                 title: "No Document Selected",
@@ -920,6 +910,98 @@ class EditRequest extends Component {
                 type: "warning"
             })
         }
+
+        if (typeValid) {
+            if (this.state.taskDetails.applicationTypeId === "CNIPS") {
+                for (let i = 0; i < doc.length; i++) {
+                    if (doc[i].documentFileName === this.state.editRequestForm.docAttachedName && doc[i].contractNums[0] === this.state.tempContractNumber) {
+                        valid = false
+                        break
+                    }
+                    else {
+                        valid = true
+                    }
+                }
+            }
+            else {
+                for (let i = 0; i < doc.length; i++) {
+                    if (doc[i].documentNameEnglish === this.state.editRequestForm.engName && doc[i].documentFileName === this.state.editRequestForm.docAttachedName) {
+                        valid = false
+                        break
+                    }
+                    else {
+                        valid = true
+                    }
+                }
+            }
+
+            if (valid) {
+
+
+                const obj = {
+                    taskId: this.state.taskDetails.taskId,
+                    documentFileName: this.state.editRequestForm.docAttachedName,
+                    documentCode: "",
+                    contractNumber: this.state.editRequestForm.contractNum,
+                    description: "",
+                    created: date,
+                    updated: "",
+                    documentType: "",
+                    documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
+                    documentFileType: this.state.editRequestForm.docSelected.type,
+                    documentBase64String: "",
+                    expiryDate: null,
+                    departmentHeads: null,
+                    documentId: rand,
+                    documentNameEnglish: this.state.editRequestForm.engName,
+                    documentNameChinese: this.state.editRequestForm.cnName,
+                    docSelected: this.state.editRequestForm.docSelected,
+                    contractNums: [this.state.tempContractNumber]
+                }
+
+                this.getBase64(this.state.editRequestForm.docSelected, (result) => {
+                    obj.documentBase64String = result
+                })
+
+                console.log(obj)
+
+                this.setState(state => {
+                    let { taskDetails, invalidChinese, invalidEnglish } = this.state
+                    taskDetails.documents.push(obj)
+                    invalidChinese = false
+                    invalidEnglish = false
+                    return { taskDetails, invalidChinese, invalidEnglish }
+                })
+                document.getElementById("documents").className = ""
+            }
+            else {
+                Swal.fire({
+                    title: "Document Exists",
+                    html: 'The selected document already exists!',
+                    type: "warning"
+                })
+            }
+
+            this.setState(state => {
+                let { editRequestForm, tempContractNumber } = this.state
+                editRequestForm.docAttachedName = ""
+                tempContractNumber = ""
+                editRequestForm.docSelected = null
+                editRequestForm.engName = ""
+                editRequestForm.cnName = ""
+                return editRequestForm
+            })
+            this.setState({ conNum: [] })
+        }
+        else {
+            Swal.fire({
+                title: "Invalid Data",
+                html: 'Please input valid data!',
+                type: "warning"
+            })
+        }
+
+
     }
     addDocumentLTU() {
         if (this.state.selectedDocs.length !== 0) {
@@ -1236,18 +1318,60 @@ class EditRequest extends Component {
     }
 
     async selectDocument() {
-        await this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId)
-        if (this.state.documents.length === 0) {
-            Swal.fire({
-                title: "No Documents",
-                html: 'No documents to select from!',
-                type: "warning"
-            })
+
+        document.getElementById('selectDocuments').blur()
+        let { deptSelected, teamSelected, chopTypeSelected, checkDetails } = this.state
+        // if (this.state.documents.length === 0) {
+        if (checkDetails.deptSelected === deptSelected && checkDetails.chopTypeSelected === chopTypeSelected && checkDetails.teamSelected === teamSelected) {
+            this.setState({ showDoc: true })
         }
         else {
-            this.setState({ showDoc: !this.state.showDoc })
-
+            Swal.fire({
+                title: "Retrieving",
+                html: 'Please wait while we retrive the list of documents available.',
+                type: "info",
+                onBeforeOpen: () => {
+                    Swal.showLoading()
+                },
+                onOpen: () => {
+                    this.getDocuments(this.props.legalName, deptSelected, chopTypeSelected, teamSelected, (numberOfDocuments) => {
+                        if (numberOfDocuments === 0) {
+                            Swal.update({
+                                title: "No Documents",
+                                html: 'No documents to select from!',
+                                type: "warning"
+                            })
+                            Swal.hideLoading()
+                        }
+                        else {
+                            // Swal.hideLoading();
+                            Swal.close();
+                            this.setState({ showDoc: true })
+                        }
+                        this.setState(state => {
+                            let checkDetails = this.state.checkDetails
+                            checkDetails.deptSelected = deptSelected
+                            checkDetails.chopTypeSelected = chopTypeSelected
+                            checkDetails.teamSelected = teamSelected
+                            return checkDetails
+                        })
+                    })
+                }
+            })
         }
+
+        // await this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId)
+        // if (this.state.documents.length === 0) {
+        //     Swal.fire({
+        //         title: "No Documents",
+        //         html: 'No documents to select from!',
+        //         type: "warning"
+        //     })
+        // }
+        // else {
+        //     this.setState({ showDoc: !this.state.showDoc })
+
+        // }
     }
 
     toggleSelection = (key, shift, row) => {
@@ -1502,8 +1626,8 @@ class EditRequest extends Component {
         let userId = localStorage.getItem('userId')
         let postReq = new FormData();
         postReq.append("UserId", userId);
-        postReq.append("EmployeeNum", this.state.taskDetails.employeeNum);
-        postReq.append("TelephoneNum", this.state.taskDetails.telephoneNum);
+        postReq.append("EmployeeNum", this.state.taskDetails.requestorUser.employeeNum);
+        postReq.append("TelephoneNum", this.state.taskDetails.requestorUser.telephoneNum);
         postReq.append("CompanyId", this.props.legalName);
         postReq.append("DepartmentId", this.state.taskDetails.departmentId);
         postReq.append("ApplicationTypeId", this.state.taskDetails.applicationTypeId);
@@ -1563,9 +1687,9 @@ class EditRequest extends Component {
                     postReq.append(`Documents[${temp}].Attachment.File`, documentSelected);
                     postReq.append(`Documents[${temp}].DocumentNameEnglish`, this.state.taskDetails.documents[i].documentNameEnglish);
                     postReq.append(`Documents[${temp}].DocumentNameChinese`, this.state.taskDetails.documents[i].documentNameChinese);
-                    for (let j = 0; j < this.state.taskDetails.documents[i].contractNums.length; j++) {
-                        postReq.append(`Documents[${temp}].ContractNums[${j}]`, this.state.taskDetails.documents[i].contractNums[j]);
-                    }
+                    // for (let j = 0; j < this.state.taskDetails.documents[i].contractNums.length; j++) {
+                    postReq.append(`Documents[${temp}].ContractNums[0]`, this.state.taskDetails.documents[i].contractNums[0]);
+                    // }
                 }
             }
 
@@ -1590,6 +1714,10 @@ class EditRequest extends Component {
             this.postData(postReq, isSubmitted)
             // resetMounted.setMounted()
         }
+    }
+
+    hideDoc() {
+        this.setState({ showDoc: false })
     }
 
     dataURLtoFile(dataurl, filename) {
@@ -1630,6 +1758,248 @@ class EditRequest extends Component {
             callback(reader.result.replace(/^data:.+;base64,/, ''))
         };
         reader.readAsDataURL(file)
+    }
+
+    handleContractNumber(event) {
+        let value = event.target.value.toUpperCase()
+        let { tempContractNumber } = this.state
+        let regex = /[0-9]/
+        let regAlph = /[a-zA-Z]/
+        if (value.length === 1) {
+            if (value[0] === 'I' || value[0] === 'S') {
+                if (tempContractNumber !== "") {
+                    this.setState({ tempContractNumber: "" })
+                }
+                else {
+                    this.setState({ tempContractNumber: value + "-" })
+                }
+            }
+        }
+        else if (value.length === 3) {
+            if (regAlph.test(value[2])) {
+                if (value[2] === "I") {
+                    this.setState({ tempContractNumber: value + "A-" })
+                }
+                else {
+                    if (tempContractNumber.length === 2) {
+                        this.setState({ tempContractNumber: value + "-" })
+                    }
+                    else {
+                        this.setState({ tempContractNumber: value.substr(0, 2) })
+                    }
+                }
+            }
+        }
+        else if (value.length === 4) {
+            this.setState({ tempContractNumber: value.substr(0, 2) })
+        }
+        else if (value.length === 5) {
+            if (regAlph.test(value[4])) {
+                if (value[2] === "I") {
+
+                }
+                else {
+                    if (tempContractNumber.length === 4) {
+                        this.setState({ tempContractNumber: value + "-" })
+                    }
+                    else {
+                        this.setState({ tempContractNumber: value.substr(0, 4) })
+                    }
+                }
+            }
+        }
+        else if (value.length === 6) {
+            if (regAlph.test(value[5])) {
+                if (value[2] === "I") {
+                    if (tempContractNumber.length === 5) {
+                        this.setState({ tempContractNumber: value + "-" })
+                    }
+                    else {
+                        this.setState({ tempContractNumber: value.substr(0, 5) })
+                    }
+                }
+                else {
+                    this.setState({ tempContractNumber: value })
+                }
+            }
+        }
+        else if (value.length === 8) {
+            if (regex.test(value[7])) {
+                this.setState({ tempContractNumber: value, isNumber: true })
+            }
+            else {
+                this.setState({ isNumber: false })
+            }
+
+        }
+        else if (value.length === 7 || value.length === 9) {
+            if (value[2] === "I") {
+                if (value.length === 9) {
+                    if (regex.test(value[8])) {
+                        this.setState({ tempContractNumber: value, isNumber: true })
+                    }
+                    else {
+                        this.setState({ isNumber: false })
+                    }
+                }
+                else if (value.length === 7) {
+                    this.setState({ tempContractNumber: value.substr(0, 7) })
+                }
+            }
+            else {
+                switch (value.length) {
+                    case 7:
+                        if (regex.test(value[6])) {
+                            this.setState({ tempContractNumber: value, isNumber: true })
+                        }
+                        else {
+                            this.setState({ isNumber: false })
+                        }
+                        break;
+                    case 9:
+                        if (regex.test(value[8])) {
+                            this.setState({ tempContractNumber: value, isNumber: true })
+                        }
+                        else {
+                            this.setState({ isNumber: false })
+                        }
+                        break;
+                }
+            }
+        }
+        else if (value.length === 10) {
+            if (value[2] === "I") {
+                if (regex.test(value[9])) {
+                    this.setState({ tempContractNumber: value, isNumber: true })
+                }
+                else {
+                    this.setState({ isNumber: false })
+
+                }
+            }
+            else {
+                if (regex.test(value[9])) {
+                    if (tempContractNumber.length === 9) {
+                        this.setState({ tempContractNumber: value + "-" })
+                    }
+                    else {
+                        this.setState({ tempContractNumber: value.substr(0, 9), isNumber: true })
+                    }
+                }
+                else {
+                    this.setState({ isNumber: false })
+
+                }
+            }
+        }
+        else if ((value.length === 11 || value.length < 16) && value.length !== 13) {
+            if (value[2] === "I") {
+                switch (value.length) {
+                    case 11:
+                        if (regex.test(value[10])) {
+                            if (tempContractNumber.length === 10) {
+                                this.setState({ tempContractNumber: value + "-" })
+                            }
+                            else {
+                                this.setState({ tempContractNumber: value.substr(0, 10), isNumber: true })
+                            }
+                        }
+                        else {
+                            this.setState({ isNumber: false })
+
+                        }
+                        break;
+                    case 12:
+                        this.setState({ tempContractNumber: value.substr(0, 12), isNumber: true })
+                        break;
+                    case 14:
+                        if (regex.test(value[13])) {
+                            this.setState({ tempContractNumber: value, isNumber: true })
+                        }
+                        else {
+                            this.setState({ isNumber: false })
+
+                        }
+                        break;
+                    case 15:
+                        if (regex.test(value[14])) {
+                            this.setState({ tempContractNumber: value, isNumber: true })
+                        }
+                        else {
+                            this.setState({ isNumber: false })
+
+                        }
+                        break;
+                }
+            }
+            else {
+                switch (value.length) {
+                    case 11:
+                        this.setState({ tempContractNumber: value })
+                        break;
+                    case 12:
+                        if (regex.test(value[11])) {
+                            this.setState({ tempContractNumber: value, isNumber: true })
+                        }
+                        else {
+                            this.setState({ isNumber: false })
+
+                        }
+                        break;
+
+                    case 14:
+                        if (regex.test(value[13])) {
+                            this.setState({ tempContractNumber: value, isNumber: true })
+                        }
+                        else {
+                            this.setState({ isNumber: false })
+
+                        }
+                        break;
+                    case 15:
+                        if (regex.test(value[14])) {
+                            this.setState({ tempContractNumber: value, isNumber: true })
+                        }
+                        else {
+                            this.setState({ isNumber: false })
+
+                        }
+                        break;
+                }
+            }
+        }
+        else if (value.length === 13) {
+            if (value[2] === "I") {
+                if (regex.test(value[12])) {
+                    this.setState({ tempContractNumber: value, isNumber: true })
+                }
+                else {
+                    this.setState({ isNumber: false })
+
+                }
+            }
+            else {
+                if (regex.test(value[12])) {
+                    this.setState({ tempContractNumber: value, isNumber: true })
+                }
+                else {
+                    this.setState({ isNumber: false })
+
+                }
+            }
+        }
+        else if (value.length === 16) {
+            if (value[2] === "I") {
+                if (regex.test(value[15])) {
+                    this.setState({ tempContractNumber: value, isNumber: true })
+                }
+                else {
+                    this.setState({ isNumber: false })
+
+                }
+            }
+        }
+        console.log(value.length)
     }
 
 
@@ -1782,10 +2152,10 @@ class EditRequest extends Component {
                                         <FormGroup check={false}>
                                             <Label>Document Name</Label>
                                             {taskDetails.applicationTypeId === "LTU"
-                                                ? <div id="documents">
+                                                ? <div>
                                                     <InputGroup id="documentTableLTU" >
                                                         <InputGroupAddon addonType="prepend">
-                                                            <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
+                                                            <Button id="selectDocuments" color="primary" onClick={this.selectDocument}>Select Documents</Button>
                                                         </InputGroupAddon>
                                                         {/* <Input id="documentTableLTU" disabled /> */}
                                                         {/* <FormFeedback>Invalid Input a valid Document Name</FormFeedback> */}
@@ -1795,7 +2165,7 @@ class EditRequest extends Component {
                                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Documents', taskDetails.documents, 'required')}</small>
                                                             : null}
                                                     </InputGroup>
-                                                    <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
+                                                    <Modal color="info" size="xl" toggle={this.hideDoc} isOpen={this.state.showDoc} >
                                                         <ModalHeader className="center"> Select Documents </ModalHeader>
                                                         <ModalBody>
                                                             <SelectTable
@@ -1842,7 +2212,7 @@ class EditRequest extends Component {
                                                             />
                                                         </ModalBody>
                                                         <ModalFooter>
-                                                            <Button color="primary" block size="md" onClick={() => { this.addDocumentLTU(); this.selectDocument() }}>  Add </Button>
+                                                            <Button color="primary" block size="md" onClick={() => { this.addDocumentLTU(); this.hideDoc() }}>  Add </Button>
                                                         </ModalFooter>
                                                     </Modal>
 
@@ -1892,7 +2262,8 @@ class EditRequest extends Component {
                                                             ? <Col  >
                                                                 <FormGroup>
                                                                     <InputGroup>
-                                                                        <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
+                                                                        <Input autoComplete="off" type="text" value={this.state.tempContractNumber} onChange={this.handleContractNumber} id="contractNumber" placeholder={this.state.contractNumNotes}></Input>
+                                                                        {/* <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
                                                                             <DropdownToggle><i className="fa fa-list-ul" /></DropdownToggle>
                                                                             <DropdownMenu>
                                                                                 <DropdownItem header><center>List of Contract Number added</center></DropdownItem>
@@ -1912,8 +2283,12 @@ class EditRequest extends Component {
                                                                         <InputMask placeholder="enter contract number" mask={this.state.inputMask} name="contractNumber" id="contractNumber" className="form-control"
                                                                             onChange={this.handleContractNumber('contractNumber')} value={this.state.contractNumber}
                                                                             onClick={this.handleInputMask}></InputMask>
-                                                                        <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon>
+                                                                        <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon> */}
                                                                     </InputGroup>
+                                                                    {!this.state.isNumber
+                                                                        ? <small style={{ color: '#F86C6B' }} > Please enter only Digits. </small>
+                                                                        : null
+                                                                    }
                                                                 </FormGroup>
                                                             </Col>
                                                             : ""}
@@ -1941,7 +2316,9 @@ class EditRequest extends Component {
                                                         <Col md>
                                                             <FormGroup>
                                                                 {/* <Label>File Name</Label> */}
-                                                                <CustomInput id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" label={editRequestForm.docAttachedName} />
+                                                                <CustomInput
+                                                                    accept=".ipg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, docx, .pdf, .pdfx, .bmp"
+                                                                    id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" label={editRequestForm.docAttachedName} />
                                                             </FormGroup>
                                                         </Col>
                                                         <Col xl={1}>
@@ -2251,8 +2628,31 @@ class EditRequest extends Component {
                                                 <Button onClick={this.deleteTask} color="danger" >Delete</Button>
                                             </Col>
                                         </Row>
-
-
+                                        <hr></hr>
+                                        <Row>
+                                            <Col>
+                                                {taskDetails.histories.length !== 0
+                                                    ? <>
+                                                        <Row>
+                                                            <Col><h4>Approval Histories</h4></Col>
+                                                        </Row>
+                                                        {taskDetails.histories.map((history, index) =>
+                                                            <div key={index}>
+                                                                <hr></hr>
+                                                                <Row className="text-md-left text-center">
+                                                                    <Col sm md="10" lg>
+                                                                        <h5>{history.approvedByName}<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
+                                                                        <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
+                                                                        <Col className="p-0"> <p>{history.comments}</p> </Col>
+                                                                    </Col>
+                                                                </Row>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                    : null
+                                                }
+                                            </Col>
+                                        </Row>
                                     </div>
                                 </CardFooter>
                             </Card>

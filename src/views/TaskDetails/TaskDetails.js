@@ -436,7 +436,7 @@ class TaskDetails extends Component {
 
                             {taskDetails.histories.map((history, index) =>
                                 <div key={index}>
-                                    <Row className="bottom-border"></Row>
+                                    <hr></hr>
                                     <Row className="text-md-left text-center">
                                         {/* <Col xs="12" sm="12" md="2" lg="1">
                                             <img src={history.approvedByAvatarUrl} className="img-avaa img-responsive" alt="Avatar" />
