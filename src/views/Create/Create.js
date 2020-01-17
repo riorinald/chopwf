@@ -1811,7 +1811,7 @@ class Create extends Component {
           <div style={{ fontFamily: "sans-serif" }} className="animated fadeIn">
             <h4>Create</h4>
             <Card>
-              <CardHeader>CREATE NEW REQUEST</CardHeader>
+              <CardHeader>Create new request</CardHeader>
               <CardBody>
                 <FormGroup>
                   <h5>NOTES :</h5>

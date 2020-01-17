@@ -283,7 +283,7 @@ class MyPendingTasks extends Component {
         ))
         return (
             <div className="animated fadeIn">
-                <h4>MY PENDING TASKS</h4>
+                <h4>My Pending Tasks</h4>
 
                 {/* {this.state.show? */}
                 <Card onKeyDown={this.handleKeyDown} >

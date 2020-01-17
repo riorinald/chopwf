@@ -233,7 +233,7 @@ class LicenseMyApplications extends Component {
             <div className="animated fadeIn" >
                 <h4>My Applications</h4>
                 <Card onKeyDown={this.handleKeyDown} >
-                    <CardHeader>MY APPLICATIONS <Button className="float-right" onClick={this.search} >Search</Button> </CardHeader>
+                    <CardHeader>My Applicaitons <Button className="float-right" onClick={this.search} >Search</Button> </CardHeader>
                     <CardBody>
                         <ReactTable
                             data={applications}

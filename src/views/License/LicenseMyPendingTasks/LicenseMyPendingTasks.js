@@ -225,7 +225,7 @@ class LicenseMyPendingTasks extends Component {
             <div className="animated fadeIn">
                 <h4>My Pending Tasks</h4>
                 <Card onKeyDown={this.handleKeyDown}>
-                    <CardHeader>MY PENDING TASKS <Button className="float-right" onClick={this.getPendingTasks} >Search</Button></CardHeader>
+                    <CardHeader>My Pending Tasks <Button className="float-right" onClick={this.getPendingTasks} >Search</Button></CardHeader>
                     <CardBody>
                         <ReactTable
                             data={pendingTasks}

@@ -233,7 +233,7 @@ class Myapps extends Component {
       <div className="animated fadeIn">
         <h4>My Applications</h4>
         <Card>
-          <CardHeader>MY APPLICATIONS <Button className="float-right" onClick={this.search} >Search</Button>
+          <CardHeader>My Applications <Button className="float-right" onClick={this.search} >Search</Button>
           </CardHeader>
           <CardBody onKeyDown={this.onKeyPressed}>
             <ReactTable
