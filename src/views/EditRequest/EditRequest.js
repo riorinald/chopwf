@@ -162,7 +162,8 @@ class EditRequest extends Component {
             ioTooltip: false,
             tempContractNumber: "",
             isNumber: true,
-            contractNumNotes: ""
+            contractNumNotes: "",
+            checkDetails: { deptSelected: "null", chopTypeSelected: "null", teamSelected: "null" },
         }
         this.getTaskDetails = this.getTaskDetails.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -179,6 +180,7 @@ class EditRequest extends Component {
         this.addContract = this.addContract.bind(this);
         this.toggleModal = this.toggleModal.bind(this);
         this.handleContractNumber = this.handleContractNumber.bind(this);
+        this.hideDoc = this.hideDoc.bind(this);
     }
 
     componentDidMount() {
@@ -446,7 +448,9 @@ class EditRequest extends Component {
 
         if (temporary.applicationTypeId === "LTU") {
             if (temporary.departmentId !== "" && temporary.chopTypeId !== "" && temporary.teamId !== "") {
-                this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId)
+                this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId, (callback) => {
+
+                })
             }
         }
         temporary.departmentId = temporary.departmentId.toLowerCase()
@@ -499,7 +503,7 @@ class EditRequest extends Component {
     }
 
 
-    async getDocuments(companyId, deptId, chopTypeId, teamId) {
+    async getDocuments(companyId, deptId, chopTypeId, teamId, callback) {
 
         //change to 2nd URL -  1st URL for dev
         // let url = `${config.url}/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit`
@@ -510,8 +514,10 @@ class EditRequest extends Component {
         try {
             await Axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
                 this.setState({ documents: res.data })
+                callback(true)
             })
         } catch (error) {
+            callback(false)
             console.error(error)
         }
     }
@@ -658,7 +664,9 @@ class EditRequest extends Component {
             console.log(this.state.taskDetails.applicationTypeId)
             if (this.state.taskDetails.applicationTypeId === "LTU") {
                 if (this.state.taskDetails.chopTypeId !== "" && this.state.taskDetails.teamId !== "") {
-                    this.getDocuments(this.props.legalName, event.target.value, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId)
+                    this.getDocuments(this.props.legalName, event.target.value, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId, (callback) => {
+
+                    })
                 }
                 this.setState(state => {
                     const taskDetails = this.state.taskDetails
@@ -674,7 +682,9 @@ class EditRequest extends Component {
             })
             if (this.state.taskDetails.applicationTypeId === "LTU") {
                 if (this.state.taskDetails.chopTypeId !== "") {
-                    this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, event.target.value)
+                    this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, event.target.value, (callback) => {
+
+                    })
                 }
             }
         }
@@ -693,7 +703,9 @@ class EditRequest extends Component {
             }
             if (this.state.taskDetails.applicationTypeId === "LTU") {
                 if (this.state.taskDetails.departmentId !== "" && this.state.taskDetails.teamId !== "") {
-                    this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.teamId)
+                    this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.teamId, (callback) => {
+
+                    })
                 }
             }
         }
@@ -1306,18 +1318,60 @@ class EditRequest extends Component {
     }
 
     async selectDocument() {
-        await this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId)
-        if (this.state.documents.length === 0) {
-            Swal.fire({
-                title: "No Documents",
-                html: 'No documents to select from!',
-                type: "warning"
-            })
+
+        document.getElementById('selectDocuments').blur()
+        let { deptSelected, teamSelected, chopTypeSelected, checkDetails } = this.state
+        // if (this.state.documents.length === 0) {
+        if (checkDetails.deptSelected === deptSelected && checkDetails.chopTypeSelected === chopTypeSelected && checkDetails.teamSelected === teamSelected) {
+            this.setState({ showDoc: true })
         }
         else {
-            this.setState({ showDoc: !this.state.showDoc })
-
+            Swal.fire({
+                title: "Retrieving",
+                html: 'Please wait while we retrive the list of documents available.',
+                type: "info",
+                onBeforeOpen: () => {
+                    Swal.showLoading()
+                },
+                onOpen: () => {
+                    this.getDocuments(this.props.legalName, deptSelected, chopTypeSelected, teamSelected, (numberOfDocuments) => {
+                        if (numberOfDocuments === 0) {
+                            Swal.update({
+                                title: "No Documents",
+                                html: 'No documents to select from!',
+                                type: "warning"
+                            })
+                            Swal.hideLoading()
+                        }
+                        else {
+                            // Swal.hideLoading();
+                            Swal.close();
+                            this.setState({ showDoc: true })
+                        }
+                        this.setState(state => {
+                            let checkDetails = this.state.checkDetails
+                            checkDetails.deptSelected = deptSelected
+                            checkDetails.chopTypeSelected = chopTypeSelected
+                            checkDetails.teamSelected = teamSelected
+                            return checkDetails
+                        })
+                    })
+                }
+            })
         }
+
+        // await this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId)
+        // if (this.state.documents.length === 0) {
+        //     Swal.fire({
+        //         title: "No Documents",
+        //         html: 'No documents to select from!',
+        //         type: "warning"
+        //     })
+        // }
+        // else {
+        //     this.setState({ showDoc: !this.state.showDoc })
+
+        // }
     }
 
     toggleSelection = (key, shift, row) => {
@@ -1660,6 +1714,10 @@ class EditRequest extends Component {
             this.postData(postReq, isSubmitted)
             // resetMounted.setMounted()
         }
+    }
+
+    hideDoc() {
+        this.setState({ showDoc: false })
     }
 
     dataURLtoFile(dataurl, filename) {
@@ -2097,7 +2155,7 @@ class EditRequest extends Component {
                                                 ? <div>
                                                     <InputGroup id="documentTableLTU" >
                                                         <InputGroupAddon addonType="prepend">
-                                                            <Button color="primary" onClick={this.selectDocument}>Select Documents</Button>
+                                                            <Button id="selectDocuments" color="primary" onClick={this.selectDocument}>Select Documents</Button>
                                                         </InputGroupAddon>
                                                         {/* <Input id="documentTableLTU" disabled /> */}
                                                         {/* <FormFeedback>Invalid Input a valid Document Name</FormFeedback> */}
@@ -2107,7 +2165,7 @@ class EditRequest extends Component {
                                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Documents', taskDetails.documents, 'required')}</small>
                                                             : null}
                                                     </InputGroup>
-                                                    <Modal color="info" size="xl" toggle={this.selectDocument} isOpen={this.state.showDoc} >
+                                                    <Modal color="info" size="xl" toggle={this.hideDoc} isOpen={this.state.showDoc} >
                                                         <ModalHeader className="center"> Select Documents </ModalHeader>
                                                         <ModalBody>
                                                             <SelectTable
@@ -2154,7 +2212,7 @@ class EditRequest extends Component {
                                                             />
                                                         </ModalBody>
                                                         <ModalFooter>
-                                                            <Button color="primary" block size="md" onClick={() => { this.addDocumentLTU(); this.selectDocument() }}>  Add </Button>
+                                                            <Button color="primary" block size="md" onClick={() => { this.addDocumentLTU(); this.hideDoc() }}>  Add </Button>
                                                         </ModalFooter>
                                                     </Modal>
 
