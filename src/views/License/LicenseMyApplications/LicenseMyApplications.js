@@ -440,7 +440,7 @@ class LicenseMyApplications extends Component {
                                     style: { textAlign: "center" }
                                 }
                             ]}
-                            defaultPageSize={20}
+                            defaultPageSize={10}
                             // pages={this.state.page}
                             // manual
                             // onPageChange={(e)=>{this.setState({page: e})}}

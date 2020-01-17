@@ -452,7 +452,7 @@ class ChopApplication extends Component {
                   style: { textAlign: "center" }
                 }
               ]}
-              defaultPageSize={20}
+              defaultPageSize={10}
               manual
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {

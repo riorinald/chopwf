@@ -305,7 +305,7 @@ class MyPendingTasks extends Component {
                                 return row[id]
                             }}
                             getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
-                            defaultPageSize={20}
+                            defaultPageSize={10}
                             manual
                             onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getPendingTasks(e + 1, this.state.limit)) }}
                             onPageSizeChange={(pageSize, page) => {
