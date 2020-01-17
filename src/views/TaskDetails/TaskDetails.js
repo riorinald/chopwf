@@ -379,39 +379,7 @@ class TaskDetails extends Component {
                                         </FormGroup>
                                         : ""
                                     }
-                                    {/* {appType === "LTI" ?
-                                        <div>
-                                            <FormGroup row >
-                                                <Col md="4" className="d-flex align-items-center" >
-                                                    <Label>Use in Office or not</Label>
-                                                </Col>
-                                                <Col xs="12" md="8">
-                                                    <Input disabled type="text" value={taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} id="isUseInOffice" name="isUseInOffice" placeholder="/" />
-                                                </Col>
-                                            </FormGroup>
-                                            {taskDetails.isUseInOffice === "N"
-                                                ? <div>
-                                                    <FormGroup row >
-                                                        <Col md="4" className="d-flex align-items-center" >
-                                                            <Label>Return Date</Label>
-                                                        </Col>
-                                                        <Col xs="12" md="8">
-                                                            <Input disabled type="text" value={this.convertDate(taskDetails.returnDate)} id="returnDate" name="returnDate" placeholder="/" />
-                                                        </Col>
-                                                    </FormGroup>
-                                                    <FormGroup row >
-                                                        <Col md="4" className="d-flex align-items-center" >
-                                                            <Label>Responsible Person</Label>
-                                                        </Col>
-                                                        <Col xs="12" md="8">
-                                                            <Input disabled type="text" value={taskDetails.responsiblePersonName} id="responsiblePersonName" name="responsiblePersonName" placeholder="/" />
-                                                        </Col>
-                                                    </FormGroup>
-                                                </div>
 
-                                                : ""}
-                                        </div>
-                                        : null} */}
                                     {appType !== "LTI" ?
                                         <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
@@ -436,13 +404,13 @@ class TaskDetails extends Component {
                                             {taskDetails.isUseInOffice === "N"
                                                 ? <FormGroup row >
                                                     <Col md="4" className="d-flex align-items-center" >
-                                                        <Label>Return Date</Label>
+                                                        <Label>Responsible Person</Label>
                                                     </Col>
                                                     <Col xs="12" md="8">
-                                                        <Input disabled type="text" value={this.convertDate(taskDetails.returnDate)} id="returnDate" name="returnDate" placeholder="/" />
+                                                        <Input disabled type="text" value={taskDetails.responsiblePersonName} id="responsiblePersonName" name="responsiblePersonName" placeholder="/" />
                                                     </Col>
                                                 </FormGroup>
-                                                : ""}
+                                                : null}
                                         </>
                                         : null}
                                     {appType === 'CNIPS'
@@ -483,7 +451,7 @@ class TaskDetails extends Component {
                                                 <Label>Pick Up By</Label>
                                             </Col>
                                             <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.pickUpByName} id="pickUpBy" name="pickUpBy" placeholder="EMPTY DATA" />
+                                                <Input disabled type="text" value={taskDetails.pickUpByName} id="pickUpBy" name="pickUpBy" placeholder="/" />
                                             </Col>
                                         </FormGroup>
                                         : null}
@@ -534,7 +502,7 @@ class TaskDetails extends Component {
                                                 <Label>Entitled Team</Label>
                                             </Col>
                                             <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.teamName} id="teamName" name="teamName" placeholder="EMPTY DATA" />
+                                                <Input disabled type="text" value={taskDetails.teamName} id="teamName" name="teamName" placeholder="/" />
                                             </Col>
                                         </FormGroup>
                                         : null
@@ -600,6 +568,16 @@ class TaskDetails extends Component {
                                             </Col>
                                         </FormGroup>
                                         : null}
+                                    {taskDetails.isUseInOffice === "N"
+                                        ? <FormGroup row >
+                                            <Col md="4" className="d-flex align-items-center" >
+                                                <Label>Return Date</Label>
+                                            </Col>
+                                            <Col xs="12" md="8">
+                                                <Input disabled type="text" value={this.convertDate(taskDetails.returnDate)} id="returnDate" name="returnDate" placeholder="/" />
+                                            </Col>
+                                        </FormGroup>
+                                        : ""}
                                     <FormGroup row >
                                         <Col md="4" className="d-flex align-items-center" >
                                             <Label>Address to</Label>
@@ -610,16 +588,7 @@ class TaskDetails extends Component {
                                     </FormGroup>
 
 
-                                    {taskDetails.isUseInOffice === "N"
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Responsible Person</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.responsiblePersonName} id="responsiblePersonName" name="responsiblePersonName" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : null}
+
                                     {appType === "CNIPS"
                                         ? <FormGroup row >
                                             <Col md="4" className="d-flex align-items-center" >
@@ -655,7 +624,7 @@ class TaskDetails extends Component {
                                                 <Label>Pick Up By</Label>
                                             </Col>
                                             <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.pickUpByName} id="pickUpBy" name="pickUpBy" placeholder="EMPTY DATA" />
+                                                <Input disabled type="text" value={taskDetails.pickUpByName} id="pickUpBy" name="pickUpBy" placeholder="/" />
                                             </Col>
                                         </FormGroup>
                                         : null}

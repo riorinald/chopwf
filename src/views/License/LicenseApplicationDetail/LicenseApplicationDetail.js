@@ -420,13 +420,13 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Employee Number</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="EMPTY DATA" />
+                                        <Input disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Department</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.departmentName} name="text-input" placeholder="EMPTY DATA" />
+                                        <Input disabled type="text" defaultValue={taskDetails.departmentName} name="text-input" placeholder="/" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -434,13 +434,13 @@ class LicenseApplicationDetail extends Component {
                                         <Label>License Name</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" name="text-input" value={taskDetails.licenseName} placeholder="EMPTY DATA" />
+                                        <Input disabled type="text" name="text-input" value={taskDetails.licenseName} placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Purpose</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.purposeTypeName} name="text-input" placeholder="EMPTY DATA" />
+                                        <Input disabled type="text" defaultValue={taskDetails.purposeTypeName} name="text-input" placeholder="/" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -448,7 +448,7 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Document Type</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.documentTypeName} name="text-input" placeholder="EMPTY DATA" />
+                                        <Input disabled type="text" defaultValue={taskDetails.documentTypeName} name="text-input" placeholder="/" />
                                     </Col>
                                     {taskDetails.documentTypeId === "ORIGINAL"
                                         ? <>
@@ -456,7 +456,7 @@ class LicenseApplicationDetail extends Component {
                                                 <Label>Planned Return Date</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={this.convertDate(taskDetails.plannedReturnDate)} name="text-input" placeholder="EMPTY DATA" />
+                                                <Input disabled type="text" defaultValue={this.convertDate(taskDetails.plannedReturnDate)} name="text-input" placeholder="/" />
                                             </Col>
                                         </>
                                         : <>
@@ -464,7 +464,7 @@ class LicenseApplicationDetail extends Component {
                                                 <Label> Watermark </Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="EMPTY DATA" />
+                                                <Input disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="/" />
                                             </Col>
                                         </>
                                     }
@@ -474,13 +474,13 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Deliver Ways</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="EMPTY DATA" />
+                                        <Input disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Delivery Address</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="EMPTY DATA" />
+                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -488,7 +488,7 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Receiver</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="EMPTY DATA" />
+                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Deliver Express Number</Label>
@@ -503,7 +503,7 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Receiver Mobile Number</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="EMPTY DATA" />
+                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Return Way</Label>
@@ -517,7 +517,7 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Senior Manager or above of Requestor Department</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="EMPTY DATA" />
+                                        <Input disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Return Express Number</Label>
@@ -537,7 +537,7 @@ class LicenseApplicationDetail extends Component {
                                                     ?
                                                     <FormGroup onChange={this.handleRadio} >
                                                         <Label>Deliver Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                                         <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
                                                             <Collapse isOpen={deliverWay === "Express"}>
                                                                 <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
@@ -569,7 +569,7 @@ class LicenseApplicationDetail extends Component {
                                                 <Col>
                                                     <FormGroup onChange={this.handleRadio} >
                                                         <Label>Return Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                                         <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
                                                             <Collapse isOpen={deliverWay === "Express"}>
                                                                 <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
@@ -612,7 +612,7 @@ class LicenseApplicationDetail extends Component {
                                                 <Col>
                                                     <FormGroup onChange={this.handleRadio} >
                                                         <Label>Return Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                                         <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
                                                             <Collapse isOpen={deliverWay === "Express"}>
                                                                 <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
