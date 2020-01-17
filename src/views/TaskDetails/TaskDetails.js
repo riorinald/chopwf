@@ -13,7 +13,8 @@ import Axios from 'axios';
 import config from '../../config';
 import Swal from 'sweetalert2';
 import ReactTable from "react-table";
-import "react-table/react-table.css"
+import "react-table/react-table.css";
+import {STU,LTU,LTI,CNIPS} from './viewDetails';
 // import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
 
 
@@ -196,6 +197,27 @@ class TaskDetails extends Component {
         }
     }
 
+    handleViews(appType){
+        
+        switch (appType) {
+            case 'STU':
+                return <STU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                ;
+            case 'LTU':
+                return <LTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                ;
+            case 'LTI':
+                return <LTI setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                ;
+            case 'CNIPS':
+                return <CNIPS setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                ;
+            default:
+                return <STU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                ;    
+        }
+    }
+
     dataURLtoFile(dataurl, filename) {
 
         var arr = dataurl.split(','),
@@ -231,6 +253,8 @@ class TaskDetails extends Component {
     render() {
 
         const { taskDetails, userDetails, loading, showModal, page, appType } = this.state
+        const viewDetail = null 
+
         return (
             <div className="animated fadeIn">
                 {!loading ?
@@ -282,28 +306,6 @@ class TaskDetails extends Component {
                                 {/* </Col> */}
 
                             </Row>
-                            {/* <Modal style={{ maxWidth: 1500 }} size="xl" color="info" toggle={() => this.setState({ progressModal: !this.state.progressModal })} isOpen={this.state.progressModal} >
-                                <ModalBody>
-                                    <Col style={{ width: "100%" }} >
-                                        <Progress multi style={{ height: "5rem" }}>
-                                            {taskDetails.allStages.map((stage, index) =>
-                                                <React.Fragment key={index}>
-                                                    <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
-                                                    <Progress style={{ height: "5rem" }}
-                                                        className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
-                                                        bar
-                                                        animated={stage.state === "CURRENT" ? true : false}
-                                                        striped={stage.state === "FINISHED"}
-                                                        color={stage.state === "CURRENT" ? "green" : stage.state === "FIRSTPENDING" ? "warning" : stage.state === "FINISHED" ? "secondary" : ""}
-                                                        value={100 / taskDetails.allStages.length}> <div className="text-break" id={"status" + index} style={{ wordWrap: "break-word", color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
-                                                    </Progress>
-                                                </React.Fragment>
-                                            )}
-                                        </Progress>
-                                    </Col>
-                                </ModalBody>
-                            </Modal> */}
-
                             <Row className="mb-4">
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
@@ -331,322 +333,7 @@ class TaskDetails extends Component {
                                     </Row>
                                 </Col>
                             </Row>
-                            <Row>
-                                <Col>
-                                    <FormGroup row >
-                                        <Col md="4" className="d-flex align-items-center" >
-                                            <Label>Employee Number</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.requestorUser.employeeNum} id="employeeNum" name="employeeNum" placeholder="/" />
-                                        </Col>
-                                    </FormGroup>
-                                    <FormGroup row >
-                                        <Col md="4" className="d-flex align-items-center" >
-                                            <Label>Dept</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.departmentName} id="departmentName" name="departmentName" placeholder="/" />
-                                        </Col>
-                                    </FormGroup>
-                                    {appType === "LTI"
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Effective Period</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={this.convertDate(taskDetails.effectivePeriod)} id="effectivePeriod" name="effectivePeriod" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : null
-                                    }
-                                    <FormGroup row >
-                                        <Col md="4" className="d-flex align-items-center" >
-                                            <Label>Chop Type</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.chopTypeName} id="chopTypeName" name="chopTypeName" placeholder="/" />
-                                        </Col>
-                                    </FormGroup>
-                                    {taskDetails.branchName !== ""
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Branch Company Chop</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : ""
-                                    }
-
-                                    {appType !== "LTI" ?
-                                        <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Connecting Chop</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.connectChop === "Y" ? "Yes" : "No"} id="connectChop" name="connectChop" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : null}
-
-                                    {appType !== "LTI" ?
-                                        <>
-                                            <FormGroup row >
-                                                <Col md="4" className="d-flex align-items-center" >
-                                                    <Label>Use in Office or not</Label>
-                                                </Col>
-                                                <Col xs="12" md="8">
-                                                    <Input disabled type="text" value={taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} id="isUseInOffice" name="isUseInOffice" placeholder="/" />
-                                                </Col>
-                                            </FormGroup>
-                                            {taskDetails.isUseInOffice === "N"
-                                                ? <FormGroup row >
-                                                    <Col md="4" className="d-flex align-items-center" >
-                                                        <Label>Responsible Person</Label>
-                                                    </Col>
-                                                    <Col xs="12" md="8">
-                                                        <Input disabled type="text" value={taskDetails.responsiblePersonName} id="responsiblePersonName" name="responsiblePersonName" placeholder="/" />
-                                                    </Col>
-                                                </FormGroup>
-                                                : null}
-                                        </>
-                                        : null}
-                                    {appType === 'CNIPS'
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Contract Signed By (First Person) :  </Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.contractSignedByFirstPersonName} id="contractSignedByFirstPersonName" name="contractSignedByFirstPersonName" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : ''}
-                                    <FormGroup row >
-                                        <Col md="4" className="d-flex align-items-center" >
-                                            <Label>Remark (e.g. tel.)</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.remark} id="remark" name="remark" placeholder="/" />
-                                        </Col>
-                                    </FormGroup>
-
-                                    {appType === "LTI"
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Document Check By</Label>
-                                            </Col>
-                                            <Col id="docCheck" xs="12" md="8">
-                                                <Input disabled type="textarea" value={this.setArray(taskDetails.documentCheckByName)} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
-                                                <UncontrolledTooltip placement="right" target="docCheck">{this.setArray(taskDetails.documentCheckByName)}</UncontrolledTooltip>
-                                            </Col>
-                                        </FormGroup>
-                                        : null
-                                    }
-
-                                    {appType !== "LTI" && appType !== "CNIPS"
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Pick Up By</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.pickUpByName} id="pickUpBy" name="pickUpBy" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : null}
-
-
-                                    {/* Drop HERE */}
-
-
-
-
-
-
-                                    {appType !== "STU"
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Confirm</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : ''
-                                    }
-
-
-                                </Col>
-                                <Col>
-                                    <FormGroup row >
-                                        <Col md="4" className="d-flex align-items-center" >
-                                            <Label>Tel</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.requestorUser.telephoneNum} id="telephoneNum" name="telephoneNum" placeholder="/" />
-                                        </Col>
-                                    </FormGroup>
-                                    <FormGroup row >
-                                        <Col md="4" className="d-flex align-items-center" >
-                                            <Label>Application Type</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
-                                            <Input disabled type="text" value={taskDetails.applicationTypeName} id="applicationTypeName" name="applicationTypeName" placeholder="/" />
-                                        </Col>
-                                    </FormGroup>
-
-                                    {appType === "LTU" || appType === "LTI"
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Entitled Team</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.teamName} id="teamName" name="teamName" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : null
-                                    }
-                                    {appType === "LTI"
-                                        ? taskDetails.isUseInOffice === "N"
-                                            ? <FormGroup row >
-                                                <Col md="4" className="d-flex align-items-center" >
-                                                    <Label>Purpose of Use</Label>
-                                                </Col>
-                                                <Col xs="12" md="8">
-                                                    <Input disabled type="text" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
-                                                </Col>
-                                            </FormGroup>
-                                            : null
-                                        : null}
-                                    {appType === "CNIPS"
-                                        ? taskDetails.isUseInOffice === "Y"
-                                            ? <FormGroup row >
-                                                <Col md="4" className="d-flex align-items-center" >
-                                                    <Label>Purpose of Use</Label>
-                                                </Col>
-                                                <Col xs="12" md="8">
-                                                    <Input disabled type="text" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
-                                                </Col>
-                                            </FormGroup> : "" : ""}
-                                    {appType === "LTI"
-                                        ? taskDetails.isUseInOffice === "Y"
-                                            ? <FormGroup row >
-                                                <Col md="4" className="d-flex align-items-center" >
-                                                    <Label>Purpose of Use</Label>
-                                                </Col>
-                                                <Col xs="12" md="8">
-                                                    <Input disabled type="text" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
-                                                </Col>
-                                            </FormGroup>
-                                            : null
-                                        : appType === "CNIPS"
-                                            ? taskDetails.isUseInOffice === "N"
-                                                ? <FormGroup row >
-                                                    <Col md="4" className="d-flex align-items-center" >
-                                                        <Label>Purpose of Use</Label>
-                                                    </Col>
-                                                    <Col xs="12" md="8">
-                                                        <Input disabled type="textarea" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
-                                                    </Col>
-                                                </FormGroup> : "" : <FormGroup row >
-                                                <Col md="4" className="d-flex align-items-center" >
-                                                    <Label>Purpose of Use</Label>
-                                                </Col>
-                                                <Col xs="12" md="8">
-                                                    <Input disabled type="textarea" value={taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
-                                                </Col>
-                                            </FormGroup>
-                                    }
-                                    {appType !== "LTI"
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>No. of Pages to Be Chopped </Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.numOfPages} id="numOfPages" name="numOfPages" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : null}
-                                    {taskDetails.isUseInOffice === "N"
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Return Date</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={this.convertDate(taskDetails.returnDate)} id="returnDate" name="returnDate" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : ""}
-                                    <FormGroup row >
-                                        <Col md="4" className="d-flex align-items-center" >
-                                            <Label>Address to</Label>
-                                        </Col>
-                                        <Col xs="12" md="8">
-                                            <Input disabled type="textarea" value={taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
-                                        </Col>
-                                    </FormGroup>
-
-
-
-                                    {appType === "CNIPS"
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Contract Signed By (Second Person) :  </Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.contractSignedBySecondPersonName} id="contractSignedBySecondPersonName" name="contractSignedBySecondPersonName" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : appType === "LTU"
-                                            ? <FormGroup row >
-                                                <Col md="4" className="d-flex align-items-center" >
-                                                    <Label>Document Check By</Label>
-                                                </Col>
-                                                <Col xs="12" md="8">
-                                                    <Input disabled type="text" value={taskDetails.documentCheckByName} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
-                                                </Col>
-                                            </FormGroup>
-                                            :
-                                            <FormGroup row >
-                                                <Col md="4" className="d-flex align-items-center" >
-                                                    <Label>Department Heads</Label>
-                                                </Col>
-                                                <Col id="deptHead" xs="12" md="8">
-                                                    <Input disabled type="textarea" value={this.setArray(taskDetails.departmentHeadsName)} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
-                                                    <UncontrolledTooltip placement="right" target="deptHead">{this.setArray(taskDetails.departmentHeadsName)}</UncontrolledTooltip>
-                                                </Col>
-                                            </FormGroup>
-                                    }
-                                    {appType === "CNIPS"
-                                        ? <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Pick Up By</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.pickUpByName} id="pickUpBy" name="pickUpBy" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                        : null}
-                                    {appType !== "STU"
-                                        ? ''
-                                        : <FormGroup row >
-                                            <Col md="4" className="d-flex align-items-center" >
-                                                <Label>Confirm</Label>
-                                            </Col>
-                                            <Col xs="12" md="8">
-                                                <Input disabled type="text" value={taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
-                                            </Col>
-                                        </FormGroup>
-                                    }
-
-
-
-
-
-
-                                </Col>
-                            </Row>
+                                {this.handleViews(appType)}
                             <Row>
                                 <FormGroup>
                                     <Col>
