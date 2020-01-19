@@ -173,7 +173,8 @@ class Login extends Component {
                                 <Col sm={9}>
                                     <Input onChange={this.handleChange} 
                                     value={this.state.username} type="text" name="username" 
-                                    id="username" placeholder="Please enter Username" />
+                                    id="username" placeholder="Please enter Username" 
+                                    onKeyPress={(e) => {if (e.key === 'Enter'){this.loginCheck()}}}/>
                                 </Col>
                             </FormGroup>
                             <FormGroup row>
