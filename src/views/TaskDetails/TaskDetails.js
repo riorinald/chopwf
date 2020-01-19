@@ -131,7 +131,7 @@ class TaskDetails extends Component {
 
                         Swal.update({
                             title: res.data.message,
-                            text: `The request has been ${res.data.message}`,
+                            text: `The request has been approved`,
                             type: "success",
 
                         })
