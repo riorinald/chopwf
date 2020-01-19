@@ -54,7 +54,7 @@ class LicenseCreate extends Component {
                 isConfirm: "N"
             },
 
-            validateForm: ["telephoneNum", "department", "licenseName", "licensePurpose1", "licensePurpose2", "licensePurpose3", "documentType1", "documentType2", "watermark1", "watermark2", "returnDate", "deliverWay1", "deliverWay2", "address", "reciever", "recieverPhone", "seniorManager"],
+            validateForm: ["department", "licenseName", "licensePurpose1", "licensePurpose2", "licensePurpose3", "documentType1", "documentType2", "watermark1", "watermark2", "returnDate", "deliverWay1", "deliverWay2", "address", "reciever", "recieverPhone", "seniorManager"],
 
 
             returnDateView: null,
@@ -323,7 +323,7 @@ class LicenseCreate extends Component {
             //     return formData
             // })
             this.submitRequest("Y")
-            // console.log("ALL VALIDATED")
+            console.log("ALL VALIDATED", )
         }
         else {
             // alert("Invalid Fields")
@@ -621,13 +621,15 @@ class LicenseCreate extends Component {
                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         />
                                         {/* <Input placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" /> */}
-                                        <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
+                                        {/* <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small> */}
                                     </FormGroup>
 
                                     <FormGroup>
                                         <Label>Reciever Mobile Phone</Label>
                                         <Input placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
+                                        {formData.documentType === "ORIGINAL" ?
                                         <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, formData.recieverPhone, 'required')}</small>
+                                        : null}
                                     </FormGroup>
                                 </Collapse>
                             </Collapse>
