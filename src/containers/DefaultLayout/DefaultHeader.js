@@ -105,15 +105,14 @@ class DefaultHeader extends Component {
                     </DropdownItem>
             </DropdownMenu>
           </Dropdown>
-          <UncontrolledDropdown nav direction="down" >
-            <DropdownToggle nav>
+          <UncontrolledDropdown nav direction="down" className="mr-4" >
+            <DropdownToggle nav className="mr-2">
               {userDetails.displayName}
             </DropdownToggle>
-            <DropdownMenu right className="mt-2">
+            <DropdownMenu right className="mt-3">
               <AuthButton />
             </DropdownMenu>
           </UncontrolledDropdown>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         </Nav>
       </React.Fragment>
     );

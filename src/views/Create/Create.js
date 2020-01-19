@@ -193,7 +193,8 @@ class Create extends Component {
       inputMask: { mask: "a-a-a-9999-9999" },
       msgTooltip: '[I / S ]-[ A / L / IA / R ]-[ O / P / S] \n e.g "S-A-O-9999-9999"',
       ioTooltip: false,
-      contractNumNotes: ""
+      contractNumNotes: "",
+      contractError: "Please enter only Digits."
 
     };
 
@@ -597,8 +598,8 @@ class Create extends Component {
       })
   }
 
-  async getDocCheckBy(teamId) {
-    await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&displayname=&userid=${this.state.userId}`,
+  async getDocCheckBy(chopType) {
+    await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${this.state.teamSelected}&choptypeid=${chopType}&displayname=&userid=${this.state.userId}`,
       { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ docCheckBy: res.data })
@@ -721,8 +722,8 @@ class Create extends Component {
     else if (name === "chopTypeSelected") {
       console.log(event.target.value)
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
+        this.getDocCheckBy(event.target.value)
         this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
-
         })
       }
 
@@ -760,12 +761,6 @@ class Create extends Component {
     //ENTITLED TEAM
     else if (name === "teamSelected") {
       // console.log(event.target.value)
-      this.getDocCheckBy(event.target.value)
-      if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
-        this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, event.target.value, (callback) => {
-
-        })
-      }
     }
 
     //Handle engName
@@ -1451,18 +1446,23 @@ class Create extends Component {
     let { tempContractNumber } = this.state
     let regex = /[0-9]/
     let regAlph = /[a-zA-Z]/
+    let second = /[IALR]/
+    let third = /(?!.*[A-NQRT-Z])[PSO]/
     if (value.length === 1) {
       if (value[0] === 'I' || value[0] === 'S') {
         if (tempContractNumber !== "") {
+
           this.setState({ tempContractNumber: "" })
         }
         else {
-          this.setState({ tempContractNumber: value + "-" })
+          this.setState({ isNumber:true, tempContractNumber: value + "-" })
         }
+      } else {
+        this.setState({isNumber:false, contractError: "Please Input I or S.",})
       }
     }
     else if (value.length === 3) {
-      if (regAlph.test(value[2])) {
+      if (second.test(value[2])) {
         if (value[2] === "I") {
           this.setState({ tempContractNumber: value + "A-" })
         }
@@ -1474,31 +1474,37 @@ class Create extends Component {
             this.setState({ tempContractNumber: value.substr(0, 2) })
           }
         }
+      } 
+      else {
+        this.setState({isNumber:false, contractError: "Please Input A / IA / L / R "})
       }
     }
     else if (value.length === 4) {
       this.setState({ tempContractNumber: value.substr(0, 2) })
     }
     else if (value.length === 5) {
-      if (regAlph.test(value[4])) {
+      if (third.test(value[4])) {
         if (value[2] === "I") {
 
         }
         else {
           if (tempContractNumber.length === 4) {
-            this.setState({ tempContractNumber: value + "-" })
+            this.setState({ tempContractNumber: value + "-", contractError: "Please enter only Digits." })
           }
           else {
             this.setState({ tempContractNumber: value.substr(0, 4) })
           }
         }
+      } 
+      else {
+          this.setState({isNumber: false, contractError: "Please input O / P / S"})
       }
     }
     else if (value.length === 6) {
-      if (regAlph.test(value[5])) {
+      if (third.test(value[5])) {
         if (value[2] === "I") {
           if (tempContractNumber.length === 5) {
-            this.setState({ tempContractNumber: value + "-" })
+            this.setState({ tempContractNumber: value + "-", contractError: "Please enter only Digits." })
           }
           else {
             this.setState({ tempContractNumber: value.substr(0, 5) })
@@ -1517,7 +1523,7 @@ class Create extends Component {
         this.setState({ tempContractNumber: value, isNumber: true })
       }
       else {
-        this.setState({ isNumber: false })
+        this.setState({ isNumber: false, contractError: "Please enter only Digits." })
       }
 
     }
@@ -1875,7 +1881,7 @@ class Create extends Component {
 
                   <Input autoComplete="off" type="text" value={this.state.tempContractNumber} onChange={this.handleContractNumber} id="contractNumber" placeholder={this.state.contractNumNotes}></Input>
                   {!this.state.isNumber
-                    ? <small style={{ color: '#F86C6B' }} > Please enter only Digits. </small>
+                    ? <small style={{ color: '#F86C6B' }} > {this.state.contractError} </small>
                     : null
                   }
 
@@ -1900,7 +1906,8 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 {/* <Label>Chinese Name</Label> */}
-                <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3" placeholder="Please describe in Chinese (optional)" />
+                <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3" 
+                placeholder={this.state.isLTI ? "Please describe in Chinese" : "Please describe in Chinese (optional)" }/>
                 {this.state.invalidChinese
                   ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
                   : null
@@ -2257,7 +2264,7 @@ class Create extends Component {
                     </FormGroup>
                   </Collapse>
 
-                  <Collapse isOpen={!this.state.collapse}>
+                  <Collapse isOpen={!this.state.collapse && !this.state.isLTI && !this.state.isLTU}>
                     <FormGroup visibelity="false" >
                       <Label>Return Date</Label>
                       <Row />
@@ -2333,7 +2340,7 @@ class Create extends Component {
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect
                         id="docCheckByLTI"
-                        loadOptions={loadOptions}
+                        loadOptions={loadUsers}
                         isMulti
                         onChange={this.handleSelectOption("docCheckByLTI")}
                         menuPortalTarget={document.body}
