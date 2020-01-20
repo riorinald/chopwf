@@ -25,6 +25,7 @@ import {
     Table,
     Tooltip,
     UncontrolledTooltip,
+    Badge
 } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -681,37 +682,43 @@ class LicenseEditRequest extends Component {
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', taskDetails.deliverWayId, 'required')}</small>
                                             : null}
                                     </FormGroup>
+                                </Collapse>
 
+                                <Collapse isOpen={taskDetails.deliverWayId === "F2F"}>
                                     <FormGroup>
                                         <Label>Address</Label>
                                         <Input placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" />
-                                        {taskDetails.documentTypeId === "ORIGINAL"
+                                        {taskDetails.deliverWayId === "F2F"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.expDeliveryAddress, 'required')}</small>
                                             : null}
                                     </FormGroup>
+
+
+                                    <FormGroup>
+                                        <Label>Reciever</Label>
+                                        <AsyncSelect
+                                            id="expDeliveryReceiver"
+                                            loadOptions={loadOptions}
+                                            isClearable
+                                            value={seniorManagersList[this.getOption(taskDetails.expDeliveryReceiver)]}
+                                            onChange={this.handleSelectReciever}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        />
+                                        {taskDetails.deliverWayId === "F2F"
+                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', taskDetails.expDeliveryReceiver, 'required')}</small>
+                                            : null}
+                                    </FormGroup>
+
+                                    <FormGroup>
+                                        <Label>Reciever Mobile Phone</Label>
+                                        {/* <input type="number" id="phoneNumber"></input> */}
+                                        <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="number" />
+                                        {taskDetails.deliverWayId === "F2F"
+                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.expDeliveryMobileNo, 'required')}</small>
+                                            : null}
+                                    </FormGroup>
                                 </Collapse>
-
-                                <FormGroup>
-                                    <Label>Reciever</Label>
-                                    <AsyncSelect
-                                        id="expDeliveryReceiver"
-                                        loadOptions={loadOptions}
-                                        isClearable
-                                        value={seniorManagersList[this.getOption(taskDetails.expDeliveryReceiver)]}
-                                        onChange={this.handleSelectReciever}
-                                        menuPortalTarget={document.body}
-                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                    />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', taskDetails.expDeliveryReceiver, 'required')}</small>
-                                </FormGroup>
-
-                                <FormGroup>
-                                    <Label>Reciever Mobile Phone</Label>
-                                    {/* <input type="number" id="phoneNumber"></input> */}
-                                    <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="number" />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.expDeliveryMobileNo, 'required')}</small>
-                                </FormGroup>
-
                                 <FormGroup>
                                     <Label>Senior Manager or above of requestor department</Label>
                                     <AsyncSelect
@@ -763,6 +770,33 @@ class LicenseEditRequest extends Component {
                                     </Col>
                                     <Col className="d-flex justify-content-end">
                                         <Button onClick={this.deleteTask} color="danger" >Delete</Button>
+                                    </Col>
+                                </Row>
+                                {taskDetails.histories ? <hr></hr> : null}
+                                <Row>
+                                    <Col>
+                                        {taskDetails.histories ?
+                                            taskDetails.histories.length !== 0
+                                                ? <>
+                                                    <Row>
+                                                        <Col><h4>Approval Histories</h4></Col>
+                                                    </Row>
+                                                    {taskDetails.histories.map((history, index) =>
+                                                        <div key={index}>
+                                                            <hr></hr>
+                                                            <Row className="text-md-left text-center">
+                                                                <Col sm md="10" lg>
+                                                                    <h5>{history.approvedByName}<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
+                                                                    <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
+                                                                    <Col className="p-0"> <p>{history.comments}</p> </Col>
+                                                                </Col>
+                                                            </Row>
+                                                        </div>
+                                                    )}
+                                                </>
+                                                : null
+                                            : null}
+
                                     </Col>
                                 </Row>
 
