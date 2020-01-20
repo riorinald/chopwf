@@ -863,8 +863,9 @@ class Create extends Component {
     
     isFirst = first.test(value[0])
     isSecond = second.test(value[2])
-    isThird = third.test(value[5])
+    isThird = third.test(value[4])
     if(value[3] === 'I'){
+      isThird = third.test(value[5])
       let i = 7
       for(i < 11; i++;){
         isDigit = digit.test(value[i])
@@ -919,8 +920,7 @@ class Create extends Component {
         }
       } 
       if (value.length === 14){
-        let i = 12
-        for(i < 13; i++;){
+        for(let i = 12; i < 13; i++){
           isDigit = digit.test(value[i])
           if(!isDigit){
             console.log("error", value[i], i)
@@ -930,10 +930,7 @@ class Create extends Component {
             valid = true
           }
         }
-      }
-    }
-    else {
-      console.log("contract not valid", valid)
+      } else {console.log('14', value, )}
     }
     return valid
   }
