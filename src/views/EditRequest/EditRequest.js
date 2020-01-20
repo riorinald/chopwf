@@ -2634,7 +2634,7 @@ class EditRequest extends Component {
                                                 <Button onClick={this.deleteTask} color="danger" >Delete</Button>
                                             </Col>
                                         </Row>
-                                        <hr></hr>
+                                        {taskDetails.histories.length !== 0 ? <hr></hr> : null}
                                         <Row>
                                             <Col>
                                                 {taskDetails.histories.length !== 0

@@ -219,7 +219,6 @@ class Create extends Component {
     this.getDocuments = this.getDocuments.bind(this);
     this.addContract = this.addContract.bind(this);
     this.setContractNotes = this.setContractNotes.bind(this);
-    this.handleContractNumber = this.handleContractNumber.bind(this);
   };
 
   componentDidMount() {
@@ -854,87 +853,84 @@ class Create extends Component {
   }
 
   validateConNum() {
-    let first = /(?!.*[A-HJ-QT-Z])[IS]/i;
-    let third = /(?!.*[A-NQRT-Z])[PSO]/i;
+    const first = /(?!.*[A-HJ-QT-Z])[IS]/i;
+    const second = /[LIAR]/
+    const third = /(?!.*[A-NQRT-Z])[PSO]/i;
     let digit = /[0-9]/;
-    var isFirst = false
-    var isThird = false
-    var isDigit = false
     let valid = false
-    isFirst = first.test(this.state.contractNumber[0])
-    // if (this.props.match.params.company === "MBIA") {
-    isThird = third.test(this.state.contractNumber[5])
-    for (let i = 7; i < 11; i++) {
-      isDigit = digit.test(this.state.contractNumber[i])
-      if (!isDigit) {
-        break;
-      }
-    }
-    if (isDigit) {
-      for (let i = 12; i < 16; i++) {
-        isDigit = digit.test(this.state.contractNumber[i])
-        if (!isDigit) {
+    let value = this.state.contractNumber
+    let {isFirst, isSecond, isThird, isDigit} = false; 
+    
+    isFirst = first.test(value[0])
+    isSecond = second.test(value[2])
+    isThird = third.test(value[4])
+    if(value[3] === 'I'){
+      isThird = third.test(value[5])
+      let i = 7
+      for(i < 11; i++;){
+        isDigit = digit.test(value[i])
+        if(!isDigit){
+          console.log("error", value[i], i)
           break;
         }
       }
-    }
-    // }
-
-    else {
-      isThird = third.test(this.state.contractNumber[4])
-      for (let i = 6; i < 10; i++) {
-        isDigit = digit.test(this.state.contractNumber[i])
-        if (!isDigit) {
-          break;
-        }
-      }
-      if (isDigit) {
-        for (let i = 11; i < 14; i++) {
-          isDigit = digit.test(this.state.contractNumber[i])
-          if (!isDigit) {
+      if(isDigit && value.length === 16){
+        let i = 12
+        for(i < 16; i++;){
+          isDigit = digit.test(value[i])
+          if(!isDigit){
+            console.log("error", value[i], i)
             break;
           }
         }
       }
-
+      if(isDigit && isThird && value.length === 15){
+        let i = 12
+        for(i < 15; i++;){
+          isDigit = digit.test(value[i])
+          if(!isDigit){
+            console.log("error", value[i], i)
+            break;
+          }
+        }
+      }
     }
-    if (isFirst && isThird && isDigit) {
-      if (this.state.conNum.length !== 0) {
-        for (let i = 0; i < this.state.conNum.length; i++) {
-          let value = this.state.contractNumber
-          // if (this.props.match.params.company === "MBIA") {
-          if (!digit.test(value[16])) {
-            value = value.substr(0, 16)
-          }
-          // }
-          else {
-            if (!digit.test(value[15])) {
-              value = value.substr(0, 15)
-            }
-          }
-          if (this.state.conNum[i] === value) {
-            valid = false
-            // this.setState({ conNum: "" })
-            // console.log("Contract Number Already Exists") //show error
-            Swal.fire({
-              title: "Contract Number Exists",
-              html: 'Please input a new Contract Number!',
-              type: "warning"
-            })
+
+    if(isSecond && isThird && value[3] !== 'I'){
+      
+      for(let i = 6; i <= 9; i++){
+        isDigit = digit.test(value[i])
+        if(!isDigit){
+          console.log("error", value[i], i, value, value.length)
+          break;
+        }
+      }
+
+      if (value.length === 15){
+
+        for(let i = 12; i < 14; i++){
+          isDigit = digit.test(value[i])
+          if(!isDigit){
+            console.log("error", value[i], i)
             break;
           }
           else {
             valid = true
           }
-
         }
-      }
-      else {
-        valid = true
-      }
-    }
-    else {
-      valid = false
+      } 
+      if (value.length === 14){
+        for(let i = 12; i < 13; i++){
+          isDigit = digit.test(value[i])
+          if(!isDigit){
+            console.log("error", value[i], i)
+            break;
+          }
+          else {
+            valid = true
+          }
+        }
+      } else {console.log('14', value, )}
     }
     return valid
   }
@@ -1155,24 +1151,35 @@ class Create extends Component {
     var rand = Math.floor((Math.random() * maxNumber) + 1);
     let valid = true
     let doc = this.state.documentTableCNIPS
-    let conName = [this.state.tempContractNumber]
+    let conName = [this.state.contractNumber]
+    let contractError = []
+    let validateConNum = this.validateConNum()
 
-    if (this.state.docSelected !== null) {
-      if (this.validateContractNumber()) {
-        if (this.state.engName !== "") {
-          for (let i = 0; i < doc.length; i++) {
-            if (doc[i].docName === this.state.docAttachedName && doc[i].conNum[0] === this.state.tempContractNumber) {
-              // if (doc[i].engName === this.state.engName && doc[i].cnName === this.state.cnName) {
-              valid = false
-              break
-            }
-            else {
-              valid = true
-            }
+      if (this.state.docSelected === null){
+        contractError.push("Please Select a valid Document.<br />")
+      }
+      if (this.state.engName === ""){
+        contractError.push("Please input name in english.<br />")
+      }
+      if (this.state.contractNumber === ""){
+        contractError.push("Please input a valid Contract Number.<br />")
+      }
+      if (this.state.contractNumber !== "" && validateConNum === false){
+        contractError.push(this.state.contractNumNotes)
+      }
+      if (contractError.length === 0 && validateConNum === true){
+        for (let i = 0; i < doc.length; i++) {
+          if (doc[i].docName === this.state.docAttachedName && doc[i].conNum[0] === this.state.contractNumber) {
+            contractError.push("Document and contract number already exists in the list")
+            break
           }
-
-          if (valid) {
-            const obj = {
+          else {
+            contractError = []
+          }
+        }
+      }
+      if (contractError.length === 0){
+          const obj = {
               id: rand,
               conNum: conName,
               engName: this.state.engName,
@@ -1190,43 +1197,17 @@ class Create extends Component {
                 documentTableCNIPS
               }
             })
-            this.setState({ tempContractNumber: "", conNum: [], engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
+            this.setState({ contractNumber: "", engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
             document.getElementById("documentTableCNIPS").className = ""
-          }
-          else {
-            Swal.fire({
-              title: "Document Exists",
-              html: 'Document and contract number already exists in the list',
-              type: "warning"
-            })
-          }
-
-        }
-
-        else {
-          Swal.fire({
-            title: "English Contract Name is Required",
-            html: 'Please input Contract Name in English',
-            type: "warning"
-          })
-        }
       }
       else {
         Swal.fire({
-          title: "Contract number is required.",
-          html: 'Please input a valid contract number.',
-          type: "warning"
+          title: "Invalid Contract Name!",
+          html: contractError.join('\n\n'),
+          type: "warning",
+          width: "500px"
         })
       }
-    }
-    else {
-      Swal.fire({
-        title: "Document is required.",
-        width: '700px',
-        html: 'Please attach a valid Document.',
-        type: "warning"
-      })
-    }
   }
 
   addDocumentLTU() {
@@ -1441,263 +1422,6 @@ class Create extends Component {
     }
   }
 
-  handleContractNumber(event) {
-    let value = event.target.value.toUpperCase()
-    let { tempContractNumber } = this.state
-    let regex = /[0-9]/
-    let regAlph = /[a-zA-Z]/
-    let second = /[IALR]/
-    let third = /(?!.*[A-NQRT-Z])[PSO]/
-    if (value.length === 1) {
-      if (value[0] === 'I' || value[0] === 'S') {
-        if (tempContractNumber !== "") {
-
-          this.setState({ tempContractNumber: "" })
-        }
-        else {
-          this.setState({ isNumber:true, tempContractNumber: value + "-" })
-        }
-      } else {
-        this.setState({isNumber:false, contractError: "Please Input I or S.",})
-      }
-    }
-    else if (value.length === 3) {
-      if (second.test(value[2])) {
-        if (value[2] === "I") {
-          this.setState({ tempContractNumber: value + "A-" })
-        }
-        else {
-          if (tempContractNumber.length === 2) {
-            this.setState({ tempContractNumber: value + "-" })
-          }
-          else {
-            this.setState({ tempContractNumber: value.substr(0, 2) })
-          }
-        }
-      } 
-      else {
-        this.setState({isNumber:false, contractError: "Please Input A / IA / L / R "})
-      }
-    }
-    else if (value.length === 4) {
-      this.setState({ tempContractNumber: value.substr(0, 2) })
-    }
-    else if (value.length === 5) {
-      if (third.test(value[4])) {
-        if (value[2] === "I") {
-
-        }
-        else {
-          if (tempContractNumber.length === 4) {
-            this.setState({ tempContractNumber: value + "-", contractError: "Please enter only Digits." })
-          }
-          else {
-            this.setState({ tempContractNumber: value.substr(0, 4) })
-          }
-        }
-      } 
-      else {
-          this.setState({isNumber: false, contractError: "Please input O / P / S"})
-      }
-    }
-    else if (value.length === 6) {
-      if (third.test(value[5])) {
-        if (value[2] === "I") {
-          if (tempContractNumber.length === 5) {
-            this.setState({ tempContractNumber: value + "-", contractError: "Please enter only Digits." })
-          }
-          else {
-            this.setState({ tempContractNumber: value.substr(0, 5) })
-          }
-        }
-        else {
-          this.setState({ tempContractNumber: value })
-        }
-      }
-      else{
-        this.setState({ tempContractNumber: tempContractNumber.substr(0,4)})
-      }
-    }
-    else if (value.length === 8) {
-      if (regex.test(value[7])) {
-        this.setState({ tempContractNumber: value, isNumber: true })
-      }
-      else {
-        this.setState({ isNumber: false, contractError: "Please enter only Digits." })
-      }
-
-    }
-    else if (value.length === 7 || value.length === 9) {
-      if (value[2] === "I") {
-        if (value.length === 9) {
-          if (regex.test(value[8])) {
-            this.setState({ tempContractNumber: value, isNumber: true })
-          }
-          else {
-            this.setState({ isNumber: false })
-          }
-        }
-        else if (value.length === 7) {
-          this.setState({ tempContractNumber: value.substr(0, 7) })
-        }
-      }
-      else {
-        switch (value.length) {
-          case 7:
-            if (regex.test(value[6])) {
-              this.setState({ tempContractNumber: value, isNumber: true })
-            }
-            else {
-              this.setState({ isNumber: false })
-            }
-            break;
-          case 9:
-            if (regex.test(value[8])) {
-              this.setState({ tempContractNumber: value, isNumber: true })
-            }
-            else {
-              this.setState({ isNumber: false })
-            }
-            break;
-        }
-      }
-    }
-    else if (value.length === 10) {
-      if (value[2] === "I") {
-        if (regex.test(value[9])) {
-          this.setState({ tempContractNumber: value, isNumber: true })
-        }
-        else {
-          this.setState({ isNumber: false })
-
-        }
-      }
-      else {
-        if (regex.test(value[9])) {
-          if (tempContractNumber.length === 9) {
-            this.setState({ tempContractNumber: value + "-" })
-          }
-          else {
-            this.setState({ tempContractNumber: value.substr(0, 9), isNumber: true })
-          }
-        }
-        else {
-          this.setState({ isNumber: false })
-
-        }
-      }
-    }
-    else if ((value.length === 11 || value.length < 16) && value.length !== 13) {
-      if (value[2] === "I") {
-        switch (value.length) {
-          case 11:
-            if (regex.test(value[10])) {
-              if (tempContractNumber.length === 10) {
-                this.setState({ tempContractNumber: value + "-" })
-              }
-              else {
-                this.setState({ tempContractNumber: value.substr(0, 10), isNumber: true })
-              }
-            }
-            else {
-              this.setState({ isNumber: false })
-
-            }
-            break;
-          case 12:
-            this.setState({ tempContractNumber: value.substr(0, 12), isNumber: true })
-            break;
-          case 14:
-            if (regex.test(value[13])) {
-              this.setState({ tempContractNumber: value, isNumber: true })
-            }
-            else {
-              this.setState({ isNumber: false })
-
-            }
-            break;
-          case 15:
-            if (regex.test(value[14])) {
-              this.setState({ tempContractNumber: value, isNumber: true })
-            }
-            else {
-              this.setState({ isNumber: false })
-
-            }
-            break;
-        }
-      }
-      else {
-        switch (value.length) {
-          case 11:
-            this.setState({ tempContractNumber: value })
-            break;
-          case 12:
-            if (regex.test(value[11])) {
-              this.setState({ tempContractNumber: value, isNumber: true })
-            }
-            else {
-              this.setState({ isNumber: false })
-
-            }
-            break;
-
-          case 14:
-            if (regex.test(value[13])) {
-              this.setState({ tempContractNumber: value, isNumber: true })
-            }
-            else {
-              this.setState({ isNumber: false })
-
-            }
-            break;
-          case 15:
-            if (regex.test(value[14])) {
-              this.setState({ tempContractNumber: value, isNumber: true })
-            }
-            else {
-              this.setState({ isNumber: false })
-
-            }
-            break;
-        }
-      }
-    }
-    else if (value.length === 13) {
-      if (value[2] === "I") {
-        if (regex.test(value[12])) {
-          this.setState({ tempContractNumber: value, isNumber: true })
-        }
-        else {
-          this.setState({ isNumber: false })
-
-        }
-      }
-      else {
-        if (regex.test(value[12])) {
-          this.setState({ tempContractNumber: value, isNumber: true })
-        }
-        else {
-          this.setState({ isNumber: false })
-
-        }
-      }
-    }
-    else if (value.length === 16) {
-      if (value[2] === "I") {
-        if (regex.test(value[15])) {
-          this.setState({ tempContractNumber: value, isNumber: true })
-        }
-        else {
-          this.setState({ isNumber: false })
-
-        }
-      }
-    }
-    console.log(value.length)
-  }
-
-
   render() {
     this.validator.purgeFields();
     const deptHeads = []
@@ -1879,7 +1603,11 @@ class Create extends Component {
                     onChange={this.handleContractChange} value={this.state.contractNumber}
                     /> */}
 
-                  <Input autoComplete="off" type="text" value={this.state.tempContractNumber} onChange={this.handleContractNumber} id="contractNumber" placeholder={this.state.contractNumNotes}></Input>
+                  <Input autoComplete="off" type="text" 
+                    value={this.state.contractNumber} 
+                    onChange={this.handleContractChange} id="contractNumber" 
+                    placeholder={this.state.contractNumNotes}></Input>
+
                   {!this.state.isNumber
                     ? <small style={{ color: '#F86C6B' }} > {this.state.contractError} </small>
                     : null

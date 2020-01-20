@@ -540,7 +540,7 @@ class LicenseApplicationDetail extends Component {
                                                         <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                                         <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
                                                             <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
+                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
                                                                 <Row> &nbsp; </Row>
                                                                 <div>Reciever: {taskDetails.expDeliveryReceiver}</div>
                                                                 <div>Address: {taskDetails.expDeliveryAddress}</div>
@@ -572,7 +572,7 @@ class LicenseApplicationDetail extends Component {
                                                         <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                                         <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
                                                             <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
+                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
                                                                 <Row> &nbsp; </Row>
                                                                 {/* <div>Reciever: </div>
                                                                 <div>Address: </div>
@@ -615,7 +615,7 @@ class LicenseApplicationDetail extends Component {
                                                         <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                                         <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
                                                             <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
+                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
                                                                 <Row> &nbsp; </Row>
                                                                 {/* <div>Reciever: </div>
                                                             <div>Address: </div>
