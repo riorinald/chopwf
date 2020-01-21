@@ -38,7 +38,7 @@ class ChopApplication extends Component {
 
       loading: false,
       page: 0,
-      limit: 20,
+      limit: 10,
       totalPages: 3,
 
       modal: false,
@@ -96,7 +96,7 @@ class ChopApplication extends Component {
     // this.dateChange = this.dateChange.bind(this);
   }
   componentDidMount() {
-    this.getApplications(1, 20);
+    this.getApplications(1, this.state.limit);
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
     this.getData("departments", `${config.url}/departments`);
@@ -479,7 +479,7 @@ class ChopApplication extends Component {
                   style: { textAlign: "center" }
                 }
               ]}
-              defaultPageSize={10}
+              defaultPageSize={this.state.limit}
               manual
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {

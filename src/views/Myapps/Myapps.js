@@ -31,7 +31,7 @@ class Myapps extends Component {
       loading: false,
       totalPages: 1,
       page: 1,
-      limit: 20,
+      limit: 10,
 
 
       username: localStorage.getItem('userId'),
@@ -65,7 +65,7 @@ class Myapps extends Component {
   }
 
   componentDidMount() {
-    this.getApplications(1, 20);
+    this.getApplications(1, this.state.limit);
     // resetMounted.setMounted();
 
     this.getData("applicationTypes", `${config.url}/apptypes`);
@@ -441,7 +441,7 @@ class Myapps extends Component {
                   style: { textAlign: "center" }
                 },
               ]}
-              defaultPageSize={10}
+              defaultPageSize={this.state.limit}
               manual
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {

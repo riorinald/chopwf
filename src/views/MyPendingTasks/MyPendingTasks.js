@@ -33,7 +33,7 @@ class MyPendingTasks extends Component {
             filtered: [],
             totalPages: 1,
             page: 1,
-            limit: 20,
+            limit: 10,
             dateView1: "",
 
             show: true,
@@ -78,7 +78,7 @@ class MyPendingTasks extends Component {
         await this.getStatusList();
         // console.log(mounted)
         // if (mounted === 0) {
-        await this.getPendingTasks(1, 20);
+        await this.getPendingTasks(1, this.state.limit);
         // }
         // else {
         //     this.setState({ loading: !this.state.loading })
@@ -306,7 +306,7 @@ class MyPendingTasks extends Component {
                                 return row[id]
                             }}
                             getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
-                            defaultPageSize={10}
+                            defaultPageSize={this.state.limit}
                             manual
                             onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getPendingTasks(e + 1, this.state.limit)) }}
                             onPageSizeChange={(pageSize, page) => {

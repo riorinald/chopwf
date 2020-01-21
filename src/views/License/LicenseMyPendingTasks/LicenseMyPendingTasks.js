@@ -38,6 +38,7 @@ class LicenseMyPendingTasks extends Component {
                 createdDate: "",
                 createdByName: ""
             },
+            limit:10,
             returnDateView: "",
             createdDateView: "",
             loading: false,
@@ -432,7 +433,7 @@ class LicenseMyPendingTasks extends Component {
                                     style: { textAlign: "center" }
                                 }
                             ]}
-                            defaultPageSize={10}
+                            defaultPageSize={this.state.limit}
                             // pages={this.state.page}
                             // manual
                             // onPageChange={(e)=>{this.setState({page: e})}}
