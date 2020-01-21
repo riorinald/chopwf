@@ -166,7 +166,7 @@ class Create extends Component {
       invalidNumberOfPages: false,
       isNumber: true,
 
-      checkDetails: { deptSelected: "null", chopTypeSelected: "null", teamSelected: "null" },
+      checkDetails: { deptTempSelected: "null", chopTypeTempSelected: "null", teamTempSelected: "null" },
 
       tempContractNumber: "",
 
@@ -217,8 +217,8 @@ class Create extends Component {
     this.hideDoc = this.hideDoc.bind(this);
     this.toggleConnection = this.toggleConnection.bind(this);
     this.getDocuments = this.getDocuments.bind(this);
-    this.addContract = this.addContract.bind(this);
     this.setContractNotes = this.setContractNotes.bind(this);
+    this.checkforChinese = this.checkforChinese.bind(this);
   };
 
   componentDidMount() {
@@ -486,6 +486,7 @@ class Create extends Component {
     try {
       await axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ documents: res.data })
+        console.log(res.data.length)
         callback(res.data.length)
       })
     } catch (error) {
@@ -597,8 +598,9 @@ class Create extends Component {
       })
   }
 
-  async getDocCheckBy(chopType) {
-    await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${this.state.teamSelected}&choptypeid=${chopType}&displayname=&userid=${this.state.userId}`,
+  async getDocCheckBy(chopType, teamId) {
+    console.log("Get document check by users")
+    await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&choptypeid=${chopType}&displayname=&userid=${this.state.userId}`,
       { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ docCheckBy: res.data })
@@ -721,7 +723,7 @@ class Create extends Component {
     else if (name === "chopTypeSelected") {
       console.log(event.target.value)
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
-        this.getDocCheckBy(event.target.value)
+        this.getDocCheckBy(event.target.value, this.state.teamSelected)
         this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
         })
       }
@@ -759,6 +761,9 @@ class Create extends Component {
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
+      if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
+        this.getDocCheckBy(this.state.chopTypeSelected, event.target.value)
+      }
       // console.log(event.target.value)
     }
 
@@ -859,36 +864,36 @@ class Create extends Component {
     let digit = /[0-9]/;
     let valid = false
     let value = this.state.contractNumber
-    let {isFirst, isSecond, isThird, isDigit} = false; 
-    
+    let { isFirst, isSecond, isThird, isDigit } = false;
+
     isFirst = first.test(value[0])
     isSecond = second.test(value[2])
     isThird = third.test(value[4])
-    if(value[3] === 'I'){
+    if (value[3] === 'I') {
       isThird = third.test(value[5])
       let i = 7
-      for(i < 11; i++;){
+      for (i < 11; i++;) {
         isDigit = digit.test(value[i])
-        if(!isDigit){
+        if (!isDigit) {
           console.log("error", value[i], i)
           break;
         }
       }
-      if(isDigit && value.length === 16){
+      if (isDigit && value.length === 16) {
         let i = 12
-        for(i < 16; i++;){
+        for (i < 16; i++;) {
           isDigit = digit.test(value[i])
-          if(!isDigit){
+          if (!isDigit) {
             console.log("error", value[i], i)
             break;
           }
         }
       }
-      if(isDigit && isThird && value.length === 15){
+      if (isDigit && isThird && value.length === 15) {
         let i = 12
-        for(i < 15; i++;){
+        for (i < 15; i++;) {
           isDigit = digit.test(value[i])
-          if(!isDigit){
+          if (!isDigit) {
             console.log("error", value[i], i)
             break;
           }
@@ -896,21 +901,21 @@ class Create extends Component {
       }
     }
 
-    if(isSecond && isThird && value[3] !== 'I'){
-      
-      for(let i = 6; i <= 9; i++){
+    if (isSecond && isThird && value[3] !== 'I') {
+
+      for (let i = 6; i <= 9; i++) {
         isDigit = digit.test(value[i])
-        if(!isDigit){
+        if (!isDigit) {
           console.log("error", value[i], i, value, value.length)
           break;
         }
       }
 
-      if (value.length === 15){
+      if (value.length === 15) {
 
-        for(let i = 12; i < 14; i++){
+        for (let i = 12; i < 14; i++) {
           isDigit = digit.test(value[i])
-          if(!isDigit){
+          if (!isDigit) {
             console.log("error", value[i], i)
             break;
           }
@@ -918,11 +923,11 @@ class Create extends Component {
             valid = true
           }
         }
-      } 
-      if (value.length === 14){
-        for(let i = 12; i < 13; i++){
+      }
+      if (value.length === 14) {
+        for (let i = 12; i < 13; i++) {
           isDigit = digit.test(value[i])
-          if(!isDigit){
+          if (!isDigit) {
             console.log("error", value[i], i)
             break;
           }
@@ -930,7 +935,7 @@ class Create extends Component {
             valid = true
           }
         }
-      } else {console.log('14', value, )}
+      } else { console.log('14', value) }
     }
     return valid
   }
@@ -960,38 +965,6 @@ class Create extends Component {
     }
     // console.log(inputMask, inputMask.value);
     this.setState({ viewContract: true, msgTooltip: message, ioTooltip: true, contractNumber: value })
-  }
-
-  addContract(event) {
-    let valid = this.validateConNum()
-    let digit = /[0-9]/;
-    let value = this.state.contractNumber.toUpperCase();
-    if (valid) {
-      // if (this.props.match.params.company === "MBIA") {
-      //   if (!digit.test(this.state.contractNumber[14])) {
-      //     value = this.state.contractNumber.substr(0, 15)
-      //   }
-      // // }
-      // else {
-      //   if (!digit.test(this.state.contractNumber[14])) {
-      //     value = this.state.contractNumber.substr(0, 14)
-      //   }
-
-      // }
-      // console.log(value.replace(/_/g, ''))
-      this.setState(state => ({
-        conNum: [...state.conNum, value.replace(/_/g, '')]
-      })
-      )
-      this.setState({ viewContract: true, contractNumber: "" }, this.toggle('viewContract'))
-    }
-    else {
-      Swal.fire({
-        title: "Invalid Contract Number",
-        html: 'Please input a new valid Contract Number!',
-        type: "warning"
-      })
-    }
   }
 
   deleteContract(i) {
@@ -1101,7 +1074,7 @@ class Create extends Component {
       else {
         Swal.fire({
           title: "Invalid Data",
-          html: 'The input valid data!',
+          html: 'Please input valid data!',
           type: "warning"
         })
       }
@@ -1146,6 +1119,18 @@ class Create extends Component {
     return valid
   }
 
+  checkforChinese(event) {
+    let value = event.target.value
+    if (value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)) {
+      this.setState({ engName: this.state.engName, invalidEnglish: true })
+      event.target.className = "form-control is-invalid"
+    }
+    else {
+      event.target.className = "form-control"
+      this.setState({ engName: value, invalidEnglish: false })
+    }
+  }
+
   addDocumentCNIPS = () => {
     var maxNumber = 45;
     var rand = Math.floor((Math.random() * maxNumber) + 1);
@@ -1155,59 +1140,59 @@ class Create extends Component {
     let contractError = []
     let validateConNum = this.validateConNum()
 
-      if (this.state.docSelected === null){
-        contractError.push("Please Select a valid Document.<br />")
-      }
-      if (this.state.engName === ""){
-        contractError.push("Please input name in english.<br />")
-      }
-      if (this.state.contractNumber === ""){
-        contractError.push("Please input a valid Contract Number.<br />")
-      }
-      if (this.state.contractNumber !== "" && validateConNum === false){
-        contractError.push(this.state.contractNumNotes)
-      }
-      if (contractError.length === 0 && validateConNum === true){
-        for (let i = 0; i < doc.length; i++) {
-          if (doc[i].docName === this.state.docAttachedName && doc[i].conNum[0] === this.state.contractNumber) {
-            contractError.push("Document and contract number already exists in the list")
-            break
-          }
-          else {
-            contractError = []
-          }
+    if (this.state.docSelected === null) {
+      contractError.push("Please Select a valid Document.<br />")
+    }
+    if (this.state.engName === "") {
+      contractError.push("Please input name in english.<br />")
+    }
+    if (this.state.contractNumber === "") {
+      contractError.push("Please input a valid Contract Number.<br />")
+    }
+    if (this.state.contractNumber !== "" && validateConNum === false) {
+      contractError.push(this.state.contractNumNotes)
+    }
+    if (contractError.length === 0 && validateConNum === true) {
+      for (let i = 0; i < doc.length; i++) {
+        if (doc[i].docName === this.state.docAttachedName && doc[i].conNum[0] === this.state.contractNumber) {
+          contractError.push("Document and contract number already exists in the list")
+          break
+        }
+        else {
+          contractError = []
         }
       }
-      if (contractError.length === 0){
-          const obj = {
-              id: rand,
-              conNum: conName,
-              engName: this.state.engName,
-              cnName: this.state.cnName,
-              docSelected: this.state.docSelected,
-              docName: this.state.docAttachedName,
-              docURL: URL.createObjectURL(this.state.docSelected),
-              contractNumbers: conName
-            }
-
-            this.setState(state => {
-              const documentTableCNIPS = state.documentTableCNIPS.concat(obj)
-
-              return {
-                documentTableCNIPS
-              }
-            })
-            this.setState({ contractNumber: "", engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
-            document.getElementById("documentTableCNIPS").className = ""
+    }
+    if (contractError.length === 0) {
+      const obj = {
+        id: rand,
+        conNum: conName,
+        engName: this.state.engName,
+        cnName: this.state.cnName,
+        docSelected: this.state.docSelected,
+        docName: this.state.docAttachedName,
+        docURL: URL.createObjectURL(this.state.docSelected),
+        contractNumbers: conName
       }
-      else {
-        Swal.fire({
-          title: "Invalid Contract Name!",
-          html: contractError.join('\n\n'),
-          type: "warning",
-          width: "500px"
-        })
-      }
+
+      this.setState(state => {
+        const documentTableCNIPS = state.documentTableCNIPS.concat(obj)
+
+        return {
+          documentTableCNIPS
+        }
+      })
+      this.setState({ contractNumber: "", engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
+      document.getElementById("documentTableCNIPS").className = ""
+    }
+    else {
+      Swal.fire({
+        title: "Invalid Contract Name!",
+        html: contractError.join('\n\n'),
+        type: "warning",
+        width: "500px"
+      })
+    }
   }
 
   addDocumentLTU() {
@@ -1330,8 +1315,8 @@ class Create extends Component {
   selectDocument() {
     document.getElementById('selectDocuments').blur()
     let { deptSelected, teamSelected, chopTypeSelected, checkDetails } = this.state
-    // if (this.state.documents.length === 0) {
-    if (checkDetails.deptSelected === deptSelected && checkDetails.chopTypeSelected === chopTypeSelected && checkDetails.teamSelected === teamSelected) {
+    // if (this.state.documents.length !== 0) {
+    if (checkDetails.deptTempSelected === deptSelected && checkDetails.chopTypeTempSelected === chopTypeSelected && checkDetails.teamTempSelected === teamSelected) {
       this.setState({ showDoc: true })
     }
     else {
@@ -1351,19 +1336,26 @@ class Create extends Component {
                 type: "warning"
               })
               Swal.hideLoading()
+              this.setState(state => {
+                let checkDetails = this.state.checkDetails
+                checkDetails.deptTempSelected = "empty"
+                checkDetails.chopTypeTempSelected = "empty"
+                checkDetails.teamTempSelected = "empty"
+                return checkDetails
+              })
             }
             else {
               // Swal.hideLoading();
               Swal.close();
               this.setState({ showDoc: true })
+              this.setState(state => {
+                let checkDetails = this.state.checkDetails
+                checkDetails.deptTempSelected = deptSelected
+                checkDetails.chopTypeTempSelected = chopTypeSelected
+                checkDetails.teamTempSelected = teamSelected
+                return checkDetails
+              })
             }
-            this.setState(state => {
-              let checkDetails = this.state.checkDetails
-              checkDetails.deptSelected = deptSelected
-              checkDetails.chopTypeSelected = chopTypeSelected
-              checkDetails.teamSelected = teamSelected
-              return checkDetails
-            })
           })
         }
       })
@@ -1603,18 +1595,15 @@ class Create extends Component {
                     onChange={this.handleContractChange} value={this.state.contractNumber}
                     /> */}
 
-                  <Input autoComplete="off" type="text" 
-                    value={this.state.contractNumber} 
-                    onChange={this.handleContractChange} id="contractNumber" 
+                  <Input autoComplete="off" type="text"
+                    value={this.state.contractNumber}
+                    onChange={this.handleContractChange} id="contractNumber"
                     placeholder={this.state.contractNumNotes}></Input>
 
                   {!this.state.isNumber
                     ? <small style={{ color: '#F86C6B' }} > {this.state.contractError} </small>
                     : null
                   }
-
-                  {/* <InputGroupAddon name="addContract" addonType="append"><Button onClick={this.addContract} color="secondary"><i className="fa fa-plus " /></Button></InputGroupAddon> */}
-                  {/* </InputGroup> */}
 
 
                 </FormGroup></Col>
@@ -1624,7 +1613,7 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 {/* <Label>English Name</Label> */}
-                <Input autoComplete="off" value={this.state.engName} onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
+                <Input autoComplete="off" value={this.state.engName} onBlur={this.checkforChinese} onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
                 {this.state.invalidEnglish
                   ? <small style={{ color: '#F86C6B' }}> Please input only English characters </small>
                   : null
@@ -1634,8 +1623,8 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 {/* <Label>Chinese Name</Label> */}
-                <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3" 
-                placeholder={this.state.isLTI ? "Please describe in Chinese" : "Please describe in Chinese (optional)" }/>
+                <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3"
+                  placeholder={this.state.isLTI ? "Please describe in Chinese" : "Please describe in Chinese (optional)"} />
                 {this.state.invalidChinese
                   ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
                   : null
