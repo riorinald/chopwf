@@ -29,6 +29,7 @@ import {
 } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { addDays } from 'date-fns';
 import SimpleReactValidator from 'simple-react-validator';
 import AsyncSelect from 'react-select/async';
 import config from '../../../config'
@@ -131,6 +132,12 @@ class LicenseEditRequest extends Component {
         }
     }
 
+    convertApprovedDate(dateValue) {
+
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\w{2})/g, '$1/$2/$3 $4:$5 $6')
+        return regEx
+    }
+
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
         await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem('userId')}`,
@@ -140,6 +147,7 @@ class LicenseEditRequest extends Component {
                 if (temp.documentTypeId === "ORIGINAL") {
                     temp.needWatermark = ""
                 }
+                console.log(temp)
                 this.setState({ taskDetails: temp, loading: false, returnDateView: this.convertDateView(res.data.plannedReturnDate) })
             })
     }
@@ -325,11 +333,10 @@ class LicenseEditRequest extends Component {
         })
     }
 
-
-    getOption(person) {
+    getReciever(person) {
         let i = 0
         if (person !== "") {
-            this.state.seniorManagersList.map((head, index) => {
+            this.state.receivers.map((head, index) => {
                 if (head.label === person) {
                     i = index
                 }
@@ -340,6 +347,22 @@ class LicenseEditRequest extends Component {
         }
         return i
     }
+
+
+    // getOption(person) {
+    //     let i = 0
+    //     if (person !== "") {
+    //         this.state.seniorManagersList.map((head, index) => {
+    //             if (head.label === person) {
+    //                 i = index
+    //             }
+    //         })
+    //     }
+    //     else {
+    //         i = null
+    //     }
+    //     return i
+    // }
 
     handleAgreeTerms(event) {
         this.validate()
@@ -466,7 +489,7 @@ class LicenseEditRequest extends Component {
             text: '',
             footer: '',
             allowOutsideClick: false,
-            onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) },
+            onClose: () => { this.goBack() },
             onBeforeOpen: () => {
                 Swal.showLoading()
             },
@@ -476,7 +499,7 @@ class LicenseEditRequest extends Component {
 
                         Swal.update({
                             title: "Request Deleted",
-                            text: `The request has been successfully deleted`,
+                            text: `The request has been successfully deleted.`,
                             type: "success",
 
                         })
@@ -665,6 +688,8 @@ class LicenseEditRequest extends Component {
                                             className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                                             showMonthDropdown
                                             showYearDropdown
+                                            minDate={new Date()}
+                                            maxDate={addDays(new Date(), 30)}
                                             selected={returnDateView}
                                             onChange={this.dateChange("plannedReturnDate", "returnDateView")} />
                                         {taskDetails.documentTypeId === "ORIGINAL"
@@ -698,9 +723,9 @@ class LicenseEditRequest extends Component {
                                         <Label>Reciever</Label>
                                         <AsyncSelect
                                             id="expDeliveryReceiver"
-                                            loadOptions={loadOptions}
+                                            loadOptions={loadReciever}
                                             isClearable
-                                            value={seniorManagersList[this.getOption(taskDetails.expDeliveryReceiver)]}
+                                            value={receivers[this.getReciever(taskDetails.expDeliveryReceiver)]}
                                             onChange={this.handleSelectReciever}
                                             menuPortalTarget={document.body}
                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}

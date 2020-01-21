@@ -8,6 +8,7 @@ import {
 } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { addDays } from 'date-fns';
 import axios from 'axios';
 import config from '../../../config';
 import SimpleReactValidator from 'simple-react-validator';
@@ -283,11 +284,12 @@ class LicenseCreate extends Component {
     //convert Date
     dateChange = (name, view) => date => {
         let month = date.getMonth()
-
+        let tempDate = date.getDate()
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${tempDate.toLocaleString().length === 1 ? 0 : ""}${tempDate}`
         }
+        console.log(dates)
         this.setState({ [view]: date });
         this.setState(state => {
             let formData = this.state.formData
@@ -581,6 +583,8 @@ class LicenseCreate extends Component {
                                     <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
                                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                                         showMonthDropdown
+                                        minDate={new Date()}
+                                        maxDate={addDays(new Date(), 30)}
                                         showYearDropdown
                                         selected={returnDateView}
                                         onChange={this.dateChange("returnDate", "returnDateView")} />

@@ -56,7 +56,8 @@ class Myapps extends Component {
         createdByName: ""
       },
 
-      status: []
+      status: [],
+      departments: []
 
     }
     this.getApplications = this.getApplications.bind(this);
@@ -69,6 +70,7 @@ class Myapps extends Component {
 
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
+    this.getData("departments", `${config.url}/departments`);
     this.getStatusList();
   }
 
@@ -304,36 +306,49 @@ class Myapps extends Component {
                 },
                 {
 
-                  Header: "Document Name English",
+                  Header: "Document Name (EN)",
                   accessor: "documentNameEnglish",
-                  width: this.getColumnWidth('documentNameEnglish', "Document Name English"),
+                  width: this.getColumnWidth('documentNameEnglish', "Document Name (EN)"),
                   // Cell: this.renderEditable,
                   Cell: row => (
                     <div> {this.getDeptHeads(row.original.documentNameEnglish)} </div>
                   ),
-                  style: { textAlign: "center", 'whiteSpace': 'unset' },
+                  style: { textAlign: "center" },
                   filterable: false
                 },
                 {
 
-                  Header: "Document Name Chinese",
+                  Header: "Document Name (CN)",
                   accessor: "documentNameChinese",
-                  width: this.getColumnWidth('documentNameChinese', "Document Name Chinese"),
+                  width: this.getColumnWidth('documentNameChinese', "Document Name (CN)"),
                   // Cell: this.renderEditable,
                   Cell: row => (
                     <div> {this.getDeptHeads(row.original.documentNameChinese)} </div>
                   ),
-                  style: { textAlign: "center", 'whiteSpace': 'unset' },
+                  style: { textAlign: "center" },
                   filterable: false
                 },
                 {
-                  Header: "Document Check By",
-                  accessor: " ",
-                  width: this.getColumnWidth('documentCheckByName', "Document Check By"),
-                  Cell: row => (
-                    <div> {this.getDeptHeads(row.original.documentCheckByName)} </div>
-                  ),
-                  style: { textAlign: "center" }
+
+                  Header: "Department",
+                  accessor: "departmentName",
+                  width: this.getColumnWidth('departmentName', "Department"),
+                  Cell: this.renderEditable,
+                  filterMethod: (filter, row) => {
+                    return row[filter.id] === filter.value;
+                  },
+                  Filter: ({ filter, onChange }) => {
+                    return (
+                      <Input type="select" value={this.state.searchOption.departmentName} onChange={this.handleSearch('departmentName')} >
+                        <option value="" >Please Select a department</option>
+                        {this.state.departments.map((dept, index) =>
+                          <option key={index} value={dept.deptId} >{dept.deptName}</option>
+                        )}
+                      </Input>
+
+                    )
+                  },
+                  style: { textAlign: "center" },
                 },
                 {
                   Header: "Department Head",
@@ -350,6 +365,16 @@ class Myapps extends Component {
                   accessor: "teamName",
                   width: this.getColumnWidth('teamName', "Entitled Team"),
                   Cell: this.renderEditable,
+                  style: { textAlign: "center" }
+                },
+
+                {
+                  Header: "Document Check By",
+                  accessor: "documentCheckByName",
+                  width: this.getColumnWidth('documentCheckByName', "Document Check By"),
+                  Cell: row => (
+                    <div> {this.getDeptHeads(row.original.documentCheckByName)} </div>
+                  ),
                   style: { textAlign: "center" }
                 },
                 {
