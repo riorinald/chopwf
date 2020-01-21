@@ -25,9 +25,11 @@ import {
     Table,
     Tooltip,
     UncontrolledTooltip,
+    Badge
 } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { addDays } from 'date-fns';
 import SimpleReactValidator from 'simple-react-validator';
 import AsyncSelect from 'react-select/async';
 import config from '../../../config'
@@ -130,6 +132,12 @@ class LicenseEditRequest extends Component {
         }
     }
 
+    convertApprovedDate(dateValue) {
+
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\w{2})/g, '$1/$2/$3 $4:$5 $6')
+        return regEx
+    }
+
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
         await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem('userId')}`,
@@ -139,6 +147,7 @@ class LicenseEditRequest extends Component {
                 if (temp.documentTypeId === "ORIGINAL") {
                     temp.needWatermark = ""
                 }
+                console.log(temp)
                 this.setState({ taskDetails: temp, loading: false, returnDateView: this.convertDateView(res.data.plannedReturnDate) })
             })
     }
@@ -324,11 +333,10 @@ class LicenseEditRequest extends Component {
         })
     }
 
-
-    getOption(person) {
+    getReciever(person) {
         let i = 0
         if (person !== "") {
-            this.state.seniorManagersList.map((head, index) => {
+            this.state.receivers.map((head, index) => {
                 if (head.label === person) {
                     i = index
                 }
@@ -339,6 +347,22 @@ class LicenseEditRequest extends Component {
         }
         return i
     }
+
+
+    // getOption(person) {
+    //     let i = 0
+    //     if (person !== "") {
+    //         this.state.seniorManagersList.map((head, index) => {
+    //             if (head.label === person) {
+    //                 i = index
+    //             }
+    //         })
+    //     }
+    //     else {
+    //         i = null
+    //     }
+    //     return i
+    // }
 
     handleAgreeTerms(event) {
         this.validate()
@@ -465,7 +489,7 @@ class LicenseEditRequest extends Component {
             text: '',
             footer: '',
             allowOutsideClick: false,
-            onClose: () => { this.props.history.push({ pathname: `/${this.props.match.params.page}` }) },
+            onClose: () => { this.goBack() },
             onBeforeOpen: () => {
                 Swal.showLoading()
             },
@@ -475,7 +499,7 @@ class LicenseEditRequest extends Component {
 
                         Swal.update({
                             title: "Request Deleted",
-                            text: `The request has been successfully deleted`,
+                            text: `The request has been successfully deleted.`,
                             type: "success",
 
                         })
@@ -664,6 +688,8 @@ class LicenseEditRequest extends Component {
                                             className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                                             showMonthDropdown
                                             showYearDropdown
+                                            minDate={new Date()}
+                                            maxDate={addDays(new Date(), 30)}
                                             selected={returnDateView}
                                             onChange={this.dateChange("plannedReturnDate", "returnDateView")} />
                                         {taskDetails.documentTypeId === "ORIGINAL"
@@ -681,37 +707,43 @@ class LicenseEditRequest extends Component {
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', taskDetails.deliverWayId, 'required')}</small>
                                             : null}
                                     </FormGroup>
+                                </Collapse>
 
+                                <Collapse isOpen={taskDetails.deliverWayId === "F2F"}>
                                     <FormGroup>
                                         <Label>Address</Label>
                                         <Input placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" />
-                                        {taskDetails.documentTypeId === "ORIGINAL"
+                                        {taskDetails.deliverWayId === "F2F"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.expDeliveryAddress, 'required')}</small>
                                             : null}
                                     </FormGroup>
+
+
+                                    <FormGroup>
+                                        <Label>Reciever</Label>
+                                        <AsyncSelect
+                                            id="expDeliveryReceiver"
+                                            loadOptions={loadReciever}
+                                            isClearable
+                                            value={receivers[this.getReciever(taskDetails.expDeliveryReceiver)]}
+                                            onChange={this.handleSelectReciever}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        />
+                                        {taskDetails.deliverWayId === "F2F"
+                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', taskDetails.expDeliveryReceiver, 'required')}</small>
+                                            : null}
+                                    </FormGroup>
+
+                                    <FormGroup>
+                                        <Label>Reciever Mobile Phone</Label>
+                                        {/* <input type="number" id="phoneNumber"></input> */}
+                                        <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="number" />
+                                        {taskDetails.deliverWayId === "F2F"
+                                            ? <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.expDeliveryMobileNo, 'required')}</small>
+                                            : null}
+                                    </FormGroup>
                                 </Collapse>
-
-                                <FormGroup>
-                                    <Label>Reciever</Label>
-                                    <AsyncSelect
-                                        id="expDeliveryReceiver"
-                                        loadOptions={loadOptions}
-                                        isClearable
-                                        value={seniorManagersList[this.getOption(taskDetails.expDeliveryReceiver)]}
-                                        onChange={this.handleSelectReciever}
-                                        menuPortalTarget={document.body}
-                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                    />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', taskDetails.expDeliveryReceiver, 'required')}</small>
-                                </FormGroup>
-
-                                <FormGroup>
-                                    <Label>Reciever Mobile Phone</Label>
-                                    {/* <input type="number" id="phoneNumber"></input> */}
-                                    <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="number" />
-                                    <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.expDeliveryMobileNo, 'required')}</small>
-                                </FormGroup>
-
                                 <FormGroup>
                                     <Label>Senior Manager or above of requestor department</Label>
                                     <AsyncSelect
@@ -763,6 +795,33 @@ class LicenseEditRequest extends Component {
                                     </Col>
                                     <Col className="d-flex justify-content-end">
                                         <Button onClick={this.deleteTask} color="danger" >Delete</Button>
+                                    </Col>
+                                </Row>
+                                {taskDetails.histories ? <hr></hr> : null}
+                                <Row>
+                                    <Col>
+                                        {taskDetails.histories ?
+                                            taskDetails.histories.length !== 0
+                                                ? <>
+                                                    <Row>
+                                                        <Col><h4>Approval Histories</h4></Col>
+                                                    </Row>
+                                                    {taskDetails.histories.map((history, index) =>
+                                                        <div key={index}>
+                                                            <hr></hr>
+                                                            <Row className="text-md-left text-center">
+                                                                <Col sm md="10" lg>
+                                                                    <h5>{history.approvedByName}<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
+                                                                    <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
+                                                                    <Col className="p-0"> <p>{history.comments}</p> </Col>
+                                                                </Col>
+                                                            </Row>
+                                                        </div>
+                                                    )}
+                                                </>
+                                                : null
+                                            : null}
+
                                     </Col>
                                 </Row>
 

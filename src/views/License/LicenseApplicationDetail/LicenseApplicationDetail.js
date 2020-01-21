@@ -91,7 +91,7 @@ class LicenseApplicationDetail extends Component {
                         valid = false
                         Swal.fire({
                             title: "No Express Number",
-                            html: "Please add Express Number !",
+                            html: "Please add express number !",
                             type: "warning"
                         })
                     }
@@ -141,7 +141,7 @@ class LicenseApplicationDetail extends Component {
                         valid = false
                         Swal.fire({
                             title: "No Express Number",
-                            html: "Please add Express Number !",
+                            html: "Please add express number !",
                             type: "warning"
                         })
                     }
@@ -375,9 +375,9 @@ class LicenseApplicationDetail extends Component {
                                                     className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
                                                     bar
                                                     animated={stage.state === "CURRENT" ? true : false}
-                                                    striped={stage.state === "FINISHED"}
-                                                    color={stage.state === "CURRENT" ? "green" : stage.state === "FINISHED" ? "secondary" : "warning  "}
-                                                    value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
+                                                    striped={true}
+                                                    color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "green" : "secondary  "}
+                                                    value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "white" : stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                 </Progress>
                                             </React.Fragment>
                                         )}
@@ -464,67 +464,227 @@ class LicenseApplicationDetail extends Component {
                                                 <Label> Watermark </Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="/" />
+                                                <Input disabled type="text" defaultValue={taskDetails.needWatermark === "Y" ? taskDetails.watermark : "No Watermark"} name="text-input" placeholder="/" />
+                                            </Col>
+                                            {
+                                            }
+                                        </>
+
+                                    }
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Reason for no watermark</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="/" />
+                                                </Col>
+                                                < Col md lg>
+                                                    <Label>Deliver Ways</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                            : <>
+                                                < Col md lg>
+                                                    <Label>Deliver Ways</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Delivery Address</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                        : <>
+                                            < Col md lg>
+                                                <Label>Deliver Ways</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <Input disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
+                                            </Col>
+                                            <Col md lg>
+                                                <Label>Delivery Address</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </>
+                                    }
+
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Delivery Address</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Receiver</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                            : <>
+                                                <Col md lg>
+                                                    <Label>Receiver</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Deliver Express Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                        : <>
+                                            <Col md lg>
+                                                <Label>Receiver</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
+                                            </Col>
+                                            <Col md lg>
+                                                <Label>Deliver Express Number</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <Input disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </>
+                                    }
+
+
+
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Deliver Express Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Receiver Mobile Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                            : <>
+                                                <Col md lg>
+                                                    <Label>Receiver Mobile Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Return Way</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                        : <>
+                                            <Col md lg>
+                                                <Label>Receiver Mobile Number</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
+                                            </Col>
+                                            <Col md lg>
+                                                <Label>Return Way</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <Input disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </>
+                                    }
+
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Return Way</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Senior Manager or above of Requestor Department</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                            : <>
+                                                <Col md lg>
+                                                    <Label>Senior Manager or above of Requestor Department</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Return Express Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                        : <>
+                                            <Col md lg>
+                                                <Label>Senior Manager or above of Requestor Department</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <Input disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
+                                            </Col>
+                                            <Col md lg>
+                                                <Label>Return Express Number</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
                                             </Col>
                                         </>
                                     }
                                 </FormGroup>
                                 <FormGroup row>
-                                    <Col md lg>
-                                        <Label>Deliver Ways</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
-                                    </Col>
-                                    <Col md lg>
-                                        <Label>Delivery Address</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
-                                    </Col>
-                                </FormGroup>
-                                <FormGroup row>
-                                    <Col md lg>
-                                        <Label>Receiver</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
-                                    </Col>
-                                    <Col md lg>
-                                        <Label>Deliver Express Number</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
-                                    </Col>
-
-                                </FormGroup>
-                                <FormGroup row>
-                                    <Col md lg>
-                                        <Label>Receiver Mobile Number</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
-                                    </Col>
-                                    <Col md lg>
-                                        <Label>Return Way</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
-                                    </Col>
-                                </FormGroup>
-                                <FormGroup row>
-                                    <Col md lg>
-                                        <Label>Senior Manager or above of Requestor Department</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
-                                    </Col>
-                                    <Col md lg>
-                                        <Label>Return Express Number</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
-                                    </Col>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Return Express Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label></Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    {/* <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" /> */}
+                                                </Col>
+                                            </>
+                                            : null
+                                        : null
+                                    }
                                 </FormGroup>
                             </Col>
                             {page === "mypendingtask"
@@ -540,7 +700,7 @@ class LicenseApplicationDetail extends Component {
                                                         <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                                         <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
                                                             <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
+                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
                                                                 <Row> &nbsp; </Row>
                                                                 <div>Reciever: {taskDetails.expDeliveryReceiver}</div>
                                                                 <div>Address: {taskDetails.expDeliveryAddress}</div>
@@ -572,7 +732,7 @@ class LicenseApplicationDetail extends Component {
                                                         <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                                         <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
                                                             <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
+                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
                                                                 <Row> &nbsp; </Row>
                                                                 {/* <div>Reciever: </div>
                                                                 <div>Address: </div>
@@ -600,7 +760,7 @@ class LicenseApplicationDetail extends Component {
                                     </Row>
                                     <Row>
                                         {taskDetails.actions.map((action, index) =>
-                                            <Button className="mx-1" key={index} color={action.action === "approve" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
+                                            <Button className="mx-1" key={index} color={action.action !== "reject" || action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
                                         )}
                                     </Row>
                                 </div>
@@ -615,7 +775,7 @@ class LicenseApplicationDetail extends Component {
                                                         <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                                         <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
                                                             <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
+                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
                                                                 <Row> &nbsp; </Row>
                                                                 {/* <div>Reciever: </div>
                                                             <div>Address: </div>
@@ -679,7 +839,9 @@ class LicenseApplicationDetail extends Component {
                             }
                         </CardBody>
                         <CardFooter>
-                            <Row><Col><h4>Approval History</h4></Col></Row>
+                            {taskDetails.histories.length !== 0
+                                ? <Row><Col><h4>Approval History</h4></Col></Row>
+                                : null}
                             {taskDetails.histories.map((history, index) =>
                                 <div key={index}>
                                     <Row className="bottom-border"></Row>

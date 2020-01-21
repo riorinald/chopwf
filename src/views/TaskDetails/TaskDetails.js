@@ -15,6 +15,7 @@ import Swal from 'sweetalert2';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import {STU,LTU,LTI,CNIPS} from './viewDetails';
+import {BSTU,BLTU,BLTI,BCNIPS} from './viewBranchDetails';
 // import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
 
 
@@ -131,7 +132,7 @@ class TaskDetails extends Component {
 
                         Swal.update({
                             title: res.data.message,
-                            text: `The request has been ${res.data.message}`,
+                            text: `The request has been approved`,
                             type: "success",
 
                         })
@@ -198,23 +199,43 @@ class TaskDetails extends Component {
     }
 
     handleViews(appType){
-        
-        switch (appType) {
-            case 'STU':
-                return <STU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                ;
-            case 'LTU':
-                return <LTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                ;
-            case 'LTI':
-                return <LTI setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                ;
-            case 'CNIPS':
-                return <CNIPS setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                ;
-            default:
-                return <STU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                ;    
+        if( this.state.taskDetails.branchId !== ''){
+            switch (appType) {
+                case 'STU':
+                    return <BSTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                case 'LTU':
+                    return <BLTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                case 'LTI':
+                    return <BLTI setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                case 'CNIPS':
+                    return <BCNIPS setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                default:
+                    return <BSTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;    
+            }
+        }
+        else {
+            switch (appType) {
+                case 'STU':
+                    return <STU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                case 'LTU':
+                    return <LTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                case 'LTI':
+                    return <LTI setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                case 'CNIPS':
+                    return <CNIPS setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                default:
+                    return <STU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;    
+            }
         }
     }
 
@@ -417,7 +438,7 @@ class TaskDetails extends Component {
                                                 {taskDetails.actions.map((action, index) =>
                                                     <React.Fragment key={index}>
                                                         {action.action !== "copy" && action.action !== "recall" && action.action !== "remind"
-                                                            ? <Button className="mx-1" key={index} color={action.action === "approve" ? "success" : "danger"} onClick={() => this.approve(action.action)} > {action.actionName}</Button>
+                                                            ? <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.approve(action.action)} > {action.actionName}</Button>
                                                             : null}
                                                     </React.Fragment>
                                                 )}

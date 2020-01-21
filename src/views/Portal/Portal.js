@@ -1,20 +1,54 @@
 import React, { Component, Suspense } from 'react';
 import {
-  Button, Col, Spinner, Container, Input, InputGroup, InputGroupAddon, InputGroupText, Row,
-  Card, CardHeader, CardBody
-} from 'reactstrap';
+  Col, Spinner, Container,
+  Row,
+  Card, CardBody,
+  Navbar,
+  NavItem
+  } from 'reactstrap';
 import {
   AppHeader,
-  AppFooter,
-  AppSidebarNav2 as AppSidebarNav,
-  // AppBreadcrumb2 as AppBreadcrumb,
-} from '@coreui/react';
+  } from '@coreui/react';
 import LegalEntity from '../../context';
-const DefaultHeader = React.lazy(() => import('../../containers/DefaultLayout/DefaultHeader'));
+import Axios from 'axios';
+import config from '../../config';
+import UserInfo from '../../context/UserInfo'
+
 const DefaultFooter = React.lazy(() => import('../../containers/DefaultLayout/DefaultFooter'));
 
 
 class Portal extends Component {
+  constructor(props) {
+    super(props);
+    this.state={
+      userDetails:{}
+    }
+  }
+
+  componentDidMount() {
+    this.getUserDetails()
+  }
+
+  async getUserDetails() {
+    this.setState({ loading: true })
+    await Axios.get(`${config.url}/users/${localStorage.getItem('userId')}`,{ headers: { Pragma: 'no-cache' } }).then(res => {
+      this.setState({ userDetails: res.data, loading: false })
+      switch(res.data.companyCode){
+        case '685': 
+            localStorage.setItem('legalEntity','MBAFC')
+            break;
+        case '632': 
+            localStorage.setItem('legalEntity','MBIA')
+            break;
+        case '669': 
+            localStorage.setItem('legalEntity','MBLC')
+            break;
+        case '520': 
+            localStorage.setItem('legalEntity','DMT')
+            break;
+      }
+    })
+  }
 
   loading = () => <div className="animated fadeIn pt-1 text-center"><Spinner /></div>
 
@@ -32,14 +66,13 @@ class Portal extends Component {
   render() {
     return (
       <div style={{ backgroundColor: "#2F353A" }} >
-        <LegalEntity.Consumer>
-          {ContextValue => (
+        <LegalEntity.Provider value={{UserInfo: this.state.userDetails}}>
             <AppHeader fixed>
               <Suspense fallback={this.loading()}>
-
+                <span className="navbar-nav ml-auto mr-5">{this.state.userDetails.displayName}</span>
               </Suspense>
             </AppHeader>
-          )}</LegalEntity.Consumer>
+          </LegalEntity.Provider>
         <div className="app flex-row align-items-center">
           <Container>
             <Row className="justify-content-center">
