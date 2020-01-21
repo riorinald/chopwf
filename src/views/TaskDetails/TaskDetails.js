@@ -15,6 +15,7 @@ import Swal from 'sweetalert2';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import {STU,LTU,LTI,CNIPS} from './viewDetails';
+import {BSTU,BLTU,BLTI,BCNIPS} from './viewBranchDetails';
 // import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
 
 
@@ -198,23 +199,43 @@ class TaskDetails extends Component {
     }
 
     handleViews(appType){
-        
-        switch (appType) {
-            case 'STU':
-                return <STU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                ;
-            case 'LTU':
-                return <LTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                ;
-            case 'LTI':
-                return <LTI setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                ;
-            case 'CNIPS':
-                return <CNIPS setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                ;
-            default:
-                return <STU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                ;    
+        if( this.state.taskDetails.branchId !== ''){
+            switch (appType) {
+                case 'STU':
+                    return <BSTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                case 'LTU':
+                    return <BLTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                case 'LTI':
+                    return <BLTI setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                case 'CNIPS':
+                    return <BCNIPS setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                default:
+                    return <BSTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;    
+            }
+        }
+        else {
+            switch (appType) {
+                case 'STU':
+                    return <STU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                case 'LTU':
+                    return <LTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                case 'LTI':
+                    return <LTI setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                case 'CNIPS':
+                    return <CNIPS setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;
+                default:
+                    return <STU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
+                    ;    
+            }
         }
     }
 

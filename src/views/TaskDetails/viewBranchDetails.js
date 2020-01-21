@@ -17,18 +17,21 @@ function convertDate(dateValue) {
 function expandRow(value){
     let row = 1
     if (value.length < 70){
-        row = 1
+        row = 2
     }
-    if (value.length > 140 && value.length < 230){
+    if (value.length < 140){
+        row = 3
+    }
+    if (value.length < 210){
         row = 4
     }
-    if (value.length > 230 && value.length < 320){
+    if (value.length < 380){
         row = 5
     }
-    if (value.length > 320 && value.length < 420){
+    if (value.length > 380){
         row = 7
     }
-    if (value.length > 420 && value.length < 520){
+    if (value.length > 450){
         row = 10
     }
     console.log(row, value)
@@ -36,7 +39,7 @@ function expandRow(value){
 }
 
 
-const CNIPS = (props) => { 
+const BCNIPS = (props) => { 
   return <> 
             <Col className="mb-4">
                         <FormGroup row>
@@ -67,27 +70,35 @@ const CNIPS = (props) => {
                                 <Input disabled type="text" value={props.taskDetails.chopTypeName} id="chopTypeName" name="chopTypeName" placeholder="/" />
                             </Col>
                         </FormGroup>
+                         <FormGroup row >
+                                <Col md lg={2}>
+                                    <Label>Branch Company Chop</Label>
+                                </Col>
+                                <Col md lg={4}>
+                                    <Input disabled type="text" value={props.taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
+                                </Col>
+                                <Col md lg={2}>
+                                    <Label>Purpose of Use</Label>
+                                </Col>
+                                <Col md lg={4}>
+                                    <Input disabled type="textarea" rows={"auto"} style={{resize:"none"}} value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
+                                </Col>
+                        </FormGroup>
                         <FormGroup row>
-                            <Col md lg={2}>
-                                <Label>Purpose of Use</Label>
-                            </Col>
-                            <Col md lg={4}>
-                                <Input disabled type="textarea" rows={"auto"} style={{resize:"none"}} value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
-                            </Col>
                             <Col md lg={2}>
                                 <Label>No. of Pages to Be Chopped </Label>
                             </Col>
                             <Col md lg={4}>
                                 <Input disabled type="text" value={props.taskDetails.numOfPages} id="numOfPages" name="numOfPages" placeholder="/" />
                             </Col>
-                        </FormGroup>
-                        <FormGroup row>
                             <Col md lg={2}>
                                 <Label>Connecting Chop</Label>
                             </Col>
                             <Col md lg={4}>
                                 <Input disabled type="text" value={props.taskDetails.connectChop === "Y" ? "Yes" : "No"} id="connectChop" name="connectChop" placeholder="/" />
                             </Col>
+                        </FormGroup>
+                        <FormGroup row>
                             <Col md lg={2}>
                                 <Label>Use in Office or not</Label>
                             </Col>
@@ -95,7 +106,6 @@ const CNIPS = (props) => {
                                 <Input disabled type="text" value={props.taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} id="isUseInOffice" name="isUseInOffice" placeholder="/" />
                             </Col>
                         </FormGroup>
-
                         {props.taskDetails.isUseInOffice === "N" ?
                         <>
                             <FormGroup row>
@@ -114,7 +124,6 @@ const CNIPS = (props) => {
                             </FormGroup>
                         </> : null
                         }
-
                         <FormGroup row>
                             <Col md lg={2}>
                                 <Label>Address to</Label>
@@ -161,7 +170,7 @@ const CNIPS = (props) => {
   </>
 } 
 
-const LTI = (props) => { 
+const BLTI = (props) => { 
     return <> 
               <Col className="mb-4">
                           <FormGroup row>
@@ -208,33 +217,39 @@ const LTI = (props) => {
                           </FormGroup>
                           <FormGroup row>
                               <Col md lg={2}>
+                                  <Label>Branch Company Chop</Label>
+                              </Col>
+                              <Col md lg={4}>
+                                  <Input disabled type="text" value={props.taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
+                              </Col>
+                              <Col md lg={2}>
                                   <Label>Purpose of Use</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="textarea" rows={"auto"} style={{resize:"none"}} value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
                               </Col>
+                          </FormGroup>
+                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Address to</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="textarea" rows={expandRow(props.taskDetails.addressTo)} style={{resize:"none"}} value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Remark (e.g. tel.)</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="textarea" rows={expandRow(props.taskDetails.remark)} style={{resize:"none"}} value={props.taskDetails.remark} id="remark" name="remark" placeholder="/" />
                               </Col>
-                              <Col md lg={2}>
-                                  <Label>Document Check By</Label>
-                                </Col>
-                                <Col md lg={4}>
-                                  <Input disabled type="text" value={props.taskDetails.documentCheckByName} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
-                              </Col>
                           </FormGroup>
                           <FormGroup row>
+                              <Col md lg={2}>
+                                  <Label>Document Check By</Label>
+                              </Col>
+                              <Col md lg={4}>
+                                  <Input disabled type="text" value={props.taskDetails.documentCheckByName} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
+                              </Col>
                               <Col md lg={2}>
                                   <Label>Department Heads</Label>
                               </Col>
@@ -242,6 +257,8 @@ const LTI = (props) => {
                                   <Input disabled type="textarea" rows={2} style={{resize:"none"}} value={props.setArray(props.taskDetails.departmentHeadsName)} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
                                   <UncontrolledTooltip placement="right" target="deptHead">{props.setArray(props.taskDetails.departmentHeadsName)}</UncontrolledTooltip>
                               </Col>
+                          </FormGroup>
+                          <FormGroup>
                               <Col md lg={2}>
                                   <Label>Confirm</Label>
                               </Col>
@@ -253,7 +270,7 @@ const LTI = (props) => {
     </>
   } 
 
-  const LTU = (props) => { 
+  const BLTU = (props) => { 
     return <> 
               <Col className="mb-4">
                           <FormGroup row>
@@ -292,55 +309,61 @@ const LTI = (props) => {
                                   <Input disabled type="text" value={props.taskDetails.chopTypeName} id="chopTypeName" name="chopTypeName" placeholder="/" />
                               </Col>
                               <Col md lg={2}>
+                                  <Label>Branch Company Chop</Label>
+                              </Col>
+                              <Col md lg={4}>
+                                  <Input disabled type="text" value={props.taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
+                              </Col>
+                          </FormGroup>
+                          <FormGroup row>
+                              <Col md lg={2}>
                                   <Label>Purpose of Use</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="textarea" rows={"auto"} style={{resize:"none"}} value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>No. of Pages to Be Chopped </Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="text" value={props.taskDetails.numOfPages} id="numOfPages" name="numOfPages" placeholder="/" />
                               </Col>
+                          </FormGroup>
+                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Connecting Chop</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="text" value={props.taskDetails.connectChop === "Y" ? "Yes" : "No"} id="connectChop" name="connectChop" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Address to</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="textarea" rows={expandRow(props.taskDetails.addressTo)} style={{resize:"none"}} value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
                               </Col>
+                          </FormGroup>
+                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Pick Up By</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="text" value={props.taskDetails.pickUpByName} id="pickUpBy" name="pickUpBy" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Remark (e.g. tel.)</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="textarea" rows={expandRow(props.taskDetails.remark)} style={{resize:"none"}} value={props.taskDetails.remark} id="remark" name="remark" placeholder="/" />
                               </Col>
+                          </FormGroup>
+                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Document Check By</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="text" value={props.taskDetails.documentCheckByName} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Confirm</Label>
                               </Col>
@@ -352,7 +375,7 @@ const LTI = (props) => {
     </>
   }
   
-  const STU = (props) => { 
+  const BSTU = (props) => { 
     return <> 
               <Col className="mb-4">
                           <FormGroup row>
@@ -385,33 +408,46 @@ const LTI = (props) => {
                           </FormGroup>
                           <FormGroup row>
                               <Col md lg={2}>
+                                    <Label>Branch Company Chop</Label>
+                                </Col>
+                                <Col md lg={4}>
+                                    <Input disabled type="text" value={props.taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
+                                </Col>
+                              <Col md lg={2}>
                                   <Label>Purpose of Use</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="textarea" rows={expandRow(props.taskDetails.purposeOfUse)} style={{resize:"none"}} value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
                               </Col>
+                          </FormGroup>
+                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>No. of Pages to Be Chopped </Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="text" value={props.taskDetails.numOfPages} id="numOfPages" name="numOfPages" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Connecting Chop</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="text" value={props.taskDetails.connectChop === "Y" ? "Yes" : "No"} id="connectChop" name="connectChop" placeholder="/" />
                               </Col>
-                              <Col md lg={2}>
+                          </FormGroup>
+                          <FormGroup row>
+                          <Col md lg={2}>
                                   <Label>Use in Office or not</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="text" value={props.taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} id="isUseInOffice" name="isUseInOffice" placeholder="/" />
                               </Col>
+                              <Col md lg={2}>
+                                  <Label>Address to</Label>
+                              </Col>
+                              <Col md lg={4}>
+                                  <Input disabled type="textarea" rows={expandRow(props.taskDetails.addressTo)} style={{resize:"none"}} value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
+                              </Col>
                           </FormGroup>
-  
                           {props.taskDetails.isUseInOffice === "N" ?
                           <>
                               <FormGroup row>
@@ -430,28 +466,21 @@ const LTI = (props) => {
                               </FormGroup>
                           </> : null
                           }
-  
                           <FormGroup row>
-                              <Col md lg={2}>
-                                  <Label>Address to</Label>
-                              </Col>
-                              <Col md lg={4}>
-                                  <Input disabled type="textarea" rows={expandRow(props.taskDetails.addressTo)} style={{resize:"none"}} value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
-                              </Col>
                               <Col md lg={2}>
                                   <Label>Pick Up By</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="text" value={props.taskDetails.pickUpByName} id="pickUpBy" name="pickUpBy" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Remark (e.g. tel.)</Label>
                               </Col>
                               <Col md lg={4}>
                                   <Input disabled type="textarea" rows={expandRow(props.taskDetails.remark)} style={{resize:"none"}} value={props.taskDetails.remark} id="remark" name="remark" placeholder="/" />
                               </Col>
+                          </FormGroup>
+                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Department Heads</Label>
                               </Col>
@@ -459,8 +488,6 @@ const LTI = (props) => {
                                   <Input disabled type="textarea" rows={2} style={{resize:"none"}} value={props.setArray(props.taskDetails.departmentHeadsName)} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
                                   <UncontrolledTooltip placement="right" target="deptHead">{props.setArray(props.taskDetails.departmentHeadsName)}</UncontrolledTooltip>
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Confirm</Label>
                               </Col>
@@ -472,4 +499,4 @@ const LTI = (props) => {
     </>
   } 
 
-export {STU,LTU,LTI,CNIPS};
+export {BSTU,BLTU,BLTI,BCNIPS};
