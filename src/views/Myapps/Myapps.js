@@ -312,9 +312,9 @@ class Myapps extends Component {
                   width: this.getColumnWidth('documentNameEnglish', "Document Name (EN)"),
                   // Cell: this.renderEditable,
                   Cell: row => (
-                    <div> {this.getDeptHeads(row.original.documentNameEnglish)} </div>
+                    <div> <span title={this.getDeptHeads(row.original.documentNameEnglish)} >{this.getDeptHeads(row.original.documentNameEnglish)}</span> </div>
                   ),
-                  style: { textAlign: "center" },
+                  style: { textAlign: "center", whiteSpace: 'unset' },
                   filterable: false
                 },
                 {
@@ -324,7 +324,7 @@ class Myapps extends Component {
                   width: this.getColumnWidth('documentNameChinese', "Document Name (CN)"),
                   // Cell: this.renderEditable,
                   Cell: row => (
-                    <div> {this.getDeptHeads(row.original.documentNameChinese)} </div>
+                    <div> <span title={this.getDeptHeads(row.original.documentNameChinese)}>{this.getDeptHeads(row.original.documentNameChinese)}</span> </div>
                   ),
                   style: { textAlign: "center" },
                   filterable: false
