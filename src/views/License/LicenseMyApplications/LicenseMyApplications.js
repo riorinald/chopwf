@@ -37,7 +37,8 @@ class LicenseMyApplications extends Component {
                 status: "",
                 plannedReturnDate: "",
                 createdDate: "",
-                createdByName: ""
+                createdByName: "",
+                departmentId: ""
             },
             limit: 10,
             returnDateView: "",
@@ -118,7 +119,7 @@ class LicenseMyApplications extends Component {
         const { searchOption } = this.state
         console.log(searchOption)
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}`,
+        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentId=${searchOption.departmentId}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 this.setState({ applications: res.data, loading: false })
@@ -276,6 +277,28 @@ class LicenseMyApplications extends Component {
                                         )
                                     },
                                     style: { textAlign: "center" }
+                                },
+                                {
+
+                                    Header: "Department",
+                                    accessor: "departmentName",
+                                    width: this.getColumnWidth('departmentName', "Department"),
+                                    Cell: this.renderEditable,
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
+                                                <option value="" >Please Select a department</option>
+                                                {this.state.departments.map((dept, index) =>
+                                                    <option key={index} value={dept.deptId} >{dept.deptName}</option>
+                                                )}
+                                            </Input>
+
+                                        )
+                                    },
+                                    style: { textAlign: "center" },
                                 },
                                 {
                                     Header: "Document Type",
@@ -465,13 +488,6 @@ class LicenseMyApplications extends Component {
                                     };
                                 } else {
                                     return {};
-                                }
-                            }}
-                            getTrGroupProps={(state, rowInfo, column, instance) => {
-                                return {
-                                    onMouseEnter: (e, handleOriginal) => {
-                                        console.log(rowInfo.original.requestNum)
-                                    }
                                 }
                             }}
                         />

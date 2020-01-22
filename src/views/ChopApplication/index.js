@@ -65,28 +65,11 @@ class ChopApplication extends Component {
         documentCheckByName: "",
         statusName: "",
         createdDate: "",
-        createdByName: ""
+        createdByName: "",
+        departmentId: ""
       },
       departments: [],
-      status: [
-        "Recall",
-        "Pending for Document check by (L4 or above) Approval ",
-        "Pending for Department Head Approval",
-        "Bring the Original Documents for Chop",
-        "Pending for Chop Owner Approval",
-        "Send Back to Requestor",
-        "Rejected",
-        "Pending for Chop Keeper Acknowledge Lend Out",
-        "Pending Chop Keeper Acknowledge Return",
-        "Completed",
-        "Draft",
-        "Pending Requestor Return/Extension",
-        "Pending Department Head Approval for Extension",
-        "Pending Chop Keeper Approval for extension",
-        "Pending Chop Owner Approval for extension",
-        "Chop request expired after 30 days",
-        "Pending Requestor Return"
-      ]
+      status: []
 
     }
     this.getApplications = this.getApplications.bind(this);
@@ -107,7 +90,7 @@ class ChopApplication extends Component {
 
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: !this.state.loading })
-    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
+    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.pageCount === 0 ? 1 : res.data.pageCount })
         console.log(res.data)
@@ -406,7 +389,7 @@ class ChopApplication extends Component {
                   },
                   Filter: ({ filter, onChange }) => {
                     return (
-                      <Input type="select" value={this.state.searchOption.departmentName} onChange={this.handleSearch('departmentName')} >
+                      <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
                         <option value="" >Please Select a department</option>
                         {this.state.departments.map((dept, index) =>
                           <option key={index} value={dept.deptId} >{dept.deptName}</option>

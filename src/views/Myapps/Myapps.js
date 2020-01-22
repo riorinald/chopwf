@@ -53,7 +53,8 @@ class Myapps extends Component {
         documentCheckByName: "",
         statusName: "",
         createdDate: "",
-        createdByName: ""
+        createdByName: "",
+        departmentId: ""
       },
 
       status: [],
@@ -82,7 +83,7 @@ class Myapps extends Component {
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: true })
     // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
-    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
+    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false })
@@ -339,7 +340,7 @@ class Myapps extends Component {
                   },
                   Filter: ({ filter, onChange }) => {
                     return (
-                      <Input type="select" value={this.state.searchOption.departmentName} onChange={this.handleSearch('departmentName')} >
+                      <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
                         <option value="" >Please Select a department</option>
                         {this.state.departments.map((dept, index) =>
                           <option key={index} value={dept.deptId} >{dept.deptName}</option>

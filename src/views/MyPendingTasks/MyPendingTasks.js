@@ -48,7 +48,8 @@ class MyPendingTasks extends Component {
                 documentCheckByName: "",
                 statusName: "",
                 createdDate: "",
-                createdByName: ""
+                createdByName: "",
+                departmentId: ""
             },
 
             //data retrieved from database
@@ -138,7 +139,8 @@ class MyPendingTasks extends Component {
         this.setState({ loading: !this.state.loading })
         let userId = localStorage.getItem('userId')
         // let userId = "josh@otds.admin"
-        let url = `${config.url}/tasks?category=pending&companyid=${this.props.legalName}&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`
+        let url = `${config.url}/tasks?category=pending&companyid=${this.props.legalName}&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`
+        console.log(url)
         const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } })
         this.setState({ pendingTasks: response.data.tasks, totalPages: response.data.pageCount, loading: !this.state.loading })
         // array = response.data
@@ -156,7 +158,6 @@ class MyPendingTasks extends Component {
             // }
             // value = temp
         }
-        console.log(value)
         const options = this.state.searchOption
         options[name] = value
         this.setState(state => {
@@ -400,7 +401,7 @@ class MyPendingTasks extends Component {
                                     },
                                     Filter: ({ filter, onChange }) => {
                                         return (
-                                            <Input type="select" value={this.state.searchOption.departmentName} onChange={this.handleSearch('departmentName')} >
+                                            <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
                                                 <option value="" >Please Select a department</option>
                                                 {this.state.departments.map((dept, index) =>
                                                     <option key={index} value={dept.deptId} >{dept.deptName}</option>
