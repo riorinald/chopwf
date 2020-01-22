@@ -13,8 +13,14 @@ html body .app.flex-row.align-items-center {
   }
 
   .ReactTable {
-    -ms-overflow-style: -ms-autohiding-scrollbar;
+    // -ms-overflow-style: -ms-autohiding-scrollbar;
+    -ms-overflow-style: none;
+    overflow-y: auto;
   }
+  
+  .ReactTable .rt-th, .ReactTable .rt-td {
+    white-space: unset;
+}
   
 }
 
