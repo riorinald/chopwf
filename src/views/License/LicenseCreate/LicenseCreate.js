@@ -161,13 +161,19 @@ class LicenseCreate extends Component {
                         let err3 = ""
                         if (error.response) {
                             console.log(error.response)
-                            let keys = Object.keys(error.response.data.errors)
-                            err = keys.join(',')
-                            keys.map(key => {
-                                // console.log(error.response.data.errors[key].join(','))
-                                err2.push(error.response.data.errors[key].join(','))
-                            })
-                            err3 = err2.join(';')
+                            if (error.response.data.errors) {
+                                let keys = Object.keys(error.response.data.errors)
+                                err = keys.join(',')
+                                keys.map(key => {
+                                    // console.log(error.response.data.errors[key].join(','))
+                                    err2.push(error.response.data.errors[key].join(','))
+                                })
+                                err3 = err2.join(';')
+                            }
+                            else if (error.response.data.message) {
+                                err = error.response.data.message
+                                err3 = ""
+                            }
                         }
                         Swal.hideLoading()
                         Swal.update({
@@ -512,7 +518,7 @@ class LicenseCreate extends Component {
                                 <CustomInput type="radio" id="licensePurpose2" name="licensePurpose" value="MFP" label="城抵押 Mortgage Filling Purpose" />
                                 <CustomInput type="radio" id="licensePurpose3" name="licensePurpose" value="PS" label="其他 Please specify:">
                                     <Collapse isOpen={formData.licensePurpose === "PS"}>
-                                        <Input id="specificPurpose" type="text" onChange={this.handleChange("specificPurpose")} value={formData.specificPurpose} />
+                                        <Input id="specificPurpose" type="text" maxLength={500} onChange={this.handleChange("specificPurpose")} value={formData.specificPurpose} />
                                         {formData.licensePurpose === "PS"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Specify Purpose', formData.specificPurpose, 'required')}</small>
                                             : null}
@@ -534,7 +540,7 @@ class LicenseCreate extends Component {
                                     <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
                                     <CustomInput type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes, Please specify watermark here:">
                                         <Collapse isOpen={formData.isWatermark === "Y"}>
-                                            <Input id="inputWatermark1" type="text" value={formData.watermark} onChange={this.handleChange("watermark")} />
+                                            <Input id="inputWatermark1" type="text" maxLength={50} value={formData.watermark} onChange={this.handleChange("watermark")} />
                                             {formData.isWatermark === "Y"
                                                 ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', formData.watermark, 'required')}</small>
                                                 : null}
@@ -542,9 +548,9 @@ class LicenseCreate extends Component {
                                     </CustomInput>
                                     <CustomInput type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No, Please specify the reason of not adding watermark:">
                                         <Collapse isOpen={formData.isWatermark === "N"}>
-                                            <Input id="inputWatermark2" type="text" value={formData.watermark} onChange={this.handleChange("watermark")} />
+                                            <Input id="inputWatermark2" type="text" maxLength={50} value={formData.watermark} onChange={this.handleChange("watermark")} />
                                             {formData.isWatermark === "N"
-                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', formData.watermark, 'required')}</small>
+                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('', formData.watermark, 'required')}</small>
                                                 : null}
                                         </Collapse>
                                     </CustomInput>

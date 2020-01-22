@@ -2237,7 +2237,7 @@ class EditRequest extends Component {
                                         <FormGroup check={false}>
                                             <Label>Document Name</Label>
                                             {taskDetails.applicationTypeId === "LTU"
-                                                ? <div>
+                                                ? <div id="documents" >
                                                     <InputGroup id="documentTableLTU" >
                                                         <InputGroupAddon addonType="prepend">
                                                             <Button id="selectDocuments" color="primary" onClick={this.selectDocument}>Select Documents</Button>

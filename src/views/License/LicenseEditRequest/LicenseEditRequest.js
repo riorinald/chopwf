@@ -205,10 +205,10 @@ class LicenseEditRequest extends Component {
     //convert Date
     dateChange = (name, view) => date => {
         let month = date.getMonth()
-
+        let tempDate = date.getDate()
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${tempDate.toLocaleString().length === 1 ? 0 : ""}${tempDate}`
         }
         this.setState({ [view]: date });
         this.setState(state => {
@@ -639,7 +639,7 @@ class LicenseEditRequest extends Component {
                                     <CustomInput type="radio" id="licensePurpose2" name="purposeType" defaultChecked={taskDetails.purposeType === "MFP"} value="MFP" label="城抵押 Mortgage Filling Purpose" />
                                     <CustomInput type="radio" id="licensePurpose3" name="purposeType" defaultChecked={taskDetails.purposeType === "PS"} value="PS" label="其他 Please specify:">
                                         <Collapse isOpen={taskDetails.purposeType === "PS"}>
-                                            <Input id="purposeComment" type="text" onChange={this.handleChange("purposeComment")} value={taskDetails.purposeComment} />
+                                            <Input id="purposeComment" type="text" maxLength={500} onChange={this.handleChange("purposeComment")} value={taskDetails.purposeComment} />
                                             {taskDetails.purposeType === "PS"
                                                 ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Specify Purpose', taskDetails.purposeComment, 'required')}</small>
                                                 : null}
@@ -661,7 +661,7 @@ class LicenseEditRequest extends Component {
                                         <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
                                         <CustomInput defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes, Please specify watermark here:">
                                             <Collapse isOpen={taskDetails.needWatermark === "Y"}>
-                                                <Input id="inputWatermark1" type="text" value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
+                                                <Input id="inputWatermark1" type="text" maxLength={50} value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
                                                 {taskDetails.needWatermark === "Y"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', taskDetails.watermark, 'required')}</small>
                                                     : null}
@@ -669,7 +669,7 @@ class LicenseEditRequest extends Component {
                                         </CustomInput>
                                         <CustomInput defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No, Please specify the reason of not adding watermark:">
                                             <Collapse isOpen={taskDetails.needWatermark === "N"}>
-                                                <Input id="inputWatermark2" type="text" value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
+                                                <Input id="inputWatermark2" type="text" maxLength={50} value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
                                                 {taskDetails.needWatermark === "N"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', taskDetails.watermark, 'required')}</small>
                                                     : null}
@@ -812,7 +812,7 @@ class LicenseEditRequest extends Component {
                                                             <hr></hr>
                                                             <Row className="text-md-left text-center">
                                                                 <Col sm md="10" lg>
-                                                                    <h5>{history.approvedByName}<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
+                                                                    <h5>{history.approvedByName}<span> <Badge color={history.approvalStatus === "APPROVED" ? "success" : "danger"}>{history.approvalStatus}</Badge></span></h5>
                                                                     <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
                                                                     <Col className="p-0"> <p>{history.comments}</p> </Col>
                                                                 </Col>

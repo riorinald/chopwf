@@ -13,6 +13,8 @@ import {
 } from 'reactstrap';
 import config from '../../../config';
 import Swal from 'sweetalert2';
+import TextareaAutosize from 'react-autosize-textarea';
+
 
 class LicenseApplicationDetail extends Component {
     constructor(props) {
@@ -420,13 +422,13 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Employee Number</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="/" />
+                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Department</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.departmentName} name="text-input" placeholder="/" />
+                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.departmentName} name="text-input" placeholder="/" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -434,13 +436,13 @@ class LicenseApplicationDetail extends Component {
                                         <Label>License Name</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" name="text-input" value={taskDetails.licenseName} placeholder="/" />
+                                        <TextareaAutosize className="form-control" disabled type="text" name="text-input" value={taskDetails.licenseName} placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Purpose</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.purposeTypeName} name="text-input" placeholder="/" />
+                                        <TextareaAutosize className="form-control" disabled value={taskDetails.purposeType === "PS" ? taskDetails.purposeComment : taskDetails.purposeTypeName} placeholder="/" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -448,7 +450,7 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Document Type</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.documentTypeName} name="text-input" placeholder="/" />
+                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.documentTypeName} name="text-input" placeholder="/" />
                                     </Col>
                                     {taskDetails.documentTypeId === "ORIGINAL"
                                         ? <>
@@ -456,7 +458,7 @@ class LicenseApplicationDetail extends Component {
                                                 <Label>Planned Return Date</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={this.convertDate(taskDetails.plannedReturnDate)} name="text-input" placeholder="/" />
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertDate(taskDetails.plannedReturnDate)} name="text-input" placeholder="/" />
                                             </Col>
                                         </>
                                         : <>
@@ -464,7 +466,7 @@ class LicenseApplicationDetail extends Component {
                                                 <Label> Watermark </Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={taskDetails.needWatermark === "Y" ? taskDetails.watermark : "No Watermark"} name="text-input" placeholder="/" />
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.needWatermark === "Y" ? taskDetails.watermark : "No Watermark"} name="text-input" placeholder="/" />
                                             </Col>
                                             {
                                             }
@@ -480,13 +482,13 @@ class LicenseApplicationDetail extends Component {
                                                     <Label>Reason for no watermark</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="/" />
                                                 </Col>
                                                 < Col md lg>
                                                     <Label>Deliver Ways</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
                                                 </Col>
                                             </>
                                             : <>
@@ -494,13 +496,13 @@ class LicenseApplicationDetail extends Component {
                                                     <Label>Deliver Ways</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
                                                 </Col>
                                                 <Col md lg>
                                                     <Label>Delivery Address</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
                                                 </Col>
                                             </>
                                         : <>
@@ -508,13 +510,13 @@ class LicenseApplicationDetail extends Component {
                                                 <Label>Deliver Ways</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
                                             </Col>
                                             <Col md lg>
                                                 <Label>Delivery Address</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
                                             </Col>
                                         </>
                                     }
@@ -528,13 +530,13 @@ class LicenseApplicationDetail extends Component {
                                                     <Label>Delivery Address</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
                                                 </Col>
                                                 <Col md lg>
                                                     <Label>Receiver</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
                                                 </Col>
                                             </>
                                             : <>
@@ -542,13 +544,13 @@ class LicenseApplicationDetail extends Component {
                                                     <Label>Receiver</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
                                                 </Col>
                                                 <Col md lg>
                                                     <Label>Deliver Express Number</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
                                                 </Col>
                                             </>
                                         : <>
@@ -556,13 +558,13 @@ class LicenseApplicationDetail extends Component {
                                                 <Label>Receiver</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
                                             </Col>
                                             <Col md lg>
                                                 <Label>Deliver Express Number</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
+                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
                                             </Col>
                                         </>
                                     }
@@ -578,13 +580,13 @@ class LicenseApplicationDetail extends Component {
                                                     <Label>Deliver Express Number</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
                                                 </Col>
                                                 <Col md lg>
                                                     <Label>Receiver Mobile Number</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
                                                 </Col>
                                             </>
                                             : <>
@@ -592,13 +594,13 @@ class LicenseApplicationDetail extends Component {
                                                     <Label>Receiver Mobile Number</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
                                                 </Col>
                                                 <Col md lg>
                                                     <Label>Return Way</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
                                                 </Col>
                                             </>
                                         : <>
@@ -606,13 +608,13 @@ class LicenseApplicationDetail extends Component {
                                                 <Label>Receiver Mobile Number</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
                                             </Col>
                                             <Col md lg>
                                                 <Label>Return Way</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
+                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
                                             </Col>
                                         </>
                                     }
@@ -626,13 +628,13 @@ class LicenseApplicationDetail extends Component {
                                                     <Label>Return Way</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
                                                 </Col>
                                                 <Col md lg>
                                                     <Label>Senior Manager or above of Requestor Department</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
                                                 </Col>
                                             </>
                                             : <>
@@ -640,13 +642,13 @@ class LicenseApplicationDetail extends Component {
                                                     <Label>Senior Manager or above of Requestor Department</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
                                                 </Col>
                                                 <Col md lg>
                                                     <Label>Return Express Number</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
                                                 </Col>
                                             </>
                                         : <>
@@ -654,13 +656,13 @@ class LicenseApplicationDetail extends Component {
                                                 <Label>Senior Manager or above of Requestor Department</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
                                             </Col>
                                             <Col md lg>
                                                 <Label>Return Express Number</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
+                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
                                             </Col>
                                         </>
                                     }
@@ -673,7 +675,7 @@ class LicenseApplicationDetail extends Component {
                                                     <Label>Return Express Number</Label>
                                                 </Col>
                                                 <Col md lg>
-                                                    <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
                                                 </Col>
                                                 <Col md lg>
                                                     <Label></Label>
@@ -759,9 +761,11 @@ class LicenseApplicationDetail extends Component {
                                         <Col>&nbsp;</Col>
                                     </Row>
                                     <Row>
-                                        {taskDetails.actions.map((action, index) =>
-                                            <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
-                                        )}
+                                        <Col>
+                                            {taskDetails.actions.map((action, index) =>
+                                                <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
+                                            )}
+                                        </Col>
                                     </Row>
                                 </div>
 
