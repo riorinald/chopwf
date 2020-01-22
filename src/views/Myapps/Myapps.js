@@ -136,7 +136,6 @@ class Myapps extends Component {
     },
       // console.log(this.state.searchOption)\
     )
-    this.getApplications(this.state.page, this.state.limit)
   }
 
   getDeptHeads(heads) {
@@ -288,7 +287,7 @@ class Myapps extends Component {
                   Header: "Chop Type",
                   accessor: "chopTypeName",
                   Cell: this.renderEditable,
-                  style: { textAlign: "center" },
+                  style: { textAlign: "center", whiteSpace: 'unset'  },
                   width: this.getColumnWidth('chopTypeName', "Chop Type"),
                   filterMethod: (filter, row) => {
                     return row[filter.id] === filter.value;
@@ -312,9 +311,9 @@ class Myapps extends Component {
                   width: this.getColumnWidth('documentNameEnglish', "Document Name (EN)"),
                   // Cell: this.renderEditable,
                   Cell: row => (
-                    <div> {this.getDeptHeads(row.original.documentNameEnglish)} </div>
+                    <div> <span title={this.getDeptHeads(row.original.documentNameEnglish)} >{this.getDeptHeads(row.original.documentNameEnglish)}</span> </div>
                   ),
-                  style: { textAlign: "center" },
+                  style: { textAlign: "center", whiteSpace: 'unset' },
                   filterable: false
                 },
                 {
@@ -324,9 +323,9 @@ class Myapps extends Component {
                   width: this.getColumnWidth('documentNameChinese', "Document Name (CN)"),
                   // Cell: this.renderEditable,
                   Cell: row => (
-                    <div> {this.getDeptHeads(row.original.documentNameChinese)} </div>
+                    <div> <span title={this.getDeptHeads(row.original.documentNameChinese)}>{this.getDeptHeads(row.original.documentNameChinese)}</span> </div>
                   ),
-                  style: { textAlign: "center" },
+                  style: { textAlign: "center", whiteSpace: 'unset'  },
                   filterable: false
                 },
                 {

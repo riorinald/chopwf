@@ -908,7 +908,8 @@ class Create extends Component {
 					break;
 				}
 					else {
-						valid = true
+            valid = true
+            this.setState({ contractValid: true, contractError: ""})
 					}
 				}
 			}
@@ -922,7 +923,8 @@ class Create extends Component {
 					break;
 				}
 				else {
-						valid = true
+            valid = true
+            this.setState({ contractValid: true, contractError: ""})
 					}
 				}
 			}
@@ -934,7 +936,7 @@ class Create extends Component {
 			 }
 		if (isThird && isdigit1 && value.length > 16){
 			valid = false
-			let message = "invalid contract format"
+			let message = "Invalid contract format"
 			this.setState({ contractValid: false, contractError: message})
 		}
 	 } 
@@ -970,7 +972,8 @@ class Create extends Component {
 						break;
 					}
 					else {
-						valid = true
+            valid = true
+            this.setState({ contractValid: true, contractError: ""})
 					}
 				}
 			} 
@@ -984,7 +987,8 @@ class Create extends Component {
 						break;
 					}
 					else {
-						valid = true
+            valid = true
+            this.setState({ contractValid: true, contractError: ""})
 					}
 				}
 			} 
@@ -996,7 +1000,7 @@ class Create extends Component {
 		}
 		if (isThird && isdigit1 && value.length > 16){
 			valid = false
-			let message = "invalid contract format"
+			let message = "Invalid contract format"
 			this.setState({ contractValid: false, contractError: message})
 		}
 	if (isSecond && value[2] === 'I' && value[3] !== 'A' && value[3] !== undefined){
@@ -1012,7 +1016,7 @@ class Create extends Component {
 	}
 	
 	
-	handleContractChange = (event) => {
+	handleContractNumber = (event) => {
 
     // let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
     // let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
@@ -1237,7 +1241,7 @@ class Create extends Component {
                 documentTableCNIPS
               }
             })
-            this.setState({ contractNumber: "", engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
+            this.setState({ contractValid:true, contractNumber: "", engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
             document.getElementById("documentTableCNIPS").className = ""
       }
       else {
@@ -1602,7 +1606,7 @@ class Create extends Component {
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
               {/* <td className="mediumTd">{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</td> */}
-              <td>{document.conNum}</td>
+              <td className="smallTd">{document.conNum}</td>
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
@@ -1648,12 +1652,12 @@ class Create extends Component {
                     autoComplete="off" autoCapitalize="character" 
                     name="contractNumber" id="contractNumber" className="form-control"
                     placeholder="Enter Contract Number" 
-                    onChange={this.handleContractChange} value={this.state.contractNumber}
+                    onChange={this.handleContractNumber} value={this.state.contractNumber}
                     /> */}
 
                   <Input autoComplete="off" type="text"
                     value={this.state.contractNumber}
-                    onChange={this.handleContractChange} id="contractNumber"
+                    onChange={this.handleContractNumber} id="contractNumber"
                     placeholder={this.state.contractNumNotes}></Input>
 
                   {!this.state.contractValid
@@ -2191,7 +2195,9 @@ class Create extends Component {
                       </FormGroup>
                       : <FormGroup>
                         <Label>Department Heads <i className="fa fa-user" /></Label>
-                        <small className="ml-2"> If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity.</small>
+                          {this.props.legalName === 'DMT' ? null :
+                            <small className="ml-2"> If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.props.legalName} entity.</small>
+                          }
                         <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                         <AsyncSelect
                           id="deptHeadSelected"

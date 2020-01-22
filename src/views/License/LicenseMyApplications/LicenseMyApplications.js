@@ -374,6 +374,9 @@ class LicenseMyApplications extends Component {
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;
                                     },
+                                    Cell: row => (
+                                        <div><span title={row.original.statusName} >{row.original.statusName}</span></div>
+                                    ),
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('status')} >

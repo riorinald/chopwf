@@ -14,8 +14,8 @@ import config from '../../config';
 import Swal from 'sweetalert2';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
-import {STU,LTU,LTI,CNIPS} from './viewDetails';
-import {BSTU,BLTU,BLTI,BCNIPS} from './viewBranchDetails';
+import { STU, LTU, LTI, CNIPS } from './viewDetails';
+import { BSTU, BLTU, BLTI, BCNIPS } from './viewBranchDetails';
 // import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
 
 
@@ -173,6 +173,20 @@ class TaskDetails extends Component {
 
     }
 
+    changeDeptHeads(heads) {
+        let dh = ""
+        heads.map(head => {
+            dh = dh + head.displayName + "; "
+        })
+        return dh
+    }
+
+
+    convertExpDate(dateValue) {
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        return regEx;
+    }
+
     handleChange(event) {
         this.setState({ comments: event.target.value })
     }
@@ -198,43 +212,43 @@ class TaskDetails extends Component {
         }
     }
 
-    handleViews(appType){
-        if( this.state.taskDetails.branchId !== ''){
+    handleViews(appType) {
+        if (this.state.taskDetails.branchId !== '') {
             switch (appType) {
                 case 'STU':
-                    return <BSTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                    ;
+                    return <BSTU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                        ;
                 case 'LTU':
-                    return <BLTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                    ;
+                    return <BLTU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                        ;
                 case 'LTI':
-                    return <BLTI setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                    ;
+                    return <BLTI setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                        ;
                 case 'CNIPS':
-                    return <BCNIPS setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                    ;
+                    return <BCNIPS setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                        ;
                 default:
-                    return <BSTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                    ;    
+                    return <BSTU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                        ;
             }
         }
         else {
             switch (appType) {
                 case 'STU':
-                    return <STU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                    ;
+                    return <STU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                        ;
                 case 'LTU':
-                    return <LTU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                    ;
+                    return <LTU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                        ;
                 case 'LTI':
-                    return <LTI setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                    ;
+                    return <LTI setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                        ;
                 case 'CNIPS':
-                    return <CNIPS setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                    ;
+                    return <CNIPS setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                        ;
                 default:
-                    return <STU setArray={this.setArray} taskDetails={this.state.taskDetails}/>
-                    ;    
+                    return <STU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                        ;
             }
         }
     }
@@ -274,7 +288,7 @@ class TaskDetails extends Component {
     render() {
 
         const { taskDetails, userDetails, loading, showModal, page, appType } = this.state
-        const viewDetail = null 
+        const viewDetail = null
 
         return (
             <div className="animated fadeIn">
@@ -354,7 +368,7 @@ class TaskDetails extends Component {
                                     </Row>
                                 </Col>
                             </Row>
-                                {this.handleViews(appType)}
+                            {this.handleViews(appType)}
                             <Row>
                                 <FormGroup>
                                     <Col>
@@ -404,12 +418,38 @@ class TaskDetails extends Component {
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
+                                                            Header: "Expiry Date",
+                                                            accessor: "expiryDate",
+                                                            width: 250,
+                                                            Cell: row => (
+                                                                <div onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} style={{ color: "blue", cursor: "pointer" }} >
+                                                                    {this.convertExpDate(row.original.expiryDate)}
+                                                                </div>
+                                                            ),
+                                                            show: appType === "LTU"
+                                                        },
+                                                        {
+                                                            Header: "DH Approved",
+                                                            accessor: "documentNameChinese",
+                                                            width: 250,
+                                                            Cell: row => (
+                                                                <div onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} style={{ color: "blue", cursor: "pointer" }} >
+                                                                    {this.changeDeptHeads(row.original.departmentHeads)}
+                                                                </div>
+
+                                                            ),
+                                                            show: appType === "LTU"
+                                                            // style: {textAlign: "center" },
+                                                        },
+
+                                                        {
                                                             Header: "Attached Document",
                                                             accessor: "documentName",
                                                             Cell: row => (
                                                                 <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} >{row.original.documentFileName}</div>
                                                             ),
-                                                            // style: { textAlign: "center" },
+                                                            show: appType !== "LTU"
+                                                            // style: {textAlign: "center" },
                                                         },
                                                     ]}
                                                     defaultPageSize={10}
