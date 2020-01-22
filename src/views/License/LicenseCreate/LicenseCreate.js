@@ -72,8 +72,6 @@ class LicenseCreate extends Component {
     //Mount
     componentDidMount() {
         this.getUserData();
-        // this.getData('licenseNames');
-        // this.getData('seniorManagers');
         this.getLicenseNames();
         this.getSeniorManagers();
         this.getData('departments');
@@ -182,27 +180,6 @@ class LicenseCreate extends Component {
                     })
             }
         })
-        // await axios.post(`${config.url}/licenses`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-        //     .then(res => {
-        //         if (isSubmitted === "Y") {
-        //             Swal.fire({
-        //                 title: res.data.status === 200 ? 'Request Submitted' : "",
-        //                 text: 'Request Number : ' + res.data.requestNum,
-        //                 footer: 'Your request is being processed and is waiting for the approval',
-        //                 type: 'success',
-        //                 onClose: () => { this.formReset() }
-        //             })
-        //         }
-        //         else {
-        //             Swal.fire({
-        //                 title: res.data.status === 200 ? 'Request Saved' : '',
-        //                 text: 'Request Number : ' + res.data.requestNum,
-        //                 footer: 'Your request is saved as draft.',
-        //                 type: 'info',
-        //                 onClose: () => { this.formReset() }
-        //             })
-        //         }
-        //     })
     }
 
 
@@ -604,28 +581,28 @@ class LicenseCreate extends Component {
                                         : null}
                                 </FormGroup>
 
-                                <Collapse isOpen={formData.deliverWay === "F2F"}>
+                                <Collapse isOpen={formData.deliverWay === "Express"}>
                                     <FormGroup>
                                         <Label>Address</Label>
                                         <Input placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
-                                        {formData.deliverWay === "F2F"
+                                        {formData.deliverWay === "Express"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
                                             : null}
                                     </FormGroup>
 
 
                                     <FormGroup>
-                                        <Label>Reciever</Label>
-                                        <AsyncSelect
+                                        <Label>Receiver</Label>
+                                        {/* <AsyncSelect
                                             id="reciever"
                                             loadOptions={loadReciever}
                                             isClearable
                                             onChange={this.handleSelectReciever}
                                             menuPortalTarget={document.body}
                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                        />
-                                        {/* <Input placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" /> */}
-                                        {formData.deliverWay === "F2F"
+                                        /> */}
+                                        <Input placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
+                                        {formData.deliverWay === "Express"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
                                             : null}
                                     </FormGroup>
@@ -633,7 +610,7 @@ class LicenseCreate extends Component {
                                     <FormGroup>
                                         <Label>Reciever Mobile Phone</Label>
                                         <Input placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
-                                        {formData.deliverWay === "F2F" ?
+                                        {formData.deliverWay === "Express" ?
                                             <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, formData.recieverPhone, 'required')}</small>
                                             : null}
                                     </FormGroup>

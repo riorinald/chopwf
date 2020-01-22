@@ -760,7 +760,7 @@ class LicenseApplicationDetail extends Component {
                                     </Row>
                                     <Row>
                                         {taskDetails.actions.map((action, index) =>
-                                            <Button className="mx-1" key={index} color={action.action !== "reject" || action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
+                                            <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
                                         )}
                                     </Row>
                                 </div>

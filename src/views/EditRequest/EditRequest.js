@@ -1262,13 +1262,15 @@ class EditRequest extends Component {
 
         else if (sname === "documentCheckBy1") {
             let value = []
+            let option = ""
             if (newValue) {
                 value.push(newValue.value)
+                option = this.getDocCheckByOption(newValue.value)
             }
-            console.log(value)
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
                 taskDetails.documentCheckBy = value
+                taskDetails.docCheckByOption = option
                 return { taskDetails }
             })
         }
@@ -2586,6 +2588,7 @@ class EditRequest extends Component {
                                                     value={taskDetails.applicationTypeId === "LTI" ? selectedDocCheckBy : docCheckBy[taskDetails.docCheckByOption]}
                                                     onChange={this.handleSelectOption(taskDetails.applicationTypeId === "LTI" ? "documentCheckBy" : "documentCheckBy1")}
                                                     menuPortalTarget={document.body}
+                                                    isClearable={taskDetails.applicationTypeId === "LTU" ? true : false}
                                                     components={animatedComponents}
                                                     styles={taskDetails.applicationTypeId === "LTI" ? this.state.deptHeadSelected === null ? reactSelectControl : "" : { menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                                 />

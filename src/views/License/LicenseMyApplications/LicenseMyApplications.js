@@ -126,9 +126,9 @@ class LicenseMyApplications extends Component {
     }
 
     async getStatusList() {
-        const res = await Axios.get(`${config.url}/statuses?category=license`,{ headers: { Pragma: 'no-cache' } })
+        const res = await Axios.get(`${config.url}/statuses?category=license`, { headers: { Pragma: 'no-cache' } })
         this.setState({ statusName: res.data })
-      }
+    }
 
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
@@ -465,6 +465,13 @@ class LicenseMyApplications extends Component {
                                     };
                                 } else {
                                     return {};
+                                }
+                            }}
+                            getTrGroupProps={(state, rowInfo, column, instance) => {
+                                return {
+                                    onMouseEnter: (e, handleOriginal) => {
+                                        console.log(rowInfo.original.requestNum)
+                                    }
                                 }
                             }}
                         />

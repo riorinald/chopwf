@@ -32,7 +32,7 @@ class DefaultLayout extends Component {
   loading = () => <div className="animated fadeIn pt-1 text-center"><Spinner /></div>
 
   signOut(e) {
-    if(e){
+    if (e) {
       e.preventDefault()
     }
     this.props.history.push('/login')
@@ -58,6 +58,7 @@ class DefaultLayout extends Component {
 
   changeWorkflow = (value) => {
     if (value === "LICENSE") {
+      // LicenseCreate.fakeUpdate.didUpdate()
       this.props.history.push(`/${value.toLowerCase()}/create`)
     }
     else {
@@ -72,6 +73,7 @@ class DefaultLayout extends Component {
   changeEntity = workflow => event => {
     if (workflow === "LICENSE") {
       this.props.history.push(`/${workflow.toLowerCase()}/create`)
+      window.location.reload();
     }
     else {
       this.props.history.push(`/create/${event.target.value}`)
@@ -101,7 +103,7 @@ class DefaultLayout extends Component {
         if (this.state.cAdmin === 'Y')
           return ChopNav.admin;
         else return this.signOut();
-          console.log('error! Roles not match, no sideBarNav');
+        console.log('error! Roles not match, no sideBarNav');
 
       case 'LICENSE':
         if (this.state.lAdmin === 'N')
@@ -109,11 +111,11 @@ class DefaultLayout extends Component {
         if (this.state.lAdmin === 'Y')
           return LicenseNav.admin;
         else return this.signOut();
-          console.log('error! Roles not match, no sideBarNav');
+        console.log('error! Roles not match, no sideBarNav');
 
-        default:
-          return this.signOut(); 
-          console.log('error! workflow application not match, no sideBarNav');
+      default:
+        return this.signOut();
+        console.log('error! workflow application not match, no sideBarNav');
     }
   }
 

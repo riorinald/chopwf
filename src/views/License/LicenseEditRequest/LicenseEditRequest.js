@@ -709,19 +709,19 @@ class LicenseEditRequest extends Component {
                                     </FormGroup>
                                 </Collapse>
 
-                                <Collapse isOpen={taskDetails.deliverWayId === "F2F"}>
+                                <Collapse isOpen={taskDetails.deliverWayId === "Express"}>
                                     <FormGroup>
                                         <Label>Address</Label>
                                         <Input placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" />
-                                        {taskDetails.deliverWayId === "F2F"
+                                        {taskDetails.deliverWayId === "Express"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.expDeliveryAddress, 'required')}</small>
                                             : null}
                                     </FormGroup>
 
 
                                     <FormGroup>
-                                        <Label>Reciever</Label>
-                                        <AsyncSelect
+                                        <Label>Receiver</Label>
+                                        {/* <AsyncSelect
                                             id="expDeliveryReceiver"
                                             loadOptions={loadReciever}
                                             isClearable
@@ -729,8 +729,9 @@ class LicenseEditRequest extends Component {
                                             onChange={this.handleSelectReciever}
                                             menuPortalTarget={document.body}
                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                        />
-                                        {taskDetails.deliverWayId === "F2F"
+                                        /> */}
+                                        <Input type="text" id="expDeliveryReceiver" onChange={this.handleChange("expDeliveryReceiver")} placeholder="Please specify receiver" value={taskDetails.expDeliveryReceiver} />
+                                        {taskDetails.deliverWayId === "Express"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', taskDetails.expDeliveryReceiver, 'required')}</small>
                                             : null}
                                     </FormGroup>
@@ -739,7 +740,7 @@ class LicenseEditRequest extends Component {
                                         <Label>Reciever Mobile Phone</Label>
                                         {/* <input type="number" id="phoneNumber"></input> */}
                                         <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="number" />
-                                        {taskDetails.deliverWayId === "F2F"
+                                        {taskDetails.deliverWayId === "Express"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.expDeliveryMobileNo, 'required')}</small>
                                             : null}
                                     </FormGroup>
