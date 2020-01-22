@@ -69,7 +69,7 @@ class Portal extends Component {
         <LegalEntity.Provider value={{UserInfo: this.state.userDetails}}>
             <AppHeader fixed>
               <Suspense fallback={this.loading()}>
-                <span class="navbar-nav ml-auto mr-5">{this.state.userDetails.displayName}</span>
+                <span className="navbar-nav ml-auto mr-5">{this.state.userDetails.displayName}</span>
               </Suspense>
             </AppHeader>
           </LegalEntity.Provider>

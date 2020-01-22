@@ -8,6 +8,7 @@ import {
 } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { addDays } from 'date-fns';
 import axios from 'axios';
 import config from '../../../config';
 import SimpleReactValidator from 'simple-react-validator';
@@ -71,8 +72,6 @@ class LicenseCreate extends Component {
     //Mount
     componentDidMount() {
         this.getUserData();
-        // this.getData('licenseNames');
-        // this.getData('seniorManagers');
         this.getLicenseNames();
         this.getSeniorManagers();
         this.getData('departments');
@@ -181,27 +180,6 @@ class LicenseCreate extends Component {
                     })
             }
         })
-        // await axios.post(`${config.url}/licenses`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-        //     .then(res => {
-        //         if (isSubmitted === "Y") {
-        //             Swal.fire({
-        //                 title: res.data.status === 200 ? 'Request Submitted' : "",
-        //                 text: 'Request Number : ' + res.data.requestNum,
-        //                 footer: 'Your request is being processed and is waiting for the approval',
-        //                 type: 'success',
-        //                 onClose: () => { this.formReset() }
-        //             })
-        //         }
-        //         else {
-        //             Swal.fire({
-        //                 title: res.data.status === 200 ? 'Request Saved' : '',
-        //                 text: 'Request Number : ' + res.data.requestNum,
-        //                 footer: 'Your request is saved as draft.',
-        //                 type: 'info',
-        //                 onClose: () => { this.formReset() }
-        //             })
-        //         }
-        //     })
     }
 
 
@@ -283,11 +261,12 @@ class LicenseCreate extends Component {
     //convert Date
     dateChange = (name, view) => date => {
         let month = date.getMonth()
-
+        let tempDate = date.getDate()
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${tempDate.toLocaleString().length === 1 ? 0 : ""}${tempDate}`
         }
+        console.log(dates)
         this.setState({ [view]: date });
         this.setState(state => {
             let formData = this.state.formData
@@ -492,14 +471,14 @@ class LicenseCreate extends Component {
                                         <InputGroupAddon addonType="prepend">
                                             <InputGroupText>ID</InputGroupText>
                                         </InputGroupAddon>
-                                        <Input disabled value={formData.employeeNum} id="prependedInput" size="16" type="text" />
+                                        <Input autoComplete="off" disabled value={formData.employeeNum} id="prependedInput" size="16" type="text" />
                                     </InputGroup>
                                 </div>
                             </FormGroup>
                             <FormGroup>
                                 <Label>Telephone Number </Label>
                                 <InputGroup>
-                                    <Input onChange={this.handleChange("telephoneNum")} value={formData.telephoneNum} id="telephoneNum" size="16" type="text" />
+                                    <Input autoComplete="off" onChange={this.handleChange("telephoneNum")} value={formData.telephoneNum} id="telephoneNum" size="16" type="text" />
                                 </InputGroup>
                             </FormGroup>
                             <FormGroup>
@@ -578,9 +557,11 @@ class LicenseCreate extends Component {
                             <Collapse isOpen={formData.documentType === "ORIGINAL"}>
                                 <FormGroup>
                                     <Label>Planned Return Date:</Label>
-                                    <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
+                                    <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
                                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                                         showMonthDropdown
+                                        minDate={new Date()}
+                                        maxDate={addDays(new Date(), 30)}
                                         showYearDropdown
                                         selected={returnDateView}
                                         onChange={this.dateChange("returnDate", "returnDateView")} />
@@ -600,36 +581,36 @@ class LicenseCreate extends Component {
                                         : null}
                                 </FormGroup>
 
-                                <Collapse isOpen={formData.deliverWay === "F2F"}>
+                                <Collapse isOpen={formData.deliverWay === "Express"}>
                                     <FormGroup>
                                         <Label>Address</Label>
-                                        <Input placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
-                                        {formData.deliverWay === "F2F"
+                                        <Input autoComplete="off" placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
+                                        {formData.deliverWay === "Express"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
                                             : null}
                                     </FormGroup>
 
 
                                     <FormGroup>
-                                        <Label>Reciever</Label>
-                                        <AsyncSelect
+                                        <Label>Receiver</Label>
+                                        {/* <AsyncSelect
                                             id="reciever"
                                             loadOptions={loadReciever}
                                             isClearable
                                             onChange={this.handleSelectReciever}
                                             menuPortalTarget={document.body}
                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                        />
-                                        {/* <Input placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" /> */}
-                                        {formData.deliverWay === "F2F"
+                                        /> */}
+                                        <Input autoComplete="off" placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
+                                        {formData.deliverWay === "Express"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
                                             : null}
                                     </FormGroup>
 
                                     <FormGroup>
                                         <Label>Reciever Mobile Phone</Label>
-                                        <Input placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
-                                        {formData.deliverWay === "F2F" ?
+                                        <Input autoComplete="off" placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
+                                        {formData.deliverWay === "Express" ?
                                             <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, formData.recieverPhone, 'required')}</small>
                                             : null}
                                     </FormGroup>

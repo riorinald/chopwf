@@ -6,6 +6,7 @@ import {
     FormGroup,
     Label,
     UncontrolledTooltip,
+
 } from 'reactstrap';
 import TextareaAutosize from 'react-autosize-textarea';
 
@@ -14,7 +15,32 @@ function convertDate(dateValue) {
     return regEx
 }
 
-const CNIPS = (props) => { 
+function expandRow(value){
+    let row = 1
+    if (value.length < 70){
+        row = 2
+    }
+    if (value.length < 140){
+        row = 3
+    }
+    if (value.length < 210){
+        row = 4
+    }
+    if (value.length < 380){
+        row = 5
+    }
+    if (value.length > 380){
+        row = 7
+    }
+    if (value.length > 450){
+        row = 10
+    }
+    console.log(row, value)
+    return row
+}
+
+
+const BCNIPS = (props) => { 
   return <> 
             <Col className="mb-4">
                         <FormGroup row>
@@ -45,27 +71,35 @@ const CNIPS = (props) => {
                                 <TextareaAutosize className="form-control" disabled value={props.taskDetails.chopTypeName} id="chopTypeName" name="chopTypeName" placeholder="/" />
                             </Col>
                         </FormGroup>
+                         <FormGroup row >
+                                <Col md lg={2}>
+                                    <Label>Branch Company Chop</Label>
+                                </Col>
+                                <Col md lg={4}>
+                                    <TextareaAutosize className="form-control" disabled value={props.taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
+                                </Col>
+                                <Col md lg={2}>
+                                    <Label>Purpose of Use</Label>
+                                </Col>
+                                <Col md lg={4}>
+                                    <TextareaAutosize className="form-control" disabled value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
+                                </Col>
+                        </FormGroup>
                         <FormGroup row>
-                            <Col md lg={2}>
-                                <Label>Purpose of Use</Label>
-                            </Col>
-                            <Col md lg={4}>
-                                <TextareaAutosize className="form-control" disabled value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
-                            </Col>
                             <Col md lg={2}>
                                 <Label>No. of Pages to Be Chopped </Label>
                             </Col>
                             <Col md lg={4}>
                                 <TextareaAutosize className="form-control" disabled value={props.taskDetails.numOfPages} id="numOfPages" name="numOfPages" placeholder="/" />
                             </Col>
-                        </FormGroup>
-                        <FormGroup row>
                             <Col md lg={2}>
                                 <Label>Connecting Chop</Label>
                             </Col>
                             <Col md lg={4}>
                                 <TextareaAutosize className="form-control" disabled value={props.taskDetails.connectChop === "Y" ? "Yes" : "No"} id="connectChop" name="connectChop" placeholder="/" />
                             </Col>
+                        </FormGroup>
+                        <FormGroup row>
                             <Col md lg={2}>
                                 <Label>Use in Office or not</Label>
                             </Col>
@@ -73,7 +107,6 @@ const CNIPS = (props) => {
                                 <TextareaAutosize className="form-control" disabled value={props.taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} id="isUseInOffice" name="isUseInOffice" placeholder="/" />
                             </Col>
                         </FormGroup>
-
                         {props.taskDetails.isUseInOffice === "N" ?
                         <>
                             <FormGroup row>
@@ -92,13 +125,12 @@ const CNIPS = (props) => {
                             </FormGroup>
                         </> : null
                         }
-
                         <FormGroup row>
                             <Col md lg={2}>
                                 <Label>Address to</Label>
                             </Col>
                             <Col md lg={4}>
-                                <TextareaAutosize className="form-control" disabled value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
+                                <TextareaAutosize className="form-control" disabled style={{resize:"none"}} value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
                             </Col>
                             <Col md lg={2}>
                                 <Label>Pick Up By</Label>
@@ -112,7 +144,7 @@ const CNIPS = (props) => {
                                 <Label>Remark (e.g. tel.)</Label>
                             </Col>
                             <Col md lg={4}>
-                                <TextareaAutosize className="form-control" disabled value={props.taskDetails.remark} id="remark" name="remark" placeholder="/" />
+                                <TextareaAutosize className="form-control" disabled style={{resize:"none"}} value={props.taskDetails.remark} id="remark" name="remark" placeholder="/" />
                             </Col>
                             <Col md lg={2}>
                                 <Label>Contract Signed By (First Person) :  </Label>
@@ -139,7 +171,7 @@ const CNIPS = (props) => {
   </>
 } 
 
-const LTI = (props) => { 
+const BLTI = (props) => { 
     return <> 
               <Col className="mb-4">
                           <FormGroup row>
@@ -186,33 +218,39 @@ const LTI = (props) => {
                           </FormGroup>
                           <FormGroup row>
                               <Col md lg={2}>
+                                  <Label>Branch Company Chop</Label>
+                              </Col>
+                              <Col md lg={4}>
+                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
+                              </Col>
+                              <Col md lg={2}>
                                   <Label>Purpose of Use</Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
                               </Col>
+                          </FormGroup>
+                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Address to</Label>
                               </Col>
                               <Col md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
+                                  <TextareaAutosize className="form-control" disabled style={{resize:"none"}} value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Remark (e.g. tel.)</Label>
                               </Col>
                               <Col md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.remark} id="remark" name="remark" placeholder="/" />
-                              </Col>
-                              <Col md lg={2}>
-                                  <Label>Document Check By</Label>
-                                </Col>
-                                <Col md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.documentCheckByName} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
+                                  <TextareaAutosize className="form-control" disabled style={{resize:"none"}} value={props.taskDetails.remark} id="remark" name="remark" placeholder="/" />
                               </Col>
                           </FormGroup>
                           <FormGroup row>
+                              <Col md lg={2}>
+                                  <Label>Document Check By</Label>
+                              </Col>
+                              <Col md lg={4}>
+                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.documentCheckByName} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
+                              </Col>
                               <Col md lg={2}>
                                   <Label>Department Heads</Label>
                               </Col>
@@ -220,6 +258,8 @@ const LTI = (props) => {
                                   <TextareaAutosize className="form-control" disabled value={props.setArray(props.taskDetails.departmentHeadsName)} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
                                   <UncontrolledTooltip placement="right" target="deptHead">{props.setArray(props.taskDetails.departmentHeadsName)}</UncontrolledTooltip>
                               </Col>
+                          </FormGroup>
+                          <FormGroup>
                               <Col md lg={2}>
                                   <Label>Confirm</Label>
                               </Col>
@@ -231,7 +271,7 @@ const LTI = (props) => {
     </>
   } 
 
-  const LTU = (props) => { 
+  const BLTU = (props) => { 
     return <> 
               <Col className="mb-4">
                           <FormGroup row>
@@ -270,55 +310,61 @@ const LTI = (props) => {
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.chopTypeName} id="chopTypeName" name="chopTypeName" placeholder="/" />
                               </Col>
                               <Col md lg={2}>
+                                  <Label>Branch Company Chop</Label>
+                              </Col>
+                              <Col md lg={4}>
+                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
+                              </Col>
+                          </FormGroup>
+                          <FormGroup row>
+                              <Col md lg={2}>
                                   <Label>Purpose of Use</Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>No. of Pages to Be Chopped </Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.numOfPages} id="numOfPages" name="numOfPages" placeholder="/" />
                               </Col>
+                          </FormGroup>
+                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Connecting Chop</Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.connectChop === "Y" ? "Yes" : "No"} id="connectChop" name="connectChop" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Address to</Label>
                               </Col>
                               <Col md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
+                                  <TextareaAutosize className="form-control" disabled style={{resize:"none"}} value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
                               </Col>
+                          </FormGroup>
+                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Pick Up By</Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.pickUpByName} id="pickUpBy" name="pickUpBy" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Remark (e.g. tel.)</Label>
                               </Col>
                               <Col md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.remark} id="remark" name="remark" placeholder="/" />
+                                  <TextareaAutosize className="form-control" disabled style={{resize:"none"}} value={props.taskDetails.remark} id="remark" name="remark" placeholder="/" />
                               </Col>
+                          </FormGroup>
+                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Document Check By</Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.documentCheckByName} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Confirm</Label>
                               </Col>
@@ -330,7 +376,7 @@ const LTI = (props) => {
     </>
   }
   
-  const STU = (props) => { 
+  const BSTU = (props) => { 
     return <> 
               <Col className="mb-4">
                           <FormGroup row>
@@ -363,33 +409,46 @@ const LTI = (props) => {
                           </FormGroup>
                           <FormGroup row>
                               <Col md lg={2}>
+                                    <Label>Branch Company Chop</Label>
+                                </Col>
+                                <Col md lg={4}>
+                                    <TextareaAutosize className="form-control" disabled value={props.taskDetails.branchName} id="branchName" name="branchName" placeholder="/" />
+                                </Col>
+                              <Col md lg={2}>
                                   <Label>Purpose of Use</Label>
                               </Col>
                               <Col md lg={4}>
-                                <TextareaAutosize className="form-control" disabled value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
+                                  <TextareaAutosize className="form-control" disabled style={{resize:"none"}} value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
                               </Col>
+                          </FormGroup>
+                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>No. of Pages to Be Chopped </Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.numOfPages} id="numOfPages" name="numOfPages" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Connecting Chop</Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.connectChop === "Y" ? "Yes" : "No"} id="connectChop" name="connectChop" placeholder="/" />
                               </Col>
-                              <Col md lg={2}>
+                          </FormGroup>
+                          <FormGroup row>
+                          <Col md lg={2}>
                                   <Label>Use in Office or not</Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} id="isUseInOffice" name="isUseInOffice" placeholder="/" />
                               </Col>
+                              <Col md lg={2}>
+                                  <Label>Address to</Label>
+                              </Col>
+                              <Col md lg={4}>
+                                  <TextareaAutosize className="form-control" disabled style={{resize:"none"}} value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
+                              </Col>
                           </FormGroup>
-  
                           {props.taskDetails.isUseInOffice === "N" ?
                           <>
                               <FormGroup row>
@@ -408,28 +467,21 @@ const LTI = (props) => {
                               </FormGroup>
                           </> : null
                           }
-  
                           <FormGroup row>
-                              <Col md lg={2}>
-                                  <Label>Address to</Label>
-                              </Col>
-                              <Col md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
-                              </Col>
                               <Col md lg={2}>
                                   <Label>Pick Up By</Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.pickUpByName} id="pickUpBy" name="pickUpBy" placeholder="/" />
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Remark (e.g. tel.)</Label>
                               </Col>
                               <Col md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.remark} id="remark" name="remark" placeholder="/" />
+                                  <TextareaAutosize className="form-control" disabled style={{resize:"none"}} value={props.taskDetails.remark} id="remark" name="remark" placeholder="/" />
                               </Col>
+                          </FormGroup>
+                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Department Heads</Label>
                               </Col>
@@ -437,8 +489,6 @@ const LTI = (props) => {
                                   <TextareaAutosize className="form-control" disabled value={props.setArray(props.taskDetails.departmentHeadsName)} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
                                   <UncontrolledTooltip placement="right" target="deptHead">{props.setArray(props.taskDetails.departmentHeadsName)}</UncontrolledTooltip>
                               </Col>
-                          </FormGroup>
-                          <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Confirm</Label>
                               </Col>
@@ -450,4 +500,4 @@ const LTI = (props) => {
     </>
   } 
 
-export {STU,LTU,LTI,CNIPS};
+export {BSTU,BLTU,BLTI,BCNIPS};

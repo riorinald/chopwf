@@ -33,7 +33,7 @@ class MyPendingTasks extends Component {
             filtered: [],
             totalPages: 1,
             page: 1,
-            limit: 20,
+            limit: 10,
             dateView1: "",
 
             show: true,
@@ -48,7 +48,8 @@ class MyPendingTasks extends Component {
                 documentCheckByName: "",
                 statusName: "",
                 createdDate: "",
-                createdByName: ""
+                createdByName: "",
+                departmentId: ""
             },
 
             //data retrieved from database
@@ -58,7 +59,7 @@ class MyPendingTasks extends Component {
             taskId: "",
             redirectToUrl: "",
             loading: false,
-
+            departments: [],
             status: []
         }
 
@@ -74,10 +75,11 @@ class MyPendingTasks extends Component {
     async componentDidMount() {
         await this.getData("applicationTypes", `${config.url}/apptypes`);
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
+        await this.getData("departments", `${config.url}/departments`);
         await this.getStatusList();
         // console.log(mounted)
         // if (mounted === 0) {
-        await this.getPendingTasks(1, 20);
+        await this.getPendingTasks(1, this.state.limit);
         // }
         // else {
         //     this.setState({ loading: !this.state.loading })
@@ -87,7 +89,7 @@ class MyPendingTasks extends Component {
     }
 
     async getStatusList() {
-        const res = await Axios.get(`${config.url}/statuses?category=chop`,{ headers: { Pragma: 'no-cache' } })
+        const res = await Axios.get(`${config.url}/statuses?category=chop`, { headers: { Pragma: 'no-cache' } })
         this.setState({ status: res.data })
     }
 
@@ -137,7 +139,8 @@ class MyPendingTasks extends Component {
         this.setState({ loading: !this.state.loading })
         let userId = localStorage.getItem('userId')
         // let userId = "josh@otds.admin"
-        let url = `${config.url}/tasks?category=pending&companyid=${this.props.legalName}&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`
+        let url = `${config.url}/tasks?category=pending&companyid=${this.props.legalName}&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`
+        console.log(url)
         const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } })
         this.setState({ pendingTasks: response.data.tasks, totalPages: response.data.pageCount, loading: !this.state.loading })
         // array = response.data
@@ -155,7 +158,6 @@ class MyPendingTasks extends Component {
             // }
             // value = temp
         }
-        console.log(value)
         const options = this.state.searchOption
         options[name] = value
         this.setState(state => {
@@ -305,7 +307,7 @@ class MyPendingTasks extends Component {
                                 return row[id]
                             }}
                             getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
-                            defaultPageSize={10}
+                            defaultPageSize={this.state.limit}
                             manual
                             onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getPendingTasks(e + 1, this.state.limit)) }}
                             onPageSizeChange={(pageSize, page) => {
@@ -366,9 +368,9 @@ class MyPendingTasks extends Component {
                                 },
                                 {
 
-                                    Header: "Document Name English",
+                                    Header: "Document Name (EN)",
                                     accessor: "documentNameEnglish",
-                                    width: this.getColumnWidth('documentNameEnglish', "Document Name English"),
+                                    width: this.getColumnWidth('documentNameEnglish', "Document Name (EN)"),
                                     // Cell: this.renderEditable,
                                     Cell: row => (
                                         <div> {this.getDeptHeads(row.original.documentNameEnglish)} </div>
@@ -378,9 +380,9 @@ class MyPendingTasks extends Component {
                                 },
                                 {
 
-                                    Header: "Document Name Chinese",
+                                    Header: "Document Name (CN)",
                                     accessor: "documentNameChinese",
-                                    width: this.getColumnWidth('documentNameChinese', "Document Name Chinese"),
+                                    width: this.getColumnWidth('documentNameChinese', "Document Name (CN)"),
                                     // Cell: this.renderEditable,
                                     Cell: row => (
                                         <div> {this.getDeptHeads(row.original.documentNameChinese)} </div>
@@ -389,13 +391,26 @@ class MyPendingTasks extends Component {
                                     filterable: false
                                 },
                                 {
-                                    Header: "Document Check By",
-                                    accessor: "documentCheckByName",
-                                    width: this.getColumnWidth('documentCheckByName', "Document Check By"),
-                                    Cell: row => (
-                                        <div> {this.getDeptHeads(row.original.documentCheckByName)} </div>
-                                    ),
-                                    style: { textAlign: "center" }
+
+                                    Header: "Department",
+                                    accessor: "departmentName",
+                                    width: this.getColumnWidth('departmentName', "Department"),
+                                    Cell: this.renderEditable,
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
+                                                <option value="" >Please Select a department</option>
+                                                {this.state.departments.map((dept, index) =>
+                                                    <option key={index} value={dept.deptId} >{dept.deptName}</option>
+                                                )}
+                                            </Input>
+
+                                        )
+                                    },
+                                    style: { textAlign: "center" },
                                 },
                                 {
                                     Header: "Department Head",
@@ -414,6 +429,18 @@ class MyPendingTasks extends Component {
                                     Cell: this.renderEditable,
                                     style: { textAlign: "center" }
                                 },
+
+                                {
+                                    Header: "Document Check By",
+                                    accessor: "documentCheckByName",
+                                    width: this.getColumnWidth('documentCheckByName', "Document Check By"),
+                                    Cell: row => (
+                                        <div> {this.getDeptHeads(row.original.documentCheckByName)} </div>
+                                    ),
+                                    style: { textAlign: "center" }
+                                },
+
+
                                 {
                                     Header: "Status",
                                     accessor: "statusName",

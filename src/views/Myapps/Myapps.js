@@ -31,7 +31,7 @@ class Myapps extends Component {
       loading: false,
       totalPages: 1,
       page: 1,
-      limit: 20,
+      limit: 10,
 
 
       username: localStorage.getItem('userId'),
@@ -53,10 +53,12 @@ class Myapps extends Component {
         documentCheckByName: "",
         statusName: "",
         createdDate: "",
-        createdByName: ""
+        createdByName: "",
+        departmentId: ""
       },
 
-      status: []
+      status: [],
+      departments: []
 
     }
     this.getApplications = this.getApplications.bind(this);
@@ -64,11 +66,12 @@ class Myapps extends Component {
   }
 
   componentDidMount() {
-    this.getApplications(1, 20);
+    this.getApplications(1, this.state.limit);
     // resetMounted.setMounted();
 
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
+    this.getData("departments", `${config.url}/departments`);
     this.getStatusList();
   }
 
@@ -80,7 +83,7 @@ class Myapps extends Component {
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: true })
     // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
-    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
+    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false })
@@ -304,36 +307,49 @@ class Myapps extends Component {
                 },
                 {
 
-                  Header: "Document Name English",
+                  Header: "Document Name (EN)",
                   accessor: "documentNameEnglish",
-                  width: this.getColumnWidth('documentNameEnglish', "Document Name English"),
+                  width: this.getColumnWidth('documentNameEnglish', "Document Name (EN)"),
                   // Cell: this.renderEditable,
                   Cell: row => (
                     <div> {this.getDeptHeads(row.original.documentNameEnglish)} </div>
                   ),
-                  style: { textAlign: "center", 'whiteSpace': 'unset' },
+                  style: { textAlign: "center" },
                   filterable: false
                 },
                 {
 
-                  Header: "Document Name Chinese",
+                  Header: "Document Name (CN)",
                   accessor: "documentNameChinese",
-                  width: this.getColumnWidth('documentNameChinese', "Document Name Chinese"),
+                  width: this.getColumnWidth('documentNameChinese', "Document Name (CN)"),
                   // Cell: this.renderEditable,
                   Cell: row => (
                     <div> {this.getDeptHeads(row.original.documentNameChinese)} </div>
                   ),
-                  style: { textAlign: "center", 'whiteSpace': 'unset' },
+                  style: { textAlign: "center" },
                   filterable: false
                 },
                 {
-                  Header: "Document Check By",
-                  accessor: " ",
-                  width: this.getColumnWidth('documentCheckByName', "Document Check By"),
-                  Cell: row => (
-                    <div> {this.getDeptHeads(row.original.documentCheckByName)} </div>
-                  ),
-                  style: { textAlign: "center" }
+
+                  Header: "Department",
+                  accessor: "departmentName",
+                  width: this.getColumnWidth('departmentName', "Department"),
+                  Cell: this.renderEditable,
+                  filterMethod: (filter, row) => {
+                    return row[filter.id] === filter.value;
+                  },
+                  Filter: ({ filter, onChange }) => {
+                    return (
+                      <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
+                        <option value="" >Please Select a department</option>
+                        {this.state.departments.map((dept, index) =>
+                          <option key={index} value={dept.deptId} >{dept.deptName}</option>
+                        )}
+                      </Input>
+
+                    )
+                  },
+                  style: { textAlign: "center" },
                 },
                 {
                   Header: "Department Head",
@@ -350,6 +366,16 @@ class Myapps extends Component {
                   accessor: "teamName",
                   width: this.getColumnWidth('teamName', "Entitled Team"),
                   Cell: this.renderEditable,
+                  style: { textAlign: "center" }
+                },
+
+                {
+                  Header: "Document Check By",
+                  accessor: "documentCheckByName",
+                  width: this.getColumnWidth('documentCheckByName', "Document Check By"),
+                  Cell: row => (
+                    <div> {this.getDeptHeads(row.original.documentCheckByName)} </div>
+                  ),
                   style: { textAlign: "center" }
                 },
                 {
@@ -416,7 +442,7 @@ class Myapps extends Component {
                   style: { textAlign: "center" }
                 },
               ]}
-              defaultPageSize={10}
+              defaultPageSize={this.state.limit}
               manual
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {
