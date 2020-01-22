@@ -124,6 +124,8 @@ class EditRequest extends Component {
             validateForm: [],
             viewContract: false,
 
+            branches:[],
+
             contractNumber: "",
             conNum: [],
             inputMask: [],
@@ -449,7 +451,7 @@ class EditRequest extends Component {
         await this.getData("appTypes", `${config.url}/appTypes`)
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
         if (temporary.chopTypeId === "BCSCHOP") {
-            await this.getData("branches", `${config.url}/branches?companyid=mblc`)
+            await this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
         }
 
         if (temporary.applicationTypeId === "LTU") {
@@ -718,6 +720,9 @@ class EditRequest extends Component {
 
                     // })
                 }
+            }
+            if (event.target.value === "BCSCHOP"){
+                this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
             }
         }
         else if (name === "numOfPages") {
@@ -2141,7 +2146,7 @@ async validateContractNumber() {
                                             </InputGroup>
                                             {/* <FormFeedback>Invalid Chop Type Selected</FormFeedback> */}
                                         </FormGroup>
-                                        {taskDetails.chopTypeId === "BCSCHOP"
+                                        {taskDetails.chopTypeId === "BCSCHOP" && this.state.branches !== []
                                             ? <FormGroup>
                                                 <Label>Branch Company Chop</Label>
                                                 <Input onChange={this.handleChange("branchId")} type="select" value={taskDetails.branchId}>
