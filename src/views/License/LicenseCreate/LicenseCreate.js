@@ -477,14 +477,14 @@ class LicenseCreate extends Component {
                                         <InputGroupAddon addonType="prepend">
                                             <InputGroupText>ID</InputGroupText>
                                         </InputGroupAddon>
-                                        <Input disabled value={formData.employeeNum} id="prependedInput" size="16" type="text" />
+                                        <Input autoComplete="off" disabled value={formData.employeeNum} id="prependedInput" size="16" type="text" />
                                     </InputGroup>
                                 </div>
                             </FormGroup>
                             <FormGroup>
                                 <Label>Telephone Number </Label>
                                 <InputGroup>
-                                    <Input onChange={this.handleChange("telephoneNum")} value={formData.telephoneNum} id="telephoneNum" size="16" type="text" />
+                                    <Input autoComplete="off" onChange={this.handleChange("telephoneNum")} value={formData.telephoneNum} id="telephoneNum" size="16" type="text" />
                                 </InputGroup>
                             </FormGroup>
                             <FormGroup>
@@ -563,7 +563,7 @@ class LicenseCreate extends Component {
                             <Collapse isOpen={formData.documentType === "ORIGINAL"}>
                                 <FormGroup>
                                     <Label>Planned Return Date:</Label>
-                                    <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
+                                    <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
                                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                                         showMonthDropdown
                                         minDate={new Date()}
@@ -590,7 +590,7 @@ class LicenseCreate extends Component {
                                 <Collapse isOpen={formData.deliverWay === "Express"}>
                                     <FormGroup>
                                         <Label>Address</Label>
-                                        <Input placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
+                                        <Input autoComplete="off" placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
                                         {formData.deliverWay === "Express"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
                                             : null}
@@ -607,7 +607,7 @@ class LicenseCreate extends Component {
                                             menuPortalTarget={document.body}
                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         /> */}
-                                        <Input placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
+                                        <Input autoComplete="off" placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
                                         {formData.deliverWay === "Express"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
                                             : null}
@@ -615,7 +615,7 @@ class LicenseCreate extends Component {
 
                                     <FormGroup>
                                         <Label>Reciever Mobile Phone</Label>
-                                        <Input placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
+                                        <Input autoComplete="off" placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
                                         {formData.deliverWay === "Express" ?
                                             <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, formData.recieverPhone, 'required')}</small>
                                             : null}

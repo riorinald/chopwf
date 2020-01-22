@@ -1909,7 +1909,7 @@ class Create extends Component {
                     <FormGroup>
                       <Label>Effective Period</Label>
                       {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
-                      <DatePicker id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                      <DatePicker autoComplete="off" id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                         peekNextMonth
                         showMonthDropdown
@@ -2041,7 +2041,7 @@ class Create extends Component {
                     <FormGroup visibelity="false" >
                       <Label>Return Date</Label>
                       <Row />
-                      <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                      <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                         selected={this.state.dateView2}
                         onChange={this.dateChange("returnDate", "dateView2")}
