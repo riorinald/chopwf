@@ -6,14 +6,19 @@ import {
     FormGroup,
     Label,
     Collapse,
-    Form, InputGroup, InputGroupAddon,
+    Form, 
+    InputGroup, 
+    InputGroupAddon,
     Modal,
     ModalHeader,
     ModalBody,
     ModalFooter,
     CustomInput,
     Spinner,
-    Badge
+    Badge,
+    Progress,
+    UncontrolledTooltip,
+    
 } from 'reactstrap';
 import config from '../../config';
 import Axios from 'axios';

@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import { Badge, UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem, Dropdown } from 'reactstrap';
+import { UncontrolledDropdown, DropdownItem, DropdownMenu, DropdownToggle, Nav, Dropdown } from 'reactstrap';
 import PropTypes from 'prop-types';
 import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
 import { fakeAuth } from '../../App';
 import { withRouter } from 'react-router-dom';
-import LegalEntity from '../../context';
 import Axios from 'axios';
 import config from '../../config';
 
@@ -50,9 +49,9 @@ class DefaultHeader extends Component {
   render() {
 
 
-    const { children, state } = this.props;
+    const { state } = this.props;
     const { userDetails } = this.state;
-    const username = localStorage.getItem('userId');
+
     return (
       <React.Fragment>
         <AppSidebarToggler className="d-lg-none" display="sm" mobile />
