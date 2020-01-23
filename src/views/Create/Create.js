@@ -1847,7 +1847,7 @@ class Create extends Component {
           <div style={{ fontFamily: "sans-serif" }} className="animated fadeIn">
             <h4>Create</h4>
             <Card>
-              <CardHeader>Create new request</CardHeader>
+              <CardHeader>Create New Request</CardHeader>
               <CardBody>
                 <FormGroup>
                   <h5>NOTES :</h5>
@@ -1915,7 +1915,6 @@ class Create extends Component {
                   <Collapse isOpen={this.state.isLTI}>
                     <FormGroup>
                       <Label>Effective Period</Label>
-                      {/* <Input type="date" onChange={this.handleChange("effectivePeriod")} id="effectivePeriod"></Input> */}
                       <DatePicker autoComplete="off" id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                         peekNextMonth
@@ -2107,7 +2106,7 @@ class Create extends Component {
                   </Collapse>
 
                   <FormGroup>
-                    <Label>Remark <small className="ml-2">Notes: Please enter the remarks, e.g. telephone number of pick up person.</small> </Label>
+                    <Label>Remark <small className="ml-2"> Please enter the remarks, e.g. telephone number of pick up person.</small> </Label>
                     <InputGroup>
                       <Input autoComplete="off" maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
                     </InputGroup>
@@ -2141,7 +2140,7 @@ class Create extends Component {
                       <small className="ml-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval.</small>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <Row>
-                        <Col>
+                        <Col className="py-2" xs={12} md={6} lg={6}>
                           <AsyncSelect
                             id="contractSign1"
                             onBlur={this.checkDepartment}
@@ -2157,7 +2156,7 @@ class Create extends Component {
                               : null}
                           </InputGroup>
                         </Col>
-                        <Col>
+                        <Col className="py-2" xs={12} md={6} lg={6}>
                           <AsyncSelect
                             id="contractSign2"
                             onBlur={this.checkDepartment}
@@ -2177,17 +2176,17 @@ class Create extends Component {
                     </FormGroup>
 
                     : this.state.isLTU
-                      ? <FormGroup>
-                        <Label>Document Check By <i className="fa fa-user" /></Label>
-                        <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-                        <Select
-                          id="docCheckBySelected"
-                          options={docCheckByUsers}
-                          isClearable
-                          menuPortalTarget={document.body}
-                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                          onChange={this.handleSelectOption("docCheckBySelected")}
-                        />
+                      	? <FormGroup>
+							<Label>Document Check By <i className="fa fa-user" /></Label>
+							<Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+								<Select
+									id="docCheckBySelected"
+									options={docCheckByUsers}
+									isClearable
+									menuPortalTarget={document.body}
+									styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+									onChange={this.handleSelectOption("docCheckBySelected")}
+								/>
                         {/* <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
                           loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} /> */}
                         <InputGroup>

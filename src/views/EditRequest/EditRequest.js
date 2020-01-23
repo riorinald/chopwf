@@ -6,18 +6,13 @@ import {
     FormGroup,
     Label,
     Collapse,
-    Form, InputGroup, InputGroupAddon, InputGroupText, FormFeedback,
+    Form, InputGroup, InputGroupAddon,
     Modal,
     ModalHeader,
     ModalBody,
     ModalFooter,
     CustomInput,
     Spinner,
-    InputGroupButtonDropdown,
-    Tooltip,
-    DropdownToggle,
-    DropdownMenu,
-    DropdownItem,
     Badge
 } from 'reactstrap';
 import config from '../../config';
@@ -29,6 +24,7 @@ import InputMask from "react-input-mask";
 import deleteBin from '../../assets/img/deletebin.png'
 import { AppSwitch } from '@coreui/react';
 import AsyncSelect from 'react-select/async';
+import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import Swal from 'sweetalert2';
 import ReactTable from "react-table";
@@ -185,7 +181,6 @@ class EditRequest extends Component {
         this.toggleModal = this.toggleModal.bind(this);
         this.handleContractNumber = this.handleContractNumber.bind(this);
         this.hideDoc = this.hideDoc.bind(this);
-        this.checkContractNumber = this.checkContractNumber.bind(this);
         this.checkforChinese = this.checkforChinese.bind(this);
     }
 
@@ -363,6 +358,7 @@ class EditRequest extends Component {
                 if (head.value === person[0]) {
                     console.log(index)
                     i = index
+                    this.setState({ selectedDocCheckBy : head.value })
                 }
             })
         }
@@ -452,6 +448,7 @@ class EditRequest extends Component {
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
         if (temporary.chopTypeId === "BCSCHOP") {
             await this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
+            await this.getDocCheckBy(response.data.taskDetails.departmentId, response.data.teamId, response.data.chopTypeId)
         }
 
         if (temporary.applicationTypeId === "LTU") {
@@ -663,6 +660,7 @@ class EditRequest extends Component {
 
     handleChange = name => event => {
         let value = event.target.value
+
         this.setState(state => {
             let taskDetails = this.state.taskDetails
             taskDetails.isConfirm = "N"
@@ -1965,55 +1963,6 @@ async validateContractNumber() {
         reader.readAsDataURL(file)
     }
 
-    checkContractNumber() {
-        const first = /(?!.*[A-HJ-QT-Z])[IS]/i;
-        const second = /[LIAR]/
-        const third = /(?!.*[A-NQRT-Z])[PSO]/i;
-        let digit = /[0-9]/;
-        let { tempContractNumber } = this.state
-        if (first.test(tempContractNumber[0])) {
-            if (second.test(tempContractNumber[2])) {
-                if (third.test(tempContractNumber[4]) || third.test(tempContractNumber[5])) {
-                    if (tempContractNumber[2] === "I") {
-                        if (digit.test(tempContractNumber[7]) && digit.test(tempContractNumber[8]) && digit.test(tempContractNumber[9]) && digit.test(tempContractNumber[10])) {
-                            if (digit.test(tempContractNumber[12]) && digit.test(tempContractNumber[13]) && digit.test(tempContractNumber[14])) {
-                                console.log("valid")
-                            }
-                            else {
-                                this.setState({ tempContractNumber: "" })
-                            }
-                        }
-                        else {
-                            this.setState({ tempContractNumber: "" })
-                        }
-                    }
-                    else {
-                        if (digit.test(tempContractNumber[6]) && digit.test(tempContractNumber[7]) && digit.test(tempContractNumber[8]) && digit.test(tempContractNumber[9])) {
-                            if (digit.test(tempContractNumber[11]) && digit.test(tempContractNumber[12]) && digit.test(tempContractNumber[13])) {
-                                console.log("valid")
-                            }
-                            else {
-                                this.setState({ tempContractNumber: "" })
-                            }
-                        }
-                        else {
-                            this.setState({ tempContractNumber: "" })
-                        }
-                    }
-                }
-                else {
-                    this.setState({ tempContractNumber: "" })
-                }
-            }
-            else {
-                this.setState({ tempContractNumber: "" })
-            }
-        }
-        else {
-            this.setState({ tempContractNumber: "" })
-        }
-    }
-
     handleContractNumber(event) {
         let value = event.target.value.toUpperCase();
         let valid = false
@@ -2043,7 +1992,7 @@ async validateContractNumber() {
                             <Card className="animated fadeIn">
                                 <CardHeader>
                                     <Button onClick={() => this.goBack()}>Back</Button> &nbsp;
-                             EDIT REQUEST - {taskDetails.requestNum}
+                             Edit Request <small className="d-sm-down-none">- {taskDetails.requestNum}</small>
                                 </CardHeader>
                                 <CardBody color="dark">
                                     <FormGroup>
@@ -2083,7 +2032,7 @@ async validateContractNumber() {
                                         <FormGroup>
                                             <Label>Dept.</Label>
                                             <Input id="departmentId" type="select" value={taskDetails.departmentId} onChange={this.handleChange("departmentId")} name="dept">
-                                                <option value="" >Please select a department</option>
+                                                <option value="" >Please select </option>
                                                 {this.state.departments.map((option, index) => (
                                                     <option value={option.deptId} key={option.deptId}>
                                                         {option.deptName}
@@ -2099,7 +2048,7 @@ async validateContractNumber() {
                                         <FormGroup>
                                             <Label>Application Type</Label>
                                             <Input type="select" id="appTypeSelected" onChange={this.handleChange("applicationTypeId")} value={taskDetails.applicationTypeId} name="appType">
-                                                <option value="" disabled>Please select an application type</option>
+                                                <option value="" disabled>Please select </option>
                                                 {appTypes.map((type, index) =>
                                                     <option key={index} value={type.appTypeId} > {type.appTypeName} </option>
                                                 )}
@@ -2131,7 +2080,7 @@ async validateContractNumber() {
                                                 <Label>Entitled Team</Label>
                                                 <InputGroup>
                                                     <Input id="teamId" onChange={this.handleChange("teamId")} value={taskDetails.teamId} type="select">
-                                                        <option value="" disabled>Please select a team</option>
+                                                        <option value="" disabled>Please select </option>
                                                         {this.state.teams.map((team, index) =>
                                                             <option key={index} value={team.teamId}>{team.teamName}</option>
                                                         )}
@@ -2150,7 +2099,7 @@ async validateContractNumber() {
                                             <Input type="select" id="chopTypeId"
                                                 // onClick={() => { props.getChopTypes(props.legalName, props.taskDetails.appTypeSelected) }}
                                                 onChange={this.handleChange("chopTypeId")} value={taskDetails.chopTypeId} name="chopType" >
-                                                <option disabled value="" >Please select a Chop Type</option>
+                                                <option disabled value="" >Please select </option>
                                                 {this.state.chopTypes.map((option, id) => (
                                                     <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
                                                 ))}
@@ -2511,7 +2460,7 @@ async validateContractNumber() {
                                         </Collapse>
 
                                         <FormGroup>
-                                            <Label>Remark</Label>
+                                            <Label>Remark <small className="ml-2"> Please enter the remarks, e.g. telephone number of pick up person.</small> </Label>
                                             <InputGroup>
                                                 <TextareaAutosize maxLength={500} onChange={this.handleChange("remark")} value={taskDetails.remark} id="remark" size="16" className="form-control" placeholder="Please enter the remarks, e.g. telephone number of pick up person." />
                                                 {/* <FormFeedback>Please add remarks</FormFeedback> */}
@@ -2524,17 +2473,28 @@ async validateContractNumber() {
                                         <Collapse isOpen={taskDetails.applicationTypeId === "LTI" || taskDetails.applicationTypeId === "LTU"}>
                                             <FormGroup>
                                                 <Label>Document Check By <i className="fa fa-user" /></Label>
-                                                <AsyncSelect
-                                                    id="documentCheckBy"
-                                                    loadOptions={taskDetails.applicationTypeId === "LTI" ? this.loadAllUsers : this.loadOptionsDocCheck}
-                                                    isMulti={taskDetails.applicationTypeId === "LTI" ? true : false}
-                                                    value={taskDetails.applicationTypeId === "LTI" ? selectedDocCheckBy : docCheckBy[taskDetails.docCheckByOption]}
-                                                    onChange={this.handleSelectOption(taskDetails.applicationTypeId === "LTI" ? "documentCheckBy" : "documentCheckBy1")}
-                                                    menuPortalTarget={document.body}
-                                                    isClearable={taskDetails.applicationTypeId === "LTU" ? true : false}
-                                                    components={animatedComponents}
-                                                    styles={taskDetails.applicationTypeId === "LTI" ? this.state.deptHeadSelected === null ? reactSelectControl : "" : { menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                                />
+                                                {taskDetails.applicationTypeId === "LTI" ?
+                                                    <AsyncSelect
+                                                        id="documentCheckBy"
+                                                        loadOptions={this.loadAllUsers}
+                                                        isMulti={true}
+                                                        value={selectedDocCheckBy}
+                                                        onChange={this.handleSelectOption("documentCheckBy")}
+                                                        menuPortalTarget={document.body}
+                                                        components={animatedComponents}
+                                                        styles={{menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                                    />
+                                                :
+                                                    <Select
+                                                        id="documentCheckBy"
+                                                        options={docCheckBy}
+                                                        isClearable
+                                                        value={docCheckBy[taskDetails.docCheckByOption]}
+                                                        menuPortalTarget={document.body}
+                                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                                        onChange={this.handleSelectOption("documentCheckBy1")}
+                                                    />
+                                                }
                                                 <InputGroup>
                                                     {taskDetails.applicationTypeId === "LTI" || taskDetails.applicationTypeId === "LTU"
                                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Check By', taskDetails.documentCheckBy, 'required')}</small>
@@ -2546,9 +2506,9 @@ async validateContractNumber() {
                                         <Collapse isOpen={taskDetails.applicationTypeId === "CNIPS"}>
                                             <FormGroup>
                                                 <Label>Contract Signed By: <i className="fa fa-user" /></Label>
-                                                <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
+                                                <small className="ml-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval.</small>
                                                 <Row>
-                                                    <Col>
+                                                    <Col className="py-2" xs={12} md={6} lg={6}>
                                                         <AsyncSelect
                                                             id="contractSignedByFirstPerson"
                                                             loadOptions={this.loadOptionsDeptContract1}
@@ -2563,7 +2523,7 @@ async validateContractNumber() {
                                                                 : null}
                                                         </InputGroup>
                                                     </Col>
-                                                    <Col>
+                                                    <Col className="py-2" xs={12} md={6} lg={6}>
                                                         <AsyncSelect
                                                             id="contractSignedBySecondPerson"
                                                             loadOptions={this.loadOptionsDeptContract2}
@@ -2601,7 +2561,7 @@ async validateContractNumber() {
                                         <Collapse isOpen={taskDetails.applicationTypeId === "STU" || taskDetails.applicationTypeId === "LTI" || taskDetails.applicationTypeId === ""}>
                                             <FormGroup>
                                                 <Label>Department Heads <i className="fa fa-user" /></Label>
-                                                <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.legalName} entity</small>
+                                                <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.legalName} entity.</small>
                                                 <AsyncSelect
                                                     id="departmentHeads"
                                                     loadOptions={this.loadOptionsDept}
@@ -2629,10 +2589,10 @@ async validateContractNumber() {
                                                         onChange={this.handleAgreeTerm}
                                                         onClick={this.isValid}
                                                         id="confirm" value="option1">
-                                                        <Label className="form-check-label" check >
+                                                        <Label onClick={this.handleAgreeTerm} className="form-check-label" check >
                                                             By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines
-                                                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
-                      </Label>
+                                                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action.
+                                                        </Label>
                                                     </CustomInput>
                                                 </FormGroup>
                                             </FormGroup>
