@@ -140,7 +140,6 @@ class MyPendingTasks extends Component {
         let userId = localStorage.getItem('userId')
         // let userId = "josh@otds.admin"
         let url = `${config.url}/tasks?category=pending&companyid=${this.props.legalName}&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`
-        console.log(url)
         const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } })
         this.setState({ pendingTasks: response.data.tasks, totalPages: response.data.pageCount, loading: !this.state.loading })
         // array = response.data

@@ -458,8 +458,9 @@ class EditRequest extends Component {
             }
         }
         temporary.departmentId = temporary.departmentId.toLowerCase()
-        console.log(temporary.requestorUser)
+        // console.log(temporary.requestorUser)
         this.setState({ taskDetails: temporary, loading: false })
+        console.log(temporary)
 
     }
 
@@ -665,6 +666,11 @@ class EditRequest extends Component {
         })
         if (name === "departmentId") {
             this.getTeams(event.target.value)
+            this.setState(state => {
+                let taskDetails = this.state.taskDetails
+                taskDetails.documents = []
+                return taskDetails
+            })
             console.log(this.state.taskDetails.applicationTypeId)
             if (this.state.taskDetails.applicationTypeId === "LTU") {
                 if (this.state.taskDetails.chopTypeId !== "" && this.state.taskDetails.teamId !== "") {
@@ -681,8 +687,11 @@ class EditRequest extends Component {
         }
         else if (name === "teamId") {
             // console.log(this.state.taskDetails.applicationTypeId)
-
-
+            this.setState(state => {
+                let taskDetails = this.state.taskDetails
+                taskDetails.documents = []
+                return taskDetails
+            })
             if (this.state.taskDetails.applicationTypeId === "LTU") {
                 if (this.state.taskDetails.chopTypeId !== "") {
                     this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.chopTypeId, (callback) => {
@@ -701,6 +710,11 @@ class EditRequest extends Component {
             this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${event.target.value}`);
         }
         else if (name === "chopTypeId") {
+            this.setState(state => {
+                let taskDetails = this.state.taskDetails
+                taskDetails.documents = []
+                return taskDetails
+            })
             if (this.state.taskDetails.teamId !== "") {
                 this.getDocCheckBy(this.state.taskDetails.departmentId, this.state.taskDetails.teamId, event.target.value, (callback) => {
 
@@ -1327,6 +1341,7 @@ class EditRequest extends Component {
             let tempDate = format(date, "yyyy-MM-dd").split('T')[0];//right
             dates = tempDate.replace(/-/g, "")
         }
+        console.log(dates)
         this.setState({
             [view]: date
         });
@@ -2510,7 +2525,7 @@ class EditRequest extends Component {
                                                     className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                                                     selected={this.state.dateView2}
                                                     onChange={this.dateChange("returnDate", "dateView2")}
-                                                    minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                                                    minDate={new Date()} maxDate={addDays(new Date(), 30)} />
                                             </FormGroup>
                                             {!editRequestForm.collapseUIO
                                                 ? <InputGroup>

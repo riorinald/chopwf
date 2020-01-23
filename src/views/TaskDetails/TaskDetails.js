@@ -117,7 +117,7 @@ class TaskDetails extends Component {
         }
 
         Swal.fire({
-            title: `Creating your Request ... `,
+            title: `Processing your Request ... `,
             type: "info",
             text: '',
             footer: '',
@@ -132,7 +132,7 @@ class TaskDetails extends Component {
 
                         Swal.update({
                             title: res.data.message,
-                            text: `The request has been approved`,
+                            text: `The request has been ${res.data.message.toLowerCase()}`,
                             type: "success",
 
                         })

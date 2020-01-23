@@ -653,11 +653,11 @@ class Create extends Component {
   handleChange = name => event => {
     //APPLICATION TYPE
     let value = event.target.value
-
+    this.setState({ agreeTerms: false })
     if (name === "appTypeSelected") {
       this.setValidateForm(event.target.value)
       //Clear Doc Table and agreeTerms
-      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [], agreeTerms: false })
+      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
 
       //Update Chop Types
       this.getChopTypes(this.props.legalName, event.target.value)
@@ -722,6 +722,7 @@ class Create extends Component {
     //CHOP TYPE
     else if (name === "chopTypeSelected") {
       console.log(event.target.value)
+      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
         this.getDocCheckBy(event.target.value, this.state.teamSelected)
         this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
@@ -749,6 +750,7 @@ class Create extends Component {
       this.setState({ teamSelected: "" })
       this.getDeptHead(this.props.legalName)
       this.getUsers();
+      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
       if (this.state.isLTU || this.state.isLTI) {
         this.getTeams(event.target.value)
       }
@@ -761,6 +763,7 @@ class Create extends Component {
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
+      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
         this.getDocCheckBy(this.state.chopTypeSelected, event.target.value)
       }
@@ -864,168 +867,168 @@ class Create extends Component {
     let digit = /[0-9]/;
     let valid = false
     let value = this.state.contractNumber
-    let {isFirst, isSecond, isThird, isDigit, isdigit1} = false; 
-    
-    if (first.test(value[0])){
-		 isFirst = true
-	 	}	else {
-			let message = "First value should be I / S"
-			this.setState({ contractValid: false, contractError: message}) 
-		 }
-    if (isFirst && second.test(value[2])){
+    let { isFirst, isSecond, isThird, isDigit, isdigit1 } = false;
+
+    if (first.test(value[0])) {
+      isFirst = true
+    } else {
+      let message = "First value should be I / S"
+      this.setState({ contractValid: false, contractError: message })
+    }
+    if (isFirst && second.test(value[2])) {
       isSecond = true
-    	} 	else if (isFirst){
-			let message = "Second value should be A / L / IA / R"
-			this.setState({ contractValid: false, contractError: message})
-	 }
-	 
-    if( isSecond && value[3] === 'A'){
-      if (third.test(value[5])){
+    } else if (isFirst) {
+      let message = "Second value should be A / L / IA / R"
+      this.setState({ contractValid: false, contractError: message })
+    }
+
+    if (isSecond && value[3] === 'A') {
+      if (third.test(value[5])) {
         isThird = true
-		}	else {
-		  	let message = "Third value should be O / P / S"
-			this.setState({ contractValid: false, contractError: message})
+      } else {
+        let message = "Third value should be O / P / S"
+        this.setState({ contractValid: false, contractError: message })
       }
-      
-      for(let i = 7; i < 11; i++){
+
+      for (let i = 7; i < 11; i++) {
         isDigit = digit.test(value[i])
-        if(isThird && !isDigit){
-			 console.log("error", value[i], i)
-			 let message = "Please input 4 digits of year"
-			 this.setState({ contractValid: false, contractError: message})
+        if (isThird && !isDigit) {
+          console.log("error", value[i], i)
+          let message = "Please input 4 digits of year"
+          this.setState({ contractValid: false, contractError: message })
           break;
-		  }
-		  else if (i === 9){
-			isdigit1 = true
-		 }
-			if(value.length === 16){
-			for(let i = 12; i < 16; i++){
-				isDigit = digit.test(value[i])
-				if(!isDigit){
-					console.log("error", value[i], i)
-					let message = "Please input last 4 digits"
-			 		this.setState({ contractValid: false, contractError: message})
-					break;
-				}
-					else {
-						valid = true
-					}
-				}
-			}
-			if(value.length === 15){
-			for(let i = 12; i < 15; i++){
-				isDigit = digit.test(value[i])
-				if(!isDigit){
-					console.log("error", value[i], i)
-					let message = "Please input last 4 digits"
-			 		this.setState({ contractValid: false, contractError: message})
-					break;
-				}
-				else {
-						valid = true
-					}
-				}
-			}
-		}
-			if (isThird && isdigit1 && value.length < 15){
-				console.log( 'last digit should be 4' )
-				let message = "Please input last 4 digits"
-			 	this.setState({ contractValid: false, contractError: message})
-			 }
-		if (isThird && isdigit1 && value.length > 16){
-			valid = false
-			let message = "invalid contract format"
-			this.setState({ contractValid: false, contractError: message})
-		}
-	 } 
-	 
-    if(isSecond && value[2] !== 'I'){
-		 if (third.test(value[4])){
-			 isThird = true
-			} else {
-				let message = "Third value should be O / P / S"
-				this.setState({ contractValid: false, contractError: message})
-			}
-			for(let i = 6; i <= 9; i++){
-				isDigit = digit.test(value[i])
-				if(isThird && !isDigit){
-					console.log("error", value[i], i, value, value.length)
-					let message = "Please input 4 digits of year"
-			 		this.setState({ contractValid: false, contractError: message})
-					break;
-				} 
-				else if (i === 9){
-					isdigit1 = true
-				}
-			}
-			
-			if (value.length === 15){
-				
-				for(let i = 12; i < 14; i++){
-					isDigit = digit.test(value[i])
-					if(!isDigit){
-						console.log("error", value[i], i)
-						let message = "Please input last 4 digits"
-			 			this.setState({ contractValid: false, contractError: message})
-						break;
-					}
-					else {
-						valid = true
-					}
-				}
-			} 
-			if (value.length === 14){
-				for(let i = 12; i < 13; i++){
-					isDigit = digit.test(value[i])
-					if(!isDigit){
-						console.log("error", value[i], i)
-						let message = "Please input last 4 digits"
-			 			this.setState({ contractValid: false, contractError: message})
-						break;
-					}
-					else {
-						valid = true
-					}
-				}
-			} 
-			if (isThird && isdigit1 && value.length < 14){
-				console.log( 'last digit should be 4' )
-				let message = "Please input last 4 digits"
-			 	this.setState({ contractValid: false, contractError: message})
-			}
-		}
-		if (isThird && isdigit1 && value.length > 16){
-			valid = false
-			let message = "invalid contract format"
-			this.setState({ contractValid: false, contractError: message})
-		}
-	if (isSecond && value[2] === 'I' && value[3] !== 'A' && value[3] !== undefined){
-			console.log('please input IA')
-			let message = "Please input IA instead of I"+ value[3]
-			this.setState({ contractValid: false, contractError: message })
-		} else if (isSecond && value[2] === 'I' && value[3] !== 'A') {
-			let message = "Third value should be A / L / IA / R"
-			this.setState({ contractValid: false, contractError: message})
-		}
+        }
+        else if (i === 9) {
+          isdigit1 = true
+        }
+        if (value.length === 16) {
+          for (let i = 12; i < 16; i++) {
+            isDigit = digit.test(value[i])
+            if (!isDigit) {
+              console.log("error", value[i], i)
+              let message = "Please input last 4 digits"
+              this.setState({ contractValid: false, contractError: message })
+              break;
+            }
+            else {
+              valid = true
+            }
+          }
+        }
+        if (value.length === 15) {
+          for (let i = 12; i < 15; i++) {
+            isDigit = digit.test(value[i])
+            if (!isDigit) {
+              console.log("error", value[i], i)
+              let message = "Please input last 4 digits"
+              this.setState({ contractValid: false, contractError: message })
+              break;
+            }
+            else {
+              valid = true
+            }
+          }
+        }
+      }
+      if (isThird && isdigit1 && value.length < 15) {
+        console.log('last digit should be 4')
+        let message = "Please input last 4 digits"
+        this.setState({ contractValid: false, contractError: message })
+      }
+      if (isThird && isdigit1 && value.length > 16) {
+        valid = false
+        let message = "invalid contract format"
+        this.setState({ contractValid: false, contractError: message })
+      }
+    }
+
+    if (isSecond && value[2] !== 'I') {
+      if (third.test(value[4])) {
+        isThird = true
+      } else {
+        let message = "Third value should be O / P / S"
+        this.setState({ contractValid: false, contractError: message })
+      }
+      for (let i = 6; i <= 9; i++) {
+        isDigit = digit.test(value[i])
+        if (isThird && !isDigit) {
+          console.log("error", value[i], i, value, value.length)
+          let message = "Please input 4 digits of year"
+          this.setState({ contractValid: false, contractError: message })
+          break;
+        }
+        else if (i === 9) {
+          isdigit1 = true
+        }
+      }
+
+      if (value.length === 15) {
+
+        for (let i = 12; i < 14; i++) {
+          isDigit = digit.test(value[i])
+          if (!isDigit) {
+            console.log("error", value[i], i)
+            let message = "Please input last 4 digits"
+            this.setState({ contractValid: false, contractError: message })
+            break;
+          }
+          else {
+            valid = true
+          }
+        }
+      }
+      if (value.length === 14) {
+        for (let i = 12; i < 13; i++) {
+          isDigit = digit.test(value[i])
+          if (!isDigit) {
+            console.log("error", value[i], i)
+            let message = "Please input last 4 digits"
+            this.setState({ contractValid: false, contractError: message })
+            break;
+          }
+          else {
+            valid = true
+          }
+        }
+      }
+      if (isThird && isdigit1 && value.length < 14) {
+        console.log('last digit should be 4')
+        let message = "Please input last 4 digits"
+        this.setState({ contractValid: false, contractError: message })
+      }
+    }
+    if (isThird && isdigit1 && value.length > 16) {
+      valid = false
+      let message = "invalid contract format"
+      this.setState({ contractValid: false, contractError: message })
+    }
+    if (isSecond && value[2] === 'I' && value[3] !== 'A' && value[3] !== undefined) {
+      console.log('please input IA')
+      let message = "Please input IA instead of I" + value[3]
+      this.setState({ contractValid: false, contractError: message })
+    } else if (isSecond && value[2] === 'I' && value[3] !== 'A') {
+      let message = "Third value should be A / L / IA / R"
+      this.setState({ contractValid: false, contractError: message })
+    }
 
     return valid
-	}
-	
-	
-	handleContractChange = (event) => {
+  }
+
+
+  handleContractChange = (event) => {
 
     // let mask = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
     // let masks = [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[IALR]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]
-	 
-	 let value = event.target.value.toUpperCase();
-	 let valid = false
+
+    let value = event.target.value.toUpperCase();
+    let valid = false
     if (/^[IS]/.test(value)) {
-		valid = true
+      valid = true
     }
     else {
       var errorMsg = "First Charcter should be I or S "
-		value = ""
-		valid = false
+      value = ""
+      valid = false
     }
     this.setState({ contractValid: valid, contractError: errorMsg, contractNumber: value })
   }
@@ -1161,42 +1164,42 @@ class Create extends Component {
   }
 
   async validateContractNumber() {
-	let doc = this.state.documentTableCNIPS
-	let contractError = []
-	try {
-	let validateConNum = await this.validateConNum();
-	  if (this.state.docSelected === null){
-		 contractError.push("Please Select a valid Document.<br />")
-	  }
-	  if (this.state.engName === ""){
-		 contractError.push("Please input name in english.<br />")
-	  }
-	  if (this.state.contractNumber === ""){
-		 contractError.push("Please input a valid Contract Number.<br />")
-	  }
-	  if (this.state.contractNumber !== "" && validateConNum === false){
-		  contractError.push(this.state.contractError+".<br />")
-		  contractError.push(this.state.contractNumNotes)
-	  }
-	  if (contractError.length === 0 && validateConNum === true){
-		 for (let i = 0; i < doc.length; i++) {
-			if (doc[i].docName === this.state.docAttachedName && doc[i].conNum[0] === this.state.contractNumber) {
-			  contractError.push("Document and contract number already exists in the list")
-			  break
-			}
-			else {
-			  contractError = []
-			}
-		 }
-	  }
-	}
-	catch (e) {
-	  console.log(e,contractError)
-	}
-	finally {
-		return contractError
-	}		
-}
+    let doc = this.state.documentTableCNIPS
+    let contractError = []
+    try {
+      let validateConNum = await this.validateConNum();
+      if (this.state.docSelected === null) {
+        contractError.push("Please Select a valid Document.<br />")
+      }
+      if (this.state.engName === "") {
+        contractError.push("Please input name in english.<br />")
+      }
+      if (this.state.contractNumber === "") {
+        contractError.push("Please input a valid Contract Number.<br />")
+      }
+      if (this.state.contractNumber !== "" && validateConNum === false) {
+        contractError.push(this.state.contractError + ".<br />")
+        contractError.push(this.state.contractNumNotes)
+      }
+      if (contractError.length === 0 && validateConNum === true) {
+        for (let i = 0; i < doc.length; i++) {
+          if (doc[i].docName === this.state.docAttachedName && doc[i].conNum[0] === this.state.contractNumber) {
+            contractError.push("Document and contract number already exists in the list")
+            break
+          }
+          else {
+            contractError = []
+          }
+        }
+      }
+    }
+    catch (e) {
+      console.log(e, contractError)
+    }
+    finally {
+      return contractError
+    }
+  }
 
   checkforChinese(event) {
     let value = event.target.value
@@ -1214,41 +1217,41 @@ class Create extends Component {
     var maxNumber = 45;
     var rand = Math.floor((Math.random() * maxNumber) + 1);
     let conName = [this.state.contractNumber]
-	 let contractError = ["error"];
-	 this.validateContractNumber()
-	 .then( data => {
-		 contractError = data
-	      if (contractError.length === 0){
+    let contractError = ["error"];
+    this.validateContractNumber()
+      .then(data => {
+        contractError = data
+        if (contractError.length === 0) {
           const obj = {
-              id: rand,
-              conNum: conName,
-              engName: this.state.engName,
-              cnName: this.state.cnName,
-              docSelected: this.state.docSelected,
-              docName: this.state.docAttachedName,
-              docURL: URL.createObjectURL(this.state.docSelected),
-              contractNumbers: conName
+            id: rand,
+            conNum: conName,
+            engName: this.state.engName,
+            cnName: this.state.cnName,
+            docSelected: this.state.docSelected,
+            docName: this.state.docAttachedName,
+            docURL: URL.createObjectURL(this.state.docSelected),
+            contractNumbers: conName
+          }
+
+          this.setState(state => {
+            const documentTableCNIPS = state.documentTableCNIPS.concat(obj)
+
+            return {
+              documentTableCNIPS
             }
-
-      this.setState(state => {
-        const documentTableCNIPS = state.documentTableCNIPS.concat(obj)
-
-              return {
-                documentTableCNIPS
-              }
-            })
-            this.setState({ contractNumber: "", engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
-            document.getElementById("documentTableCNIPS").className = ""
-      }
-      else {
-        Swal.fire({
-          title: "Invalid",
-          html: contractError.join('\n\n'),
-          type: "warning",
-          width: "500px"
-        })
-		}
-	})
+          })
+          this.setState({ contractNumber: "", engName: "", cnName: "", docSelected: null, docAttachedName: "", conNum: [] })
+          document.getElementById("documentTableCNIPS").className = ""
+        }
+        else {
+          Swal.fire({
+            title: "Invalid",
+            html: contractError.join('\n\n'),
+            type: "warning",
+            width: "500px"
+          })
+        }
+      })
   }
 
   addDocumentLTU() {
@@ -1691,7 +1694,7 @@ class Create extends Component {
               <FormGroup>
                 {/* <Label>File Name</Label> */}
                 <CustomInput id="docFileName" onChange={this.uploadDocument}
-                  accept=".ipg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, docx, .pdf, .pdfx, .bmp"
+                  accept=".ipg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp"
                   type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
               </FormGroup>
             </Col>
