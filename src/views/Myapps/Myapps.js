@@ -136,7 +136,6 @@ class Myapps extends Component {
     },
       // console.log(this.state.searchOption)\
     )
-    this.getApplications(this.state.page, this.state.limit)
   }
 
   getDeptHeads(heads) {
@@ -288,7 +287,7 @@ class Myapps extends Component {
                   Header: "Chop Type",
                   accessor: "chopTypeName",
                   Cell: this.renderEditable,
-                  style: { textAlign: "center" },
+                  style: { textAlign: "center", whiteSpace: 'unset'  },
                   width: this.getColumnWidth('chopTypeName', "Chop Type"),
                   filterMethod: (filter, row) => {
                     return row[filter.id] === filter.value;
@@ -326,7 +325,7 @@ class Myapps extends Component {
                   Cell: row => (
                     <div> <span title={this.getDeptHeads(row.original.documentNameChinese)}>{this.getDeptHeads(row.original.documentNameChinese)}</span> </div>
                   ),
-                  style: { textAlign: "center" },
+                  style: { textAlign: "center", whiteSpace: 'unset'  },
                   filterable: false
                 },
                 {
