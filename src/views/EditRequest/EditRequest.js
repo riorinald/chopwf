@@ -18,6 +18,7 @@ import {
     DropdownToggle,
     DropdownMenu,
     DropdownItem,
+    Progress, UncontrolledTooltip, 
     Badge
 } from 'reactstrap';
 import config from '../../config';
@@ -348,9 +349,16 @@ class EditRequest extends Component {
     }
 
     convertDate(dateValue, view) {
-        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
-        this.setState({ [view]: new Date(regEx) })
-        return new Date(regEx);
+        console.log(dateValue)
+        let regEx = ""
+        let dateView = null
+        if (dateValue !== "00010101" && dateValue !== "" && dateValue !== "/") {
+            regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
+            dateView = new Date(regEx)
+        }
+
+        this.setState({ [view]: dateView })
+        return dateView;
     }
 
     getDocCheckByOption(person) {
@@ -414,7 +422,7 @@ class EditRequest extends Component {
         // if (temporary.returnDate !== "") {
         //     this.convertDate(temporary.returnDate, 'dateView2')
         // }
-        temporary.returnDate = temporary.returnDate === '' ? this.convertDate(temporary.returnDate, 'dateView2') : this.dateChanged(new Date())
+        temporary.returnDate = temporary.returnDate !== '' ? this.convertDate(temporary.returnDate, 'dateView2') : null
         temporary.responsiblePersonOption = this.getOptionAllUsers(temporary.responsiblePerson)
         temporary.pickUpByOption = this.getOptionAllUsers(temporary.pickUpBy)
 
@@ -431,13 +439,13 @@ class EditRequest extends Component {
                     temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
                 })
             }
-            temporary.effectivePeriod = temporary.effectivePeriod !== "" ? this.convertDate(temporary.effectivePeriod, 'dateView1') : null
+            // temporary.effectivePeriod = temporary.effectivePeriod !== "" ? this.convertDate(temporary.effectivePeriod, 'dateView1') : null
         }
 
         else if (temporary.applicationTypeId === "LTI") {
 
             this.setSelectedDocCheckBy(temporary.documentCheckBy)
-
+            temporary.effectivePeriod = temporary.effectivePeriod !== "" ? this.convertDate(temporary.effectivePeriod, 'dateView1') : null
         }
 
         this.setState(state => {
@@ -1826,7 +1834,7 @@ class EditRequest extends Component {
 
     async submitRequest(isSubmitted) {
 
-        let returnDate = this.state.taskDetails.returnDate === undefined ? "00010101" : this.state.taskDetails.returnDate
+        let returnDate = this.state.taskDetails.returnDate ? this.state.taskDetails.returnDate : ""
 
         let userId = localStorage.getItem('userId')
         let postReq = new FormData();
@@ -2046,6 +2054,31 @@ class EditRequest extends Component {
                              EDIT REQUEST - {taskDetails.requestNum}
                                 </CardHeader>
                                 <CardBody color="dark">
+                                    {taskDetails.currentStatusId === "SENDBACKED"
+                                        ? <Row>
+                                            <Col className="mb-4" onClick={() => this.setState({ progressModal: !this.state.progressModal })}>
+                                                <Progress multi>
+                                                    {taskDetails.allStages.map((stage, index) =>
+
+                                                        <React.Fragment key={index}>
+                                                            <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
+                                                            <Progress
+                                                                className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
+                                                                bar
+                                                                animated={stage.state === "CURRENT" ? true : false}
+                                                                striped={stage.state !== "CURRENT"}
+                                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                                // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                                value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
+                                                            </Progress>
+                                                        </React.Fragment>
+
+                                                    )}
+                                                </Progress>
+                                            </Col>
+                                        </Row>
+                                        : null
+                                    }
                                     <FormGroup>
                                         <h5>NOTES :</h5>
                                         {notes}
@@ -2452,6 +2485,7 @@ class EditRequest extends Component {
                                                 <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                                                     className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                                                     selected={this.state.dateView2}
+                                                    isClearable
                                                     onChange={this.dateChange("returnDate", "dateView2")}
                                                     minDate={new Date()} maxDate={addDays(new Date(), 30)} />
                                             </FormGroup>
