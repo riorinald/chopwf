@@ -124,7 +124,7 @@ class EditRequest extends Component {
             validateForm: [],
             viewContract: false,
 
-            branches:[],
+            branches: [],
 
             contractNumber: "",
             conNum: [],
@@ -735,7 +735,7 @@ class EditRequest extends Component {
                     // })
                 }
             }
-            if (event.target.value === "BCSCHOP"){
+            if (event.target.value === "BCSCHOP") {
                 this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
             }
         }
@@ -880,43 +880,43 @@ class EditRequest extends Component {
         })
     }
 
-async validateContractNumber() {
-    let doc = this.state.taskDetails.documents
-    let contractError = []
-    try {
-        let validateConNum = await this.validateConNum();
-            if (this.state.editRequestForm.docSelected === null){
+    async validateContractNumber() {
+        let doc = this.state.taskDetails.documents
+        let contractError = []
+        try {
+            let validateConNum = await this.validateConNum();
+            if (this.state.editRequestForm.docSelected === null) {
                 contractError.push("Please Select a valid Document.<br />")
             }
-            if (this.state.editRequestForm.engName === ""){
+            if (this.state.editRequestForm.engName === "") {
                 contractError.push("Please input name in english.<br />")
             }
-            if (this.state.editRequestForm.contractNumber === ""){
+            if (this.state.editRequestForm.contractNumber === "") {
                 contractError.push("Please input a valid Contract Number.<br />")
             }
-            if (this.state.editRequestForm.contractNumber !== "" && validateConNum === false){
-                contractError.push(this.state.contractError+".<br />")
+            if (this.state.editRequestForm.contractNumber !== "" && validateConNum === false) {
+                contractError.push(this.state.contractError + ".<br />")
                 contractError.push(this.state.contractNumNotes)
             }
-            if (contractError.length === 0 && validateConNum === true){
+            if (contractError.length === 0 && validateConNum === true) {
                 for (let i = 0; i < doc.length; i++) {
                     if (doc[i].documentFileName === this.state.editRequestForm.docAttachedName && doc[i].contractNums[0] === this.state.contractNumber) {
                         contractError.push("Document and contract number already exists in the list")
-                            break
-                        }
-                        else {
-                            contractError = []
-                        }
+                        break
+                    }
+                    else {
+                        contractError = []
                     }
                 }
+            }
         }
-    catch (e) {
-        console.log(e,contractError)
+        catch (e) {
+            console.log(e, contractError)
+        }
+        finally {
+            return contractError
+        }
     }
-    finally {
-        return contractError
-    }		
-}
 
     convertApprovedDate(dateValue) {
 
@@ -1061,7 +1061,7 @@ async validateContractNumber() {
             })
         }
     }
-    
+
     addDocumentLTU() {
         if (this.state.selectedDocs.length !== 0) {
             document.getElementById("documentTableLTU").className = "form-control"
@@ -1082,60 +1082,60 @@ async validateContractNumber() {
         var tempDate = new Date();
         var date = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear() + ' ' + tempDate.getHours() + ':' + tempDate.getMinutes() + ':' + tempDate.getSeconds();
         let conName = [this.state.contractNumber]
-         let contractError = ["error"];
-         this.validateContractNumber()
-         .then( data => {
-             contractError = data
-              if (contractError.length === 0){
-                const obj = {
-                    taskId: this.state.taskDetails.taskId,
-                    documentFileName: this.state.editRequestForm.docAttachedName,
-                    documentCode: "",
-                    contractNumber: this.state.editRequestForm.contractNumber,
-                    description: "",
-                    created: date,
-                    updated: "",
-                    documentType: "",
-                    documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
-                    documentFileType: this.state.editRequestForm.docSelected.type,
-                    documentBase64String: "",
-                    expiryDate: null,
-                    departmentHeads: null,
-                    documentId: rand,
-                    documentNameEnglish: this.state.editRequestForm.engName,
-                    documentNameChinese: this.state.editRequestForm.cnName,
-                    docSelected: this.state.editRequestForm.docSelected,
-                    contractNums: [this.state.contractNumber]
-                }
-                this.setState(state => {
-                    let { taskDetails, invalidChinese, invalidEnglish } = this.state
-                    taskDetails.documents.push(obj)
-                    return { taskDetails }
-                })
-            
-                this.setState(state => {
-                    let { editRequestForm } = this.state
-                    editRequestForm.docAttachedName = ""
-                    editRequestForm.contractNumbers = ""
-                    editRequestForm.docSelected = null
-                    editRequestForm.engName = ""
-                    editRequestForm.cnName = ""
-                    return editRequestForm
-                })
-                this.setState({ contractValid:true, contractNumber:"", conNum: [] })
+        let contractError = ["error"];
+        this.validateContractNumber()
+            .then(data => {
+                contractError = data
+                if (contractError.length === 0) {
+                    const obj = {
+                        taskId: this.state.taskDetails.taskId,
+                        documentFileName: this.state.editRequestForm.docAttachedName,
+                        documentCode: "",
+                        contractNumber: this.state.editRequestForm.contractNumber,
+                        description: "",
+                        created: date,
+                        updated: "",
+                        documentType: "",
+                        documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
+                        documentFileType: this.state.editRequestForm.docSelected.type,
+                        documentBase64String: "",
+                        expiryDate: null,
+                        departmentHeads: null,
+                        documentId: rand,
+                        documentNameEnglish: this.state.editRequestForm.engName,
+                        documentNameChinese: this.state.editRequestForm.cnName,
+                        docSelected: this.state.editRequestForm.docSelected,
+                        contractNums: [this.state.contractNumber]
+                    }
+                    this.setState(state => {
+                        let { taskDetails, invalidChinese, invalidEnglish } = this.state
+                        taskDetails.documents.push(obj)
+                        return { taskDetails }
+                    })
 
-                document.getElementById("documents").className = ""
-          }
-          else {
-            Swal.fire({
-              title: "Invalid",
-              html: contractError.join('\n\n'),
-              type: "warning",
-              width: "500px"
+                    this.setState(state => {
+                        let { editRequestForm } = this.state
+                        editRequestForm.docAttachedName = ""
+                        editRequestForm.contractNumbers = ""
+                        editRequestForm.docSelected = null
+                        editRequestForm.engName = ""
+                        editRequestForm.cnName = ""
+                        return editRequestForm
+                    })
+                    this.setState({ contractValid: true, contractNumber: "", conNum: [] })
+
+                    document.getElementById("documents").className = ""
+                }
+                else {
+                    Swal.fire({
+                        title: "Invalid",
+                        html: contractError.join('\n\n'),
+                        type: "warning",
+                        width: "500px"
+                    })
+                }
             })
-            }
-        })
-      }
+    }
 
 
     handleInputMask = () => {
@@ -1206,156 +1206,156 @@ async validateContractNumber() {
         let digit = /[0-9]/;
         let valid = false
         let value = this.state.contractNumber
-        let {isFirst, isSecond, isThird, isDigit, isdigit1} = false; 
-        
-        if (first.test(value[0])){
-             isFirst = true
-             }	else {
-                let message = "First value should be I / S"
-                this.setState({ contractValid: false, contractError: message}) 
-             }
-        if (isFirst && second.test(value[2])){
-          isSecond = true
-            } 	else if (isFirst){
-                let message = "Second value should be A / L / IA / R"
-                this.setState({ contractValid: false, contractError: message})
-         }
-         
-        if( isSecond && value[3] === 'A'){
-          if (third.test(value[5])){
-            isThird = true
-            }	else {
-                  let message = "Third value should be O / P / S"
-                this.setState({ contractValid: false, contractError: message})
-          }
-          
-          for(let i = 7; i < 11; i++){
-            isDigit = digit.test(value[i])
-            if(isThird && !isDigit){
-                 console.log("error", value[i], i)
-                 let message = "Please input 4 digits of year"
-                 this.setState({ contractValid: false, contractError: message})
-              break;
-              }
-              else if (i === 9){
-                isdigit1 = true
-             }
-                if(value.length === 16){
-                for(let i = 12; i < 16; i++){
-                    isDigit = digit.test(value[i])
-                    if(!isDigit){
-                        console.log("error", value[i], i)
-                        let message = "Please input last 4 digits"
-                         this.setState({ contractValid: false, contractError: message})
-                        break;
-                    }
+        let { isFirst, isSecond, isThird, isDigit, isdigit1 } = false;
+
+        if (first.test(value[0])) {
+            isFirst = true
+        } else {
+            let message = "First value should be I / S"
+            this.setState({ contractValid: false, contractError: message })
+        }
+        if (isFirst && second.test(value[2])) {
+            isSecond = true
+        } else if (isFirst) {
+            let message = "Second value should be A / L / IA / R"
+            this.setState({ contractValid: false, contractError: message })
+        }
+
+        if (isSecond && value[3] === 'A') {
+            if (third.test(value[5])) {
+                isThird = true
+            } else {
+                let message = "Third value should be O / P / S"
+                this.setState({ contractValid: false, contractError: message })
+            }
+
+            for (let i = 7; i < 11; i++) {
+                isDigit = digit.test(value[i])
+                if (isThird && !isDigit) {
+                    console.log("error", value[i], i)
+                    let message = "Please input 4 digits of year"
+                    this.setState({ contractValid: false, contractError: message })
+                    break;
+                }
+                else if (i === 9) {
+                    isdigit1 = true
+                }
+                if (value.length === 16) {
+                    for (let i = 12; i < 16; i++) {
+                        isDigit = digit.test(value[i])
+                        if (!isDigit) {
+                            console.log("error", value[i], i)
+                            let message = "Please input last 4 digits"
+                            this.setState({ contractValid: false, contractError: message })
+                            break;
+                        }
                         else {
                             valid = true
-                            this.setState({ contractValid: true, contractError: ""})
+                            this.setState({ contractValid: true, contractError: "" })
                         }
                     }
                 }
-                if(value.length === 15){
-                for(let i = 12; i < 15; i++){
+                if (value.length === 15) {
+                    for (let i = 12; i < 15; i++) {
+                        isDigit = digit.test(value[i])
+                        if (!isDigit) {
+                            console.log("error", value[i], i)
+                            let message = "Please input last 4 digits"
+                            this.setState({ contractValid: false, contractError: message })
+                            break;
+                        }
+                        else {
+                            valid = true
+                            this.setState({ contractValid: true, contractError: "" })
+                        }
+                    }
+                }
+            }
+            if (isThird && isdigit1 && value.length < 15) {
+                console.log('last digit should be 4')
+                let message = "Please input last 4 digits"
+                this.setState({ contractValid: false, contractError: message })
+            }
+            if (isThird && isdigit1 && value.length > 16) {
+                valid = false
+                let message = "Invalid contract format"
+                this.setState({ contractValid: false, contractError: message })
+            }
+        }
+
+        if (isSecond && value[2] !== 'I') {
+            if (third.test(value[4])) {
+                isThird = true
+            } else {
+                let message = "Third value should be O / P / S"
+                this.setState({ contractValid: false, contractError: message })
+            }
+            for (let i = 6; i <= 9; i++) {
+                isDigit = digit.test(value[i])
+                if (isThird && !isDigit) {
+                    console.log("error", value[i], i, value, value.length)
+                    let message = "Please input 4 digits of year"
+                    this.setState({ contractValid: false, contractError: message })
+                    break;
+                }
+                else if (i === 9) {
+                    isdigit1 = true
+                }
+            }
+
+            if (value.length === 15) {
+
+                for (let i = 12; i < 14; i++) {
                     isDigit = digit.test(value[i])
-                    if(!isDigit){
+                    if (!isDigit) {
                         console.log("error", value[i], i)
                         let message = "Please input last 4 digits"
-                         this.setState({ contractValid: false, contractError: message})
+                        this.setState({ contractValid: false, contractError: message })
                         break;
                     }
                     else {
-                            valid = true
-                            this.setState({ contractValid: true, contractError: ""})
-                        }
+                        valid = true
+                        this.setState({ contractValid: true, contractError: "" })
                     }
                 }
             }
-                if (isThird && isdigit1 && value.length < 15){
-                    console.log( 'last digit should be 4' )
-                    let message = "Please input last 4 digits"
-                     this.setState({ contractValid: false, contractError: message})
-                 }
-            if (isThird && isdigit1 && value.length > 16){
-                valid = false
-                let message = "Invalid contract format"
-                this.setState({ contractValid: false, contractError: message})
-            }
-         } 
-         
-        if(isSecond && value[2] !== 'I'){
-             if (third.test(value[4])){
-                 isThird = true
-                } else {
-                    let message = "Third value should be O / P / S"
-                    this.setState({ contractValid: false, contractError: message})
-                }
-                for(let i = 6; i <= 9; i++){
+            if (value.length === 14) {
+                for (let i = 12; i < 13; i++) {
                     isDigit = digit.test(value[i])
-                    if(isThird && !isDigit){
-                        console.log("error", value[i], i, value, value.length)
-                        let message = "Please input 4 digits of year"
-                         this.setState({ contractValid: false, contractError: message})
+                    if (!isDigit) {
+                        console.log("error", value[i], i)
+                        let message = "Please input last 4 digits"
+                        this.setState({ contractValid: false, contractError: message })
                         break;
-                    } 
-                    else if (i === 9){
-                        isdigit1 = true
+                    }
+                    else {
+                        valid = true
+                        this.setState({ contractValid: true, contractError: "" })
                     }
                 }
-                
-                if (value.length === 15){
-                    
-                    for(let i = 12; i < 14; i++){
-                        isDigit = digit.test(value[i])
-                        if(!isDigit){
-                            console.log("error", value[i], i)
-                            let message = "Please input last 4 digits"
-                             this.setState({ contractValid: false, contractError: message})
-                            break;
-                        }
-                        else {
-                            valid = true
-                            this.setState({ contractValid: true, contractError: ""})
-                        }
-                    }
-                } 
-                if (value.length === 14){
-                    for(let i = 12; i < 13; i++){
-                        isDigit = digit.test(value[i])
-                        if(!isDigit){
-                            console.log("error", value[i], i)
-                            let message = "Please input last 4 digits"
-                             this.setState({ contractValid: false, contractError: message})
-                            break;
-                        }
-                        else {
-                            valid = true
-                            this.setState({ contractValid: true, contractError: ""})
-                        }
-                    }
-                } 
-                if (isThird && isdigit1 && value.length < 14){
-                    console.log( 'last digit should be 4' )
-                    let message = "Please input last 4 digits"
-                     this.setState({ contractValid: false, contractError: message})
-                }
             }
-            if (isThird && isdigit1 && value.length > 16){
-                valid = false
-                let message = "Invalid contract format"
-                this.setState({ contractValid: false, contractError: message})
-            }
-        if (isSecond && value[2] === 'I' && value[3] !== 'A' && value[3] !== undefined){
-                console.log('please input IA')
-                let message = "Please input IA instead of I"+ value[3]
+            if (isThird && isdigit1 && value.length < 14) {
+                console.log('last digit should be 4')
+                let message = "Please input last 4 digits"
                 this.setState({ contractValid: false, contractError: message })
-            } else if (isSecond && value[2] === 'I' && value[3] !== 'A') {
-                let message = "Third value should be A / L / IA / R"
-                this.setState({ contractValid: false, contractError: message})
             }
-    
-        return valid
         }
+        if (isThird && isdigit1 && value.length > 16) {
+            valid = false
+            let message = "Invalid contract format"
+            this.setState({ contractValid: false, contractError: message })
+        }
+        if (isSecond && value[2] === 'I' && value[3] !== 'A' && value[3] !== undefined) {
+            console.log('please input IA')
+            let message = "Please input IA instead of I" + value[3]
+            this.setState({ contractValid: false, contractError: message })
+        } else if (isSecond && value[2] === 'I' && value[3] !== 'A') {
+            let message = "Third value should be A / L / IA / R"
+            this.setState({ contractValid: false, contractError: message })
+        }
+
+        return valid
+    }
 
     addContract(event) {
         let valid = this.validateConNum()
@@ -2017,15 +2017,15 @@ async validateContractNumber() {
     handleContractNumber(event) {
         let value = event.target.value.toUpperCase();
         let valid = false
-       if (/^[IS]/.test(value)) {
-           valid = true
-       }
-       else {
-         var errorMsg = "First Charcter should be I or S "
-           value = ""
-           valid = false
-       }
-       this.setState({ contractValid: valid, contractError: errorMsg, contractNumber: value })
+        if (/^[IS]/.test(value)) {
+            valid = true
+        }
+        else {
+            var errorMsg = "First Charcter should be I or S "
+            value = ""
+            valid = false
+        }
+        this.setState({ contractValid: valid, contractError: errorMsg, contractNumber: value })
     }
 
 
@@ -2288,7 +2288,7 @@ async validateContractNumber() {
                                                             ? <Col  >
                                                                 <FormGroup>
                                                                     <InputGroup>
-                                                                        <Input autoComplete="off"  type="text" value={this.state.contractNumber} onChange={this.handleContractNumber} id="contractNumber" placeholder={this.state.contractNumNotes}></Input>
+                                                                        <Input autoComplete="off" type="text" value={this.state.contractNumber} onChange={this.handleContractNumber} id="contractNumber" placeholder={this.state.contractNumNotes}></Input>
                                                                         {/* <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
                                                                             <DropdownToggle><i className="fa fa-list-ul" /></DropdownToggle>
                                                                             <DropdownMenu>
@@ -2350,10 +2350,10 @@ async validateContractNumber() {
                                                         <Col xl={1}>
                                                             <FormGroup>
                                                                 {taskDetails.applicationTypeId === "CNIPS"
-                                                                    ?<Button block onClick={this.addDocumentCNIPS}>Add</Button>
-                                                                    :<Button block onClick={this.addDocumentLTI}>Add</Button>
+                                                                    ? <Button block onClick={this.addDocumentCNIPS}>Add</Button>
+                                                                    : <Button block onClick={this.addDocumentLTI}>Add</Button>
                                                                 }
-                                                                </FormGroup>
+                                                            </FormGroup>
                                                         </Col>
                                                     </Row>
                                                     <InputGroup>
@@ -2670,7 +2670,7 @@ async validateContractNumber() {
                                                                 <hr></hr>
                                                                 <Row className="text-md-left text-center">
                                                                     <Col sm md="10" lg>
-                                                                        <h5>{history.approvedByName}<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
+                                                                        <h5>{history.approvedByName}<span> <Badge color={history.approvalStatus === "SENDBACKED" || history.approvalStatus === "REJECTED" ? "danger" : "success"}>{history.approvalStatus}</Badge></span></h5>
                                                                         <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
                                                                         <Col className="p-0"> <p>{history.comments}</p> </Col>
                                                                     </Col>
