@@ -18,7 +18,7 @@ import {
     Badge,
     Progress,
     UncontrolledTooltip,
-    
+
 } from 'reactstrap';
 import config from '../../config';
 import Axios from 'axios';
@@ -460,7 +460,7 @@ class EditRequest extends Component {
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
         if (temporary.chopTypeId === "BCSCHOP") {
             await this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
-            await this.getDocCheckBy(response.data.taskDetails.departmentId, response.data.teamId, response.data.chopTypeId)
+            await this.getDocCheckBy(response.data.departmentId, response.data.teamId, response.data.chopTypeId, (callback) => {})
         }
 
         if (temporary.applicationTypeId === "LTU") {
