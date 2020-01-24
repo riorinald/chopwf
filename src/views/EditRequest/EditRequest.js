@@ -145,7 +145,7 @@ class EditRequest extends Component {
 
             showDoc: false,
             selectedDocs: [],
-
+            
             invalidEnglish: false,
             invalidChinese: false,
             invalidNumberOfPages: false,
@@ -164,7 +164,7 @@ class EditRequest extends Component {
             teams: [],
             msgTooltip: '[I / S ]-[ A / L / IA / R ]-[ O / P / S] \n e.g "S-A-O-9999-9999"',
             ioTooltip: false,
-            tempContractNumber: "",
+            tempDocument: [],
             contractValid: true,
             contractNumNotes: "",
             contractError: "",
@@ -472,7 +472,7 @@ class EditRequest extends Component {
         }
         temporary.departmentId = temporary.departmentId.toLowerCase()
         // console.log(temporary.requestorUser)
-        this.setState({ taskDetails: temporary, loading: false })
+        this.setState({ taskDetails: temporary, tempDocument: temporary.documents, loading: false })
         console.log(temporary)
 
     }
@@ -984,7 +984,7 @@ class EditRequest extends Component {
         if (typeValid) {
             if (this.state.taskDetails.applicationTypeId === "CNIPS") {
                 for (let i = 0; i < doc.length; i++) {
-                    if (doc[i].documentFileName === this.state.editRequestForm.docAttachedName && doc[i].contractNums[0] === this.state.tempContractNumber) {
+                    if (doc[i].documentFileName === this.state.editRequestForm.docAttachedName ) {
                         valid = false
                         break
                     }
@@ -1025,8 +1025,7 @@ class EditRequest extends Component {
                     documentId: rand,
                     documentNameEnglish: this.state.editRequestForm.engName,
                     documentNameChinese: this.state.editRequestForm.cnName,
-                    docSelected: this.state.editRequestForm.docSelected,
-                    contractNums: [this.state.tempContractNumber]
+                    docSelected: this.state.editRequestForm.docSelected
                 }
 
                 this.getBase64(this.state.editRequestForm.docSelected, (result) => {
@@ -1053,9 +1052,8 @@ class EditRequest extends Component {
             }
 
             this.setState(state => {
-                let { editRequestForm, tempContractNumber } = this.state
+                let { editRequestForm } = this.state
                 editRequestForm.docAttachedName = ""
-                tempContractNumber = ""
                 editRequestForm.docSelected = null
                 editRequestForm.engName = ""
                 editRequestForm.cnName = ""
@@ -1076,10 +1074,7 @@ class EditRequest extends Component {
         if (this.state.selectedDocs.length !== 0) {
             document.getElementById("documentTableLTU").className = "form-control"
         }
-        let valid = true
-        this.state.selectedDocs.map(doc => {
 
-        })
         this.state.selectedDocs.map(doc => {
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
@@ -1880,9 +1875,13 @@ class EditRequest extends Component {
 
 
         if (this.state.taskDetails.applicationTypeId === "LTU") {
+            let documents =  this.state.taskDetails.documents
+            if (this.state.taskDetails.documents === this.state.tempDocument){
+                documents = []
+                }
             for (let i = 0; i < this.state.taskDetails.documents.length; i++) {
-                postReq.append(`DocumentIds[${i}]`, this.state.taskDetails.documents[i].documentId);
-            }
+                    postReq.append(`DocumentIds[${i}]`, documents[i].documentId);
+                }
         }
         else {
             let def = 0
@@ -1906,9 +1905,7 @@ class EditRequest extends Component {
                     postReq.append(`Documents[${temp}].Attachment.File`, documentSelected);
                     postReq.append(`Documents[${temp}].DocumentNameEnglish`, this.state.taskDetails.documents[i].documentNameEnglish);
                     postReq.append(`Documents[${temp}].DocumentNameChinese`, this.state.taskDetails.documents[i].documentNameChinese);
-                    // for (let j = 0; j < this.state.taskDetails.documents[i].contractNums.length; j++) {
-                    postReq.append(`Documents[${temp}].ContractNums[0]`, this.state.taskDetails.documents[i].contractNums[0]);
-                    // }
+
                 }
             }
 
