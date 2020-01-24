@@ -378,7 +378,7 @@ class LicenseApplicationDetail extends Component {
                                                     bar
                                                     animated={stage.state === "CURRENT" ? true : false}
                                                     striped={true}
-                                                     color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                    color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                     // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "green" : "secondary  "}
                                                     value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "white" : stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                 </Progress>
@@ -849,7 +849,7 @@ class LicenseApplicationDetail extends Component {
                                 : null}
                             {taskDetails.histories.map((history, index) =>
                                 <div key={index}>
-                                    <Row className="bottom-border"></Row>
+                                    <hr></hr>
                                     <Row>
                                         {/* <Col md="1">
                                             <img src={history.approvedByAvatarUrl} className="img-avatar" alt="Avatar" />

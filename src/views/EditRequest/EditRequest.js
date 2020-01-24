@@ -354,7 +354,6 @@ class EditRequest extends Component {
         }
 
         this.setState({ [view]: dateView })
-        return dateView;
     }
 
     getDocCheckByOption(person) {
@@ -413,9 +412,10 @@ class EditRequest extends Component {
             this.getTeams(temporary.departmentId)
         }
         // if (temporary.returnDate !== "") {
-        //     this.convertDate(temporary.returnDate, 'dateView2')
         // }
-        temporary.returnDate = temporary.returnDate !== '' ? this.convertDate(temporary.returnDate, 'dateView2') : null
+        if (temporary.returnDate !== '') {
+            this.convertDate(temporary.returnDate, 'dateView2')
+        }
         temporary.responsiblePersonOption = this.getOptionAllUsers(temporary.responsiblePerson)
         temporary.pickUpByOption = this.getOptionAllUsers(temporary.pickUpBy)
 
@@ -432,13 +432,14 @@ class EditRequest extends Component {
                     temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
                 })
             }
-            // temporary.effectivePeriod = temporary.effectivePeriod !== "" ? this.convertDate(temporary.effectivePeriod, 'dateView1') : null
         }
 
         else if (temporary.applicationTypeId === "LTI") {
 
             this.setSelectedDocCheckBy(temporary.documentCheckBy)
-            temporary.effectivePeriod = temporary.effectivePeriod !== "" ? this.convertDate(temporary.effectivePeriod, 'dateView1') : null
+            if (temporary.effectivePeriod !== "") {
+                this.convertDate(temporary.effectivePeriod, 'dateView1')
+            }
         }
 
         this.setState(state => {

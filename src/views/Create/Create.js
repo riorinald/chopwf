@@ -430,6 +430,7 @@ class Create extends Component {
   //toggle useInOffice
   toggle = name => event => {
     if (name === "collapse") {
+      this.setState({ agreeTerms: false })
       let form = this.state.validateForm
       if (!this.state.collapse) {
         form = form.filter(id => id !== "resPerson" && id !== "returnDate")

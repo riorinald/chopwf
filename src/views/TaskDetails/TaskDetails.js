@@ -129,6 +129,7 @@ class TaskDetails extends Component {
             onOpen: () => {
                 Axios.post(`${config.url}/tasks/${this.state.taskDetails.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
                     .then(res => {
+                        console.log(res.data)
 
                         Swal.update({
                             title: res.data.message,
@@ -408,15 +409,15 @@ class TaskDetails extends Component {
                                                         {
                                                             Header: "Document Name (English)",
                                                             accessor: "documentNameEnglish",
-                                                            // width: 250,
-                                                            style: { 'whiteSpace': 'unset', 'overflow': 'visible', 'maxWidth': 250 }
-
+                                                            width: 250,
+                                                            style: { 'white-space': 'normal' }
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
                                                             Header: "Document Name (Chinese)",
                                                             accessor: "documentNameChinese",
                                                             width: 250,
+                                                            style: { 'white-space': 'normal' }
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
