@@ -408,7 +408,8 @@ class TaskDetails extends Component {
                                                         {
                                                             Header: "Document Name (English)",
                                                             accessor: "documentNameEnglish",
-                                                            width: 250,
+                                                            // width: 250,
+                                                            style: { 'whiteSpace': 'unset', 'overflow': 'visible', 'maxWidth': 250 }
 
                                                             // style: { textAlign: "center" },
                                                         },

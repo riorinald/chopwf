@@ -678,22 +678,24 @@ class Create extends Component {
 
       //LONG TERM USE
       else if (event.target.value === "LTU") {
+
         this.setState({
           isSTU: false,
           isLTU: true,
           isLTI: false,
           isCNIPS: false,
-          reqInfo: LTU
+          reqInfo: LTU,
+
         })
 
-        if (this.state.deptSelected !== "") {
-          this.getTeams(this.state.deptSelected)
-          if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.deptSelected !== "") {
-            this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, this.state.teamSelected, (callback) => {
+        // if (this.state.deptSelected !== "") {
+        this.getTeams(this.state.deptSelected)
+        // if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.deptSelected !== "") {
+        // this.getDocuments(this.props.legalName, this.state.deptSelected, this.state.chopTypeSelected, this.state.teamSelected, (callback) => {
 
-            })
-          }
-        }
+        // })
+        // }
+        // }
       }
 
       //SHORT - TERM USE
@@ -721,13 +723,19 @@ class Create extends Component {
 
     //CHOP TYPE
     else if (name === "chopTypeSelected") {
-      console.log(event.target.value)
-      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
-      if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
-        this.getDocCheckBy(event.target.value, this.state.teamSelected)
-        this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
+      if (this.state.isLTU) {
+        this.setState({
+          docCheckBySelected: null,
+          documentTableLTU: []
         })
+        this.getDocCheckBy(event.target.value, this.state.teamSelected)
       }
+      this.setState({ documentTableCNIPS: [], documentTableLTI: [] })
+      // if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
+      // this.getDocCheckBy(event.target.value, this.state.teamSelected)
+      // this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
+      // })
+      // }
 
       if (event.target.value === "BCSCHOP") {
         this.setState({ showBranches: true })
@@ -747,26 +755,38 @@ class Create extends Component {
 
     //DEPARTMENT
     else if (name === "deptSelected") {
+      if (this.state.isLTU) {
+        this.setState({
+          docCheckBySelected: null, documentTableLTU: []
+        })
+        this.getDocCheckBy(this.state.chopTypeSelected, this.state.teamSelected)
+      }
       this.setState({ teamSelected: "" })
       this.getDeptHead(this.props.legalName)
       this.getUsers();
-      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
+      this.setState({ documentTableCNIPS: [], documentTableLTI: [] })
       if (this.state.isLTU || this.state.isLTI) {
         this.getTeams(event.target.value)
       }
-      if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.isLTU) {
-        this.getDocuments(this.props.legalName, event.target.value, this.state.chopTypeSelected, this.state.teamSelected, (callback) => {
+      // if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.isLTU) {
+      //   this.getDocuments(this.props.legalName, event.target.value, this.state.chopTypeSelected, this.state.teamSelected, (callback) => {
 
-        })
-      }
+      //   })
+      // }
     }
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
-      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
-      if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
+      if (this.state.isLTU) {
+        this.setState({
+          docCheckBySelected: null, documentTableLTU: []
+        })
         this.getDocCheckBy(this.state.chopTypeSelected, event.target.value)
       }
+      this.setState({ documentTableCNIPS: [], documentTableLTI: [] })
+      // if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
+      // this.getDocCheckBy(this.state.chopTypeSelected, event.target.value)
+      // }
       // console.log(event.target.value)
     }
 
@@ -2175,17 +2195,17 @@ class Create extends Component {
                     </FormGroup>
 
                     : this.state.isLTU
-                      	? <FormGroup>
-							<Label>Document Check By <i className="fa fa-user" /></Label>
-							<Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-								<Select
-									id="docCheckBySelected"
-									options={docCheckByUsers}
-									isClearable
-									menuPortalTarget={document.body}
-									styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-									onChange={this.handleSelectOption("docCheckBySelected")}
-								/>
+                      ? <FormGroup>
+                        <Label>Document Check By <i className="fa fa-user" /></Label>
+                        <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                        <Select
+                          id="docCheckBySelected"
+                          options={docCheckByUsers}
+                          isClearable
+                          menuPortalTarget={document.body}
+                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                          onChange={this.handleSelectOption("docCheckBySelected")}
+                        />
                         {/* <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
                           loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} /> */}
                         <InputGroup>

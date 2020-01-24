@@ -227,15 +227,12 @@ class EditRequest extends Component {
         console.log("getting lvl4 users")
         await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&choptypeid=${chopTypeId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
             { headers: { Pragma: 'no-cache' } }).then(res => {
+                let arr = []
                 for (let i = 0; i < res.data.length; i++) {
                     const obj = { value: res.data[i].userId, label: res.data[i].displayName }
-                    this.setState(state => {
-                        const docCheckBy = this.state.docCheckBy.concat(obj)
-                        return {
-                            docCheckBy
-                        }
-                    })
+                    arr.push(obj)
                 }
+                this.setState({ docCheckBy: arr })
             })
         callback()
     }
@@ -361,14 +358,10 @@ class EditRequest extends Component {
     }
 
     getDocCheckByOption(person) {
-        console.log(person)
         let i = 0
         if (person.length === 1) {
-            console.log("akath keri")
             this.state.docCheckBy.map((head, index) => {
-                console.log(head.value)
                 if (head.value === person[0]) {
-                    console.log(index)
                     i = index
                     this.setState({ selectedDocCheckBy: head.value })
                 }
@@ -671,6 +664,7 @@ class EditRequest extends Component {
     }
 
     handleChange = name => event => {
+        console.log(this.state.taskDetails.documentCheckBy[this.state.taskDetails.docCheckByOption])
         let value = event.target.value
 
         this.setState(state => {
@@ -680,39 +674,35 @@ class EditRequest extends Component {
         })
         if (name === "departmentId") {
             this.getTeams(event.target.value)
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.documents = []
-                return taskDetails
-            })
+            // this.setState(state => {
+            //     let taskDetails = this.state.taskDetails
+
+            //     return taskDetails
+            // })
             console.log(this.state.taskDetails.applicationTypeId)
             if (this.state.taskDetails.applicationTypeId === "LTU") {
-                if (this.state.taskDetails.chopTypeId !== "" && this.state.taskDetails.teamId !== "") {
-                    // this.getDocuments(this.props.legalName, event.target.value, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId, (callback) => {
-
-                    // })
-                }
+                this.setState({ docCheckBy: [] })
                 this.setState(state => {
                     const taskDetails = this.state.taskDetails
+                    taskDetails.documents = []
                     taskDetails.teamId = ""
+                    taskDetails.documentCheckBy = []
+                    taskDetails.docCheckByOption = ""
                     return { taskDetails }
                 })
             }
         }
         else if (name === "teamId") {
             // console.log(this.state.taskDetails.applicationTypeId)
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.documents = []
-                return taskDetails
-            })
             if (this.state.taskDetails.applicationTypeId === "LTU") {
-                if (this.state.taskDetails.chopTypeId !== "") {
-                    this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.chopTypeId, (callback) => {
-
-                    })
-                    // this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, event.target.value, (callback) => { })
-                }
+                this.setState(state => {
+                    let taskDetails = this.state.taskDetails
+                    taskDetails.documentCheckBy = []
+                    taskDetails.documents = []
+                    taskDetails.docCheckByOption = ""
+                    return taskDetails
+                })
+                this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.chopTypeId, (callback) => { })
             }
         }
         else if (name === "applicationTypeId") {
@@ -723,28 +713,27 @@ class EditRequest extends Component {
             })
             this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${event.target.value}`);
         }
-        else if (name === "chopTypeId") {
-            this.setState(state => {
-                let taskDetails = this.state.taskDetails
-                taskDetails.documents = []
-                return taskDetails
-            })
-            if (this.state.taskDetails.teamId !== "") {
-                this.getDocCheckBy(this.state.taskDetails.departmentId, this.state.taskDetails.teamId, event.target.value, (callback) => {
 
-                })
-            }
+        else if (name === "chopTypeId") {
+
+            // if (this.state.taskDetails.teamId !== "" && this.state.taskDetails.applicationTypeId === "LTI") {
+            //     this.getDocCheckBy(this.state.taskDetails.departmentId, this.state.taskDetails.teamId, event.target.value, (callback) => { })
+            // }
             console.log(this.state.taskDetails.applicationTypeId)
             if (event.target.value === "CONCHOP") {
                 this.toggleModal();
             }
             if (this.state.taskDetails.applicationTypeId === "LTU") {
-                if (this.state.taskDetails.departmentId !== "" && this.state.taskDetails.teamId !== "") {
-                    // this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.teamId, (callback) => {
-
-                    // })
-                }
+                this.getDocCheckBy(this.state.taskDetails.departmentId, this.state.taskDetails.teamId, event.target.value, (callback) => { })
+                this.setState(state => {
+                    let taskDetails = this.state.taskDetails
+                    taskDetails.documents = []
+                    taskDetails.documentCheckBy = []
+                    taskDetails.docCheckByOption = ""
+                    return taskDetails
+                })
             }
+
             if (event.target.value === "BCSCHOP") {
                 this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
             }
@@ -1411,7 +1400,6 @@ class EditRequest extends Component {
             taskDetails.isConfirm = "N"
             return taskDetails
         })
-        console.log(newValue)
         if (sname === "documentCheckBy1") {
             var element = document.getElementById("documentCheckBy")
             element.classList.contains("form-control")
@@ -1450,8 +1438,11 @@ class EditRequest extends Component {
             let option = ""
             if (newValue) {
                 value.push(newValue.value)
-                option = this.getDocCheckByOption(newValue.value)
+                option = this.getDocCheckByOption(value)
             }
+            console.log(this.state.docCheckBy[option])
+            // console.log(option)
+            // console.log(this.state.docCheckBy)
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
                 taskDetails.documentCheckBy = value
