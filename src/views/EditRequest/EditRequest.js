@@ -6,8 +6,8 @@ import {
     FormGroup,
     Label,
     Collapse,
-    Form, 
-    InputGroup, 
+    Form,
+    InputGroup,
     InputGroupAddon,
     Modal,
     ModalHeader,
@@ -370,7 +370,7 @@ class EditRequest extends Component {
                 if (head.value === person[0]) {
                     console.log(index)
                     i = index
-                    this.setState({ selectedDocCheckBy : head.value })
+                    this.setState({ selectedDocCheckBy: head.value })
                 }
             })
         }
@@ -460,7 +460,7 @@ class EditRequest extends Component {
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
         if (temporary.chopTypeId === "BCSCHOP") {
             await this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
-            await this.getDocCheckBy(response.data.departmentId, response.data.teamId, response.data.chopTypeId, (callback) => {})
+            await this.getDocCheckBy(response.data.departmentId, response.data.teamId, response.data.chopTypeId, (callback) => { })
         }
 
         if (temporary.applicationTypeId === "LTU") {
@@ -1076,6 +1076,10 @@ class EditRequest extends Component {
         if (this.state.selectedDocs.length !== 0) {
             document.getElementById("documentTableLTU").className = "form-control"
         }
+        let valid = true
+        this.state.selectedDocs.map(doc => {
+
+        })
         this.state.selectedDocs.map(doc => {
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
@@ -2206,17 +2210,22 @@ class EditRequest extends Component {
                                                                         Header: 'Expiry Date',
                                                                         accessor: 'expiryDate',
                                                                         Cell: row => (
-                                                                            <div> {this.convertExpDate(row.original.expiryDate)} </div>
+                                                                            <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                                                                                {this.convertExpDate(row.original.expiryDate)}
+                                                                            </div>
                                                                         ),
-                                                                        style: { textAlign: "center" },
+                                                                        // style: { textAlign: "center" },
                                                                     },
                                                                     {
                                                                         Header: 'DH Approved',
                                                                         accessor: 'departmentHeads',
                                                                         Cell: row => (
-                                                                            <div> {this.changeDeptHeads(row.original.departmentHeads)} </div>
+                                                                            <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                                                                                {this.changeDeptHeads(row.original.departmentHeads)}
+                                                                            </div>
+
                                                                         ),
-                                                                        style: { textAlign: "center" },
+                                                                        // style: { textAlign: "center" },
                                                                     },
                                                                 ]}
                                                                 keyField="documentId"
@@ -2520,9 +2529,9 @@ class EditRequest extends Component {
                                                         onChange={this.handleSelectOption("documentCheckBy")}
                                                         menuPortalTarget={document.body}
                                                         components={animatedComponents}
-                                                        styles={{menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                                     />
-                                                :
+                                                    :
                                                     <Select
                                                         id="documentCheckBy"
                                                         options={docCheckBy}

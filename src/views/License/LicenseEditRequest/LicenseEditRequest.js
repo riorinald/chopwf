@@ -25,7 +25,8 @@ import {
     Table,
     Tooltip,
     UncontrolledTooltip,
-    Badge
+    Badge,
+    Progress
 } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -612,6 +613,31 @@ class LicenseEditRequest extends Component {
                             &nbsp;&nbsp; EDIT REQUEST - {taskDetails.requestNum}
                         </CardHeader>
                         <CardBody>
+                            {taskDetails.currentStatusId === "SENDBACKED"
+                                ? <Row>
+                                    <Col className="mb-4">
+                                        <Progress multi>
+                                            {taskDetails.allStages.map((stage, index) =>
+
+                                                <React.Fragment key={index}>
+                                                    <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
+                                                    <Progress
+                                                        className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
+                                                        bar
+                                                        animated={stage.state === "CURRENT" ? true : false}
+                                                        striped={stage.state !== "CURRENT"}
+                                                        color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                        // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                        value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
+                                                    </Progress>
+                                                </React.Fragment>
+
+                                            )}
+                                        </Progress>
+                                    </Col>
+                                </Row>
+                                : null
+                            }
                             <Form className="form-horizontal">
                                 <FormGroup>
                                     <Label>Request Number</Label>
