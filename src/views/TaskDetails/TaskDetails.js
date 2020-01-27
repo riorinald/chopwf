@@ -506,7 +506,7 @@ class TaskDetails extends Component {
                                             <img src={history.approvedByAvatarUrl} className="img-avaa img-responsive" alt="Avatar" />
                                         </Col> */}
                                         <Col sm md="10" lg>
-                                            <h5>{history.approvedByName}<span> <Badge color={history.approvalStatus === "SENDBACK" || history.approvalStatus === "REJECTED" ? "danger" : "success"}>{history.approvalStatus}</Badge></span></h5>
+                                            <h5>{history.approvedByName}<span> <Badge color={history.stateIndicator === "SENDBACK" || history.stateIndicator === "REJECTED" ? "danger" : "success"}>{history.stateIndicator}</Badge></span></h5>
                                             <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
                                             <Col className="p-0"> <p>{history.comments}</p> </Col>
                                         </Col>

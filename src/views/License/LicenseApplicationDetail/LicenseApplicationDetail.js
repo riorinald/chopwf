@@ -855,7 +855,7 @@ class LicenseApplicationDetail extends Component {
                                             <img src={history.approvedByAvatarUrl} className="img-avatar" alt="Avatar" />
                                         </Col> */}
                                         <Col md="8">
-                                            <h5>{history.approvedByName}<span> <Badge color={history.approvalStatus === "SENDBACK" || history.approvalStatus === "REJECTED" ? "danger" : "success"} >{history.approvalStatus}</Badge></span></h5>
+                                            <h5>{history.approvedByName}<span> <Badge color={history.stateIndicator === "SENDBACK" || history.stateIndicator === "REJECTED" ? "danger" : "success"} >{history.stateIndicator}</Badge></span></h5>
                                             <div><b>Approved On:</b> {this.convertApprovedDate(history.approvedDate)}</div>
                                             <small>{history.comments}</small>
                                         </Col>
