@@ -931,133 +931,117 @@ class EditRequest extends Component {
         var date = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear() + ' ' + tempDate.getHours() + ':' + tempDate.getMinutes() + ':' + tempDate.getSeconds();
         // console.log(this.state.editRequestForm.docSelected)
         let valid = true
-        let contractError = []
+        let errorMessage = []
         let doc = this.state.taskDetails.documents
         let typeValid = false
-        let validateConNum = this.validateContractNumber()
 
-        if (this.state.editRequestForm.docSelected !== null) {
-            if (this.state.taskDetails.applicationTypeId === "STU") {
-                if (this.state.editRequestForm.engName !== "") {
-                    typeValid = true
-                }
-                else {
-                    typeValid = false
-                }
+        if (this.state.editRequestForm.docSelected === null) {
+            errorMessage.push("Please select a valid document.<br />")
             }
-            else if (this.state.taskDetails.applicationTypeId === "CNIPS") {
-                if (this.state.editRequestForm.engName !== "" && this.validateContractNumber()) {
-                    typeValid = true
-                }
-                else {
-                    typeValid = false
-                }
+        if (this.state.isLTI) {
+            if (this.state.editRequestForm.engName === "" && this.state.editRequestForm.cnName === "" ){
+                errorMessage.push("Please input document name in English and Chinese.<br />")
+                typeValid = false
             }
-            else if (this.state.taskDetails.applicationTypeId === "LTI") {
-                if (this.state.editRequestForm.engName !== "" && this.state.editRequestForm.cnName !== "") {
-                    typeValid = true
-                }
-                else {
-                    typeValid = false
-                }
+            if (this.state.invalidEnglish === true){
+                errorMessage.push("Please input document name in English with English character.<br />")
+                typeValid = false
             }
-        }
-
-        else {
-            Swal.fire({
-                title: "No Document Selected",
-                html: 'Please attach a valid document!',
-                type: "warning"
-            })
-        }
-
-        if (typeValid) {
-            if (this.state.taskDetails.applicationTypeId === "CNIPS") {
-                for (let i = 0; i < doc.length; i++) {
-                    if (doc[i].documentFileName === this.state.editRequestForm.docAttachedName ) {
-                        valid = false
-                        break
-                    }
-                    else {
-                        valid = true
-                    }
+            if (this.state.invalidChinese === true){
+                errorMessage.push("Please input document name in Chinese with Chinese character.<br />")
+                typeValid = false
+            }
+            else{
+                typeValid = true
+            }
                 }
+        else{
+            if (this.state.editRequestForm.engName === ""){
+                errorMessage.push("Please input document name in english.<br />")
+                typeValid = false
+            }
+            if (this.state.invalidEnglish === true){
+                errorMessage.push("Please input document name in English with English character.<br />")
+                typeValid = false
             }
             else {
-                for (let i = 0; i < doc.length; i++) {
-                    if (doc[i].documentNameEnglish === this.state.editRequestForm.engName && doc[i].documentFileName === this.state.editRequestForm.docAttachedName) {
-                        valid = false
-                        break
-                    }
-                    else {
-                        valid = true
-                    }
+                typeValid = false
                 }
             }
-
-            if (valid) {
-
-
-                const obj = {
-                    taskId: this.state.taskDetails.taskId,
-                    documentFileName: this.state.editRequestForm.docAttachedName,
-                    documentCode: "",
-                    contractNumber: this.state.editRequestForm.contractNum,
-                    description: "",
-                    created: date,
-                    updated: "",
-                    documentType: "",
-                    documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
-                    documentFileType: this.state.editRequestForm.docSelected.type,
-                    documentBase64String: "",
-                    expiryDate: null,
-                    departmentHeads: null,
-                    documentId: rand,
-                    documentNameEnglish: this.state.editRequestForm.engName,
-                    documentNameChinese: this.state.editRequestForm.cnName,
-                    docSelected: this.state.editRequestForm.docSelected
-                }
-
-                this.getBase64(this.state.editRequestForm.docSelected, (result) => {
-                    obj.documentBase64String = result
+            if (errorMessage.length !== 0){
+                console.log(errorMessage)
+                Swal.fire({
+                    title: "Invalid",
+                    html: errorMessage.join('\n\n'),
+                    type: "warning",
+                    width: "550px"
                 })
+            }
+        else {
+        for (let i = 0; i < doc.length; i++) {
+            if (doc[i].docName === this.state.editRequestForm.docAttachedName) {
+                valid = false
+                break
+            }
+            else {
+                valid = true
+            }
+            }
+                if (valid) {
+                    const obj = {
+                        taskId: this.state.taskDetails.taskId,
+                        documentFileName: this.state.editRequestForm.docAttachedName,
+                        documentCode: "",
+                        contractNumber: this.state.editRequestForm.contractNum,
+                        description: "",
+                        created: date,
+                        updated: "",
+                        documentType: "",
+                        documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
+                        documentFileType: this.state.editRequestForm.docSelected.type,
+                        documentBase64String: "",
+                        expiryDate: null,
+                        departmentHeads: null,
+                        documentId: rand,
+                        documentNameEnglish: this.state.editRequestForm.engName,
+                        documentNameChinese: this.state.editRequestForm.cnName,
+                        docSelected: this.state.editRequestForm.docSelected
+                    }
 
-                console.log(obj)
+                    this.getBase64(this.state.editRequestForm.docSelected, (result) => {
+                        obj.documentBase64String = result
+                    })
+
+                    console.log(obj)
 
                 this.setState(state => {
-                    let { taskDetails, invalidChinese, invalidEnglish } = this.state
+                let { taskDetails, invalidChinese, invalidEnglish } = this.state
                     taskDetails.documents.push(obj)
                     invalidChinese = false
                     invalidEnglish = false
                     return { taskDetails, invalidChinese, invalidEnglish }
                 })
+                
                 document.getElementById("documents").className = ""
-            }
-            else {
-                Swal.fire({
-                    title: "Document Exists",
-                    html: 'The selected document already exists!',
-                    type: "warning"
+
+                this.setState(state => {
+                let { editRequestForm } = this.state
+                    editRequestForm.docAttachedName = ""
+                    editRequestForm.docSelected = null
+                    editRequestForm.engName = ""
+                    editRequestForm.cnName = ""
+                    return editRequestForm
                 })
             }
-
-            this.setState(state => {
-                let { editRequestForm } = this.state
-                editRequestForm.docAttachedName = ""
-                editRequestForm.docSelected = null
-                editRequestForm.engName = ""
-                editRequestForm.cnName = ""
-                return editRequestForm
-            })
-            this.setState({ conNum: [] })
-        }
-        else {
+            else {
             Swal.fire({
-                title: "Invalid Data",
-                html: 'Please input valid data!',
+                title: "Document Exists",
+                html: 'The selected document already exists in the List',
                 type: "warning"
-            })
+                })
+            }
         }
+
     }
 
     addDocumentLTU() {
@@ -1516,68 +1500,54 @@ class EditRequest extends Component {
     }
 
     async selectDocument() {
-
         document.getElementById('selectDocuments').blur()
-        let { taskDetails, checkDetails } = this.state
-        // if (this.state.documents.length === 0) {
-        if (checkDetails.deptTempSelected === taskDetails.departmentId && checkDetails.chopTypeTempSelected === taskDetails.chopTypeId && checkDetails.teamTempSelected === taskDetails.teamId) {
-            this.setState({ showDoc: true })
-        }
-        else {
-            Swal.fire({
-                title: "Retrieving",
-                html: 'Please wait while we retrive the list of documents available.',
-                type: "info",
-                onBeforeOpen: () => {
-                    Swal.showLoading()
-                },
-                onOpen: () => {
-                    this.getDocuments(this.props.legalName, taskDetails.departmentId, taskDetails.chopTypeId, taskDetails.teamId, (numberOfDocuments) => {
-                        if (numberOfDocuments === 0) {
-                            Swal.update({
-                                title: "No Documents",
-                                html: 'No documents to select from!',
-                                type: "warning"
-                            })
-                            Swal.hideLoading()
-                            this.setState(state => {
-                                let checkDetails = this.state.checkDetails
-                                checkDetails.deptTempSelected = "empty"
-                                checkDetails.chopTypeTempSelected = "empty"
-                                checkDetails.teamTempSelected = "empty"
-                                return checkDetails
-                            })
-                        }
-                        else {
-                            // Swal.hideLoading();
-                            Swal.close();
-                            this.setState({ showDoc: true })
-                            this.setState(state => {
-                                let checkDetails = this.state.checkDetails
-                                checkDetails.deptTempSelected = taskDetails.departmentId
-                                checkDetails.chopTypeTempSelected = taskDetails.chopTypeId
-                                checkDetails.teamTempSelected = taskDetails.teamId
-                                return checkDetails
-                            })
-                        }
-
-                    })
+        let {taskDetails } = this.state
+        let errorMessage = []
+          Swal.fire({
+            title: "Retrieving",
+            html: 'Please wait while we retrive the list of documents available.',
+            type: "info",
+            onBeforeOpen: () => {
+              Swal.showLoading()
+            },
+            onOpen: () => {
+                if(taskDetails.departmentId === ""){
+                    errorMessage.push("Please select the Department.<br />")
                 }
-            })
-        }
-
-        // await this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId)
-        // if (this.state.documents.length === 0) {
-        //     Swal.fire({
-        //         title: "No Documents",
-        //         html: 'No documents to select from!',
-        //         type: "warning"
-        //     })
-        // }
-        // else {
-        //     this.setState({ showDoc: !this.state.showDoc })
-
-        // }
+                if(taskDetails.chopTypeId === ""){
+                    errorMessage.push("Please select Chop Type.<br />")
+                }
+                if(taskDetails.teamId === ""){
+                    errorMessage.push("Please select Team.<br />")
+                }
+                console.log(errorMessage)
+                if(errorMessage.length !== 0){
+                    Swal.update({
+                        title: "Field Required",
+                        html: errorMessage.join('\n\n'),
+                        type: "warning"
+                    })
+                    Swal.hideLoading()
+                }
+                else{
+                     this.getDocuments(this.props.legalName, taskDetails.departmentId, taskDetails.chopTypeId, taskDetails.teamId, (numberOfDocuments) => {
+                    if (numberOfDocuments === 0) {
+                    Swal.update({
+                        title: "No Documents",
+                        html: 'There is no Documents in this appliction. ',
+                        type: "warning"
+                        })
+                    Swal.hideLoading()
+                    }
+                    else {
+                    // Swal.hideLoading();
+                        Swal.close();
+                        this.setState({ showDoc: true })
+                        }
+                    })
+                } 
+            }
+        })
     }
 
     toggleSelection = (key, shift, row) => {
@@ -2199,7 +2169,7 @@ class EditRequest extends Component {
                                                                         Header: 'Expiry Date',
                                                                         accessor: 'expiryDate',
                                                                         Cell: row => (
-                                                                            <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                                                                            <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} >
                                                                                 {this.convertExpDate(row.original.expiryDate)}
                                                                             </div>
                                                                         ),
@@ -2209,7 +2179,7 @@ class EditRequest extends Component {
                                                                         Header: 'DH Approved',
                                                                         accessor: 'departmentHeads',
                                                                         Cell: row => (
-                                                                            <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                                                                            <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} >
                                                                                 {this.changeDeptHeads(row.original.departmentHeads)}
                                                                             </div>
 
@@ -2249,11 +2219,11 @@ class EditRequest extends Component {
                                                                             <td>{document.documentNameEnglish}</td>
                                                                             <td>{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.convertExpDate(document.expiryDate)} </div>
+                                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.convertExpDate(document.expiryDate)} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                                                                             </td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.changeDeptHeads(document.departmentHeads)} </div>
+                                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.changeDeptHeads(document.departmentHeads)} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
                                                                             </td>
                                                                             <td className="smallTd" ><img width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} src={deleteBin} /></td>
@@ -2370,7 +2340,7 @@ class EditRequest extends Component {
                                                                             <td className="descTd">{document.documentNameEnglish}</td>
                                                                             <td className="descTd">{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
+                                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a> */}
                                                                             </td>
                                                                             <td className="smallTd"><img width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} src={deleteBin} /></td>
