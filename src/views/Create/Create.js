@@ -168,7 +168,6 @@ class Create extends Component {
 
       checkDetails: { deptTempSelected: "null", chopTypeTempSelected: "null", teamTempSelected: "null" },
 
-      tempContractNumber: "",
 
       reqInfo: [
         { id: "deptSelected", valid: false },
@@ -1083,32 +1082,58 @@ class Create extends Component {
     })
   }
 
-  addDocumentLTI() {
+	addDocumentLTI() {
 
-    var maxNumber = 45;
-    var rand = Math.floor((Math.random() * maxNumber) + 1);
-    let valid = true
-    let typeValid = false
-    let doc = this.state.documentTableLTI
-    if (this.state.docSelected !== null) {
-		if (this.state.isLTI) {
-			if (this.state.engName !== "" && this.state.cnName !== "" && this.state.invalidChinese === false && this.state.invalidEnglish === false) {
-				typeValid = true
+	var maxNumber = 45;
+	var rand = Math.floor((Math.random() * maxNumber) + 1);
+	let valid = true
+	let typeValid = false
+	let doc = this.state.documentTableLTI
+	let errorMessage = []
+
+	if (this.state.docSelected === null) {
+		errorMessage.push("Please select a valid document.<br />")
+		}
+	if (this.state.isLTI) {
+		if (this.state.engName === "" && this.state.cnName === "" ){
+			errorMessage.push("Please input document name in English and Chinese.<br />")
+			typeValid = false
+		}
+		if (this.state.invalidEnglish === true){
+			errorMessage.push("Please input document name in English with English character.<br />")
+			typeValid = false
+		}
+		if (this.state.invalidChinese === true){
+			errorMessage.push("Please input document name in Chinese with Chinese character.<br />")
+			typeValid = false
+		}
+		else{
+			typeValid = true
+		}
 			}
-			else {
-				typeValid = false
-			}
+	else{
+		if (this.state.engName === ""){
+			errorMessage.push("Please input document name in english.<br />")
+			typeValid = false
+		}
+		if (this.state.invalidEnglish === true){
+			errorMessage.push("Please input document name in English with English character.<br />")
+			typeValid = false
 		}
 		else {
-			if (this.state.engName !== "") {
-				typeValid = true
-			}
-			else {
-				typeValid = false
+			typeValid = false
 			}
 		}
-
-		if (typeValid) {
+		if (errorMessage.length !== 0){
+			console.log(errorMessage)
+			Swal.fire({
+				title: "Invalid",
+				html: errorMessage.join('\n\n'),
+				type: "warning",
+				width: "550px"
+			})
+		}
+		else {
 			for (let i = 0; i < doc.length; i++) {
 				if (doc[i].docName === this.state.docAttachedName) {
 					valid = false
@@ -1117,60 +1142,42 @@ class Create extends Component {
 					valid = true
 				}
 			}
+				if (valid) {
+					const obj = {
+						id: rand,
+						conNum: this.state.conNum,
+						engName: this.state.engName,
+						cnName: this.state.cnName,
+						docSelected: this.state.docSelected,
+						docName: this.state.docAttachedName,
+						docURL: URL.createObjectURL(this.state.docSelected),
+					}
+				this.getBase64(this.state.docSelected, (result) => {
+					obj.documentBase64String = result
+				})
 
-        if (valid) {
-          const obj = {
-            id: rand,
-            conNum: this.state.conNum,
-            engName: this.state.engName,
-            cnName: this.state.cnName,
-            docSelected: this.state.docSelected,
-            docName: this.state.docAttachedName,
-            docURL: URL.createObjectURL(this.state.docSelected),
-            // contractNumbers: this.state.contractNumbers
-          }
-          this.getBase64(this.state.docSelected, (result) => {
-            obj.documentBase64String = result
-          })
-
-          console.log(obj.docURL)
-          this.setState({
-            invalidEnglish: false, invalidChinese: false
-          })
-          this.setState(state => {
-            const documentTableLTI = state.documentTableLTI.concat(obj)
-            return {
-              documentTableLTI
-            }
-          })
-          document.getElementById("documentTableLTI").className = ""
-        }
-        else {
-          Swal.fire({
-            title: "Document Exists",
-            html: 'The selected document already exists in the List',
-            type: "warning"
-          })
-        }
-        this.setState({ engName: "", cnName: "", docSelected: null, docAttachedName: "" })
-      }
-      else {
-        Swal.fire({
-          title: "Invalid Data",
-          html: 'Please input valid data!',
-          type: "warning"
-        })
-      }
-
-    }
-    else {
-      Swal.fire({
-        title: "No Document",
-        html: 'Please select a valid document!',
-        type: "warning"
-      })
-    }
-  }
+				console.log(obj.docURL)
+				this.setState({
+					invalidEnglish: false, invalidChinese: false
+				})
+				this.setState(state => {
+					const documentTableLTI = state.documentTableLTI.concat(obj)
+						return {
+							documentTableLTI
+						}
+					})
+				document.getElementById("documentTableLTI").className = ""
+				this.setState({ engName: "", cnName: "", docSelected: null, docAttachedName: "" })
+				}
+				else {
+				Swal.fire({
+					title: "Document Exists",
+					html: 'The selected document already exists in the List',
+					type: "warning"
+					})
+				}
+			}
+	}
 
   getBase64(file, callback) {
     let reader = new FileReader();
