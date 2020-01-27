@@ -725,7 +725,7 @@ class Create extends Component {
     //CHOP TYPE
     else if (name === "chopTypeSelected") {
       console.log(event.target.value)
-      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: []})
+      this.setState({ selectedOption: {docCheckBySelected:null}, documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: []})
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
         this.getDocCheckBy(event.target.value, this.state.teamSelected)
         this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
@@ -778,7 +778,7 @@ class Create extends Component {
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
-      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
+      this.setState({ selectedOption: {docCheckBySelected:null}, documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
 		this.getDocCheckBy(this.state.chopTypeSelected, event.target.value)
 		this.handleSelectOption('docCheckBySelected')
@@ -1407,7 +1407,7 @@ class Create extends Component {
     //   this.setState({ showDoc: true })
     // }
     // else {
-      Swal.fire({
+    Swal.fire({
         title: "Retrieving",
         html: 'Please wait while we retrive the list of documents available.',
         type: "info",
@@ -1440,27 +1440,13 @@ class Create extends Component {
 					title: "No Documents",
 					html: 'there is no Documents in this appliction. ',
 					type: "warning"
-				})
+					})
 				Swal.hideLoading()
-				// this.setState(state => {
-				// 	let checkDetails = this.state.checkDetails
-				// 	checkDetails.deptTempSelected = "empty"
-				// 	checkDetails.chopTypeTempSelected = "empty"
-				// 	checkDetails.teamTempSelected = "empty"
-				// 	return checkDetails
-				// })
 				}
 				else {
 				// Swal.hideLoading();
 					Swal.close();
 					this.setState({ showDoc: true })
-					// this.setState(state => {
-					// 	let checkDetails = this.state.checkDetails
-					// 	checkDetails.deptTempSelected = deptSelected
-					// 	checkDetails.chopTypeTempSelected = chopTypeSelected
-					// 	checkDetails.teamTempSelected = teamSelected
-					// 	return checkDetails
-					// 	})
             		}
 				})
 			} 
