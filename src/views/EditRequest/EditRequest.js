@@ -2000,7 +2000,7 @@ class EditRequest extends Component {
                              Edit Request <small className="d-sm-down-none">- {taskDetails.requestNum}</small>
                                 </CardHeader>
                                 <CardBody color="dark">
-                                    {taskDetails.currentStatusId === "SENDBACKED"
+                                    {taskDetails.currentStatusId === "SENDBACK"
                                         ? <Row>
                                             <Col className="mb-4" onClick={() => this.setState({ progressModal: !this.state.progressModal })}>
                                                 <Progress multi>
@@ -2013,7 +2013,7 @@ class EditRequest extends Component {
                                                                 bar
                                                                 animated={stage.state === "CURRENT" ? true : false}
                                                                 striped={stage.state !== "CURRENT"}
-                                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                                 // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                                 value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                             </Progress>
@@ -2666,7 +2666,7 @@ class EditRequest extends Component {
                                                                 <hr></hr>
                                                                 <Row className="text-md-left text-center">
                                                                     <Col sm md="10" lg>
-                                                                        <h5>{history.approvedByName}<span> <Badge color={history.approvalStatus === "SENDBACKED" || history.approvalStatus === "REJECTED" ? "danger" : "success"}>{history.approvalStatus}</Badge></span></h5>
+                                                                        <h5>{history.approvedByName}<span> <Badge color={history.approvalStatus === "SENDBACK" || history.approvalStatus === "REJECTED" ? "danger" : "success"}>{history.approvalStatus}</Badge></span></h5>
                                                                         <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
                                                                         <Col className="p-0"> <p>{history.comments}</p> </Col>
                                                                     </Col>

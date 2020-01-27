@@ -534,7 +534,7 @@ class MyPendingTasks extends Component {
                                             }
 
                                             let status = rowInfo.original.statusId
-                                            if (status === "DRAFTED" || status === "RECALLED" || status === "SENDBACKED") {
+                                            if (status === "DRAFTED" || status === "RECALLED" || status === "SENDBACK") {
                                                 this.goToEditRequest(rowInfo.original.taskId)
                                             }
                                             else {
