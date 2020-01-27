@@ -132,6 +132,8 @@ class Create extends Component {
       docCheckBySelected: "",
       branchSelected: "",
 
+      selectedOption:{},
+
       documentTableLTI: [],
       documentTableLTU: [],
       documentTableCNIPS: [],
@@ -166,7 +168,7 @@ class Create extends Component {
       invalidNumberOfPages: false,
       contractValid: true,
 
-      checkDetails: { deptTempSelected: "null", chopTypeTempSelected: "null", teamTempSelected: "null" },
+      checkDetails: { },
 
 
       reqInfo: [
@@ -755,25 +757,24 @@ class Create extends Component {
 
     //DEPARTMENT
     else if (name === "deptSelected") {
-      if (this.state.isLTU) {
-        this.setState({
-          docCheckBySelected: null, documentTableLTU: []
-        })
-        this.getDocCheckBy(this.state.chopTypeSelected, this.state.teamSelected)
-      }
-      this.setState({ teamSelected: "" })
-      this.getDeptHead(this.props.legalName)
-      this.getUsers();
-      this.setState({ documentTableCNIPS: [], documentTableLTI: [] })
-      if (this.state.isLTU || this.state.isLTI) {
-        this.getTeams(event.target.value)
-      }
-      // if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.isLTU) {
-      //   this.getDocuments(this.props.legalName, event.target.value, this.state.chopTypeSelected, this.state.teamSelected, (callback) => {
+		if (this.state.isLTU) {
+			this.setState({
+				selectedOption: {docCheckBySelected:null}, documentTableLTU: []
+			})
+			this.getDocCheckBy(this.state.chopTypeSelected, this.state.teamSelected)
+		}
+			this.getDeptHead(this.props.legalName)
+			this.getUsers();
+			this.setState({ teamSelected: "", documentTableCNIPS: [], documentTableLTI: [] })
+		if (this.state.isLTU || this.state.isLTI) {
+		this.getTeams(event.target.value)
+		}
+		// if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.isLTU) {
+		//   this.getDocuments(this.props.legalName, event.target.value, this.state.chopTypeSelected, this.state.teamSelected, (callback) => {
 
-      //   })
-      // }
-    }
+		//   })
+		// }
+	}
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
@@ -1369,16 +1370,15 @@ class Create extends Component {
   }
 
   handleSelectOption = sname => newValue => {
-	let name = null
-	name = sname
+
     if (newValue)
-      if (name === "deptHeadSelected" || name === "docCheckByLTI") {
+      if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
         if (newValue) {
-          this.setState({ [name]: newValue })
-          document.getElementById(name).clasname = "css-2b097c-container"
+          this.setState({ selectedOption:{[sname]:newValue}, [sname]: newValue })
+          document.getElementById(sname).clasname = "css-2b097c-container"
         }
         else {
-          this.setState({ [name]: [] })
+          this.setState({ [sname]: [] })
         }
 
       }
@@ -1386,7 +1386,7 @@ class Create extends Component {
         if (newValue.value) {
           document.getElementById(sname).className = "css-2b097c-container"
         }
-        this.setState({ [sname]: newValue.value })
+        this.setState({ selectedOption:{[sname]:newValue}, [sname]: newValue.value })
       }
 
   }
@@ -1397,14 +1397,16 @@ class Create extends Component {
   hideDoc() {
     this.setState({ showDoc: false })
   }
+
   selectDocument() {
     document.getElementById('selectDocuments').blur()
-    let { deptSelected, teamSelected, chopTypeSelected, checkDetails } = this.state
+	let { deptSelected, teamSelected, chopTypeSelected, checkDetails } = this.state
+	let errorMessage = []
     // if (this.state.documents.length !== 0) {
-    if (checkDetails.deptTempSelected === deptSelected && checkDetails.chopTypeTempSelected === chopTypeSelected && checkDetails.teamTempSelected === teamSelected) {
-      this.setState({ showDoc: true })
-    }
-    else {
+    // if (checkDetails.deptTempSelected === deptSelected && checkDetails.chopTypeTempSelected === chopTypeSelected && checkDetails.teamTempSelected === teamSelected) {
+    //   this.setState({ showDoc: true })
+    // }
+    // else {
       Swal.fire({
         title: "Retrieving",
         html: 'Please wait while we retrive the list of documents available.',
@@ -1413,38 +1415,57 @@ class Create extends Component {
           Swal.showLoading()
         },
         onOpen: () => {
-          this.getDocuments(this.props.legalName, deptSelected, chopTypeSelected, teamSelected, (numberOfDocuments) => {
-            if (numberOfDocuments === 0) {
-              Swal.update({
-                title: "No Documents",
-                html: 'No documents to select from!',
-                type: "warning"
-              })
-              Swal.hideLoading()
-              this.setState(state => {
-                let checkDetails = this.state.checkDetails
-                checkDetails.deptTempSelected = "empty"
-                checkDetails.chopTypeTempSelected = "empty"
-                checkDetails.teamTempSelected = "empty"
-                return checkDetails
-              })
-            }
-            else {
-              // Swal.hideLoading();
-              Swal.close();
-              this.setState({ showDoc: true })
-              this.setState(state => {
-                let checkDetails = this.state.checkDetails
-                checkDetails.deptTempSelected = deptSelected
-                checkDetails.chopTypeTempSelected = chopTypeSelected
-                checkDetails.teamTempSelected = teamSelected
-                return checkDetails
-              })
-            }
-          })
+			if(deptSelected === ""){
+				errorMessage.push("Please select the Department.<br />")
+			}
+			if(chopTypeSelected === ""){
+				errorMessage.push("Please select Chop Type.<br />")
+			}
+			if(teamSelected === ""){
+				errorMessage.push("Please select Team.<br />")
+			}
+			console.log(errorMessage)
+			if(errorMessage.length !== 0){
+				Swal.update({
+					title: "Field Required",
+					html: errorMessage.join('\n\n'),
+					type: "warning"
+				})
+				Swal.hideLoading()
+			}
+			else{
+         		this.getDocuments(this.props.legalName, deptSelected, chopTypeSelected, teamSelected, (numberOfDocuments) => {
+				if (numberOfDocuments === 0) {
+				Swal.update({
+					title: "No Documents",
+					html: 'there is no Documents in this appliction. ',
+					type: "warning"
+				})
+				Swal.hideLoading()
+				// this.setState(state => {
+				// 	let checkDetails = this.state.checkDetails
+				// 	checkDetails.deptTempSelected = "empty"
+				// 	checkDetails.chopTypeTempSelected = "empty"
+				// 	checkDetails.teamTempSelected = "empty"
+				// 	return checkDetails
+				// })
+				}
+				else {
+				// Swal.hideLoading();
+					Swal.close();
+					this.setState({ showDoc: true })
+					// this.setState(state => {
+					// 	let checkDetails = this.state.checkDetails
+					// 	checkDetails.deptTempSelected = deptSelected
+					// 	checkDetails.chopTypeTempSelected = chopTypeSelected
+					// 	checkDetails.teamTempSelected = teamSelected
+					// 	return checkDetails
+					// 	})
+            		}
+				})
+			} 
         }
       })
-    }
   }
 
   dateChange = (name, view) => date => {
@@ -1604,7 +1625,7 @@ class Create extends Component {
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
-                <div style={{ textDecoration: "underline", color: "#20A8D8", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
+                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
@@ -1634,7 +1655,7 @@ class Create extends Component {
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
-                <div style={{ textDecoration: "underline", color: "#20A8D8", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
+                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableCNIPS", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
@@ -1794,7 +1815,7 @@ class Create extends Component {
                   Header: 'Expiry Date',
                   accessor: 'expiryDate',
                   Cell: row => (
-                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                    <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} >
                       {this.convertExpDate(row.original.expiryDate)}
                     </div>
                   ),
@@ -1804,7 +1825,7 @@ class Create extends Component {
                   Header: 'DH Approved',
                   accessor: 'departmentHeads',
                   Cell: row => (
-                    <div onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} style={{ color: "blue", cursor: "pointer" }} >
+                    <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} >
                       {this.changeDeptHeads(row.original.departmentHeads)}
                     </div>
 
@@ -1844,13 +1865,13 @@ class Create extends Component {
                     <td>{document.documentNameEnglish}</td>
                     <td>{document.documentNameChinese}</td>
                     <td id="viewDoc">
-                      <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
+                      <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
                         {this.convertExpDate(document.expiryDate)}
                       </div>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                     </td>
                     <td id="viewDoc">
-                      <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
+                      <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
                         {this.changeDeptHeads(document.departmentHeads)}
                       </div>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
@@ -1865,7 +1886,6 @@ class Create extends Component {
 
         </Collapse>
       </div>
-
     return (
       <LegalEntity.Consumer>{
         ContextValue => (
@@ -2169,7 +2189,7 @@ class Create extends Component {
                           <AsyncSelect
                             id="contractSign1"
                             onBlur={this.checkDepartment}
-                            loadOptions={loadOptionsContract1}
+                            loadOptions={loadUsers}
                             onChange={this.handleSelectOption("contractSign1")}
                             menuPortalTarget={document.body}
                             isClearable
@@ -2185,7 +2205,7 @@ class Create extends Component {
                           <AsyncSelect
                             id="contractSign2"
                             onBlur={this.checkDepartment}
-                            loadOptions={loadOptionsContract2}
+                            loadOptions={loadUsers}
                             onChange={this.handleSelectOption("contractSign2")}
                             menuPortalTarget={document.body}
                             isClearable
@@ -2207,8 +2227,9 @@ class Create extends Component {
 								<Select
 									id="docCheckBySelected"
 									options={docCheckByUsers}
-									isClearable
-									value={this.docCheckBySelected}
+                  					isClearable
+                 					 // key={`my_unique_select_key__${docCheckBySelected}`}
+									value={this.state.selectedOption.docCheckBySelected}
 									menuPortalTarget={document.body}
 									styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
 									onChange={this.handleSelectOption("docCheckBySelected")}
