@@ -46,6 +46,11 @@ class DefaultLayout extends Component {
       cAdmin: localStorage.getItem("isChopKeeper"),
       lAdmin: localStorage.getItem('isLicenseAdmin'),
       application: localStorage.getItem('application'),
+      licenseAdminCompany: localStorage.getItem('licenseAdminCompanyIds').split(','),
+      chopKeeperCompany: localStorage.getItem('chopKeeperCompanyIds').split(','),
+      showChopAdmin: false,
+      showLicenseAdmin: false,
+      newRoutes: []
     }
     this.handleLegalEntity = this.handleLegalEntity.bind(this)
   }
@@ -60,6 +65,7 @@ class DefaultLayout extends Component {
     if (value === "LICENSE") {
       // LicenseCreate.fakeUpdate.didUpdate()
       this.props.history.push(`/${value.toLowerCase()}/create`)
+      // window.location.reload()
     }
     else {
       this.props.history.push('/create')
@@ -68,6 +74,7 @@ class DefaultLayout extends Component {
       application: value,
     },
       localStorage.setItem("application", value));
+    // window.location.reload()
   }
 
   changeEntity = workflow => event => {
@@ -95,21 +102,120 @@ class DefaultLayout extends Component {
     });
   }
 
-  handleSideBarNav(application) {
+  getRoute(application) {
+    let { licenseAdminCompany, legalEntity, chopKeeperCompany } = this.state
     switch (application) {
       case 'CHOP':
-        if (this.state.cAdmin === 'N')
-          return ChopNav.requestor;
-        if (this.state.cAdmin === 'Y')
-          return ChopNav.admin;
+        if (this.state.cAdmin === 'N') {
+          localStorage.setItem('viewAdminChop', false)
+          return routes.routesRequestor;
+        }
+        if (this.state.cAdmin === 'Y') {
+          let show = false
+          for (let i = 0; i < chopKeeperCompany.length; i++) {
+            if (chopKeeperCompany[i] === legalEntity) {
+              localStorage.setItem('viewAdminChop', true)
+              show = true
+              break;
+            }
+            else {
+              localStorage.setItem('viewAdminChop', false)
+              show = false
+            }
+          }
+          if (show)
+            return routes.routesChopAdmin;
+          else
+            return routes.routesRequestor;
+        }
         else return this.signOut();
         console.log('error! Roles not match, no sideBarNav');
 
       case 'LICENSE':
-        if (this.state.lAdmin === 'N')
+        if (this.state.lAdmin === 'N') {
+          localStorage.setItem('viewAdminLicense', false)
+          return routes.routesRequestor;
+        }
+        if (this.state.lAdmin === 'Y') {
+          let show = false
+          for (let i = 0; i < licenseAdminCompany.length; i++) {
+            if (licenseAdminCompany[i] === legalEntity) {
+              localStorage.setItem('viewAdminLicense', true)
+              show = true
+              break;
+            }
+            else {
+              localStorage.setItem('viewAdminLicense', false)
+              show = false
+            }
+          }
+          if (show)
+            return routes.routesLicenseAdmin;
+          else
+            return routes.routesRequestor;
+        }
+        else return this.signOut();
+        console.log('error! Roles not match, no sideBarNav');
+
+      default:
+        return this.signOut();
+        console.log('error! workflow application not match, no sideBarNav');
+    }
+  }
+
+
+  handleSideBarNav(application) {
+    let { licenseAdminCompany, legalEntity, chopKeeperCompany } = this.state
+    switch (application) {
+      case 'CHOP':
+        if (this.state.cAdmin === 'N') {
+          localStorage.setItem('viewAdminChop', false)
+          return ChopNav.requestor;
+        }
+        if (this.state.cAdmin === 'Y') {
+          let show = false
+          for (let i = 0; i < chopKeeperCompany.length; i++) {
+            if (chopKeeperCompany[i] === legalEntity) {
+              localStorage.setItem('viewAdminChop', true)
+              show = true
+              break;
+            }
+            else {
+              localStorage.setItem('viewAdminChop', false)
+              show = false
+            }
+          }
+          if (show)
+            return ChopNav.admin;
+          else
+            return ChopNav.requestor;
+        }
+        else return this.signOut();
+        console.log('error! Roles not match, no sideBarNav');
+
+      case 'LICENSE':
+        if (this.state.lAdmin === 'N') {
+          localStorage.setItem('viewAdminLicense', false)
           return LicenseNav.requestor;
-        if (this.state.lAdmin === 'Y')
-          return LicenseNav.admin;
+        }
+        if (this.state.lAdmin === 'Y') {
+          let show = false
+          for (let i = 0; i < licenseAdminCompany.length; i++) {
+            if (licenseAdminCompany[i] === legalEntity) {
+              localStorage.setItem('viewAdminLicense', true)
+              show = true
+              break;
+            }
+            else {
+              localStorage.setItem('viewAdminLicense', false)
+              show = false
+            }
+          }
+          if (show)
+            return LicenseNav.admin;
+          else
+            return LicenseNav.requestor;
+        }
         else return this.signOut();
         console.log('error! Roles not match, no sideBarNav');
 
@@ -121,6 +227,7 @@ class DefaultLayout extends Component {
 
 
   render() {
+    let { newRoutes } = this.state
     return (
       <div className="app">
         <LegalEntity.Provider value={{ legalEntity: label[this.state.legalEntity] }}>
@@ -145,7 +252,7 @@ class DefaultLayout extends Component {
               <Container fluid >
                 <Suspense fallback={this.loading()}>
                   <Switch>
-                    {routes.map((route, idx) => {
+                    {this.getRoute(localStorage.getItem('application')).map((route, idx) => {
                       return route.component ? (
                         <Route
                           key={idx}
@@ -159,7 +266,8 @@ class DefaultLayout extends Component {
                               {...props} routes={route.routes} />
                           )} />
                       ) : (null);
-                    })}
+                    })
+                    }
                     <Redirect from="/" to={{ pathname: "/404" }} />
                   </Switch>
                 </Suspense>

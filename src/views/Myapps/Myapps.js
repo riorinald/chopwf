@@ -313,7 +313,7 @@ class Myapps extends Component {
                   Cell: row => (
                     <div> <span title={this.getDeptHeads(row.original.documentNameEnglish)} >{this.getDeptHeads(row.original.documentNameEnglish)}</span> </div>
                   ),
-                  style: { textAlign: "center", whiteSpace: 'unset' },
+                  style: { textAlign: "center" },
                   filterable: false
                 },
                 {
@@ -325,7 +325,7 @@ class Myapps extends Component {
                   Cell: row => (
                     <div> <span title={this.getDeptHeads(row.original.documentNameChinese)}>{this.getDeptHeads(row.original.documentNameChinese)}</span> </div>
                   ),
-                  style: { textAlign: "center", whiteSpace: 'unset'  },
+                  style: { textAlign: "center"  },
                   filterable: false
                 },
                 {
@@ -472,7 +472,7 @@ class Myapps extends Component {
                         });
                       }
                       let status = rowInfo.original.statusId
-                      if (status === "DRAFTED" || status === "RECALLED" || status === "SENDBACK") {
+                      if (status === "DRAFTED" || status === "RECALLED" || status === "SENDBACKED") {
                         this.goToEditRequest(rowInfo.original.taskId)
                       }
                       else {

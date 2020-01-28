@@ -56,7 +56,7 @@ class LicenseApplicationDetail extends Component {
             .then(res => {
                 console.log(res.data)
                 let currentStatusArr = res.data.allStages.filter(stage => stage.state === "CURRENT")
-                this.setState({ taskDetails: res.data, currentStatus: currentStatusArr[0].statusId, loading: false, })
+                this.setState({ taskDetails: res.data, currentStatus: res.data.currentStatusId, loading: false, })
             })
     }
 

@@ -145,7 +145,7 @@ class EditRequest extends Component {
 
             showDoc: false,
             selectedDocs: [],
-            
+
             invalidEnglish: false,
             invalidChinese: false,
             invalidNumberOfPages: false,
@@ -430,6 +430,7 @@ class EditRequest extends Component {
             if (temporary.teamId !== "" && temporary.departmentId !== "") {
                 this.getDocCheckBy(temporary.departmentId, temporary.teamId, temporary.chopTypeId, (callback) => {
                     temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
+                    temporary.selectedOption = temporary.documentCheckBy.length !== 0 ? this.getSelected(temporary.documentCheckBy) : null
                 })
             }
         }
@@ -469,6 +470,23 @@ class EditRequest extends Component {
         this.setState({ taskDetails: temporary, tempDocument: temporary.documents, loading: false })
         console.log(temporary)
 
+    }
+
+    getSelected(person) {
+        let obj = {}
+        if (person.length === 1) {
+            this.state.docCheckBy.map((head, index) => {
+                if (head.value === person[0]) {
+                    obj = head
+                    this.setState({ selectedDocCheckBy: head.value })
+                }
+            })
+        }
+        else {
+
+            obj = null
+        }
+        return obj
     }
 
     setValidForm() {
@@ -665,7 +683,7 @@ class EditRequest extends Component {
     }
 
     handleChange = name => event => {
-        console.log(this.state.taskDetails.documentCheckBy[this.state.taskDetails.docCheckByOption])
+        // console.log(this.state.taskDetails.documentCheckBy[this.state.taskDetails.docCheckByOption])
         let value = event.target.value
 
         this.setState(state => {
@@ -689,6 +707,7 @@ class EditRequest extends Component {
                     taskDetails.teamId = ""
                     taskDetails.documentCheckBy = []
                     taskDetails.docCheckByOption = ""
+                    taskDetails.selectedOption = null
                     return { taskDetails }
                 })
             }
@@ -701,6 +720,7 @@ class EditRequest extends Component {
                     taskDetails.documentCheckBy = []
                     taskDetails.documents = []
                     taskDetails.docCheckByOption = ""
+                    taskDetails.selectedOption = null
                     return taskDetails
                 })
                 this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.chopTypeId, (callback) => { })
@@ -731,6 +751,7 @@ class EditRequest extends Component {
                     taskDetails.documents = []
                     taskDetails.documentCheckBy = []
                     taskDetails.docCheckByOption = ""
+                    taskDetails.selectedOption = null
                     return taskDetails
                 })
             }
@@ -937,95 +958,95 @@ class EditRequest extends Component {
 
         if (this.state.editRequestForm.docSelected === null) {
             errorMessage.push("Please select a valid document.<br />")
-            }
+        }
         if (this.state.isLTI) {
-            if (this.state.editRequestForm.engName === "" && this.state.editRequestForm.cnName === "" ){
+            if (this.state.editRequestForm.engName === "" && this.state.editRequestForm.cnName === "") {
                 errorMessage.push("Please input document name in English and Chinese.<br />")
                 typeValid = false
             }
-            if (this.state.invalidEnglish === true){
+            if (this.state.invalidEnglish === true) {
                 errorMessage.push("Please input document name in English with English character.<br />")
                 typeValid = false
             }
-            if (this.state.invalidChinese === true){
+            if (this.state.invalidChinese === true) {
                 errorMessage.push("Please input document name in Chinese with Chinese character.<br />")
                 typeValid = false
             }
-            else{
+            else {
                 typeValid = true
             }
-                }
-        else{
-            if (this.state.editRequestForm.engName === ""){
+        }
+        else {
+            if (this.state.editRequestForm.engName === "") {
                 errorMessage.push("Please input document name in english.<br />")
                 typeValid = false
             }
-            if (this.state.invalidEnglish === true){
+            if (this.state.invalidEnglish === true) {
                 errorMessage.push("Please input document name in English with English character.<br />")
                 typeValid = false
             }
             else {
                 typeValid = false
+            }
+        }
+        if (errorMessage.length !== 0) {
+            console.log(errorMessage)
+            Swal.fire({
+                title: "Invalid",
+                html: errorMessage.join('\n\n'),
+                type: "warning",
+                width: "550px"
+            })
+        }
+        else {
+            for (let i = 0; i < doc.length; i++) {
+                if (doc[i].docName === this.state.editRequestForm.docAttachedName) {
+                    valid = false
+                    break
+                }
+                else {
+                    valid = true
                 }
             }
-            if (errorMessage.length !== 0){
-                console.log(errorMessage)
-                Swal.fire({
-                    title: "Invalid",
-                    html: errorMessage.join('\n\n'),
-                    type: "warning",
-                    width: "550px"
+            if (valid) {
+                const obj = {
+                    taskId: this.state.taskDetails.taskId,
+                    documentFileName: this.state.editRequestForm.docAttachedName,
+                    documentCode: "",
+                    contractNumber: this.state.editRequestForm.contractNum,
+                    description: "",
+                    created: date,
+                    updated: "",
+                    documentType: "",
+                    documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
+                    documentFileType: this.state.editRequestForm.docSelected.type,
+                    documentBase64String: "",
+                    expiryDate: null,
+                    departmentHeads: null,
+                    documentId: rand,
+                    documentNameEnglish: this.state.editRequestForm.engName,
+                    documentNameChinese: this.state.editRequestForm.cnName,
+                    docSelected: this.state.editRequestForm.docSelected
+                }
+
+                this.getBase64(this.state.editRequestForm.docSelected, (result) => {
+                    obj.documentBase64String = result
                 })
-            }
-        else {
-        for (let i = 0; i < doc.length; i++) {
-            if (doc[i].docName === this.state.editRequestForm.docAttachedName) {
-                valid = false
-                break
-            }
-            else {
-                valid = true
-            }
-            }
-                if (valid) {
-                    const obj = {
-                        taskId: this.state.taskDetails.taskId,
-                        documentFileName: this.state.editRequestForm.docAttachedName,
-                        documentCode: "",
-                        contractNumber: this.state.editRequestForm.contractNum,
-                        description: "",
-                        created: date,
-                        updated: "",
-                        documentType: "",
-                        documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
-                        documentFileType: this.state.editRequestForm.docSelected.type,
-                        documentBase64String: "",
-                        expiryDate: null,
-                        departmentHeads: null,
-                        documentId: rand,
-                        documentNameEnglish: this.state.editRequestForm.engName,
-                        documentNameChinese: this.state.editRequestForm.cnName,
-                        docSelected: this.state.editRequestForm.docSelected
-                    }
 
-                    this.getBase64(this.state.editRequestForm.docSelected, (result) => {
-                        obj.documentBase64String = result
-                    })
-
-                    console.log(obj)
+                console.log(obj)
 
                 this.setState(state => {
-                let { taskDetails, invalidChinese, invalidEnglish } = this.state
+                    let { taskDetails, invalidChinese, invalidEnglish } = this.state
                     taskDetails.documents.push(obj)
                     invalidChinese = false
                     invalidEnglish = false
                     return { taskDetails, invalidChinese, invalidEnglish }
                 })
-                
+
                 document.getElementById("documents").className = ""
 
                 this.setState(state => {
-                let { editRequestForm } = this.state
+                    let { editRequestForm } = this.state
                     editRequestForm.docAttachedName = ""
                     editRequestForm.docSelected = null
                     editRequestForm.engName = ""
@@ -1034,10 +1055,10 @@ class EditRequest extends Component {
                 })
             }
             else {
-            Swal.fire({
-                title: "Document Exists",
-                html: 'The selected document already exists in the List',
-                type: "warning"
+                Swal.fire({
+                    title: "Document Exists",
+                    html: 'The selected document already exists in the List',
+                    type: "warning"
                 })
             }
         }
@@ -1420,15 +1441,15 @@ class EditRequest extends Component {
                 value.push(newValue.value)
                 option = this.getDocCheckByOption(value)
             }
-            console.log(this.state.docCheckBy[option])
             // console.log(option)
             // console.log(this.state.docCheckBy)
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
+                taskDetails.selectedOption = newValue
                 taskDetails.documentCheckBy = value
                 taskDetails.docCheckByOption = option
                 return { taskDetails }
-            })
+            }, () => console.log(this.state.taskDetails.selectedOption))
         }
 
         else if (sname === "responsiblePerson" || sname === "pickUpBy") {
@@ -1501,27 +1522,27 @@ class EditRequest extends Component {
 
     async selectDocument() {
         document.getElementById('selectDocuments').blur()
-        let {taskDetails } = this.state
+        let { taskDetails } = this.state
         let errorMessage = []
-          Swal.fire({
+        Swal.fire({
             title: "Retrieving",
             html: 'Please wait while we retrive the list of documents available.',
             type: "info",
             onBeforeOpen: () => {
-              Swal.showLoading()
+                Swal.showLoading()
             },
             onOpen: () => {
-                if(taskDetails.departmentId === ""){
+                if (taskDetails.departmentId === "") {
                     errorMessage.push("Please select the Department.<br />")
                 }
-                if(taskDetails.chopTypeId === ""){
+                if (taskDetails.chopTypeId === "") {
                     errorMessage.push("Please select Chop Type.<br />")
                 }
-                if(taskDetails.teamId === ""){
+                if (taskDetails.teamId === "") {
                     errorMessage.push("Please select Team.<br />")
                 }
                 console.log(errorMessage)
-                if(errorMessage.length !== 0){
+                if (errorMessage.length !== 0) {
                     Swal.update({
                         title: "Field Required",
                         html: errorMessage.join('\n\n'),
@@ -1529,23 +1550,23 @@ class EditRequest extends Component {
                     })
                     Swal.hideLoading()
                 }
-                else{
-                     this.getDocuments(this.props.legalName, taskDetails.departmentId, taskDetails.chopTypeId, taskDetails.teamId, (numberOfDocuments) => {
-                    if (numberOfDocuments === 0) {
-                    Swal.update({
-                        title: "No Documents",
-                        html: 'There is no Documents in this appliction. ',
-                        type: "warning"
-                        })
-                    Swal.hideLoading()
-                    }
-                    else {
-                    // Swal.hideLoading();
-                        Swal.close();
-                        this.setState({ showDoc: true })
+                else {
+                    this.getDocuments(this.props.legalName, taskDetails.departmentId, taskDetails.chopTypeId, taskDetails.teamId, (numberOfDocuments) => {
+                        if (numberOfDocuments === 0) {
+                            Swal.update({
+                                title: "No Documents",
+                                html: 'There is no Documents in this appliction. ',
+                                type: "warning"
+                            })
+                            Swal.hideLoading()
+                        }
+                        else {
+                            // Swal.hideLoading();
+                            Swal.close();
+                            this.setState({ showDoc: true })
                         }
                     })
-                } 
+                }
             }
         })
     }
@@ -1837,13 +1858,13 @@ class EditRequest extends Component {
 
 
         if (this.state.taskDetails.applicationTypeId === "LTU") {
-            let documents =  this.state.taskDetails.documents
-            if (this.state.taskDetails.documents === this.state.tempDocument){
+            let documents = this.state.taskDetails.documents
+            if (this.state.taskDetails.documents === this.state.tempDocument) {
                 documents = []
-                }
+            }
             for (let i = 0; i < this.state.taskDetails.documents.length; i++) {
-                    postReq.append(`DocumentIds[${i}]`, documents[i].documentId);
-                }
+                postReq.append(`DocumentIds[${i}]`, documents[i].documentId);
+            }
         }
         else {
             let def = 0
@@ -1970,7 +1991,7 @@ class EditRequest extends Component {
                              Edit Request <small className="d-sm-down-none">- {taskDetails.requestNum}</small>
                                 </CardHeader>
                                 <CardBody color="dark">
-                                    {taskDetails.currentStatusId === "SENDBACK"
+                                    {taskDetails.currentStatusId === "SENDBACKED"
                                         ? <Row>
                                             <Col className="mb-4" onClick={() => this.setState({ progressModal: !this.state.progressModal })}>
                                                 <Progress multi>
@@ -1983,7 +2004,7 @@ class EditRequest extends Component {
                                                                 bar
                                                                 animated={stage.state === "CURRENT" ? true : false}
                                                                 striped={stage.state !== "CURRENT"}
-                                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                                 // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                                 value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                             </Progress>
@@ -2495,7 +2516,7 @@ class EditRequest extends Component {
                                                         id="documentCheckBy"
                                                         options={docCheckBy}
                                                         isClearable
-                                                        value={docCheckBy[taskDetails.docCheckByOption]}
+                                                        value={taskDetails.selectedOption}
                                                         menuPortalTarget={document.body}
                                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                                         onChange={this.handleSelectOption("documentCheckBy1")}
