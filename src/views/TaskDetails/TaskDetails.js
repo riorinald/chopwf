@@ -117,7 +117,7 @@ class TaskDetails extends Component {
         }
 
         Swal.fire({
-            title: `Creating your Request ... `,
+            title: `Processing your Request ... `,
             type: "info",
             text: '',
             footer: '',
@@ -129,10 +129,11 @@ class TaskDetails extends Component {
             onOpen: () => {
                 Axios.post(`${config.url}/tasks/${this.state.taskDetails.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
                     .then(res => {
+                        console.log(res.data)
 
                         Swal.update({
                             title: res.data.message,
-                            text: `The request has been approved`,
+                            text: `The request has been ${res.data.message.toLowerCase()}`,
                             type: "success",
 
                         })
@@ -320,7 +321,8 @@ class TaskDetails extends Component {
                                                 bar
                                                 animated={stage.state === "CURRENT" ? true : false}
                                                 striped={stage.state !== "CURRENT"}
-                                                color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                 value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                             </Progress>
                                         </React.Fragment>
@@ -408,13 +410,14 @@ class TaskDetails extends Component {
                                                             Header: "Document Name (English)",
                                                             accessor: "documentNameEnglish",
                                                             width: 250,
-
+                                                            style: { 'white-space': 'normal' }
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
                                                             Header: "Document Name (Chinese)",
                                                             accessor: "documentNameChinese",
                                                             width: 250,
+                                                            style: { 'white-space': 'normal' }
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
@@ -503,7 +506,7 @@ class TaskDetails extends Component {
                                             <img src={history.approvedByAvatarUrl} className="img-avaa img-responsive" alt="Avatar" />
                                         </Col> */}
                                         <Col sm md="10" lg>
-                                            <h5>{history.approvedByName}<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
+                                            <h5>{history.approvedByName}<span> <Badge color={history.stateIndicator === "SENDBACK" || history.stateIndicator === "REJECTED" ? "danger" : "success"}>{history.stateIndicator}</Badge></span></h5>
                                             <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
                                             <Col className="p-0"> <p>{history.comments}</p> </Col>
                                         </Col>

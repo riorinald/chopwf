@@ -118,6 +118,7 @@ class Login extends Component {
                     localStorage.setItem('isLicenseAdmin', res.data.isLicenseAdmin)
                     localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
 
+                    console.log(res.data)
 
                     if (res.data.status === "success") {
                         this.setState({ info: info})

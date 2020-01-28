@@ -103,6 +103,8 @@
 }
 
 
+
+
 table {
     border: 1px solid black;
     table-layout: auto; 
@@ -133,4 +135,10 @@ table {
     max-width: 350px;
     vertical-align: middle;
     word-wrap: break-word;
+}
+
+.blobLink{
+    text-decoration: underline;
+    color: #20A8D8;
+    cursor: pointer;
 }

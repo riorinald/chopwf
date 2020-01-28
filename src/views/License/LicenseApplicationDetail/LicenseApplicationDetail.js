@@ -378,7 +378,8 @@ class LicenseApplicationDetail extends Component {
                                                     bar
                                                     animated={stage.state === "CURRENT" ? true : false}
                                                     striped={true}
-                                                    color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "green" : "secondary  "}
+                                                    color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                    // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "green" : "secondary  "}
                                                     value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "white" : stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                 </Progress>
                                             </React.Fragment>
@@ -848,13 +849,13 @@ class LicenseApplicationDetail extends Component {
                                 : null}
                             {taskDetails.histories.map((history, index) =>
                                 <div key={index}>
-                                    <Row className="bottom-border"></Row>
+                                    <hr></hr>
                                     <Row>
                                         {/* <Col md="1">
                                             <img src={history.approvedByAvatarUrl} className="img-avatar" alt="Avatar" />
                                         </Col> */}
                                         <Col md="8">
-                                            <h5>{history.approvedByName} (000)<span> <Badge color={history.approvalStatus === "APPROVED" ? "success" : "danger"} >{history.approvalStatus}</Badge></span></h5>
+                                            <h5>{history.approvedByName}<span> <Badge color={history.stateIndicator === "SENDBACK" || history.stateIndicator === "REJECTED" ? "danger" : "success"} >{history.stateIndicator}</Badge></span></h5>
                                             <div><b>Approved On:</b> {this.convertApprovedDate(history.approvedDate)}</div>
                                             <small>{history.comments}</small>
                                         </Col>

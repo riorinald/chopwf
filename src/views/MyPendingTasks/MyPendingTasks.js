@@ -140,7 +140,6 @@ class MyPendingTasks extends Component {
         let userId = localStorage.getItem('userId')
         // let userId = "josh@otds.admin"
         let url = `${config.url}/tasks?category=pending&companyid=${this.props.legalName}&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`
-        console.log(url)
         const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } })
         this.setState({ pendingTasks: response.data.tasks, totalPages: response.data.pageCount, loading: !this.state.loading })
         // array = response.data
@@ -290,7 +289,7 @@ class MyPendingTasks extends Component {
                 {/* {this.state.show? */}
                 <Card onKeyDown={this.handleKeyDown} >
                     <CardHeader >
-                        PENDING TASKS <Button className="float-right" onClick={this.search} >Search</Button>
+                        Pending Tasks <Button className="float-right" onClick={this.search} >Search</Button>
                     </CardHeader>
                     <CardBody >
                         <ReactTable
@@ -335,7 +334,7 @@ class MyPendingTasks extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.applicationTypeName} onChange={this.handleSearch('applicationTypeName')} >
-                                                <option value="">Please Select an application Type</option>
+                                                <option value="">Please Select </option>
                                                 {this.state.applicationTypes.map(type =>
                                                     <option key={type.appTypeId} value={type.appTypeId} >{type.appTypeName}</option>
                                                 )}
@@ -357,7 +356,7 @@ class MyPendingTasks extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.chopTypeName} onChange={this.handleSearch('chopTypeName')} >
-                                                <option value="">Please Select a Chop Type</option>
+                                                <option value="">Please Select </option>
                                                 {this.state.chopTypes.map(type =>
                                                     <option key={type.chopTypeId} value={type.chopTypeId} >{type.chopTypeName}</option>
                                                 )}
@@ -402,7 +401,7 @@ class MyPendingTasks extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
-                                                <option value="" >Please Select a department</option>
+                                                <option value="" >Please Select </option>
                                                 {this.state.departments.map((dept, index) =>
                                                     <option key={index} value={dept.deptId} >{dept.deptName}</option>
                                                 )}
@@ -452,7 +451,7 @@ class MyPendingTasks extends Component {
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
-                                                <option value="" >Please Select a status</option>
+                                                <option value="" >Please Select </option>
                                                 {this.state.status.map((stat, index) =>
                                                     <option key={index} value={stat.statusName} >{stat.statusName}</option>
                                                 )}
@@ -535,7 +534,7 @@ class MyPendingTasks extends Component {
                                             }
 
                                             let status = rowInfo.original.statusId
-                                            if (status === "DRAFTED" || status === "RECALLED" || status === "SENDBACKED") {
+                                            if (status === "DRAFTED" || status === "RECALLED" || status === "SENDBACK") {
                                                 this.goToEditRequest(rowInfo.original.taskId)
                                             }
                                             else {

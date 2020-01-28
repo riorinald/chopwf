@@ -6,19 +6,19 @@ import {
     FormGroup,
     Label,
     Collapse,
-    Form, InputGroup, InputGroupAddon, InputGroupText, FormFeedback,
+    Form,
+    InputGroup,
+    InputGroupAddon,
     Modal,
     ModalHeader,
     ModalBody,
     ModalFooter,
     CustomInput,
     Spinner,
-    InputGroupButtonDropdown,
-    Tooltip,
-    DropdownToggle,
-    DropdownMenu,
-    DropdownItem,
-    Badge
+    Badge,
+    Progress,
+    UncontrolledTooltip,
+
 } from 'reactstrap';
 import config from '../../config';
 import Axios from 'axios';
@@ -29,6 +29,7 @@ import InputMask from "react-input-mask";
 import deleteBin from '../../assets/img/deletebin.png'
 import { AppSwitch } from '@coreui/react';
 import AsyncSelect from 'react-select/async';
+import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import Swal from 'sweetalert2';
 import ReactTable from "react-table";
@@ -125,7 +126,7 @@ class EditRequest extends Component {
             validateForm: [],
             viewContract: false,
 
-            branches:[],
+            branches: [],
 
             contractNumber: "",
             conNum: [],
@@ -145,7 +146,7 @@ class EditRequest extends Component {
 
             showDoc: false,
             selectedDocs: [],
-
+            
             invalidEnglish: false,
             invalidChinese: false,
             invalidNumberOfPages: false,
@@ -168,7 +169,7 @@ class EditRequest extends Component {
               },
             msgTooltip: '[I / S ]-[ A / L / IA / R ]-[ O / P / S] \n e.g "S-A-O-9999-9999"',
             ioTooltip: false,
-            tempContractNumber: "",
+            tempDocument: [],
             contractValid: true,
             contractNumNotes: "",
             contractError: "",
@@ -190,7 +191,6 @@ class EditRequest extends Component {
         this.toggleModal = this.toggleModal.bind(this);
         this.handleContractNumber = this.handleContractNumber.bind(this);
         this.hideDoc = this.hideDoc.bind(this);
-        this.checkContractNumber = this.checkContractNumber.bind(this);
         this.checkforChinese = this.checkforChinese.bind(this);
     }
 
@@ -232,15 +232,12 @@ class EditRequest extends Component {
         console.log("getting lvl4 users")
         await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&choptypeid=${chopTypeId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
             { headers: { Pragma: 'no-cache' } }).then(res => {
+                let arr = []
                 for (let i = 0; i < res.data.length; i++) {
                     const obj = { value: res.data[i].userId, label: res.data[i].displayName }
-                    this.setState(state => {
-                        const docCheckBy = this.state.docCheckBy.concat(obj)
-                        return {
-                            docCheckBy
-                        }
-                    })
+                    arr.push(obj)
                 }
+                this.setState({ docCheckBy: arr })
             })
         callback()
     }
@@ -353,21 +350,24 @@ class EditRequest extends Component {
     }
 
     convertDate(dateValue, view) {
-        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
-        this.setState({ [view]: new Date(regEx) })
-        return new Date(regEx);
+        console.log(dateValue)
+        let regEx = ""
+        let dateView = null
+        if (dateValue !== "00010101" && dateValue !== "" && dateValue !== "/") {
+            regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
+            dateView = new Date(regEx)
+        }
+
+        this.setState({ [view]: dateView })
     }
 
     getDocCheckByOption(person) {
-        console.log(person)
         let i = 0
         if (person.length === 1) {
-            console.log("akath keri")
             this.state.docCheckBy.map((head, index) => {
-                console.log(head.value)
                 if (head.value === person[0]) {
-                    console.log(index)
                     i = index
+                    this.setState({ selectedDocCheckBy: head.value })
                 }
             })
         }
@@ -417,9 +417,10 @@ class EditRequest extends Component {
             this.getTeams(temporary.departmentId)
         }
         // if (temporary.returnDate !== "") {
-        //     this.convertDate(temporary.returnDate, 'dateView2')
         // }
-        temporary.returnDate = temporary.returnDate === '' ? this.convertDate(temporary.returnDate, 'dateView2') : this.dateChanged(new Date())
+        if (temporary.returnDate !== '') {
+            this.convertDate(temporary.returnDate, 'dateView2')
+        }
         temporary.responsiblePersonOption = this.getOptionAllUsers(temporary.responsiblePerson)
         temporary.pickUpByOption = this.getOptionAllUsers(temporary.pickUpBy)
 
@@ -436,13 +437,14 @@ class EditRequest extends Component {
                     temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
                 })
             }
-            temporary.effectivePeriod = temporary.effectivePeriod !== "" ? this.convertDate(temporary.effectivePeriod, 'dateView1') : null
         }
 
         else if (temporary.applicationTypeId === "LTI") {
 
             this.setSelectedDocCheckBy(temporary.documentCheckBy)
-
+            if (temporary.effectivePeriod !== "") {
+                this.convertDate(temporary.effectivePeriod, 'dateView1')
+            }
         }
 
         this.setState(state => {
@@ -457,6 +459,7 @@ class EditRequest extends Component {
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
         if (temporary.chopTypeId === "BCSCHOP") {
             await this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
+            await this.getDocCheckBy(response.data.departmentId, response.data.teamId, response.data.chopTypeId, (callback) => { })
         }
 
         if (temporary.applicationTypeId === "LTU") {
@@ -467,8 +470,9 @@ class EditRequest extends Component {
             }
         }
         temporary.departmentId = temporary.departmentId.toLowerCase()
-        console.log(temporary.requestorUser)
-        this.setState({ taskDetails: temporary, loading: false })
+        // console.log(temporary.requestorUser)
+        this.setState({ taskDetails: temporary, tempDocument: temporary.documents, loading: false })
+        console.log(temporary)
 
     }
 
@@ -666,7 +670,9 @@ class EditRequest extends Component {
     }
 
     handleChange = name => event => {
+        console.log(this.state.taskDetails.documentCheckBy[this.state.taskDetails.docCheckByOption])
         let value = event.target.value
+
         this.setState(state => {
             let taskDetails = this.state.taskDetails
             taskDetails.isConfirm = "N"
@@ -674,31 +680,35 @@ class EditRequest extends Component {
         })
         if (name === "departmentId") {
             this.getTeams(event.target.value)
+            // this.setState(state => {
+            //     let taskDetails = this.state.taskDetails
+
+            //     return taskDetails
+            // })
             console.log(this.state.taskDetails.applicationTypeId)
             if (this.state.taskDetails.applicationTypeId === "LTU") {
-                if (this.state.taskDetails.chopTypeId !== "" && this.state.taskDetails.teamId !== "") {
-                    // this.getDocuments(this.props.legalName, event.target.value, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId, (callback) => {
-
-                    // })
-                }
+                this.setState({ docCheckBy: [] })
                 this.setState(state => {
                     const taskDetails = this.state.taskDetails
+                    taskDetails.documents = []
                     taskDetails.teamId = ""
+                    taskDetails.documentCheckBy = []
+                    taskDetails.docCheckByOption = ""
                     return { taskDetails }
                 })
             }
         }
         else if (name === "teamId") {
             // console.log(this.state.taskDetails.applicationTypeId)
-
-
             if (this.state.taskDetails.applicationTypeId === "LTU") {
-                if (this.state.taskDetails.chopTypeId !== "") {
-                    this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.chopTypeId, (callback) => {
-
-                    })
-                    // this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, event.target.value, (callback) => { })
-                }
+                this.setState(state => {
+                    let taskDetails = this.state.taskDetails
+                    taskDetails.documentCheckBy = []
+                    taskDetails.documents = []
+                    taskDetails.docCheckByOption = ""
+                    return taskDetails
+                })
+                this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.chopTypeId, (callback) => { })
             }
         }
         else if (name === "applicationTypeId") {
@@ -709,24 +719,28 @@ class EditRequest extends Component {
             })
             this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${event.target.value}`);
         }
-        else if (name === "chopTypeId") {
-            if (this.state.taskDetails.teamId !== "") {
-                this.getDocCheckBy(this.state.taskDetails.departmentId, this.state.taskDetails.teamId, event.target.value, (callback) => {
 
-                })
-            }
+        else if (name === "chopTypeId") {
+
+            // if (this.state.taskDetails.teamId !== "" && this.state.taskDetails.applicationTypeId === "LTI") {
+            //     this.getDocCheckBy(this.state.taskDetails.departmentId, this.state.taskDetails.teamId, event.target.value, (callback) => { })
+            // }
             console.log(this.state.taskDetails.applicationTypeId)
             if (event.target.value === "CONCHOP") {
                 this.toggleModal();
             }
             if (this.state.taskDetails.applicationTypeId === "LTU") {
-                if (this.state.taskDetails.departmentId !== "" && this.state.taskDetails.teamId !== "") {
-                    // this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.teamId, (callback) => {
-
-                    // })
-                }
+                this.getDocCheckBy(this.state.taskDetails.departmentId, this.state.taskDetails.teamId, event.target.value, (callback) => { })
+                this.setState(state => {
+                    let taskDetails = this.state.taskDetails
+                    taskDetails.documents = []
+                    taskDetails.documentCheckBy = []
+                    taskDetails.docCheckByOption = ""
+                    return taskDetails
+                })
             }
-            if (event.target.value === "BCSCHOP"){
+
+            if (event.target.value === "BCSCHOP") {
                 this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
             }
         }
@@ -871,43 +885,43 @@ class EditRequest extends Component {
         })
     }
 
-async validateContractNumber() {
-    let doc = this.state.taskDetails.documents
-    let contractError = []
-    try {
-        let validateConNum = await this.validateConNum();
-            if (this.state.editRequestForm.docSelected === null){
+    async validateContractNumber() {
+        let doc = this.state.taskDetails.documents
+        let contractError = []
+        try {
+            let validateConNum = await this.validateConNum();
+            if (this.state.editRequestForm.docSelected === null) {
                 contractError.push("Please Select a valid Document.<br />")
             }
-            if (this.state.editRequestForm.engName === ""){
+            if (this.state.editRequestForm.engName === "") {
                 contractError.push("Please input name in english.<br />")
             }
-            if (this.state.editRequestForm.contractNumber === ""){
+            if (this.state.editRequestForm.contractNumber === "") {
                 contractError.push("Please input a valid Contract Number.<br />")
             }
-            if (this.state.editRequestForm.contractNumber !== "" && validateConNum === false){
-                contractError.push(this.state.contractError+".<br />")
+            if (this.state.editRequestForm.contractNumber !== "" && validateConNum === false) {
+                contractError.push(this.state.contractError + ".<br />")
                 contractError.push(this.state.contractNumNotes)
             }
-            if (contractError.length === 0 && validateConNum === true){
+            if (contractError.length === 0 && validateConNum === true) {
                 for (let i = 0; i < doc.length; i++) {
                     if (doc[i].documentFileName === this.state.editRequestForm.docAttachedName && doc[i].contractNums[0] === this.state.contractNumber) {
                         contractError.push("Document and contract number already exists in the list")
-                            break
-                        }
-                        else {
-                            contractError = []
-                        }
+                        break
+                    }
+                    else {
+                        contractError = []
                     }
                 }
+            }
         }
-    catch (e) {
-        console.log(e,contractError)
+        catch (e) {
+            console.log(e, contractError)
+        }
+        finally {
+            return contractError
+        }
     }
-    finally {
-        return contractError
-    }		
-}
 
     convertApprovedDate(dateValue) {
 
@@ -922,141 +936,124 @@ async validateContractNumber() {
         var date = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear() + ' ' + tempDate.getHours() + ':' + tempDate.getMinutes() + ':' + tempDate.getSeconds();
         // console.log(this.state.editRequestForm.docSelected)
         let valid = true
-        let contractError = []
+        let errorMessage = []
         let doc = this.state.taskDetails.documents
         let typeValid = false
-        let validateConNum = this.validateContractNumber()
 
-        if (this.state.editRequestForm.docSelected !== null) {
-            if (this.state.taskDetails.applicationTypeId === "STU") {
-                if (this.state.editRequestForm.engName !== "") {
-                    typeValid = true
-                }
-                else {
-                    typeValid = false
-                }
+        if (this.state.editRequestForm.docSelected === null) {
+            errorMessage.push("Please select a valid document.<br />")
             }
-            else if (this.state.taskDetails.applicationTypeId === "CNIPS") {
-                if (this.state.editRequestForm.engName !== "" && this.validateContractNumber()) {
-                    typeValid = true
-                }
-                else {
-                    typeValid = false
-                }
+        if (this.state.isLTI) {
+            if (this.state.editRequestForm.engName === "" && this.state.editRequestForm.cnName === "" ){
+                errorMessage.push("Please input document name in English and Chinese.<br />")
+                typeValid = false
             }
-            else if (this.state.taskDetails.applicationTypeId === "LTI") {
-                if (this.state.editRequestForm.engName !== "" && this.state.editRequestForm.cnName !== "") {
-                    typeValid = true
-                }
-                else {
-                    typeValid = false
-                }
+            if (this.state.invalidEnglish === true){
+                errorMessage.push("Please input document name in English with English character.<br />")
+                typeValid = false
             }
-        }
-
-        else {
-            Swal.fire({
-                title: "No Document Selected",
-                html: 'Please attach a valid document!',
-                type: "warning"
-            })
-        }
-
-        if (typeValid) {
-            if (this.state.taskDetails.applicationTypeId === "CNIPS") {
-                for (let i = 0; i < doc.length; i++) {
-                    if (doc[i].documentFileName === this.state.editRequestForm.docAttachedName && doc[i].contractNums[0] === this.state.tempContractNumber) {
-                        valid = false
-                        break
-                    }
-                    else {
-                        valid = true
-                    }
+            if (this.state.invalidChinese === true){
+                errorMessage.push("Please input document name in Chinese with Chinese character.<br />")
+                typeValid = false
+            }
+            else{
+                typeValid = true
+            }
                 }
+        else{
+            if (this.state.editRequestForm.engName === ""){
+                errorMessage.push("Please input document name in english.<br />")
+                typeValid = false
+            }
+            if (this.state.invalidEnglish === true){
+                errorMessage.push("Please input document name in English with English character.<br />")
+                typeValid = false
             }
             else {
-                for (let i = 0; i < doc.length; i++) {
-                    if (doc[i].documentNameEnglish === this.state.editRequestForm.engName && doc[i].documentFileName === this.state.editRequestForm.docAttachedName) {
-                        valid = false
-                        break
-                    }
-                    else {
-                        valid = true
-                    }
+                typeValid = false
                 }
             }
-
-            if (valid) {
-
-
-                const obj = {
-                    taskId: this.state.taskDetails.taskId,
-                    documentFileName: this.state.editRequestForm.docAttachedName,
-                    documentCode: "",
-                    contractNumber: this.state.editRequestForm.contractNum,
-                    description: "",
-                    created: date,
-                    updated: "",
-                    documentType: "",
-                    documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
-                    documentFileType: this.state.editRequestForm.docSelected.type,
-                    documentBase64String: "",
-                    expiryDate: null,
-                    departmentHeads: null,
-                    documentId: rand,
-                    documentNameEnglish: this.state.editRequestForm.engName,
-                    documentNameChinese: this.state.editRequestForm.cnName,
-                    docSelected: this.state.editRequestForm.docSelected,
-                    contractNums: [this.state.tempContractNumber]
-                }
-
-                this.getBase64(this.state.editRequestForm.docSelected, (result) => {
-                    obj.documentBase64String = result
+            if (errorMessage.length !== 0){
+                console.log(errorMessage)
+                Swal.fire({
+                    title: "Invalid",
+                    html: errorMessage.join('\n\n'),
+                    type: "warning",
+                    width: "550px"
                 })
+            }
+        else {
+        for (let i = 0; i < doc.length; i++) {
+            if (doc[i].docName === this.state.editRequestForm.docAttachedName) {
+                valid = false
+                break
+            }
+            else {
+                valid = true
+            }
+            }
+                if (valid) {
+                    const obj = {
+                        taskId: this.state.taskDetails.taskId,
+                        documentFileName: this.state.editRequestForm.docAttachedName,
+                        documentCode: "",
+                        contractNumber: this.state.editRequestForm.contractNum,
+                        description: "",
+                        created: date,
+                        updated: "",
+                        documentType: "",
+                        documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
+                        documentFileType: this.state.editRequestForm.docSelected.type,
+                        documentBase64String: "",
+                        expiryDate: null,
+                        departmentHeads: null,
+                        documentId: rand,
+                        documentNameEnglish: this.state.editRequestForm.engName,
+                        documentNameChinese: this.state.editRequestForm.cnName,
+                        docSelected: this.state.editRequestForm.docSelected
+                    }
 
-                console.log(obj)
+                    this.getBase64(this.state.editRequestForm.docSelected, (result) => {
+                        obj.documentBase64String = result
+                    })
+
+                    console.log(obj)
 
                 this.setState(state => {
-                    let { taskDetails, invalidChinese, invalidEnglish } = this.state
+                let { taskDetails, invalidChinese, invalidEnglish } = this.state
                     taskDetails.documents.push(obj)
                     invalidChinese = false
                     invalidEnglish = false
                     return { taskDetails, invalidChinese, invalidEnglish }
                 })
+                
                 document.getElementById("documents").className = ""
-            }
-            else {
-                Swal.fire({
-                    title: "Document Exists",
-                    html: 'The selected document already exists!',
-                    type: "warning"
+
+                this.setState(state => {
+                let { editRequestForm } = this.state
+                    editRequestForm.docAttachedName = ""
+                    editRequestForm.docSelected = null
+                    editRequestForm.engName = ""
+                    editRequestForm.cnName = ""
+                    return editRequestForm
                 })
             }
-
-            this.setState(state => {
-                let { editRequestForm, tempContractNumber } = this.state
-                editRequestForm.docAttachedName = ""
-                tempContractNumber = ""
-                editRequestForm.docSelected = null
-                editRequestForm.engName = ""
-                editRequestForm.cnName = ""
-                return editRequestForm
-            })
-            this.setState({ conNum: [] })
-        }
-        else {
+            else {
             Swal.fire({
-                title: "Invalid Data",
-                html: 'Please input valid data!',
+                title: "Document Exists",
+                html: 'The selected document already exists in the List',
                 type: "warning"
-            })
+                })
+            }
         }
+
     }
-    
+
     addDocumentLTU() {
         if (this.state.selectedDocs.length !== 0) {
             document.getElementById("documentTableLTU").className = "form-control"
         }
+
         this.state.selectedDocs.map(doc => {
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
@@ -1073,60 +1070,60 @@ async validateContractNumber() {
         var tempDate = new Date();
         var date = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear() + ' ' + tempDate.getHours() + ':' + tempDate.getMinutes() + ':' + tempDate.getSeconds();
         let conName = [this.state.contractNumber]
-         let contractError = ["error"];
-         this.validateContractNumber()
-         .then( data => {
-             contractError = data
-              if (contractError.length === 0){
-                const obj = {
-                    taskId: this.state.taskDetails.taskId,
-                    documentFileName: this.state.editRequestForm.docAttachedName,
-                    documentCode: "",
-                    contractNumber: this.state.editRequestForm.contractNumber,
-                    description: "",
-                    created: date,
-                    updated: "",
-                    documentType: "",
-                    documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
-                    documentFileType: this.state.editRequestForm.docSelected.type,
-                    documentBase64String: "",
-                    expiryDate: null,
-                    departmentHeads: null,
-                    documentId: rand,
-                    documentNameEnglish: this.state.editRequestForm.engName,
-                    documentNameChinese: this.state.editRequestForm.cnName,
-                    docSelected: this.state.editRequestForm.docSelected,
-                    contractNums: [this.state.contractNumber]
-                }
-                this.setState(state => {
-                    let { taskDetails, invalidChinese, invalidEnglish } = this.state
-                    taskDetails.documents.push(obj)
-                    return { taskDetails }
-                })
-            
-                this.setState(state => {
-                    let { editRequestForm } = this.state
-                    editRequestForm.docAttachedName = ""
-                    editRequestForm.contractNumbers = ""
-                    editRequestForm.docSelected = null
-                    editRequestForm.engName = ""
-                    editRequestForm.cnName = ""
-                    return editRequestForm
-                })
-                this.setState({ contractValid:true, contractNumber:"", conNum: [] })
+        let contractError = ["error"];
+        this.validateContractNumber()
+            .then(data => {
+                contractError = data
+                if (contractError.length === 0) {
+                    const obj = {
+                        taskId: this.state.taskDetails.taskId,
+                        documentFileName: this.state.editRequestForm.docAttachedName,
+                        documentCode: "",
+                        contractNumber: this.state.editRequestForm.contractNumber,
+                        description: "",
+                        created: date,
+                        updated: "",
+                        documentType: "",
+                        documentUrl: URL.createObjectURL(this.state.editRequestForm.docSelected),
+                        documentFileType: this.state.editRequestForm.docSelected.type,
+                        documentBase64String: "",
+                        expiryDate: null,
+                        departmentHeads: null,
+                        documentId: rand,
+                        documentNameEnglish: this.state.editRequestForm.engName,
+                        documentNameChinese: this.state.editRequestForm.cnName,
+                        docSelected: this.state.editRequestForm.docSelected,
+                        contractNums: [this.state.contractNumber]
+                    }
+                    this.setState(state => {
+                        let { taskDetails, invalidChinese, invalidEnglish } = this.state
+                        taskDetails.documents.push(obj)
+                        return { taskDetails }
+                    })
 
-                document.getElementById("documents").className = ""
-          }
-          else {
-            Swal.fire({
-              title: "Invalid",
-              html: contractError.join('\n\n'),
-              type: "warning",
-              width: "500px"
+                    this.setState(state => {
+                        let { editRequestForm } = this.state
+                        editRequestForm.docAttachedName = ""
+                        editRequestForm.contractNumbers = ""
+                        editRequestForm.docSelected = null
+                        editRequestForm.engName = ""
+                        editRequestForm.cnName = ""
+                        return editRequestForm
+                    })
+                    this.setState({ contractValid: true, contractNumber: "", conNum: [] })
+
+                    document.getElementById("documents").className = ""
+                }
+                else {
+                    Swal.fire({
+                        title: "Invalid",
+                        html: contractError.join('\n\n'),
+                        type: "warning",
+                        width: "500px"
+                    })
+                }
             })
-            }
-        })
-      }
+    }
 
 
     handleInputMask = () => {
@@ -1197,156 +1194,156 @@ async validateContractNumber() {
         let digit = /[0-9]/;
         let valid = false
         let value = this.state.contractNumber
-        let {isFirst, isSecond, isThird, isDigit, isdigit1} = false; 
-        
-        if (first.test(value[0])){
-             isFirst = true
-             }	else {
-                let message = "First value should be I / S"
-                this.setState({ contractValid: false, contractError: message}) 
-             }
-        if (isFirst && second.test(value[2])){
-          isSecond = true
-            } 	else if (isFirst){
-                let message = "Second value should be A / L / IA / R"
-                this.setState({ contractValid: false, contractError: message})
-         }
-         
-        if( isSecond && value[3] === 'A'){
-          if (third.test(value[5])){
-            isThird = true
-            }	else {
-                  let message = "Third value should be O / P / S"
-                this.setState({ contractValid: false, contractError: message})
-          }
-          
-          for(let i = 7; i < 11; i++){
-            isDigit = digit.test(value[i])
-            if(isThird && !isDigit){
-                 console.log("error", value[i], i)
-                 let message = "Please input 4 digits of year"
-                 this.setState({ contractValid: false, contractError: message})
-              break;
-              }
-              else if (i === 9){
-                isdigit1 = true
-             }
-                if(value.length === 16){
-                for(let i = 12; i < 16; i++){
-                    isDigit = digit.test(value[i])
-                    if(!isDigit){
-                        console.log("error", value[i], i)
-                        let message = "Please input last 4 digits"
-                         this.setState({ contractValid: false, contractError: message})
-                        break;
-                    }
+        let { isFirst, isSecond, isThird, isDigit, isdigit1 } = false;
+
+        if (first.test(value[0])) {
+            isFirst = true
+        } else {
+            let message = "First value should be I / S"
+            this.setState({ contractValid: false, contractError: message })
+        }
+        if (isFirst && second.test(value[2])) {
+            isSecond = true
+        } else if (isFirst) {
+            let message = "Second value should be A / L / IA / R"
+            this.setState({ contractValid: false, contractError: message })
+        }
+
+        if (isSecond && value[3] === 'A') {
+            if (third.test(value[5])) {
+                isThird = true
+            } else {
+                let message = "Third value should be O / P / S"
+                this.setState({ contractValid: false, contractError: message })
+            }
+
+            for (let i = 7; i < 11; i++) {
+                isDigit = digit.test(value[i])
+                if (isThird && !isDigit) {
+                    console.log("error", value[i], i)
+                    let message = "Please input 4 digits of year"
+                    this.setState({ contractValid: false, contractError: message })
+                    break;
+                }
+                else if (i === 9) {
+                    isdigit1 = true
+                }
+                if (value.length === 16) {
+                    for (let i = 12; i < 16; i++) {
+                        isDigit = digit.test(value[i])
+                        if (!isDigit) {
+                            console.log("error", value[i], i)
+                            let message = "Please input last 4 digits"
+                            this.setState({ contractValid: false, contractError: message })
+                            break;
+                        }
                         else {
                             valid = true
-                            this.setState({ contractValid: true, contractError: ""})
+                            this.setState({ contractValid: true, contractError: "" })
                         }
                     }
                 }
-                if(value.length === 15){
-                for(let i = 12; i < 15; i++){
+                if (value.length === 15) {
+                    for (let i = 12; i < 15; i++) {
+                        isDigit = digit.test(value[i])
+                        if (!isDigit) {
+                            console.log("error", value[i], i)
+                            let message = "Please input last 4 digits"
+                            this.setState({ contractValid: false, contractError: message })
+                            break;
+                        }
+                        else {
+                            valid = true
+                            this.setState({ contractValid: true, contractError: "" })
+                        }
+                    }
+                }
+            }
+            if (isThird && isdigit1 && value.length < 15) {
+                console.log('last digit should be 4')
+                let message = "Please input last 4 digits"
+                this.setState({ contractValid: false, contractError: message })
+            }
+            if (isThird && isdigit1 && value.length > 16) {
+                valid = false
+                let message = "Invalid contract format"
+                this.setState({ contractValid: false, contractError: message })
+            }
+        }
+
+        if (isSecond && value[2] !== 'I') {
+            if (third.test(value[4])) {
+                isThird = true
+            } else {
+                let message = "Third value should be O / P / S"
+                this.setState({ contractValid: false, contractError: message })
+            }
+            for (let i = 6; i <= 9; i++) {
+                isDigit = digit.test(value[i])
+                if (isThird && !isDigit) {
+                    console.log("error", value[i], i, value, value.length)
+                    let message = "Please input 4 digits of year"
+                    this.setState({ contractValid: false, contractError: message })
+                    break;
+                }
+                else if (i === 9) {
+                    isdigit1 = true
+                }
+            }
+
+            if (value.length === 15) {
+
+                for (let i = 12; i < 14; i++) {
                     isDigit = digit.test(value[i])
-                    if(!isDigit){
+                    if (!isDigit) {
                         console.log("error", value[i], i)
                         let message = "Please input last 4 digits"
-                         this.setState({ contractValid: false, contractError: message})
+                        this.setState({ contractValid: false, contractError: message })
                         break;
                     }
                     else {
-                            valid = true
-                            this.setState({ contractValid: true, contractError: ""})
-                        }
+                        valid = true
+                        this.setState({ contractValid: true, contractError: "" })
                     }
                 }
             }
-                if (isThird && isdigit1 && value.length < 15){
-                    console.log( 'last digit should be 4' )
-                    let message = "Please input last 4 digits"
-                     this.setState({ contractValid: false, contractError: message})
-                 }
-            if (isThird && isdigit1 && value.length > 16){
-                valid = false
-                let message = "Invalid contract format"
-                this.setState({ contractValid: false, contractError: message})
-            }
-         } 
-         
-        if(isSecond && value[2] !== 'I'){
-             if (third.test(value[4])){
-                 isThird = true
-                } else {
-                    let message = "Third value should be O / P / S"
-                    this.setState({ contractValid: false, contractError: message})
-                }
-                for(let i = 6; i <= 9; i++){
+            if (value.length === 14) {
+                for (let i = 12; i < 13; i++) {
                     isDigit = digit.test(value[i])
-                    if(isThird && !isDigit){
-                        console.log("error", value[i], i, value, value.length)
-                        let message = "Please input 4 digits of year"
-                         this.setState({ contractValid: false, contractError: message})
+                    if (!isDigit) {
+                        console.log("error", value[i], i)
+                        let message = "Please input last 4 digits"
+                        this.setState({ contractValid: false, contractError: message })
                         break;
-                    } 
-                    else if (i === 9){
-                        isdigit1 = true
+                    }
+                    else {
+                        valid = true
+                        this.setState({ contractValid: true, contractError: "" })
                     }
                 }
-                
-                if (value.length === 15){
-                    
-                    for(let i = 12; i < 14; i++){
-                        isDigit = digit.test(value[i])
-                        if(!isDigit){
-                            console.log("error", value[i], i)
-                            let message = "Please input last 4 digits"
-                             this.setState({ contractValid: false, contractError: message})
-                            break;
-                        }
-                        else {
-                            valid = true
-                            this.setState({ contractValid: true, contractError: ""})
-                        }
-                    }
-                } 
-                if (value.length === 14){
-                    for(let i = 12; i < 13; i++){
-                        isDigit = digit.test(value[i])
-                        if(!isDigit){
-                            console.log("error", value[i], i)
-                            let message = "Please input last 4 digits"
-                             this.setState({ contractValid: false, contractError: message})
-                            break;
-                        }
-                        else {
-                            valid = true
-                            this.setState({ contractValid: true, contractError: ""})
-                        }
-                    }
-                } 
-                if (isThird && isdigit1 && value.length < 14){
-                    console.log( 'last digit should be 4' )
-                    let message = "Please input last 4 digits"
-                     this.setState({ contractValid: false, contractError: message})
-                }
             }
-            if (isThird && isdigit1 && value.length > 16){
-                valid = false
-                let message = "Invalid contract format"
-                this.setState({ contractValid: false, contractError: message})
-            }
-        if (isSecond && value[2] === 'I' && value[3] !== 'A' && value[3] !== undefined){
-                console.log('please input IA')
-                let message = "Please input IA instead of I"+ value[3]
+            if (isThird && isdigit1 && value.length < 14) {
+                console.log('last digit should be 4')
+                let message = "Please input last 4 digits"
                 this.setState({ contractValid: false, contractError: message })
-            } else if (isSecond && value[2] === 'I' && value[3] !== 'A') {
-                let message = "Third value should be A / L / IA / R"
-                this.setState({ contractValid: false, contractError: message})
             }
-    
-        return valid
         }
+        if (isThird && isdigit1 && value.length > 16) {
+            valid = false
+            let message = "Invalid contract format"
+            this.setState({ contractValid: false, contractError: message })
+        }
+        if (isSecond && value[2] === 'I' && value[3] !== 'A' && value[3] !== undefined) {
+            console.log('please input IA')
+            let message = "Please input IA instead of I" + value[3]
+            this.setState({ contractValid: false, contractError: message })
+        } else if (isSecond && value[2] === 'I' && value[3] !== 'A') {
+            let message = "Third value should be A / L / IA / R"
+            this.setState({ contractValid: false, contractError: message })
+        }
+
+        return valid
+    }
 
     addContract(event) {
         let valid = this.validateConNum()
@@ -1388,7 +1385,6 @@ async validateContractNumber() {
             taskDetails.isConfirm = "N"
             return taskDetails
         })
-        console.log(newValue)
         if (sname === "documentCheckBy1") {
             var element = document.getElementById("documentCheckBy")
             element.classList.contains("form-control")
@@ -1427,8 +1423,11 @@ async validateContractNumber() {
             let option = ""
             if (newValue) {
                 value.push(newValue.value)
-                option = this.getDocCheckByOption(newValue.value)
+                option = this.getDocCheckByOption(value)
             }
+            console.log(this.state.docCheckBy[option])
+            // console.log(option)
+            // console.log(this.state.docCheckBy)
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
                 taskDetails.documentCheckBy = value
@@ -1489,6 +1488,7 @@ async validateContractNumber() {
             let tempDate = format(date, "yyyy-MM-dd").split('T')[0];//right
             dates = tempDate.replace(/-/g, "")
         }
+        console.log(dates)
         this.setState({
             [view]: date
         });
@@ -1505,68 +1505,54 @@ async validateContractNumber() {
     }
 
     async selectDocument() {
-
         document.getElementById('selectDocuments').blur()
-        let { taskDetails, checkDetails } = this.state
-        // if (this.state.documents.length === 0) {
-        if (checkDetails.deptTempSelected === taskDetails.departmentId && checkDetails.chopTypeTempSelected === taskDetails.chopTypeId && checkDetails.teamTempSelected === taskDetails.teamId) {
-            this.setState({ showDoc: true })
-        }
-        else {
-            Swal.fire({
-                title: "Retrieving",
-                html: 'Please wait while we retrive the list of documents available.',
-                type: "info",
-                onBeforeOpen: () => {
-                    Swal.showLoading()
-                },
-                onOpen: () => {
-                    this.getDocuments(this.props.legalName, taskDetails.departmentId, taskDetails.chopTypeId, taskDetails.teamId, (numberOfDocuments) => {
-                        if (numberOfDocuments === 0) {
-                            Swal.update({
-                                title: "No Documents",
-                                html: 'No documents to select from!',
-                                type: "warning"
-                            })
-                            Swal.hideLoading()
-                            this.setState(state => {
-                                let checkDetails = this.state.checkDetails
-                                checkDetails.deptTempSelected = "empty"
-                                checkDetails.chopTypeTempSelected = "empty"
-                                checkDetails.teamTempSelected = "empty"
-                                return checkDetails
-                            })
-                        }
-                        else {
-                            // Swal.hideLoading();
-                            Swal.close();
-                            this.setState({ showDoc: true })
-                            this.setState(state => {
-                                let checkDetails = this.state.checkDetails
-                                checkDetails.deptTempSelected = taskDetails.departmentId
-                                checkDetails.chopTypeTempSelected = taskDetails.chopTypeId
-                                checkDetails.teamTempSelected = taskDetails.teamId
-                                return checkDetails
-                            })
-                        }
-
-                    })
+        let {taskDetails } = this.state
+        let errorMessage = []
+          Swal.fire({
+            title: "Retrieving",
+            html: 'Please wait while we retrive the list of documents available.',
+            type: "info",
+            onBeforeOpen: () => {
+              Swal.showLoading()
+            },
+            onOpen: () => {
+                if(taskDetails.departmentId === ""){
+                    errorMessage.push("Please select the Department.<br />")
                 }
-            })
-        }
-
-        // await this.getDocuments(this.props.legalName, this.state.taskDetails.departmentId, this.state.taskDetails.chopTypeId, this.state.taskDetails.teamId)
-        // if (this.state.documents.length === 0) {
-        //     Swal.fire({
-        //         title: "No Documents",
-        //         html: 'No documents to select from!',
-        //         type: "warning"
-        //     })
-        // }
-        // else {
-        //     this.setState({ showDoc: !this.state.showDoc })
-
-        // }
+                if(taskDetails.chopTypeId === ""){
+                    errorMessage.push("Please select Chop Type.<br />")
+                }
+                if(taskDetails.teamId === ""){
+                    errorMessage.push("Please select Team.<br />")
+                }
+                console.log(errorMessage)
+                if(errorMessage.length !== 0){
+                    Swal.update({
+                        title: "Field Required",
+                        html: errorMessage.join('\n\n'),
+                        type: "warning"
+                    })
+                    Swal.hideLoading()
+                }
+                else{
+                     this.getDocuments(this.props.legalName, taskDetails.departmentId, taskDetails.chopTypeId, taskDetails.teamId, (numberOfDocuments) => {
+                    if (numberOfDocuments === 0) {
+                    Swal.update({
+                        title: "No Documents",
+                        html: 'There is no Documents in this appliction. ',
+                        type: "warning"
+                        })
+                    Swal.hideLoading()
+                    }
+                    else {
+                    // Swal.hideLoading();
+                        Swal.close();
+                        this.setState({ showDoc: true })
+                        }
+                    })
+                } 
+            }
+        })
     }
 
     toggleSelection = (key, shift, row) => {
@@ -1816,7 +1802,7 @@ async validateContractNumber() {
 
     async submitRequest(isSubmitted) {
 
-        let returnDate = this.state.taskDetails.returnDate === undefined ? "00010101" : this.state.taskDetails.returnDate
+        let returnDate = this.state.taskDetails.returnDate ? this.state.taskDetails.returnDate : ""
 
         let userId = localStorage.getItem('userId')
         let postReq = new FormData();
@@ -1856,9 +1842,13 @@ async validateContractNumber() {
 
 
         if (this.state.taskDetails.applicationTypeId === "LTU") {
+            let documents =  this.state.taskDetails.documents
+            if (this.state.taskDetails.documents === this.state.tempDocument){
+                documents = []
+                }
             for (let i = 0; i < this.state.taskDetails.documents.length; i++) {
-                postReq.append(`DocumentIds[${i}]`, this.state.taskDetails.documents[i].documentId);
-            }
+                    postReq.append(`DocumentIds[${i}]`, documents[i].documentId);
+                }
         }
         else {
             let def = 0
@@ -1882,9 +1872,7 @@ async validateContractNumber() {
                     postReq.append(`Documents[${temp}].Attachment.File`, documentSelected);
                     postReq.append(`Documents[${temp}].DocumentNameEnglish`, this.state.taskDetails.documents[i].documentNameEnglish);
                     postReq.append(`Documents[${temp}].DocumentNameChinese`, this.state.taskDetails.documents[i].documentNameChinese);
-                    // for (let j = 0; j < this.state.taskDetails.documents[i].contractNums.length; j++) {
-                    postReq.append(`Documents[${temp}].ContractNums[0]`, this.state.taskDetails.documents[i].contractNums[0]);
-                    // }
+
                 }
             }
 
@@ -1955,67 +1943,18 @@ async validateContractNumber() {
         reader.readAsDataURL(file)
     }
 
-    checkContractNumber() {
-        const first = /(?!.*[A-HJ-QT-Z])[IS]/i;
-        const second = /[LIAR]/
-        const third = /(?!.*[A-NQRT-Z])[PSO]/i;
-        let digit = /[0-9]/;
-        let { tempContractNumber } = this.state
-        if (first.test(tempContractNumber[0])) {
-            if (second.test(tempContractNumber[2])) {
-                if (third.test(tempContractNumber[4]) || third.test(tempContractNumber[5])) {
-                    if (tempContractNumber[2] === "I") {
-                        if (digit.test(tempContractNumber[7]) && digit.test(tempContractNumber[8]) && digit.test(tempContractNumber[9]) && digit.test(tempContractNumber[10])) {
-                            if (digit.test(tempContractNumber[12]) && digit.test(tempContractNumber[13]) && digit.test(tempContractNumber[14])) {
-                                console.log("valid")
-                            }
-                            else {
-                                this.setState({ tempContractNumber: "" })
-                            }
-                        }
-                        else {
-                            this.setState({ tempContractNumber: "" })
-                        }
-                    }
-                    else {
-                        if (digit.test(tempContractNumber[6]) && digit.test(tempContractNumber[7]) && digit.test(tempContractNumber[8]) && digit.test(tempContractNumber[9])) {
-                            if (digit.test(tempContractNumber[11]) && digit.test(tempContractNumber[12]) && digit.test(tempContractNumber[13])) {
-                                console.log("valid")
-                            }
-                            else {
-                                this.setState({ tempContractNumber: "" })
-                            }
-                        }
-                        else {
-                            this.setState({ tempContractNumber: "" })
-                        }
-                    }
-                }
-                else {
-                    this.setState({ tempContractNumber: "" })
-                }
-            }
-            else {
-                this.setState({ tempContractNumber: "" })
-            }
-        }
-        else {
-            this.setState({ tempContractNumber: "" })
-        }
-    }
-
     handleContractNumber(event) {
         let value = event.target.value.toUpperCase();
         let valid = false
-       if (/^[IS]/.test(value)) {
-           valid = true
-       }
-       else {
-         var errorMsg = "First Charcter should be I or S "
-           value = ""
-           valid = false
-       }
-       this.setState({ contractValid: valid, contractError: errorMsg, contractNumber: value })
+        if (/^[IS]/.test(value)) {
+            valid = true
+        }
+        else {
+            var errorMsg = "First Charcter should be I or S "
+            value = ""
+            valid = false
+        }
+        this.setState({ contractValid: valid, contractError: errorMsg, contractNumber: value })
     }
 
 
@@ -2033,9 +1972,34 @@ async validateContractNumber() {
                             <Card className="animated fadeIn">
                                 <CardHeader>
                                     <Button onClick={() => this.goBack()}>Back</Button> &nbsp;
-                             EDIT REQUEST - {taskDetails.requestNum}
+                             Edit Request <small className="d-sm-down-none">- {taskDetails.requestNum}</small>
                                 </CardHeader>
                                 <CardBody color="dark">
+                                    {taskDetails.currentStatusId === "SENDBACK"
+                                        ? <Row>
+                                            <Col className="mb-4" onClick={() => this.setState({ progressModal: !this.state.progressModal })}>
+                                                <Progress multi>
+                                                    {taskDetails.allStages.map((stage, index) =>
+
+                                                        <React.Fragment key={index}>
+                                                            <UncontrolledTooltip placement="top" target={"status" + index}>{stage.statusName}</UncontrolledTooltip>
+                                                            <Progress
+                                                                className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
+                                                                bar
+                                                                animated={stage.state === "CURRENT" ? true : false}
+                                                                striped={stage.state !== "CURRENT"}
+                                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                                // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                                value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
+                                                            </Progress>
+                                                        </React.Fragment>
+
+                                                    )}
+                                                </Progress>
+                                            </Col>
+                                        </Row>
+                                        : null
+                                    }
                                     <FormGroup>
                                         <h5>NOTES :</h5>
                                         <p>{this.state.noteInfo.chinese}</p>
@@ -2074,7 +2038,7 @@ async validateContractNumber() {
                                         <FormGroup>
                                             <Label>Dept.</Label>
                                             <Input id="departmentId" type="select" value={taskDetails.departmentId} onChange={this.handleChange("departmentId")} name="dept">
-                                                <option value="" >Please select a department</option>
+                                                <option value="" >Please select </option>
                                                 {this.state.departments.map((option, index) => (
                                                     <option value={option.deptId} key={option.deptId}>
                                                         {option.deptName}
@@ -2090,7 +2054,7 @@ async validateContractNumber() {
                                         <FormGroup>
                                             <Label>Application Type</Label>
                                             <Input type="select" id="appTypeSelected" onChange={this.handleChange("applicationTypeId")} value={taskDetails.applicationTypeId} name="appType">
-                                                <option value="" disabled>Please select an application type</option>
+                                                <option value="" disabled>Please select </option>
                                                 {appTypes.map((type, index) =>
                                                     <option key={index} value={type.appTypeId} > {type.appTypeName} </option>
                                                 )}
@@ -2122,7 +2086,7 @@ async validateContractNumber() {
                                                 <Label>Entitled Team</Label>
                                                 <InputGroup>
                                                     <Input id="teamId" onChange={this.handleChange("teamId")} value={taskDetails.teamId} type="select">
-                                                        <option value="" disabled>Please select a team</option>
+                                                        <option value="" disabled>Please select </option>
                                                         {this.state.teams.map((team, index) =>
                                                             <option key={index} value={team.teamId}>{team.teamName}</option>
                                                         )}
@@ -2141,7 +2105,7 @@ async validateContractNumber() {
                                             <Input type="select" id="chopTypeId"
                                                 // onClick={() => { props.getChopTypes(props.legalName, props.taskDetails.appTypeSelected) }}
                                                 onChange={this.handleChange("chopTypeId")} value={taskDetails.chopTypeId} name="chopType" >
-                                                <option disabled value="" >Please select a Chop Type</option>
+                                                <option disabled value="" >Please select </option>
                                                 {this.state.chopTypes.map((option, id) => (
                                                     <option key={option.chopTypeId} value={option.chopTypeId}>{option.chopTypeName}</option>
                                                 ))}
@@ -2211,17 +2175,22 @@ async validateContractNumber() {
                                                                         Header: 'Expiry Date',
                                                                         accessor: 'expiryDate',
                                                                         Cell: row => (
-                                                                            <div> {this.convertExpDate(row.original.expiryDate)} </div>
+                                                                            <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} >
+                                                                                {this.convertExpDate(row.original.expiryDate)}
+                                                                            </div>
                                                                         ),
-                                                                        style: { textAlign: "center" },
+                                                                        // style: { textAlign: "center" },
                                                                     },
                                                                     {
                                                                         Header: 'DH Approved',
                                                                         accessor: 'departmentHeads',
                                                                         Cell: row => (
-                                                                            <div> {this.changeDeptHeads(row.original.departmentHeads)} </div>
+                                                                            <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} >
+                                                                                {this.changeDeptHeads(row.original.departmentHeads)}
+                                                                            </div>
+
                                                                         ),
-                                                                        style: { textAlign: "center" },
+                                                                        // style: { textAlign: "center" },
                                                                     },
                                                                 ]}
                                                                 keyField="documentId"
@@ -2256,11 +2225,11 @@ async validateContractNumber() {
                                                                             <td>{document.documentNameEnglish}</td>
                                                                             <td>{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.convertExpDate(document.expiryDate)} </div>
+                                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.convertExpDate(document.expiryDate)} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                                                                             </td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.changeDeptHeads(document.departmentHeads)} </div>
+                                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.changeDeptHeads(document.departmentHeads)} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
                                                                             </td>
                                                                             <td className="smallTd" ><img width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} src={deleteBin} /></td>
@@ -2279,7 +2248,7 @@ async validateContractNumber() {
                                                             ? <Col  >
                                                                 <FormGroup>
                                                                     <InputGroup>
-                                                                        <Input autoComplete="off"  type="text" value={this.state.contractNumber} onChange={this.handleContractNumber} id="contractNumber" placeholder={this.state.contractNumNotes}></Input>
+                                                                        <Input autoComplete="off" type="text" value={this.state.contractNumber} onChange={this.handleContractNumber} id="contractNumber" placeholder={this.state.contractNumNotes}></Input>
                                                                         {/* <InputGroupButtonDropdown direction="down" addonType="prepend" isOpen={this.state.viewContract} toggle={this.toggle('viewContract')}>
                                                                             <DropdownToggle><i className="fa fa-list-ul" /></DropdownToggle>
                                                                             <DropdownMenu>
@@ -2341,10 +2310,10 @@ async validateContractNumber() {
                                                         <Col xl={1}>
                                                             <FormGroup>
                                                                 {taskDetails.applicationTypeId === "CNIPS"
-                                                                    ?<Button block onClick={this.addDocumentCNIPS}>Add</Button>
-                                                                    :<Button block onClick={this.addDocumentLTI}>Add</Button>
+                                                                    ? <Button block onClick={this.addDocumentCNIPS}>Add</Button>
+                                                                    : <Button block onClick={this.addDocumentLTI}>Add</Button>
                                                                 }
-                                                                </FormGroup>
+                                                            </FormGroup>
                                                         </Col>
                                                     </Row>
                                                     <InputGroup>
@@ -2377,7 +2346,7 @@ async validateContractNumber() {
                                                                             <td className="descTd">{document.documentNameEnglish}</td>
                                                                             <td className="descTd">{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <div style={{ textDecoration: "underline", cursor: "pointer", color: "#20A8D8" }} onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
+                                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a> */}
                                                                             </td>
                                                                             <td className="smallTd"><img width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} src={deleteBin} /></td>
@@ -2443,8 +2412,9 @@ async validateContractNumber() {
                                                 <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                                                     className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                                                     selected={this.state.dateView2}
+                                                    isClearable
                                                     onChange={this.dateChange("returnDate", "dateView2")}
-                                                    minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                                                    minDate={new Date()} maxDate={addDays(new Date(), 30)} />
                                             </FormGroup>
                                             {!editRequestForm.collapseUIO
                                                 ? <InputGroup>
@@ -2502,7 +2472,7 @@ async validateContractNumber() {
                                         </Collapse>
 
                                         <FormGroup>
-                                            <Label>Remark</Label>
+                                            <Label>Remark <small className="ml-2"> Please enter the remarks, e.g. telephone number of pick up person.</small> </Label>
                                             <InputGroup>
                                                 <TextareaAutosize maxLength={500} onChange={this.handleChange("remark")} value={taskDetails.remark} id="remark" size="16" className="form-control" placeholder="Please enter the remarks, e.g. telephone number of pick up person." />
                                                 {/* <FormFeedback>Please add remarks</FormFeedback> */}
@@ -2515,17 +2485,28 @@ async validateContractNumber() {
                                         <Collapse isOpen={taskDetails.applicationTypeId === "LTI" || taskDetails.applicationTypeId === "LTU"}>
                                             <FormGroup>
                                                 <Label>Document Check By <i className="fa fa-user" /></Label>
-                                                <AsyncSelect
-                                                    id="documentCheckBy"
-                                                    loadOptions={taskDetails.applicationTypeId === "LTI" ? this.loadAllUsers : this.loadOptionsDocCheck}
-                                                    isMulti={taskDetails.applicationTypeId === "LTI" ? true : false}
-                                                    value={taskDetails.applicationTypeId === "LTI" ? selectedDocCheckBy : docCheckBy[taskDetails.docCheckByOption]}
-                                                    onChange={this.handleSelectOption(taskDetails.applicationTypeId === "LTI" ? "documentCheckBy" : "documentCheckBy1")}
-                                                    menuPortalTarget={document.body}
-                                                    isClearable={taskDetails.applicationTypeId === "LTU" ? true : false}
-                                                    components={animatedComponents}
-                                                    styles={taskDetails.applicationTypeId === "LTI" ? this.state.deptHeadSelected === null ? reactSelectControl : "" : { menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                                />
+                                                {taskDetails.applicationTypeId === "LTI" ?
+                                                    <AsyncSelect
+                                                        id="documentCheckBy"
+                                                        loadOptions={this.loadAllUsers}
+                                                        isMulti={true}
+                                                        value={selectedDocCheckBy}
+                                                        onChange={this.handleSelectOption("documentCheckBy")}
+                                                        menuPortalTarget={document.body}
+                                                        components={animatedComponents}
+                                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                                    />
+                                                    :
+                                                    <Select
+                                                        id="documentCheckBy"
+                                                        options={docCheckBy}
+                                                        isClearable
+                                                        value={docCheckBy[taskDetails.docCheckByOption]}
+                                                        menuPortalTarget={document.body}
+                                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                                        onChange={this.handleSelectOption("documentCheckBy1")}
+                                                    />
+                                                }
                                                 <InputGroup>
                                                     {taskDetails.applicationTypeId === "LTI" || taskDetails.applicationTypeId === "LTU"
                                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Document Check By', taskDetails.documentCheckBy, 'required')}</small>
@@ -2537,9 +2518,9 @@ async validateContractNumber() {
                                         <Collapse isOpen={taskDetails.applicationTypeId === "CNIPS"}>
                                             <FormGroup>
                                                 <Label>Contract Signed By: <i className="fa fa-user" /></Label>
-                                                <small> &ensp; Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval</small>
+                                                <small className="ml-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval.</small>
                                                 <Row>
-                                                    <Col>
+                                                    <Col className="py-2" xs={12} md={6} lg={6}>
                                                         <AsyncSelect
                                                             id="contractSignedByFirstPerson"
                                                             loadOptions={this.loadOptionsDeptContract1}
@@ -2554,7 +2535,7 @@ async validateContractNumber() {
                                                                 : null}
                                                         </InputGroup>
                                                     </Col>
-                                                    <Col>
+                                                    <Col className="py-2" xs={12} md={6} lg={6}>
                                                         <AsyncSelect
                                                             id="contractSignedBySecondPerson"
                                                             loadOptions={this.loadOptionsDeptContract2}
@@ -2592,7 +2573,7 @@ async validateContractNumber() {
                                         <Collapse isOpen={taskDetails.applicationTypeId === "STU" || taskDetails.applicationTypeId === "LTI" || taskDetails.applicationTypeId === ""}>
                                             <FormGroup>
                                                 <Label>Department Heads <i className="fa fa-user" /></Label>
-                                                <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.legalName} entity</small>
+                                                <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.legalName} entity.</small>
                                                 <AsyncSelect
                                                     id="departmentHeads"
                                                     loadOptions={this.loadOptionsDept}
@@ -2620,10 +2601,10 @@ async validateContractNumber() {
                                                         onChange={this.handleAgreeTerm}
                                                         onClick={this.isValid}
                                                         id="confirm" value="option1">
-                                                        <Label className="form-check-label" check >
+                                                        <Label onClick={this.handleAgreeTerm} className="form-check-label" check >
                                                             By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines
-                                                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action
-                      </Label>
+                                                            regarding chop management and I will not engage in any inappropriate chop usage and other inappropriate action.
+                                                        </Label>
                                                     </CustomInput>
                                                 </FormGroup>
                                             </FormGroup>
@@ -2661,7 +2642,7 @@ async validateContractNumber() {
                                                                 <hr></hr>
                                                                 <Row className="text-md-left text-center">
                                                                     <Col sm md="10" lg>
-                                                                        <h5>{history.approvedByName}<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
+                                                                        <h5>{history.approvedByName}<span> <Badge color={history.stateIndicator === "SENDBACK" || history.stateIndicator === "REJECTED" ? "danger" : "success"}>{history.stateIndicator}</Badge></span></h5>
                                                                         <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
                                                                         <Col className="p-0"> <p>{history.comments}</p> </Col>
                                                                     </Col>
