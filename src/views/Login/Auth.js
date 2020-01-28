@@ -17,7 +17,8 @@ class Authenticated extends Component {
       redirectOuth: false,
       token: '',
       loading: true,
-      isExpired: false
+      isExpired: false,
+      errorMessage: '',
     };
   }
   
@@ -34,7 +35,7 @@ class Authenticated extends Component {
         //   console.log('token expired')
         //   }
         // else{
-          this.getUserDetails(token.access_token);
+          this.getOpenId(token.access_token);
           console.log('token not expired')
           // }
       } else {
@@ -42,26 +43,7 @@ class Authenticated extends Component {
       }
   }
 
-  async getGoogleUserDetails(token) {
-    this.setState({ loading: true })
-    await axios.get(`https://www.googleapis.com/oauth2/v3/userinfo?alt=json&access_token=${token}`)
-    .then(res => {
-        this.setState({ userDetails: res.data, loading: false })
-
-        localStorage.setItem('authenticate', true)
-        localStorage.setItem('authType', "REQUESTOR")
-        localStorage.setItem('application', "CHOP")
-        localStorage.setItem('legalEntity', 'MBAFC')
-        localStorage.setItem('userId', "abby@otds.admin")
-        localStorage.setItem('token', this.getParameterByName('access_token',this.props.location.hash))
-    })
-    setTimeout(this.redirect, 1000)
-  }
-  // const token = url.match(/\#(?:access_token)\=([\S\s]*?)\&/)['1'];
-  // const token = JSON.parse(url).access_token
-  // console.log(url, token)
-
-  async getUserDetails(token) {
+  async getOpenId(token) {
     const config = {
 
       headers: {
@@ -79,9 +61,56 @@ class Authenticated extends Component {
             localStorage.setItem('legalEntity', 'MBAFC')
             localStorage.setItem('isLicenseAdmin', 'N')
             localStorage.setItem('isChopKeeper', 'Y')
+            this.getUserDetails(res.data.sub)
+          })
+          .catch(err => {
+            console.log(err)
+            this.setState({
+              loading:false,
+              errorMessage: "openId not authenticated",
+            })  
           })
 
       setTimeout(this.redirect, 2000)
+  }
+
+  async getUserDetails(userId) {
+    this.setState({ loading: true })
+    await axios.get(`${config.url}/users/${userId}`,{ headers: { Pragma: 'no-cache' } })
+		.then(res => {
+			this.setState({ userDetails: res.data, loading: false })
+			switch(res.data.companyCode){
+				case '685': 
+					localStorage.setItem('legalEntity','MBAFC')
+					break;
+				case '632': 
+					localStorage.setItem('legalEntity','MBIA')
+					break;
+				case '669': 
+					localStorage.setItem('legalEntity','MBLC')
+					break;
+				case '520': 
+					localStorage.setItem('legalEntity','DMT')
+					break;
+				}
+			})
+		.catch(err => {
+			console.log(err)
+			if(err.response){
+				this.setState({
+					loading:false,
+					errorMessage: "User not found in the system. redirect to login page in ",
+				})
+				// setTimeout(this.props.history.push('/login'), 5000)
+				this.countDown()
+			}
+			else{
+				this.setState({
+					loading:false,
+					errorMessage: "Server Unreachable"
+				})
+			}
+		})
   }
 
   getParameterByName(name, url) {
@@ -95,6 +124,20 @@ class Authenticated extends Component {
     fakeAuth.authenticate(() => {
       this.setState({redirectOuth: true})
       });
+  }
+
+  countDown = () => {
+    if(this.state.timer !== 0){
+    setInterval(() => {
+      this.downcrement();
+      }, 1000);
+    }
+  }
+  
+  downcrement = () => {
+      this.setState({
+        timer: this.state.timer -1
+    });
   }
 
   exchangeToken(code){
@@ -123,7 +166,7 @@ class Authenticated extends Component {
         localStorage.setItem('isLicenseAdmin', 'N')
         localStorage.setItem('isChopKeeper', 'Y')
       })
-      .then(()=> this.getUserDetails(this.state.token.access_token))
+      .then(()=> this.getOpenId(this.state.token.access_token))
       .catch((err) => {
         if(err.response){
           console.log(err.response)
@@ -135,12 +178,14 @@ class Authenticated extends Component {
   }
 
   render(){
-    if (this.state.redirectOuth || localStorage.getItem('userId') ) {
-      console.log("redirect oauth")
-      return <Redirect to={`/portal`} />
-    }
-    if (this.state.isExpired) {
-      return <Redirect to={`/login`} />
+    if (this.state.timer === 0){
+      if (this.state.redirectOuth || localStorage.getItem('userId') ) {
+        console.log("redirect oauth")
+        // return <Redirect to={`/portal`} />
+      }
+      if (this.state.isExpired) {
+        // return <Redirect to={`/login`} />
+      }
     }
     const authenticated = <><label>Authenticated as {this.state.userDetails.sub || localStorage.getItem('userId')}</label><center>redirecting . . .</center></>
     const notAuth = <label>You are not Authenticated</label>

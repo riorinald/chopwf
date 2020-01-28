@@ -292,11 +292,11 @@ class Login extends Component {
                             </FormGroup>
                         </Form>
                         <Row noGutters>
-                            <Col className="text-center">
+                            {/* <Col className="text-center">
                                 <Button className="btn-openid btn-brand" onClick= {this.loginWithGoogle}>
                                     <i className="fa fa-openid"></i><span>Google OpenID Auth</span>
                                 </Button>
-                            </Col>
+                            </Col> */}
                             <Col className="text-center">
                                 <Button className="btn-openid btn-brand" onClick= {event =>  window.location.href = pathname} >
                                     <i className="fa fa-openid"></i><span>Daimler OpenID Auth</span>

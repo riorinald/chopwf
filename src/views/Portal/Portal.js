@@ -1,10 +1,11 @@
 import React, { Component, Suspense } from 'react';
 import {
-  Col, Spinner, Container,
-  Row,
-  Card, CardBody,
-  Navbar,
-  NavItem
+	Col, Spinner, Container,
+	Row,
+	Card, CardBody,
+	Navbar,
+	NavItem,
+	Alert
   } from 'reactstrap';
 import {
   AppHeader,
@@ -21,7 +22,10 @@ class Portal extends Component {
   constructor(props) {
     super(props);
     this.state={
-      userDetails:{}
+	  userDetails:{},
+	  alert:false,
+	  errorMessage:"",
+	  timer:5
     }
   }
 
@@ -29,25 +33,45 @@ class Portal extends Component {
     this.getUserDetails()
   }
 
+  componentDidUpdate(){}
+
   async getUserDetails() {
     this.setState({ loading: true })
-    await Axios.get(`${config.url}/users/${localStorage.getItem('userId')}`,{ headers: { Pragma: 'no-cache' } }).then(res => {
-      this.setState({ userDetails: res.data, loading: false })
-      switch(res.data.companyCode){
-        case '685': 
-            localStorage.setItem('legalEntity','MBAFC')
-            break;
-        case '632': 
-            localStorage.setItem('legalEntity','MBIA')
-            break;
-        case '669': 
-            localStorage.setItem('legalEntity','MBLC')
-            break;
-        case '520': 
-            localStorage.setItem('legalEntity','DMT')
-            break;
-      }
-    })
+    await Axios.get(`${config.url}/users/${localStorage.getItem('userId')}`,{ headers: { Pragma: 'no-cache' } })
+		.then(res => {
+			this.setState({ userDetails: res.data, loading: false })
+			switch(res.data.companyCode){
+				case '685': 
+					localStorage.setItem('legalEntity','MBAFC')
+					break;
+				case '632': 
+					localStorage.setItem('legalEntity','MBIA')
+					break;
+				case '669': 
+					localStorage.setItem('legalEntity','MBLC')
+					break;
+				case '520': 
+					localStorage.setItem('legalEntity','DMT')
+					break;
+				}
+			})
+		.catch(err => {
+			console.log(err)
+			if(err.response){
+				this.setState({
+					alert:true,
+					errorMessage: "User not found in the system. redirect to login page in ",
+				})
+				// setTimeout(this.props.history.push('/login'), 5000)
+				this.countDown()
+			}
+			else{
+				this.setState({
+					alert:true,
+					errorMessage: "Server Unreachable"
+				})
+			}
+		})
   }
 
   loading = () => <div className="animated fadeIn pt-1 text-center"><Spinner /></div>
@@ -63,7 +87,24 @@ class Portal extends Component {
     }
   }
 
+countDown = () => {
+	if(this.state.timer !== 0){
+	setInterval(() => {
+		this.downcrement();
+		}, 1000);
+	}
+}
+
+downcrement = () => {
+    this.setState({
+      timer: this.state.timer -1
+	});
+  }
+
   render() {
+	if (this.state.timer === 0){
+		this.props.history.push('/login')
+	}
     return (
       <div style={{ backgroundColor: "#2F353A" }} >
         <LegalEntity.Provider value={{UserInfo: this.state.userDetails}}>
@@ -73,6 +114,9 @@ class Portal extends Component {
               </Suspense>
             </AppHeader>
           </LegalEntity.Provider>
+		<Alert className="centerd" color="danger" isOpen={this.state.alert}>
+			{this.state.errorMessage} {this.state.timer}
+		</Alert>
         <div className="app flex-row align-items-center">
           <Container>
             <Row className="justify-content-center">

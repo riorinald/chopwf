@@ -31,6 +31,7 @@ const DefaultLayout = React.lazy(() => import('./containers/DefaultLayout'));
 const Page404 = React.lazy(() => import('./views/Pages/Page404'));
 const Portal = React.lazy(() => import('./views/Portal/Portal'))
 const AuthPage = React.lazy(() => import('./views/Login/Auth'))
+const Oauth = React.lazy(()=> import('./views/Login/oauth'))
 
 const PrivateRoute = ({component: Component, ...rest}) => (
   <Route {...rest} render={props => (
@@ -48,6 +49,7 @@ class App extends Component {
       <Router basename='/CLWF/'>
         <React.Suspense fallback={loading()}>
           <Switch>
+            <Route exact path="/oauth" name="oauth" render={props => <Oauth {...props} />} />
             <Route exact path="/authenticated" name="auth" render={props => <AuthPage {...props} />} />
             <Route exact path="/page404" name="Page 404" render={props => <Page404 {...props} />} />
             <Route exact path="/portal" name="Portal" render={props => <Portal {...props} />} />
