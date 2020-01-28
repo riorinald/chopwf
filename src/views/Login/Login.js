@@ -116,6 +116,8 @@ class Login extends Component {
                     localStorage.setItem('roleId', res.data.roleId)
                     localStorage.setItem('token', res.data.token)
                     localStorage.setItem('isLicenseAdmin', res.data.isLicenseAdmin)
+                    localStorage.setItem('chopKeeperCompanyIds', res.data.chopKeeperCompanyIds)
+                    localStorage.setItem('licenseAdminCompanyIds', res.data.licenseAdminCompanyIds)
                     localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
 
                     console.log(res.data)

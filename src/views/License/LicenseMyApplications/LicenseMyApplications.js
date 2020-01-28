@@ -99,7 +99,7 @@ class LicenseMyApplications extends Component {
     }
 
     goToDetails(taskId, status) {
-        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACK") {
+        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACKED") {
             this.props.history.push({
                 pathname: `myapplication/edit`,
                 state: { redirected: true, taskId: taskId }

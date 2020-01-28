@@ -266,7 +266,7 @@ class MyPendingTasks extends Component {
     }
 
     redirectDetails(taskId, status, redirectUrl) {
-        if (status === "DRAFT" || status === "RECALL" || status === "SENDBACK") {
+        if (status === "DRAFT" || status === "RECALL" || status === "SENDBACKED") {
             this.setState({ taskId: taskId, redirectToUrl: redirectUrl, toggleDetails: true, show: false })
         }
         else {
@@ -534,7 +534,7 @@ class MyPendingTasks extends Component {
                                             }
 
                                             let status = rowInfo.original.statusId
-                                            if (status === "DRAFTED" || status === "RECALLED" || status === "SENDBACK") {
+                                            if (status === "DRAFTED" || status === "RECALLED" || status === "SENDBACKED") {
                                                 this.goToEditRequest(rowInfo.original.taskId)
                                             }
                                             else {

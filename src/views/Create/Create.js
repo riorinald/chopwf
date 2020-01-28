@@ -132,7 +132,7 @@ class Create extends Component {
       docCheckBySelected: "",
       branchSelected: "",
 
-      selectedOption:{},
+      selectedOption: {},
 
       documentTableLTI: [],
       documentTableLTU: [],
@@ -168,7 +168,7 @@ class Create extends Component {
       invalidNumberOfPages: false,
       contractValid: true,
 
-      checkDetails: { },
+      checkDetails: {},
 
 
       reqInfo: [
@@ -500,6 +500,7 @@ class Create extends Component {
     // console.log(document.getElementById("remarks"))
     let elementId = (isSubmitted === 'Y') ? "submit" : "saveAction"
     document.getElementById(elementId).blur()
+    let showError = false
 
     Swal.fire({
       title: `Creating your Request ... `,
@@ -507,14 +508,14 @@ class Create extends Component {
       text: '',
       footer: '',
       allowOutsideClick: false,
-      onClose: () => { this.formReset() },
+      onClose: () => { if (!showError) { this.formReset() } },
       onBeforeOpen: () => {
         Swal.showLoading()
       },
       onOpen: () => {
         axios.post(`${config.url}/tasks`, formData)
           .then(res => {
-
+            showError = false
             Swal.update({
               title: res.data.status === 200 ? isSubmitted === "Y" ? 'Request Submitted' : "Request Saved" : "",
               text: 'Request Number : ' + res.data.requestNum,
@@ -525,6 +526,7 @@ class Create extends Component {
             Swal.hideLoading()
           })
           .catch(error => {
+            showError = true
             let err = "Please contact the IT Admin !"
             let err2 = []
             let err3 = ""
@@ -725,7 +727,7 @@ class Create extends Component {
     //CHOP TYPE
     else if (name === "chopTypeSelected") {
       console.log(event.target.value)
-      this.setState({ selectedOption: {docCheckBySelected:null}, documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: []})
+      this.setState({ selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
         this.getDocCheckBy(event.target.value, this.state.teamSelected)
         this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
@@ -757,31 +759,31 @@ class Create extends Component {
 
     //DEPARTMENT
     else if (name === "deptSelected") {
-		if (this.state.isLTU) {
-			this.setState({
-				selectedOption: {docCheckBySelected:null}, documentTableLTU: []
-			})
-			this.getDocCheckBy(this.state.chopTypeSelected, this.state.teamSelected)
-		}
-			this.getDeptHead(this.props.legalName)
-			this.getUsers();
-			this.setState({ teamSelected: "", documentTableCNIPS: [], documentTableLTI: [] })
-		if (this.state.isLTU || this.state.isLTI) {
-		this.getTeams(event.target.value)
-		}
-		// if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.isLTU) {
-		//   this.getDocuments(this.props.legalName, event.target.value, this.state.chopTypeSelected, this.state.teamSelected, (callback) => {
+      if (this.state.isLTU) {
+        this.setState({
+          selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", documentTableLTU: []
+        })
+        this.getDocCheckBy(this.state.chopTypeSelected, this.state.teamSelected)
+      }
+      this.getDeptHead(this.props.legalName)
+      this.getUsers();
+      this.setState({ teamSelected: "", documentTableCNIPS: [], documentTableLTI: [] })
+      if (this.state.isLTU || this.state.isLTI) {
+        this.getTeams(event.target.value)
+      }
+      // if (this.state.teamSelected !== "" && this.state.chopTypeSelected !== "" && this.state.isLTU) {
+      //   this.getDocuments(this.props.legalName, event.target.value, this.state.chopTypeSelected, this.state.teamSelected, (callback) => {
 
-		//   })
-		// }
-	}
+      //   })
+      // }
+    }
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
-      this.setState({ selectedOption: {docCheckBySelected:null}, documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
+      this.setState({ selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
-		this.getDocCheckBy(this.state.chopTypeSelected, event.target.value)
-		this.handleSelectOption('docCheckBySelected')
+        this.getDocCheckBy(this.state.chopTypeSelected, event.target.value)
+        this.handleSelectOption('docCheckBySelected')
       }
       this.setState({ documentTableCNIPS: [], documentTableLTI: [] })
       // if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
@@ -792,55 +794,55 @@ class Create extends Component {
 
     //Handle engName
     else if (name === "engName") {
-      	if (value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)) {
-			value = this.state.eng
-			this.setState({ invalidEnglish: true })
-			event.target.className = "d-block is-invalid"
-      	}
-      	else {
-		  	value = value
-			this.setState({ invalidEnglish: false })
-        	event.target.className = "d-block is-valid "
-      	}
+      if (value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)) {
+        value = this.state.eng
+        this.setState({ invalidEnglish: true })
+        event.target.className = "d-block is-invalid"
+      }
+      else {
+        value = value
+        this.setState({ invalidEnglish: false })
+        event.target.className = "d-block is-valid "
+      }
     }
 
     //Handle cnName
     else if (name === "cnNameLTI") {
-    	if (value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)){
-			this.setState({ cnName: value, invalidChinese: false })
-			event.target.className = "d-block is-valid form-control"
-		}
-		else {
-			this.setState({ cnName: value, invalidChinese: true})
-			event.target.className = "d-block form-control is-invalid"
-			console.warn("chinese invalid")
-		}	
+      if (value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)) {
+        this.setState({ cnName: value, invalidChinese: false })
+        event.target.className = "d-block is-valid form-control"
+      }
+      else {
+        this.setState({ cnName: value, invalidChinese: true })
+        event.target.className = "d-block form-control is-invalid"
+        console.warn("chinese invalid")
+      }
     }
 
     else if (name === "numOfPages") {
-      	if (value.length > 9) {
-			value = this.state.numOfPages
-        	this.setState({ invalidNumberOfPages: true })
-			event.target.className = "is-invalidform-control"
-      	}
-      	else {
-			value = value
-			this.setState({ invalidNumberOfPages: false })
-			event.target.className = "form-control"
-      	}
+      if (value.length > 9) {
+        value = this.state.numOfPages
+        this.setState({ invalidNumberOfPages: true })
+        event.target.className = "is-invalidform-control"
+      }
+      else {
+        value = value
+        this.setState({ invalidNumberOfPages: false })
+        event.target.className = "form-control"
+      }
     }
 
-	this.setState({ [name]: value }, 
-		() => { this.checkDepartment()}
-	);
+    this.setState({ [name]: value },
+      () => { this.checkDepartment() }
+    );
 
-	if (value) {
-			event.target.className = "form-control"
-	}
-		else {
-			event.target.className = "is-invalid form-control"
-	}
-};
+    if (value) {
+      event.target.className = "form-control"
+    }
+    else {
+      event.target.className = "is-invalid form-control"
+    }
+  };
 
 
   handlemask = () => {
@@ -1083,102 +1085,102 @@ class Create extends Component {
     })
   }
 
-	addDocumentLTI() {
+  addDocumentLTI() {
 
-	var maxNumber = 45;
-	var rand = Math.floor((Math.random() * maxNumber) + 1);
-	let valid = true
-	let typeValid = false
-	let doc = this.state.documentTableLTI
-	let errorMessage = []
+    var maxNumber = 45;
+    var rand = Math.floor((Math.random() * maxNumber) + 1);
+    let valid = true
+    let typeValid = false
+    let doc = this.state.documentTableLTI
+    let errorMessage = []
 
-	if (this.state.docSelected === null) {
-		errorMessage.push("Please select a valid document.<br />")
-		}
-	if (this.state.isLTI) {
-		if (this.state.engName === "" && this.state.cnName === "" ){
-			errorMessage.push("Please input document name in English and Chinese.<br />")
-			typeValid = false
-		}
-		if (this.state.invalidEnglish === true){
-			errorMessage.push("Please input document name in English with English character.<br />")
-			typeValid = false
-		}
-		if (this.state.invalidChinese === true){
-			errorMessage.push("Please input document name in Chinese with Chinese character.<br />")
-			typeValid = false
-		}
-		else{
-			typeValid = true
-		}
-			}
-	else{
-		if (this.state.engName === ""){
-			errorMessage.push("Please input document name in english.<br />")
-			typeValid = false
-		}
-		if (this.state.invalidEnglish === true){
-			errorMessage.push("Please input document name in English with English character.<br />")
-			typeValid = false
-		}
-		else {
-			typeValid = false
-			}
-		}
-		if (errorMessage.length !== 0){
-			console.log(errorMessage)
-			Swal.fire({
-				title: "Invalid",
-				html: errorMessage.join('\n\n'),
-				type: "warning",
-				width: "550px"
-			})
-		}
-		else {
-			for (let i = 0; i < doc.length; i++) {
-				if (doc[i].docName === this.state.docAttachedName) {
-					valid = false
-					break
-				} else {
-					valid = true
-				}
-			}
-				if (valid) {
-					const obj = {
-						id: rand,
-						conNum: this.state.conNum,
-						engName: this.state.engName,
-						cnName: this.state.cnName,
-						docSelected: this.state.docSelected,
-						docName: this.state.docAttachedName,
-						docURL: URL.createObjectURL(this.state.docSelected),
-					}
-				this.getBase64(this.state.docSelected, (result) => {
-					obj.documentBase64String = result
-				})
+    if (this.state.docSelected === null) {
+      errorMessage.push("Please select a valid document.<br />")
+    }
+    if (this.state.isLTI) {
+      if (this.state.engName === "" && this.state.cnName === "") {
+        errorMessage.push("Please input document name in English and Chinese.<br />")
+        typeValid = false
+      }
+      if (this.state.invalidEnglish === true) {
+        errorMessage.push("Please input document name in English with English character.<br />")
+        typeValid = false
+      }
+      if (this.state.invalidChinese === true) {
+        errorMessage.push("Please input document name in Chinese with Chinese character.<br />")
+        typeValid = false
+      }
+      else {
+        typeValid = true
+      }
+    }
+    else {
+      if (this.state.engName === "") {
+        errorMessage.push("Please input document name in english.<br />")
+        typeValid = false
+      }
+      if (this.state.invalidEnglish === true) {
+        errorMessage.push("Please input document name in English with English character.<br />")
+        typeValid = false
+      }
+      else {
+        typeValid = false
+      }
+    }
+    if (errorMessage.length !== 0) {
+      console.log(errorMessage)
+      Swal.fire({
+        title: "Invalid",
+        html: errorMessage.join('\n\n'),
+        type: "warning",
+        width: "550px"
+      })
+    }
+    else {
+      for (let i = 0; i < doc.length; i++) {
+        if (doc[i].docName === this.state.docAttachedName) {
+          valid = false
+          break
+        } else {
+          valid = true
+        }
+      }
+      if (valid) {
+        const obj = {
+          id: rand,
+          conNum: this.state.conNum,
+          engName: this.state.engName,
+          cnName: this.state.cnName,
+          docSelected: this.state.docSelected,
+          docName: this.state.docAttachedName,
+          docURL: URL.createObjectURL(this.state.docSelected),
+        }
+        this.getBase64(this.state.docSelected, (result) => {
+          obj.documentBase64String = result
+        })
 
-				console.log(obj.docURL)
-				this.setState({
-					invalidEnglish: false, invalidChinese: false
-				})
-				this.setState(state => {
-					const documentTableLTI = state.documentTableLTI.concat(obj)
-						return {
-							documentTableLTI
-						}
-					})
-				document.getElementById("documentTableLTI").className = ""
-				this.setState({ engName: "", cnName: "", docSelected: null, docAttachedName: "" })
-				}
-				else {
-				Swal.fire({
-					title: "Document Exists",
-					html: 'The selected document already exists in the List',
-					type: "warning"
-					})
-				}
-			}
-	}
+        console.log(obj.docURL)
+        this.setState({
+          invalidEnglish: false, invalidChinese: false
+        })
+        this.setState(state => {
+          const documentTableLTI = state.documentTableLTI.concat(obj)
+          return {
+            documentTableLTI
+          }
+        })
+        document.getElementById("documentTableLTI").className = ""
+        this.setState({ engName: "", cnName: "", docSelected: null, docAttachedName: "" })
+      }
+      else {
+        Swal.fire({
+          title: "Document Exists",
+          html: 'The selected document already exists in the List',
+          type: "warning"
+        })
+      }
+    }
+  }
 
   getBase64(file, callback) {
     let reader = new FileReader();
@@ -1194,7 +1196,7 @@ class Create extends Component {
     try {
       let validateConNum = await this.validateConNum();
       if (this.state.docSelected === null) {
-        contractError.push("Please Select a valid Document.<br />")
+        contractError.push("Please select a valid document.<br />")
       }
       if (this.state.engName === "") {
         contractError.push("Please input name in english.<br />")
@@ -1374,7 +1376,7 @@ class Create extends Component {
     if (newValue)
       if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
         if (newValue) {
-          this.setState({ selectedOption:{[sname]:newValue}, [sname]: newValue })
+          this.setState({ selectedOption: { [sname]: newValue }, [sname]: newValue })
           document.getElementById(sname).clasname = "css-2b097c-container"
         }
         else {
@@ -1386,7 +1388,7 @@ class Create extends Component {
         if (newValue.value) {
           document.getElementById(sname).className = "css-2b097c-container"
         }
-        this.setState({ selectedOption:{[sname]:newValue}, [sname]: newValue.value })
+        this.setState({ selectedOption: { [sname]: newValue }, [sname]: newValue.value })
       }
 
   }
@@ -1400,58 +1402,58 @@ class Create extends Component {
 
   selectDocument() {
     document.getElementById('selectDocuments').blur()
-	let { deptSelected, teamSelected, chopTypeSelected, checkDetails } = this.state
-	let errorMessage = []
+    let { deptSelected, teamSelected, chopTypeSelected, checkDetails } = this.state
+    let errorMessage = []
     // if (this.state.documents.length !== 0) {
     // if (checkDetails.deptTempSelected === deptSelected && checkDetails.chopTypeTempSelected === chopTypeSelected && checkDetails.teamTempSelected === teamSelected) {
     //   this.setState({ showDoc: true })
     // }
     // else {
     Swal.fire({
-        title: "Retrieving",
-        html: 'Please wait while we retrive the list of documents available.',
-        type: "info",
-        onBeforeOpen: () => {
-          Swal.showLoading()
-        },
-        onOpen: () => {
-			if(deptSelected === ""){
-				errorMessage.push("Please select the Department.<br />")
-			}
-			if(chopTypeSelected === ""){
-				errorMessage.push("Please select Chop Type.<br />")
-			}
-			if(teamSelected === ""){
-				errorMessage.push("Please select Team.<br />")
-			}
-			console.log(errorMessage)
-			if(errorMessage.length !== 0){
-				Swal.update({
-					title: "Field Required",
-					html: errorMessage.join('\n\n'),
-					type: "warning"
-				})
-				Swal.hideLoading()
-			}
-			else{
-         		this.getDocuments(this.props.legalName, deptSelected, chopTypeSelected, teamSelected, (numberOfDocuments) => {
-				if (numberOfDocuments === 0) {
-				Swal.update({
-					title: "No Documents",
-					html: 'there is no Documents in this appliction. ',
-					type: "warning"
-					})
-				Swal.hideLoading()
-				}
-				else {
-				// Swal.hideLoading();
-					Swal.close();
-					this.setState({ showDoc: true })
-            		}
-				})
-			} 
+      title: "Retrieving",
+      html: 'Please wait while we retrive the list of documents available.',
+      type: "info",
+      onBeforeOpen: () => {
+        Swal.showLoading()
+      },
+      onOpen: () => {
+        if (deptSelected === "") {
+          errorMessage.push("Please select the Department.<br />")
         }
-      })
+        if (chopTypeSelected === "") {
+          errorMessage.push("Please select Chop Type.<br />")
+        }
+        if (teamSelected === "") {
+          errorMessage.push("Please select Team.<br />")
+        }
+        console.log(errorMessage)
+        if (errorMessage.length !== 0) {
+          Swal.update({
+            title: "Field Required",
+            html: errorMessage.join('\n\n'),
+            type: "warning"
+          })
+          Swal.hideLoading()
+        }
+        else {
+          this.getDocuments(this.props.legalName, deptSelected, chopTypeSelected, teamSelected, (numberOfDocuments) => {
+            if (numberOfDocuments === 0) {
+              Swal.update({
+                title: "No Documents",
+                html: 'there is no Documents in this appliction. ',
+                type: "warning"
+              })
+              Swal.hideLoading()
+            }
+            else {
+              // Swal.hideLoading();
+              Swal.close();
+              this.setState({ showDoc: true })
+            }
+          })
+        }
+      }
+    })
   }
 
   dateChange = (name, view) => date => {
@@ -1555,13 +1557,13 @@ class Create extends Component {
     }
 
     const filterContract1 = (inputValue) => {
-      return deptHeads.filter(i =>
+      return userLists.filter(i =>
         i.value !== this.state.contractSign2 && i.label.toLowerCase().includes(inputValue.toLowerCase())
       );
     }
 
     const filterContract2 = (inputValue) => {
-      return deptHeads.filter(i =>
+      return userLists.filter(i =>
         i.value !== this.state.contractSign1 && i.label.toLowerCase().includes(inputValue.toLowerCase())
       );
     }
@@ -1702,29 +1704,29 @@ class Create extends Component {
 
 
             <Col md>
-				<FormGroup>
-					<Input invalid={this.state.invalidEnglish} autoComplete="off" value={this.state.engName}
-						onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
-					{this.state.invalidEnglish
-						? <small style={{ color: '#F86C6B' }}> Please input only English characters </small>
-					: null }
-				</FormGroup>
+              <FormGroup>
+                <Input invalid={this.state.invalidEnglish} autoComplete="off" value={this.state.engName}
+                  onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
+                {this.state.invalidEnglish
+                  ? <small style={{ color: '#F86C6B' }}> Please input only English characters </small>
+                  : null}
+              </FormGroup>
             </Col>
             <Col md>
-				<FormGroup>
-				{this.state.isLTI ?
-					<>
-					<Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnNameLTI")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3"
-						placeholder= "Please describe in Chinese" />
-						{this.state.invalidChinese
-							? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
-					: null }
-					</>
-					:
-					<Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3"
-						placeholder= "Please describe in Chinese (optional)" />
-				}
-            	</FormGroup>
+              <FormGroup>
+                {this.state.isLTI ?
+                  <>
+                    <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnNameLTI")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3"
+                      placeholder="Please describe in Chinese" />
+                    {this.state.invalidChinese
+                      ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
+                      : null}
+                  </>
+                  :
+                  <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3"
+                    placeholder="Please describe in Chinese (optional)" />
+                }
+              </FormGroup>
             </Col>
             <Col md>
               <FormGroup>
@@ -1909,7 +1911,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Dept.</Label>
                     <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
-                      <option disabled value="0">Please Select . . .</option>
+                      <option disabled value="0">Please select . . .</option>
                       {this.state.department.map((option, index) => (
                         <option value={option.deptId} label={option.dept} key={option.deptId}>
                           {option.deptName}
@@ -1933,7 +1935,7 @@ class Create extends Component {
                     <Input ref={this.appTypeSelected} type="select"
                       onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" defaultValue="0" name="select"
                       onBlur={() => this.validator.showMessageFor('aplicationType')}>
-                      <option disabled value="0">Please Select . . .</option>
+                      <option disabled value="0">Please select . . .</option>
                       {this.state.applicationTypes.map((option, id) => (
 
                         <option value={option.appTypeId} key={option.appTypeId}>{option.appTypeName}</option>
@@ -1998,7 +2000,7 @@ class Create extends Component {
                     <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected"
                       onClick={() => { this.getChopTypes(this.props.legalName, this.state.appTypeSelected) }}
                       onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
-                      <option disabled value="0">Please Select ..</option>
+                      <option disabled value="0">Please select ..</option>
                       {this.state.chopTypes.map((option, id) => (
                         <option key={option.chopTypeId} value={option.chopTypeId}> {this.props.legalName} {option.chopTypeName}</option>
                       ))}
@@ -2175,7 +2177,7 @@ class Create extends Component {
                           <AsyncSelect
                             id="contractSign1"
                             onBlur={this.checkDepartment}
-                            loadOptions={loadUsers}
+                            loadOptions={loadOptionsContract1}
                             onChange={this.handleSelectOption("contractSign1")}
                             menuPortalTarget={document.body}
                             isClearable
@@ -2191,7 +2193,7 @@ class Create extends Component {
                           <AsyncSelect
                             id="contractSign2"
                             onBlur={this.checkDepartment}
-                            loadOptions={loadUsers}
+                            loadOptions={loadOptionsContract2}
                             onChange={this.handleSelectOption("contractSign2")}
                             menuPortalTarget={document.body}
                             isClearable
@@ -2207,19 +2209,19 @@ class Create extends Component {
                     </FormGroup>
 
                     : this.state.isLTU
-                      	? <FormGroup>
-							<Label>Document Check By <i className="fa fa-user" /></Label>
-							<Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-								<Select
-									id="docCheckBySelected"
-									options={docCheckByUsers}
-                  					isClearable
-                 					 // key={`my_unique_select_key__${docCheckBySelected}`}
-									value={this.state.selectedOption.docCheckBySelected}
-									menuPortalTarget={document.body}
-									styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-									onChange={this.handleSelectOption("docCheckBySelected")}
-								/>
+                      ? <FormGroup>
+                        <Label>Document Check By <i className="fa fa-user" /></Label>
+                        <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
+                        <Select
+                          id="docCheckBySelected"
+                          options={docCheckByUsers}
+                          isClearable
+                          // key={`my_unique_select_key__${docCheckBySelected}`}
+                          value={this.state.selectedOption.docCheckBySelected}
+                          menuPortalTarget={document.body}
+                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                          onChange={this.handleSelectOption("docCheckBySelected")}
+                        />
                         {/* <AsyncSelect id="docCheckBySelected" menuPortalTarget={document.body} onChange={this.handleSelectOption("docCheckBySelected")}
                           loadOptions={loadDocCheckBy} styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }} /> */}
                         <InputGroup>

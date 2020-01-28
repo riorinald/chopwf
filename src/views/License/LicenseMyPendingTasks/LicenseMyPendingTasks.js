@@ -98,7 +98,7 @@ class LicenseMyPendingTasks extends Component {
 
     goToDetails(taskId, status) {
 
-        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACK") {
+        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACKED") {
             this.props.history.push({
                 pathname: `mypendingtask/edit`,
                 state: { redirected: true, taskId: taskId }
