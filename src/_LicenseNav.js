@@ -29,9 +29,9 @@ const admin = {
       url: '/license/admin',
       icon: 'fa fa-cog'
     },
-  
+
     {
-      name: 'User Instruction',
+      name: 'User Guide',
       url: '/license/instruction',
       icon: 'fa fa-info-circle',
       class: 'mt-auto IE-margin-top',
@@ -67,9 +67,9 @@ const requestor = {
       url: '/license/mypendingtask',
       icon: 'fa fa-clock-o'
     },
-  
+
     {
-      name: 'User Instruction',
+      name: 'User Guide',
       url: '/license/instruction',
       icon: 'fa fa-info-circle',
       class: 'mt-auto IE-margin-top',
@@ -84,6 +84,6 @@ const requestor = {
   ],
 };
 
-const LicenseNav = {admin, requestor}
+const LicenseNav = { admin, requestor }
 
 export default LicenseNav;
