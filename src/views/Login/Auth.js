@@ -106,7 +106,7 @@ class Authenticated extends Component {
         await axios.post(`${config.url}/login`, credentials
             , { headers: { 'Content-Type': '  application/json' } })
             .then(res => {
-                let info = "User" + res.data.userId + "authorized in the system."
+                let info = "User " + res.data.userId + " is authorized in the system."
                 localStorage.setItem('authenticate', true)
                 localStorage.setItem('legalEntity', 'MBAFC')
                 localStorage.setItem('ticket', res.data.ticket)
@@ -132,7 +132,7 @@ class Authenticated extends Component {
             })
     } catch (error) {
         if (error.response){
-        this.setState({ info: error.response.statusText+": user " + credentials.usernme + "is not authorized in the system." });
+        this.setState({ info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system." });
         } else {
         this.setState({ info: "server unreachable"});
         }   
