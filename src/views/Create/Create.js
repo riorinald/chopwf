@@ -914,10 +914,14 @@ class Create extends Component {
           this.setState({ contractValid: false, contractError: message })
           break;
         }
-        else if (i === 9) {
+        if (i === 10 && value[11]==='-') {
           isdigit1 = true
         }
-        if (value.length === 16) {
+        else{
+          let message = "Please add ( - ) after 4 digits of year"
+          this.setState({ contractValid: false, contractError: message })
+        }
+        if (isdigit1 && value.length === 16) {
           for (let i = 12; i < 16; i++) {
             isDigit = digit.test(value[i])
             if (!isDigit) {
@@ -932,7 +936,7 @@ class Create extends Component {
             }
           }
         }
-        if (value.length === 15) {
+        if (isdigit1 && value.length === 15) {
           for (let i = 12; i < 15; i++) {
             isDigit = digit.test(value[i])
             if (!isDigit) {
@@ -975,12 +979,17 @@ class Create extends Component {
           this.setState({ contractValid: false, contractError: message })
           break;
         }
-        else if (i === 9) {
+        if (i === 9 && value[10]==='-') {
+          console.log(i, value[i])
           isdigit1 = true
+        }
+        else{
+          let message = "Please add ( - ) after 4 digits of year"
+          this.setState({ contractValid: false, contractError: message })
         }
       }
 
-      if (value.length === 15) {
+      if (isdigit1 && value.length === 15) {
 
         for (let i = 12; i < 14; i++) {
           isDigit = digit.test(value[i])
@@ -996,7 +1005,7 @@ class Create extends Component {
           }
         }
       }
-      if (value.length === 14) {
+      if (isdigit1 && value.length === 14) {
         for (let i = 12; i < 13; i++) {
           isDigit = digit.test(value[i])
           if (!isDigit) {
@@ -1639,7 +1648,7 @@ class Create extends Component {
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
               {/* <td className="mediumTd">{document.conNum.map(((item, index) => (<div key={index}>{item};</div>)))}</td> */}
-              <td className="smallTd">{document.conNum}</td>
+              <td className="mediumTd">{document.conNum}</td>
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
               <td id="viewDoc">
