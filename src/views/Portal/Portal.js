@@ -60,10 +60,9 @@ class Portal extends Component {
 			if(err.response){
 				this.setState({
 					alert:true,
-					errorMessage: "User not found in the system. redirect to login page in ",
+					errorMessage: "User not found in the system",
 				})
 				// setTimeout(this.props.history.push('/login'), 5000)
-				this.countDown()
 			}
 			else{
 				this.setState({
@@ -87,24 +86,8 @@ class Portal extends Component {
     }
   }
 
-countDown = () => {
-	if(this.state.timer !== 0){
-	setInterval(() => {
-		this.downcrement();
-		}, 1000);
-	}
-}
-
-downcrement = () => {
-    this.setState({
-      timer: this.state.timer -1
-	});
-  }
 
   render() {
-	if (this.state.timer === 0){
-		this.props.history.push('/login')
-	}
     return (
       <div style={{ backgroundColor: "#2F353A" }} >
         <LegalEntity.Provider value={{UserInfo: this.state.userDetails}}>
@@ -115,7 +98,7 @@ downcrement = () => {
             </AppHeader>
           </LegalEntity.Provider>
 		<Alert className="centerd" color="danger" isOpen={this.state.alert}>
-			{this.state.errorMessage} {this.state.timer}
+			{this.state.errorMessage}
 		</Alert>
         <div className="app flex-row align-items-center">
           <Container>
