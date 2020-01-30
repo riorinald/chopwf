@@ -21,6 +21,7 @@ export const fakeAuth = {
 }
 
 const Login = React.lazy(() => import('./views/Login/Login'));
+const Logout = React.lazy(() => import('./views/Logout/Logout'));
 
 const loading = () => <div className="animated fadeIn pt-3 text-center"><Spinner /> <br />Loading ...</div>;
 
@@ -53,7 +54,8 @@ class App extends Component {
             <Route exact path="/authenticated" name="auth" render={props => <AuthPage {...props} />} />
             <Route exact path="/page404" name="Page 404" render={props => <Page404 {...props} />} />
             <Route exact path="/portal" name="Portal" render={props => <Portal {...props} />} />
-            <Route path='/login' component={Login} />  
+            <Route path='/login' component={Login} /> 
+            <Route path='/Logout' component={Logout} />  
             {/* {fakeAuth.isAuthenticated
               ? <Route path="/" name="Home" render={props => <DefaultLayout {...props} />} />
               : <Redirect to='/login' />

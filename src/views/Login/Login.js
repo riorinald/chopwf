@@ -225,12 +225,7 @@ class Login extends Component {
                 </Navbar>
 
                 <Modal size="md " centered isOpen={true}>
-                    <ModalHeader >Login to Chop Workflow System</ModalHeader>
-                    <ModalBody>
-                        <div style={{ textAlign: "center" }}>
-                            {/* <img style={{ width: "150px" }} src="https://img.icons8.com/ios-filled/250/000000/ios-logo.png" /> */}
-                        </div>
-                    </ModalBody>
+                    <ModalHeader cssModule={{'modal-title': 'w-100 text-center'}}> Login to Chop Workflow System </ModalHeader>
                     <ModalBody>
                         <Form>
                             <FormGroup row>
@@ -273,7 +268,7 @@ class Login extends Component {
                         <Button id="loginWindows" block color="success" style={{ justifyContent: "center" }} onClick={this.WindowsLogin}>Login With Windows </Button>
                     </ModalFooter>
                 <Fade in={this.state.fade}>
-                    <Alert color="info"><center>{this.state.info}</center></Alert>
+                    <Alert className="text-center" color="info">{this.state.info}</Alert>
                 </Fade>
                 </Modal>
 
