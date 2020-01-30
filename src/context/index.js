@@ -5,27 +5,25 @@ export const label = {
         contractChop: <p>
             <b>MBAFC</b> Contract Chop is only used for <b>Mortgage Loan Contract</b> and <b>Mortgage Filling Business</b>.
            For any other contracts (e.g. purchase orders/release orders) and agreements, please select company chop.
-            </p> 
-      },
+            </p>
+    },
     MBIA: {
         name: 'MBIA',
         contractChop: <p>
-            <b>MBIA</b> Contract Chop hasn’t been initiated to be used yet. Please select <b>Company Chop</b> 
-            for PO/RO/Contract/Agreement.
+            <b>MBIA</b> MBIA Contract Chop hasn’t been initicated to be used yet.  For any other contracts (e.g. purchase orders/release orders) and agreements, please select <b>Company Chop.</b>.
         </p>
     },
     MBLC: {
         name: 'MBLC',
-        contractChop:<p>
-            <b>MBLC</b> Contract Chop is only used for <b>Finance Lease and Guarantee Contract and Mortgage Contract and Mortgage 
-            Filling Business</b> For any other contracts (e.g. purchase orders/release orders) and agreements, please select company chop.
+        contractChop: <p>
+            <b>MBLC</b> Contract Chop is only used for <b>Finance Lease and Guarantee Contract and Mortgage Contract and Mortgage
+            Filling Business</b> For any other contracts (e.g. purchase orders/release orders) and agreements, please select <b>Company Chop</b>.
         </p>
     },
     DMT: {
         name: 'DMT',
-        contractChop:<p>
-            <b>DMT</b> China Contract Chop hasn’t been initiated to be used yet. Please select<b>Company Chop</b>
-            for PO/RO/Contract/Agreement.
+        contractChop: <p>
+            <b>DMT</b> China Contract Chop hasn’t been initiated to be used yet. Please select <b>Company Chop </b> for PO/RO/Contract/Agreement.
         </p>
     },
 

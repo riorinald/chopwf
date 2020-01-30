@@ -36,8 +36,12 @@ class LicenseMyPendingTasks extends Component {
                 status: "",
                 plannedReturnDate: "",
                 createdDate: "",
-                createdByName: ""
+                createdByName: "",
+                departmentId: ""
             },
+            totalPages: 1,
+            page: 1,
+            limit: 10,
             returnDateView: "",
             createdDateView: "",
             loading: false,
@@ -67,7 +71,7 @@ class LicenseMyPendingTasks extends Component {
     }
 
     componentDidMount() {
-        this.getPendingTasks()
+        this.getPendingTasks(this.state.page, this.state.limit)
         this.getLicenseNames();
         this.getData('seniorManagers');
         // this.getSeniorManagers();
@@ -112,19 +116,20 @@ class LicenseMyPendingTasks extends Component {
 
     }
 
-    async getPendingTasks() {
+    async getPendingTasks(page, pageSize) {
         const searchOption = this.state.searchOption
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&category=pending&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}`)
+        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=pending&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentId=${searchOption.departmentId}&page=${page}&pageSize=${pageSize}`,
+            { headers: { Pragma: 'no-cache' } })
             .then(res => {
-                this.setState({ pendingTasks: res.data, loading: false })
+                this.setState({ pendingTasks: res.data.licenses, totalPages: res.data.pageCount, loading: false })
             })
     }
 
     async getStatusList() {
-        const res = await Axios.get(`${config.url}/statuses?category=license`)
+        const res = await Axios.get(`${config.url}/statuses?category=license`, { headers: { Pragma: 'no-cache' } })
         this.setState({ statusName: res.data })
-      }
+    }
 
 
     onFilteredChangeCustom = (value, accessor) => {
@@ -200,7 +205,7 @@ class LicenseMyPendingTasks extends Component {
 
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            this.getPendingTasks()
+            this.getPendingTasks(this.state.page, this.state.limit)
         }
     }
 
@@ -219,12 +224,12 @@ class LicenseMyPendingTasks extends Component {
     };
 
     render() {
-        const { pendingTasks, licenseNames, seniorManagers, departments, statusName, returnDateView, createdDateView } = this.state
+        const { pendingTasks, licenseNames, seniorManagers, departments, statusName, returnDateView, createdDateView, totalPages } = this.state
         return (
             <div className="animated fadeIn">
                 <h4>My Pending Tasks</h4>
                 <Card onKeyDown={this.handleKeyDown}>
-                    <CardHeader>MY PENDING TASKS <Button className="float-right" onClick={this.getPendingTasks} >Search</Button></CardHeader>
+                    <CardHeader>My Pending Tasks <Button className="float-right" onClick={() => this.getPendingTasks(this.state.page, this.state.limit)} >Search</Button></CardHeader>
                     <CardBody>
                         <ReactTable
                             data={pendingTasks}
@@ -266,6 +271,28 @@ class LicenseMyPendingTasks extends Component {
                                         )
                                     },
                                     style: { textAlign: "center" }
+                                },
+                                {
+
+                                    Header: "Department",
+                                    accessor: "departmentName",
+                                    width: this.getColumnWidth('departmentName', "Department"),
+                                    Cell: this.renderEditable,
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
+                                                <option value="" >Please Select a department</option>
+                                                {this.state.departments.map((dept, index) =>
+                                                    <option key={index} value={dept.deptId} >{dept.deptName}</option>
+                                                )}
+                                            </Input>
+
+                                        )
+                                    },
+                                    style: { textAlign: "center" },
                                 },
                                 {
                                     Header: "Document Type",
@@ -431,13 +458,16 @@ class LicenseMyPendingTasks extends Component {
                                     style: { textAlign: "center" }
                                 }
                             ]}
-                            defaultPageSize={20}
-                            // pages={this.state.page}
-                            // manual
-                            // onPageChange={(e)=>{this.setState({page: e})}}
-                            // canNextpage={true}
+                            defaultPageSize={this.state.limit}
+                            manual
+                            onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getPendingTasks(e + 1, this.state.limit)) }}
+                            onPageSizeChange={(pageSize, page) => {
+                                this.setState({ limit: pageSize, page: page + 1 });
+                                this.getPendingTasks(page + 1, pageSize)
+                            }}
                             className="-striped -highlight"
                             loading={this.state.loading}
+                            pages={totalPages}
                             getTrProps={(state, rowInfo) => {
                                 if (rowInfo && rowInfo.row) {
                                     return {

@@ -37,8 +37,12 @@ class LicenseMyApplications extends Component {
                 status: "",
                 plannedReturnDate: "",
                 createdDate: "",
-                createdByName: ""
+                createdByName: "",
+                departmentId: ""
             },
+            totalPages: 1,
+            page: 1,
+            limit: 10,
             returnDateView: "",
             createdDateView: "",
             loading: false,
@@ -69,7 +73,7 @@ class LicenseMyApplications extends Component {
     }
 
     componentDidMount() {
-        this.getMyApplications()
+        this.getMyApplications(this.state.page, this.state.limit)
         this.getLicenseNames();
         this.getData('seniorManagers');
         // this.getSeniorManagers();
@@ -113,21 +117,21 @@ class LicenseMyApplications extends Component {
 
     }
 
-    async getMyApplications() {
+    async getMyApplications(page, pageSize) {
         const { searchOption } = this.state
         console.log(searchOption)
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}`,
+        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentId=${searchOption.departmentId}&page=${page}&pageSize=${pageSize}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
-                this.setState({ applications: res.data, loading: false })
+                this.setState({ applications: res.data.licenses, totalPages: res.data.pageCount, loading: false })
             })
     }
 
     async getStatusList() {
-        const res = await Axios.get(`${config.url}/statuses?category=license`)
+        const res = await Axios.get(`${config.url}/statuses?category=license`, { headers: { Pragma: 'no-cache' } })
         this.setState({ statusName: res.data })
-      }
+    }
 
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
@@ -207,7 +211,7 @@ class LicenseMyApplications extends Component {
     }
 
     search() {
-        this.getMyApplications()
+        this.getMyApplications(this.state.page, this.state.limit)
     }
 
     dateChange = (name, view) => date => {
@@ -225,7 +229,7 @@ class LicenseMyApplications extends Component {
     };
 
     render() {
-        const { applications, seniorManagers, licenseNames, statusName, returnDateView, createdDateView } = this.state
+        const { applications, seniorManagers, licenseNames, statusName, returnDateView, createdDateView, totalPages } = this.state
 
 
 
@@ -233,7 +237,7 @@ class LicenseMyApplications extends Component {
             <div className="animated fadeIn" >
                 <h4>My Applications</h4>
                 <Card onKeyDown={this.handleKeyDown} >
-                    <CardHeader>MY APPLICATIONS <Button className="float-right" onClick={this.search} >Search</Button> </CardHeader>
+                    <CardHeader>My Applicaitons <Button className="float-right" onClick={this.search} >Search</Button> </CardHeader>
                     <CardBody>
                         <ReactTable
                             data={applications}
@@ -275,6 +279,28 @@ class LicenseMyApplications extends Component {
                                         )
                                     },
                                     style: { textAlign: "center" }
+                                },
+                                {
+
+                                    Header: "Department",
+                                    accessor: "departmentName",
+                                    width: this.getColumnWidth('departmentName', "Department"),
+                                    Cell: this.renderEditable,
+                                    filterMethod: (filter, row) => {
+                                        return row[filter.id] === filter.value;
+                                    },
+                                    Filter: ({ filter, onChange }) => {
+                                        return (
+                                            <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
+                                                <option value="" >Please Select a department</option>
+                                                {this.state.departments.map((dept, index) =>
+                                                    <option key={index} value={dept.deptId} >{dept.deptName}</option>
+                                                )}
+                                            </Input>
+
+                                        )
+                                    },
+                                    style: { textAlign: "center" },
                                 },
                                 {
                                     Header: "Document Type",
@@ -350,6 +376,9 @@ class LicenseMyApplications extends Component {
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;
                                     },
+                                    Cell: row => (
+                                        <div><span title={row.original.statusName} >{row.original.statusName}</span></div>
+                                    ),
                                     Filter: ({ filter, onChange }) => {
                                         return (
                                             <Input type="select" value={this.state.searchOption.status} onChange={this.handleSearch('status')} >
@@ -440,13 +469,16 @@ class LicenseMyApplications extends Component {
                                     style: { textAlign: "center" }
                                 }
                             ]}
-                            defaultPageSize={20}
-                            // pages={this.state.page}
-                            // manual
-                            // onPageChange={(e)=>{this.setState({page: e})}}
-                            // canNextpage={true}
+                            defaultPageSize={this.state.limit}
+                            manual
+                            onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getMyApplications(e + 1, this.state.limit)) }}
+                            onPageSizeChange={(pageSize, page) => {
+                                this.setState({ limit: pageSize, page: page + 1 });
+                                this.getMyApplications(page + 1, pageSize)
+                            }}
                             className="-striped -highlight"
                             loading={this.state.loading}
+                            pages={totalPages}
                             getTrProps={(state, rowInfo) => {
                                 if (rowInfo && rowInfo.row) {
                                     return {

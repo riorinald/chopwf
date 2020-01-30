@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import { Badge, UncontrolledDropdown, Button, Modal, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem, Dropdown } from 'reactstrap';
+import { UncontrolledDropdown, DropdownItem, DropdownMenu, DropdownToggle, Nav, Dropdown } from 'reactstrap';
 import PropTypes from 'prop-types';
 import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
 import { fakeAuth } from '../../App';
 import { withRouter } from 'react-router-dom';
-import LegalEntity from '../../context';
 import Axios from 'axios';
 import config from '../../config';
 
@@ -42,7 +41,7 @@ class DefaultHeader extends Component {
 
   async getUserDetails() {
     this.setState({ loading: true })
-    await Axios.get(`${config.url}/users/${localStorage.getItem('userId')}`).then(res => {
+    await Axios.get(`${config.url}/users/${localStorage.getItem('userId')}`,{ headers: { Pragma: 'no-cache' } }).then(res => {
       this.setState({ userDetails: res.data, loading: false })
     })
   }
@@ -50,18 +49,18 @@ class DefaultHeader extends Component {
   render() {
 
 
-    const { children, state } = this.props;
+    const { state } = this.props;
     const { userDetails } = this.state;
-    const username = localStorage.getItem('userId');
+
     return (
       <React.Fragment>
         <AppSidebarToggler className="d-lg-none" display="sm" mobile />
         <AppSidebarMinimizer className="customMT d-md-down-none navbar-toggler"><span className="navbar-toggler-icon"></span></AppSidebarMinimizer>
-        <Nav className="h5 d-sm-down-none"><b className="ml-2">{state.application} Use WORKFLOW for {state.legalEntity}</b></Nav>
+        <Nav className="h5 d-sm-down-none"><b className="ml-2">{state.application} USE WORKFLOW FOR {state.legalEntity}</b></Nav>
         <Nav className="ml-auto" navbar>
           <Dropdown isOpen={state.viewChop} toggle={this.props.toggle('viewChop')} nav direction="down" >
             <DropdownToggle color="ghost" className="btn-pill" caret>
-              CHOP WF
+              Switch Chop Entity
                 </DropdownToggle>
             <DropdownMenu className="mt-2">
               <DropdownItem onClick={this.props.changeEntity('CHOP')} value="MBAFC"
@@ -84,7 +83,7 @@ class DefaultHeader extends Component {
           </Dropdown>
           <Dropdown className="mr-2" isOpen={state.viewLicense} toggle={this.props.toggle('viewLicense')} nav direction="down" >
             <DropdownToggle color="ghost" className="btn-pill" caret>
-              LICENSE WF
+              Switch License Entity
                 </DropdownToggle>
             <DropdownMenu className="mt-2">
               <DropdownItem onClick={this.props.changeEntity('LICENSE')} value="MBAFC"
@@ -105,11 +104,11 @@ class DefaultHeader extends Component {
                     </DropdownItem>
             </DropdownMenu>
           </Dropdown>
-          <UncontrolledDropdown nav direction="down" >
-            <DropdownToggle nav>
-              {username}<img src={userDetails.photoUrl} className="img-avatar" alt={userDetails.firstName} />
+          <UncontrolledDropdown nav direction="down" className="mr-4" >
+            <DropdownToggle nav className="mr-2">
+              {userDetails.displayName}
             </DropdownToggle>
-            <DropdownMenu right className="mt-2">
+            <DropdownMenu right className="mt-3">
               <AuthButton />
             </DropdownMenu>
           </UncontrolledDropdown>

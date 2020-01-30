@@ -31,7 +31,7 @@ class Myapps extends Component {
       loading: false,
       totalPages: 1,
       page: 1,
-      limit: 20,
+      limit: 10,
 
 
       username: localStorage.getItem('userId'),
@@ -53,10 +53,12 @@ class Myapps extends Component {
         documentCheckByName: "",
         statusName: "",
         createdDate: "",
-        createdByName: ""
+        createdByName: "",
+        departmentId: ""
       },
 
-      status: []
+      status: [],
+      departments: []
 
     }
     this.getApplications = this.getApplications.bind(this);
@@ -64,23 +66,24 @@ class Myapps extends Component {
   }
 
   componentDidMount() {
-    this.getApplications(1, 20);
+    this.getApplications(1, this.state.limit);
     // resetMounted.setMounted();
 
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
+    this.getData("departments", `${config.url}/departments`);
     this.getStatusList();
   }
 
   async getStatusList() {
-    const res = await Axios.get(`${config.url}/statuses?category=chop`)
+    const res = await Axios.get(`${config.url}/statuses?category=chop`, { headers: { Pragma: 'no-cache' } })
     this.setState({ status: res.data })
   }
 
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: true })
     // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
-    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
+    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } })
       .then(res => {
         this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false })
@@ -133,7 +136,6 @@ class Myapps extends Component {
     },
       // console.log(this.state.searchOption)\
     )
-    this.getApplications(this.state.page, this.state.limit)
   }
 
   getDeptHeads(heads) {
@@ -233,7 +235,7 @@ class Myapps extends Component {
       <div className="animated fadeIn">
         <h4>My Applications</h4>
         <Card>
-          <CardHeader>MY APPLICATIONS <Button className="float-right" onClick={this.search} >Search</Button>
+          <CardHeader>My Applications <Button className="float-right" onClick={this.search} >Search</Button>
           </CardHeader>
           <CardBody onKeyDown={this.onKeyPressed}>
             <ReactTable
@@ -271,9 +273,9 @@ class Myapps extends Component {
                   Filter: ({ filter, onChange }) => {
                     return (
                       <Input type="select" value={this.state.searchOption.applicationTypeName} onChange={this.handleSearch('applicationTypeName')} >
-                        <option value="">Please Select</option>
+                        <option value="">Please Select </option>
                         {this.state.applicationTypes.map(type =>
-                          <option key={type.appTypeId} value={type.appTypeName} >{type.appTypeName}</option>
+                          <option key={type.appTypeId} value={type.appTypeId} >{type.appTypeName}</option>
                         )}
                       </Input>
 
@@ -285,7 +287,7 @@ class Myapps extends Component {
                   Header: "Chop Type",
                   accessor: "chopTypeName",
                   Cell: this.renderEditable,
-                  style: { textAlign: "center" },
+                  style: { textAlign: "center", whiteSpace: 'unset' },
                   width: this.getColumnWidth('chopTypeName', "Chop Type"),
                   filterMethod: (filter, row) => {
                     return row[filter.id] === filter.value;
@@ -293,9 +295,9 @@ class Myapps extends Component {
                   Filter: ({ filter, onChange }) => {
                     return (
                       <Input type="select" value={this.state.searchOption.chopTypeName} onChange={this.handleSearch('chopTypeName')} >
-                        <option value="">Please Select</option>
+                        <option value="">Please Select </option>
                         {this.state.chopTypes.map(type =>
-                          <option key={type.chopTypeId} value={type.chopTypeName} >{type.chopTypeName}</option>
+                          <option key={type.chopTypeId} value={type.chopTypeId} >{type.chopTypeName}</option>
                         )}
                       </Input>
 
@@ -304,36 +306,49 @@ class Myapps extends Component {
                 },
                 {
 
-                  Header: "Document Name English",
+                  Header: "Document Name (EN)",
                   accessor: "documentNameEnglish",
-                  width: this.getColumnWidth('documentNameEnglish', "Document Name English"),
+                  width: this.getColumnWidth('documentNameEnglish', "Document Name (EN)"),
                   // Cell: this.renderEditable,
                   Cell: row => (
-                    <div> {this.getDeptHeads(row.original.documentNameEnglish)} </div>
+                    <div> <span title={this.getDeptHeads(row.original.documentNameEnglish)} >{this.getDeptHeads(row.original.documentNameEnglish)}</span> </div>
                   ),
-                  style: { textAlign: "center", 'whiteSpace': 'unset' },
+                  style: { textAlign: "center" },
                   filterable: false
                 },
                 {
 
-                  Header: "Document Name Chinese",
+                  Header: "Document Name (CN)",
                   accessor: "documentNameChinese",
-                  width: this.getColumnWidth('documentNameChinese', "Document Name Chinese"),
+                  width: this.getColumnWidth('documentNameChinese', "Document Name (CN)"),
                   // Cell: this.renderEditable,
                   Cell: row => (
-                    <div> {this.getDeptHeads(row.original.documentNameChinese)} </div>
+                    <div> <span title={this.getDeptHeads(row.original.documentNameChinese)}>{this.getDeptHeads(row.original.documentNameChinese)}</span> </div>
                   ),
-                  style: { textAlign: "center", 'whiteSpace': 'unset' },
+                  style: { textAlign: "center" },
                   filterable: false
                 },
                 {
-                  Header: "Document Check By",
-                  accessor: " ",
-                  width: this.getColumnWidth('documentCheckByName', "Document Check By"),
-                  Cell: row => (
-                    <div> {this.getDeptHeads(row.original.documentCheckByName)} </div>
-                  ),
-                  style: { textAlign: "center" }
+
+                  Header: "Department",
+                  accessor: "departmentName",
+                  width: this.getColumnWidth('departmentName', "Department"),
+                  Cell: this.renderEditable,
+                  filterMethod: (filter, row) => {
+                    return row[filter.id] === filter.value;
+                  },
+                  Filter: ({ filter, onChange }) => {
+                    return (
+                      <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
+                        <option value="" >Please Select </option>
+                        {this.state.departments.map((dept, index) =>
+                          <option key={index} value={dept.deptId} >{dept.deptName}</option>
+                        )}
+                      </Input>
+
+                    )
+                  },
+                  style: { textAlign: "center" },
                 },
                 {
                   Header: "Department Head",
@@ -352,16 +367,28 @@ class Myapps extends Component {
                   Cell: this.renderEditable,
                   style: { textAlign: "center" }
                 },
+
+                {
+                  Header: "Document Check By",
+                  accessor: "documentCheckByName",
+                  width: this.getColumnWidth('documentCheckByName', "Document Check By"),
+                  Cell: row => (
+                    <div> {this.getDeptHeads(row.original.documentCheckByName)} </div>
+                  ),
+                  style: { textAlign: "center" }
+                },
                 {
                   Header: "Status",
                   accessor: "statusName",
                   width: this.getColumnWidth('statusName', "Status"),
-                  Cell: this.renderEditable,
+                  Cell: row => (
+                    <div><span title={row.original.statusName}>{row.original.statusName}</span></div>
+                  ),
                   style: { textAlign: "center" },
                   Filter: ({ filter, onChange }) => {
                     return (
                       <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
-                        <option value="" >Please Select a status</option>
+                        <option value="" >Please Select </option>
                         {this.state.status.map((stat, index) =>
                           <option key={index} value={stat.statusName} >{stat.statusName}</option>
                         )}
@@ -416,7 +443,7 @@ class Myapps extends Component {
                   style: { textAlign: "center" }
                 },
               ]}
-              defaultPageSize={20}
+              defaultPageSize={this.state.limit}
               manual
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {

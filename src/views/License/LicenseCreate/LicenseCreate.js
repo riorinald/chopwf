@@ -8,6 +8,7 @@ import {
 } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { addDays } from 'date-fns';
 import axios from 'axios';
 import config from '../../../config';
 import SimpleReactValidator from 'simple-react-validator';
@@ -31,6 +32,7 @@ class LicenseCreate extends Component {
             licenseNames: [],
             seniorManagers: [],
             departments: [],
+            receivers: [],
 
             //data to submit
             formData: {
@@ -53,7 +55,7 @@ class LicenseCreate extends Component {
                 isConfirm: "N"
             },
 
-            validateForm: ["telephoneNum", "department", "licenseName", "licensePurpose1", "licensePurpose2", "licensePurpose3", "documentType1", "documentType2", "deliverWay1", "deliverWay2", "address", "reciever", "recieverPhone", "seniorManager"],
+            validateForm: ["department", "licenseName", "licensePurpose1", "licensePurpose2", "licensePurpose3", "documentType1", "documentType2", "watermark1", "watermark2", "returnDate", "deliverWay1", "deliverWay2", "address", "reciever", "recieverPhone", "seniorManager"],
 
 
             returnDateView: null,
@@ -70,15 +72,13 @@ class LicenseCreate extends Component {
     //Mount
     componentDidMount() {
         this.getUserData();
-        // this.getData('licenseNames');
-        // this.getData('seniorManagers');
         this.getLicenseNames();
         this.getSeniorManagers();
         this.getData('departments');
     }
 
     async getLicenseNames() {
-        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`)
+        const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
         this.setState({ licenseNames: res.data })
     }
 
@@ -91,7 +91,7 @@ class LicenseCreate extends Component {
     async getUserData() {
         let ticket = localStorage.getItem('ticket')
         let userId = localStorage.getItem('userId')
-        const res = await axios.get(`${config.url}/users/` + userId, { headers: { 'ticket': ticket } })
+        const res = await axios.get(`${config.url}/users/` + userId, { headers: { Pragma: 'no-cache', 'ticket': ticket } })
         this.setState(state => {
             let formData = this.state.formData
             formData.userId = userId
@@ -102,8 +102,9 @@ class LicenseCreate extends Component {
     }
 
     async getSeniorManagers() {
-        console.log(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
-        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+        // console.log(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
+            { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let arr1 = []
                 res.data.map(mgr => {
@@ -114,6 +115,18 @@ class LicenseCreate extends Component {
                     arr1.push(obj)
                 })
                 this.setState({ seniorManagers: arr1 })
+            })
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
+            .then(res => {
+                let arr1 = []
+                res.data.map(mgr => {
+                    let obj = {
+                        value: mgr.userId,
+                        label: mgr.displayName
+                    }
+                    arr1.push(obj)
+                })
+                this.setState({ receivers: arr1 })
             })
     }
 
@@ -148,13 +161,19 @@ class LicenseCreate extends Component {
                         let err3 = ""
                         if (error.response) {
                             console.log(error.response)
-                            let keys = Object.keys(error.response.data.errors)
-                            err = keys.join(',')
-                            keys.map(key => {
-                                // console.log(error.response.data.errors[key].join(','))
-                                err2.push(error.response.data.errors[key].join(','))
-                            })
-                            err3 = err2.join(';')
+                            if (error.response.data.errors) {
+                                let keys = Object.keys(error.response.data.errors)
+                                err = keys.join(',')
+                                keys.map(key => {
+                                    // console.log(error.response.data.errors[key].join(','))
+                                    err2.push(error.response.data.errors[key].join(','))
+                                })
+                                err3 = err2.join(';')
+                            }
+                            else if (error.response.data.message) {
+                                err = error.response.data.message
+                                err3 = ""
+                            }
                         }
                         Swal.hideLoading()
                         Swal.update({
@@ -167,27 +186,6 @@ class LicenseCreate extends Component {
                     })
             }
         })
-        // await axios.post(`${config.url}/licenses`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-        //     .then(res => {
-        //         if (isSubmitted === "Y") {
-        //             Swal.fire({
-        //                 title: res.data.status === 200 ? 'Request Submitted' : "",
-        //                 text: 'Request Number : ' + res.data.requestNum,
-        //                 footer: 'Your request is being processed and is waiting for the approval',
-        //                 type: 'success',
-        //                 onClose: () => { this.formReset() }
-        //             })
-        //         }
-        //         else {
-        //             Swal.fire({
-        //                 title: res.data.status === 200 ? 'Request Saved' : '',
-        //                 text: 'Request Number : ' + res.data.requestNum,
-        //                 footer: 'Your request is saved as draft.',
-        //                 type: 'info',
-        //                 onClose: () => { this.formReset() }
-        //             })
-        //         }
-        //     })
     }
 
 
@@ -269,11 +267,12 @@ class LicenseCreate extends Component {
     //convert Date
     dateChange = (name, view) => date => {
         let month = date.getMonth()
-
+        let tempDate = date.getDate()
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${tempDate.toLocaleString().length === 1 ? 0 : ""}${tempDate}`
         }
+        console.log(dates)
         this.setState({ [view]: date });
         this.setState(state => {
             let formData = this.state.formData
@@ -301,15 +300,17 @@ class LicenseCreate extends Component {
 
     //validation
     handleAgreeTerms(event) {
+        let { formData } = this.state
         this.validate()
-        if (this.validator.allValid()) {
+        let validScanCopy = formData.documentType === "SCANCOPY" ? formData.isWatermark !== "" ? formData.watermark !== "" ? true : false : false : true
+        if (this.validator.allValid() && validScanCopy) {
             // this.setState(state => {
             //     let formData = this.state.formData
             //     formData.isConfirm = "Y"
             //     return formData
             // })
             this.submitRequest("Y")
-            // console.log("ALL VALIDATED")
+            console.log("ALL VALIDATED")
         }
         else {
             // alert("Invalid Fields")
@@ -326,19 +327,19 @@ class LicenseCreate extends Component {
             keys = keys.filter(key => key !== "licensePurpose1" && key !== "licensePurpose2" && key !== "licensePurpose3")
             keys = keys.concat("specificPurpose")
         }
-        if (data.documentType === "ORIGINAL") {
-            keys = keys.concat("returnDate")
-        }
-        else {
-            keys = keys.filter(key => key !== "returnDate")
-        }
-        if (data.documentType === "SCANCOPY") {
-            keys = keys.concat("watermark1")
-            keys = keys.concat("watermark2")
-        }
-        else {
-            keys = keys.filter(key => key !== "watermark1" || key !== "watermark2")
-        }
+        // if (data.documentType === "ORIGINAL") {
+        //     keys = keys.concat("returnDate")
+        // }
+        // else {
+        //     keys = keys.filter(key => key !== "returnDate")
+        // }
+        // if (data.documentType === "SCANCOPY") {
+        //     keys = keys.concat("watermark1")
+        //     keys = keys.concat("watermark2")
+        // }
+        // else {
+        //     keys = keys.filter(key => key !== "watermark1" || key !== "watermark2")
+        // }
         if (data.isWatermark === "Y") {
             keys = keys.concat("inputWatermark1")
         }
@@ -440,7 +441,7 @@ class LicenseCreate extends Component {
     }
 
     render() {
-        const { formData, licenseNames, returnDateView, seniorManagers, departments } = this.state
+        const { formData, licenseNames, returnDateView, seniorManagers, departments, receivers } = this.state
         this.validator.purgeFields();
 
 
@@ -449,11 +450,19 @@ class LicenseCreate extends Component {
                 i.label.toLowerCase().includes(inputValue.toLowerCase())
             );
         };
-
-
         const loadOptions = (inputValue, callback) => {
 
             callback(filterColors(inputValue));
+        }
+
+        const filterReceiver = (inputValue) => {
+            return receivers.filter(i =>
+                i.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        }
+
+        const loadReciever = (inputValue, callback) => {
+            callback(filterReceiver(inputValue));
         }
 
         return (
@@ -470,21 +479,21 @@ class LicenseCreate extends Component {
                                         <InputGroupAddon addonType="prepend">
                                             <InputGroupText>ID</InputGroupText>
                                         </InputGroupAddon>
-                                        <Input disabled value={formData.employeeNum} id="prependedInput" size="16" type="text" />
+                                        <Input autoComplete="off" disabled value={formData.employeeNum} id="prependedInput" size="16" type="text" />
                                     </InputGroup>
                                 </div>
                             </FormGroup>
                             <FormGroup>
                                 <Label>Telephone Number </Label>
                                 <InputGroup>
-                                    <Input onChange={this.handleChange("telephoneNum")} value={formData.telephoneNum} id="telephoneNum" size="16" type="text" />
+                                    <Input autoComplete="off" onChange={this.handleChange("telephoneNum")} value={formData.telephoneNum} id="telephoneNum" size="16" type="text" />
                                 </InputGroup>
                             </FormGroup>
                             <FormGroup>
                                 <Label>Department </Label>
                                 <InputGroup>
                                     <Input id="department" onChange={this.handleChange("department")} defaultValue="0" type="select">
-                                        <option value="0">Please selet a department</option>
+                                        <option disabled value="0">Please selet a department</option>
                                         {departments.map((dept, index) =>
                                             <option key={index} value={dept.deptId} > {dept.deptName} </option>
                                         )}
@@ -496,7 +505,7 @@ class LicenseCreate extends Component {
                                 <Label>License Name </Label>
                                 <InputGroup>
                                     <Input id="licenseName" onChange={this.handleChange("licenseName")} defaultValue="0" type="select">
-                                        <option value="0" >Please select a License Name</option>
+                                        <option disabled value="0" >Please select a License Name</option>
                                         {licenseNames.map((license, index) =>
                                             <option key={index} value={license.licenseNameId} > {license.name} </option>
                                         )}
@@ -511,7 +520,7 @@ class LicenseCreate extends Component {
                                 <CustomInput type="radio" id="licensePurpose2" name="licensePurpose" value="MFP" label="城抵押 Mortgage Filling Purpose" />
                                 <CustomInput type="radio" id="licensePurpose3" name="licensePurpose" value="PS" label="其他 Please specify:">
                                     <Collapse isOpen={formData.licensePurpose === "PS"}>
-                                        <Input id="specificPurpose" type="text" onChange={this.handleChange("specificPurpose")} value={formData.specificPurpose} />
+                                        <Input id="specificPurpose" type="text" maxLength={500} onChange={this.handleChange("specificPurpose")} value={formData.specificPurpose} />
                                         {formData.licensePurpose === "PS"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Specify Purpose', formData.specificPurpose, 'required')}</small>
                                             : null}
@@ -533,18 +542,24 @@ class LicenseCreate extends Component {
                                     <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
                                     <CustomInput type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes, Please specify watermark here:">
                                         <Collapse isOpen={formData.isWatermark === "Y"}>
-                                            <Input id="inputWatermark1" type="text" value={formData.watermark} onChange={this.handleChange("watermark")} />
-                                            {formData.isWatermark === "Y"
-                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', formData.watermark, 'required')}</small>
-                                                : null}
+                                            <Input id="inputWatermark1" type="text" maxLength={50} value={formData.watermark} onChange={this.handleChange("watermark")} />
+                                            {formData.documentType === "SCANCOPY"
+                                                ? formData.isWatermark === "Y"
+                                                    ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', formData.watermark, 'required')}</small>
+                                                    : null
+                                                : null
+                                            }
                                         </Collapse>
                                     </CustomInput>
                                     <CustomInput type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No, Please specify the reason of not adding watermark:">
                                         <Collapse isOpen={formData.isWatermark === "N"}>
-                                            <Input id="inputWatermark2" type="text" value={formData.watermark} onChange={this.handleChange("watermark")} />
-                                            {formData.isWatermark === "N"
-                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', formData.watermark, 'required')}</small>
-                                                : null}
+                                            <Input id="inputWatermark2" type="text" maxLength={50} value={formData.watermark} onChange={this.handleChange("watermark")} />
+                                            {formData.documentType === "SCANCOPY"
+                                                ? formData.isWatermark === "N"
+                                                    ? <small style={{ color: '#F86C6B' }} >{this.validator.message('', formData.watermark, 'required')}</small>
+                                                    : null
+                                                : null
+                                            }
                                         </Collapse>
                                     </CustomInput>
                                     {formData.documentType === "SCANCOPY"
@@ -556,9 +571,11 @@ class LicenseCreate extends Component {
                             <Collapse isOpen={formData.documentType === "ORIGINAL"}>
                                 <FormGroup>
                                     <Label>Planned Return Date:</Label>
-                                    <DatePicker id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
+                                    <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
                                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                                         showMonthDropdown
+                                        minDate={new Date()}
+                                        maxDate={addDays(new Date(), 30)}
                                         showYearDropdown
                                         selected={returnDateView}
                                         onChange={this.dateChange("returnDate", "returnDateView")} />
@@ -566,42 +583,62 @@ class LicenseCreate extends Component {
                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', formData.returnDate, 'required')}</small>
                                         : null}
                                 </FormGroup>
+                                {/* </Collapse>
+
+                            <Collapse isOpen={formData.documentType === "ORIGINAL"}> */}
+                                <FormGroup onChange={this.handleChange("deliverWay")} >
+                                    <Label>Deliver Way</Label>
+                                    <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
+                                    <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number" />
+                                    {formData.documentType === "ORIGINAL"
+                                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', formData.deliverWay, 'required')}</small>
+                                        : null}
+                                </FormGroup>
+
+                                <Collapse isOpen={formData.deliverWay === "Express"}>
+                                    <FormGroup>
+                                        <Label>Address</Label>
+                                        <Input autoComplete="off" placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
+                                        {formData.documentType === "ORIGINAL"
+                                            ? formData.deliverWay === "Express"
+                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
+                                                : null
+                                            : null
+                                        }
+                                    </FormGroup>
+
+
+                                    <FormGroup>
+                                        <Label>Receiver</Label>
+                                        {/* <AsyncSelect
+                                            id="reciever"
+                                            loadOptions={loadReciever}
+                                            isClearable
+                                            onChange={this.handleSelectReciever}
+                                            menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        /> */}
+                                        <Input autoComplete="off" placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
+                                        {formData.documentType === "ORIGINAL"
+                                            ? formData.deliverWay === "Express"
+                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
+                                                : null
+                                            : null
+                                        }
+                                    </FormGroup>
+
+                                    <FormGroup>
+                                        <Label>Reciever Mobile Phone</Label>
+                                        <Input autoComplete="off" placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
+                                        {formData.documentType === "ORIGINAL"
+                                            ? formData.deliverWay === "Express" ?
+                                                <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, formData.recieverPhone, 'required')}</small>
+                                                : null
+                                            : null
+                                        }
+                                    </FormGroup>
+                                </Collapse>
                             </Collapse>
-
-
-                            <FormGroup onChange={this.handleChange("deliverWay")} >
-                                <Label>Deliver Way</Label>
-                                <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
-                                <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number" />
-                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', formData.deliverWay, 'required')}</small>
-                            </FormGroup>
-
-                            <FormGroup>
-                                <Label>Address</Label>
-                                <Input placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
-                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
-                            </FormGroup>
-
-                            <FormGroup>
-                                <Label>Reciever</Label>
-                                <AsyncSelect
-                                    id="reciever"
-                                    loadOptions={loadOptions}
-                                    isClearable
-                                    onChange={this.handleSelectReciever}
-                                    menuPortalTarget={document.body}
-                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                />
-                                {/* <Input placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" /> */}
-                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
-                            </FormGroup>
-
-                            <FormGroup>
-                                <Label>Reciever Mobile Phone</Label>
-                                <Input placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
-                                <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, formData.recieverPhone, 'required')}</small>
-                            </FormGroup>
-
                             <FormGroup>
                                 <Label>Senior Manager or above of requestor department</Label>
                                 <AsyncSelect

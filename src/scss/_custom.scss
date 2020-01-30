@@ -103,6 +103,8 @@
 }
 
 
+
+
 table {
     border: 1px solid black;
     table-layout: auto; 
@@ -122,8 +124,8 @@ table {
 }
 
 .mediumTd{
-    min-width: 128px;
-    max-width: 128px;
+    min-width: 60px;
+    max-width: 65px;
     text-align: center; 
     vertical-align: middle;
 }
@@ -133,4 +135,21 @@ table {
     max-width: 350px;
     vertical-align: middle;
     word-wrap: break-word;
+}
+
+.blobLink{
+    text-decoration: underline;
+    color: #20A8D8;
+    cursor: pointer;
+}
+
+.centerd{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index:1000;
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }

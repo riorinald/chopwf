@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import editIcon from "../../../assets/img/edit.png";
+import deleteIcon from "../../../assets/img/delete.png";
 import {
     Table,
     Card,
@@ -8,8 +10,10 @@ import {
     Input,
     Label
 } from 'reactstrap';
-import editIcon from "../../../assets/img/edit.png";
-import deleteIcon from "../../../assets/img/delete.png";
+
+import Axios from 'axios';
+import config from '../../../config'
+
 
 class LicenseHelp extends Component {
     constructor(props) {
@@ -17,46 +21,14 @@ class LicenseHelp extends Component {
         this.state = {
             chopKeepers: {
                 columnHeader: ["Chop Type", "Chop Keeper", "Contact Person", "Location"],
-                table: [
-                    { chopType: ["MBAFC Company Chop", "MBAFC Company Chop", "MBAFC Company Chop", "MBAFC Company Chop"], chopKeeper: "MBAFC Enterprise Governance", contactPerson: ["person 1", "person 2", "person 3", "person 4"], location: "9F, Tower C" },
-                    { chopType: ["MBAFC Company Chop", "MBAFC Company Chop", "MBAFC Company Chop", "MBAFC Company Chop"], chopKeeper: "MBAFC Enterprise Governance", contactPerson: ["person 1", "person 2", "person 3", "person 4"], location: "9F, Tower C" },
-                    { chopType: ["MBAFC Company Chop", "MBAFC Company Chop", "MBAFC Company Chop", "MBAFC Company Chop"], chopKeeper: "MBAFC Enterprise Governance", contactPerson: ["person 1", "person 2", "person 3", "person 4"], location: "9F, Tower C" },
-                    { chopType: ["MBAFC Company Chop", "MBAFC Company Chop", "MBAFC Company Chop", "MBAFC Company Chop"], chopKeeper: "MBAFC Enterprise Governance", contactPerson: ["person 1", "person 2", "person 3", "person 4"], location: "9F, Tower C" }
-                ]
+                table: []
             },
-            QA: [
-                {
-                    question: "Who can submit an application ?",
-                    answer: "Applicant of the Chop Use Application shall be permanent staff of Daimler. Inters and external staffs are not eligible to submit applications for chop usage, but they can come to BC for chop on behalf of permanent staffs."
-                },
-                {
-                    question: "Who can submit an application ?",
-                    answer: "Applicant of the Chop Use Application shall be permanent staff of Daimler. Inters and external staffs are not eligible to submit applications for chop usage, but they can come to BC for chop on behalf of permanent staffs."
-                },
-                {
-                    question: "Who can submit an application ?",
-                    answer: "Applicant of the Chop Use Application shall be permanent staff of Daimler. Inters and external staffs are not eligible to submit applications for chop usage, but they can come to BC for chop on behalf of permanent staffs."
-                },
-                {
-                    question: "Who can submit an application ?",
-                    answer: "Applicant of the Chop Use Application shall be permanent staff of Daimler. Inters and external staffs are not eligible to submit applications for chop usage, but they can come to BC for chop on behalf of permanent staffs."
-                },
-                {
-                    question: "Who can submit an application ?",
-                    answer: "Applicant of the Chop Use Application shall be permanent staff of Daimler. Inters and external staffs are not eligible to submit applications for chop usage, but they can come to BC for chop on behalf of permanent staffs."
-                },
-                {
-                    question: "Who can submit an application ?",
-                    answer: "Applicant of the Chop Use Application shall be permanent staff of Daimler. Inters and external staffs are not eligible to submit applications for chop usage, but they can come to BC for chop on behalf of permanent staffs."
-                },
-                {
-                    question: "Who can submit an application ?",
-                    answer: "Applicant of the Chop Use Application shall be permanent staff of Daimler. Inters and external staffs are not eligible to submit applications for chop usage, but they can come to BC for chop on behalf of permanent staffs."
-                },
-            ],
+            QA: [],
             editable: false,
-            dropdownOpen: false
-        }
+            dropdownOpen: false,
+            existingCKLength: 0,
+            existingQALength: 0
+        };
         this.makeEditable = this.makeEditable.bind(this);
         this.toggleDropdown = this.toggleDropdown.bind(this);
         this.addData = this.addData.bind(this);
@@ -68,10 +40,173 @@ class LicenseHelp extends Component {
         this.deleteChopType = this.deleteChopType.bind(this);
         this.deleteContactPerson = this.deleteContactPerson.bind(this);
 
+
     }
+
+    componentDidMount() {
+        // this.getData();
+        this.getQA()
+        this.getChopKeeper();
+    }
+
+    async getQA() {
+        let qaArray = []
+        for (let i = 0; i < 50; i++) {
+            let isError = false
+            let obj = {}
+            await Axios.get(`${config.url}/helps/license/question${i}`)
+                .then(res => {
+                    isError = false
+                    let arr = res.data.sectionData.split(',')
+                    obj.question = arr[0]
+                    obj.answer = arr[1]
+                })
+                .catch(error => {
+                    isError = true
+                });
+            if (isError)
+                break;
+
+            qaArray.push(obj)
+        }
+        this.setState({ QA: qaArray, existingQALength: qaArray.length })
+    }
+
+    async getChopKeeper() {
+        let chopKeeperArray = []
+        for (let i = 0; i < 50; i++) {
+            let isError = false
+            let obj = {}
+            await Axios.get(`${config.url}/helps/license/chopKeeper${i}`)
+                .then(res => {
+                    let arr = res.data.sectionData.split(';')
+                    obj.chopType = arr[0].split(',')
+                    obj.chopKeeper = arr[1]
+                    obj.contactPerson = arr[2].split(',')
+                    obj.location = arr[3]
+                    isError = false
+                    // console.log(obj)
+                })
+                .catch(error => {
+                    isError = true
+                });
+            if (isError)
+                break;
+            chopKeeperArray.push(obj)
+        }
+        this.setState({ existingCKLength: chopKeeperArray.length })
+        this.setState(state => {
+            let { chopKeepers } = this.state
+            chopKeepers.table = chopKeeperArray
+            return chopKeepers
+        })
+    }
+
+
+
+    handleQAChange = (name, mainIndex) => event => {
+        let value = event.target.value
+        this.setState(state => {
+            let { QA } = this.state
+            QA[mainIndex][name] = value
+            return QA
+        })
+    }
+
+    handleChange = (name, mainIndex) => event => {
+        let value = event.target.value
+        this.setState(state => {
+            let { chopKeepers } = this.state
+            chopKeepers.table[mainIndex][name] = value
+            return chopKeepers
+        })
+    }
+
+
+    handleChopKeeper = (name, firstIndex, mainIndex) => event => {
+        let value = event.target.value
+        // console.log(name, firstIndex, mainIndex)
+        this.setState(state => {
+            let { chopKeepers } = this.state
+            chopKeepers.table[mainIndex][name][firstIndex] = value
+            return chopKeepers
+        })
+
+
+    }
+
+    async getData() {
+        await Axios.get(`${config.url}/helps/license`).then(res => {
+            // console.log(res.data)
+        })
+        // this.setState({ chopKeepers: response.data.chopKeepers, QA: response.data.QA })
+    }
+
+    async addNewChopKeeperDetails(details, index, name) {
+        let postData = new FormData()
+        postData.append('sectionData', details)
+        postData.append('sectionId', `${name}${index}`)
+        await Axios.post(`${config.url}/helps/license/${localStorage.getItem('userId')}`, postData)
+            .then(result => {
+                // console.log(result.data)
+            })
+            .catch(error => {
+                // console.log(error)
+            })
+    }
+
+    async updateChopKeeperDetails(details, index, name) {
+        let postData = new FormData()
+        postData.append('sectionData', details)
+        await Axios.put(`${config.url}/helps/license/${name}${index}/${localStorage.getItem('userId')}`, postData)
+            .then(result => {
+                // console.log(result.data)
+            })
+            .catch(error => {
+                // console.log(error)
+            })
+    }
+
     makeEditable() {
         if (this.state.editable) {
-            console.log("Instructions updated")
+            let chopKeepers = this.state.chopKeepers.table
+            let qa = this.state.QA
+            for (let i = 0; i < chopKeepers.length; i++) {
+                let array = []
+                let chopTypes = chopKeepers[i].chopType.join(',')
+                let contactPersons = chopKeepers[i].contactPerson.join(',')
+                array.push(chopTypes)
+                array.push(chopKeepers[i].chopKeeper)
+                array.push(contactPersons)
+                array.push(chopKeepers[i].location)
+                let finalString = array.join(';')
+                // console.log(finalString)
+                if (i < this.state.existingCKLength) {
+                    this.updateChopKeeperDetails(finalString, i, "chopKeeper")
+                    // console.log("Chop keeper details updated")
+                }
+                else {
+                    this.addNewChopKeeperDetails(finalString, i, "chopKeeper")
+                    // console.log("Chop keeper details added")
+                }
+            }
+            for (let i = 0; i < qa.length; i++) {
+                let array = []
+                array.push(qa[i].question)
+                array.push(qa[i].answer)
+                let qaString = array.join(',')
+                // console.log(qaString)
+                if (i < this.state.existingQALength) {
+                    // console.log("QA Updated")
+                    this.updateChopKeeperDetails(qaString, i, "question")
+                }
+                else {
+                    // console.log("New QA Added")
+                    this.addNewChopKeeperDetails(qaString, i, "question")
+                }
+
+            }
+            window.location.reload()
             //codes to update instructions to the database
         }
         this.setState(state => ({
@@ -87,7 +222,7 @@ class LicenseHelp extends Component {
 
     addData() {
         let chopKeepersCopy = JSON.parse(JSON.stringify(this.state.chopKeepers))
-        const obj = { 'chopType': ["Plese enter a new chop Type"], 'chopKeeper': "Please enter the name of the new Chop Keeper", 'contactPerson': ["Please add a new contact person"], 'location': "Please enter a new location" }
+        const obj = { 'chopType': [""], 'chopKeeper': "", 'contactPerson': [""], 'location': "" }
 
         chopKeepersCopy.table.push(obj)
         // console.log(chopKeepersCopy)
@@ -106,7 +241,7 @@ class LicenseHelp extends Component {
 
     addQA() {
         let QaCopy = JSON.parse(JSON.stringify(this.state.QA))
-        const obj = { 'question': "Plese enter a new question", 'answer': "Please enter the answer" }
+        const obj = { 'question': "", 'answer': "" }
         QaCopy.push(obj)
         // console.log(QaCopy)
         this.setState({
@@ -115,7 +250,7 @@ class LicenseHelp extends Component {
     }
 
     deleteQA(index) {
-        console.log(index)
+        // console.log(index)
         // let QaCopy = JSON.parse(JSON.stringify(this.state.QA))
         const QaCopy = this.state.QA.slice()
         QaCopy.splice(index, 1)
@@ -125,9 +260,10 @@ class LicenseHelp extends Component {
     }
 
     addChopType(index) {
+
         let chopKeepersCopy = JSON.parse(JSON.stringify(this.state.chopKeepers))
         // console.log(chopKeepersCopy.table)
-        chopKeepersCopy.table[index].chopType.push("Please enter a new Chop Type")
+        chopKeepersCopy.table[index].chopType.push("")
         this.setState({
             chopKeepers: chopKeepersCopy
         })
@@ -136,7 +272,7 @@ class LicenseHelp extends Component {
     addContactPerson(index) {
         let chopKeepersCopy = JSON.parse(JSON.stringify(this.state.chopKeepers))
         // console.log(chopKeepersCopy.table)
-        chopKeepersCopy.table[index].contactPerson.push("Please enter a new Contact Person")
+        chopKeepersCopy.table[index].contactPerson.push("")
         this.setState({
             chopKeepers: chopKeepersCopy
         })
@@ -177,16 +313,16 @@ class LicenseHelp extends Component {
             <tr key={index}>
                 <td>{table.chopType.map((type, i) =>
                     <div key={i}>
-                        <Form style={{ display: "flex" }}><Input type="text" defaultValue={type}></Input><Button onClick={() => this.deleteChopType(index, i)} color="danger">Delete</Button></Form><br />
+                        <Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the license type" defaultValue={type}></Input><Button onClick={() => this.deleteChopType(index, i)} color="danger">Delete</Button></Form><br />
                     </div>
                 )}
                     <Button onClick={() => this.addChopType(index)} >Add New Chop Type</Button>
                 </td>
-                <td><Form><Input type="text" defaultValue={table.chopKeeper}></Input></Form></td>
+                <td><Form><Input type="text" placeholder="Please enter the license keeper" onChange={this.handleChange("chopKeeper", index)} defaultValue={table.chopKeeper}></Input></Form></td>
                 <td> {table.contactPerson.map((person, i) =>
-                    <div key={i}><Form style={{ display: "flex" }}><Input type="text" defaultValue={person}></Input><Button onClick={() => this.deleteContactPerson(index, i)} color="danger">Delete</Button></Form><br /></div>)}
+                    <div key={i}><Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("contactPerson", i, index)} placeholder="Please enter the name of the contact person" defaultValue={person}></Input><Button onClick={() => this.deleteContactPerson(index, i)} color="danger">Delete</Button></Form><br /></div>)}
                     <Button onClick={() => this.addContactPerson(index)} >Add New Contact Person</Button></td>
-                <td><Form><Input type="text" defaultValue={table.location}></Input></Form></td>
+                <td><Form><Input type="text" placeholder="Please add the location" onChange={this.handleChange("location", index)} defaultValue={table.location}></Input></Form></td>
                 <td><Button onClick={() => this.deleteData(index)} color="danger">Delete</Button></td>
             </tr>)
         const QA = this.state.QA.map((qnsAns, index) =>
@@ -200,9 +336,9 @@ class LicenseHelp extends Component {
                 <Form>
                     <Label style={{ float: "left" }}><b>Question: {index + 1}</b></Label>
                     <img style={{ float: "right" }} onClick={() => this.deleteQA(index)} height="20px" width="20px" src={deleteIcon} />
-                    <Input type="textarea" defaultValue={qnsAns.question}></Input>
+                    <Input type="textarea" onChange={this.handleQAChange("question", index)} placeholder="Please enter your question." defaultValue={qnsAns.question}></Input>
                     <Label><b>Answer</b></Label>
-                    <Input type="textarea" defaultValue={qnsAns.answer}></Input>
+                    <Input type="textarea" onChange={this.handleQAChange("answer", index)} placeholder="Please enter your answer." defaultValue={qnsAns.answer}></Input>
                 </Form>
                 <br />
             </div>)}<Button onClick={this.addQA}>Add New Question and Answer</Button></div>
@@ -218,9 +354,14 @@ class LicenseHelp extends Component {
                             {this.state.editable ? (<Button onClick={this.addData}> Add New Data</Button>) : ""}
 
                         </div>
-                        <div style={{ float: "right" }}>
-                            {!this.state.editable ? Edit : Apply}
-                        </div>
+
+
+                        {localStorage.getItem('viewAdminLicense') === "true"
+                            ? <div style={{ float: "right" }}>
+                                {!this.state.editable ? Edit : Apply}
+                            </div>
+                            : null
+                        }
                         <br /><br />
                         <Table bordered >
                             <thead>
@@ -241,4 +382,4 @@ class LicenseHelp extends Component {
         );
     }
 }
-export default LicenseHelp
+export default LicenseHelp;

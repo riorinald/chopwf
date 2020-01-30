@@ -13,6 +13,8 @@ import {
 } from 'reactstrap';
 import config from '../../../config';
 import Swal from 'sweetalert2';
+import TextareaAutosize from 'react-autosize-textarea';
+
 
 class LicenseApplicationDetail extends Component {
     constructor(props) {
@@ -54,7 +56,7 @@ class LicenseApplicationDetail extends Component {
             .then(res => {
                 console.log(res.data)
                 let currentStatusArr = res.data.allStages.filter(stage => stage.state === "CURRENT")
-                this.setState({ taskDetails: res.data, currentStatus: currentStatusArr[0].statusId, loading: false, })
+                this.setState({ taskDetails: res.data, currentStatus: res.data.currentStatusId, loading: false, })
             })
     }
 
@@ -91,7 +93,7 @@ class LicenseApplicationDetail extends Component {
                         valid = false
                         Swal.fire({
                             title: "No Express Number",
-                            html: "Please add Express Number !",
+                            html: "Please add express number !",
                             type: "warning"
                         })
                     }
@@ -141,7 +143,7 @@ class LicenseApplicationDetail extends Component {
                         valid = false
                         Swal.fire({
                             title: "No Express Number",
-                            html: "Please add Express Number !",
+                            html: "Please add express number !",
                             type: "warning"
                         })
                     }
@@ -375,9 +377,10 @@ class LicenseApplicationDetail extends Component {
                                                     className={index !== taskDetails.allStages.lastIndex ? "mr-1" : ""}
                                                     bar
                                                     animated={stage.state === "CURRENT" ? true : false}
-                                                    striped={stage.state === "FINISHED"}
-                                                    color={stage.state === "CURRENT" ? "green" : stage.state === "FINISHED" ? "secondary" : "warning  "}
-                                                    value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "black" : "white" }} >{stage.statusName}</div>
+                                                    striped={true}
+                                                    color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                    // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "green" : "secondary  "}
+                                                    value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "white" : stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                 </Progress>
                                             </React.Fragment>
                                         )}
@@ -420,13 +423,13 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Employee Number</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="EMPTY DATA" />
+                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Department</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.departmentName} name="text-input" placeholder="EMPTY DATA" />
+                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.departmentName} name="text-input" placeholder="/" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -434,13 +437,13 @@ class LicenseApplicationDetail extends Component {
                                         <Label>License Name</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" name="text-input" value={taskDetails.licenseName} placeholder="EMPTY DATA" />
+                                        <TextareaAutosize className="form-control" disabled type="text" name="text-input" value={taskDetails.licenseName} placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Purpose</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.purposeTypeName} name="text-input" placeholder="EMPTY DATA" />
+                                        <TextareaAutosize className="form-control" disabled value={taskDetails.purposeType === "PS" ? taskDetails.purposeComment : taskDetails.purposeTypeName} placeholder="/" />
                                     </Col>
                                 </FormGroup>
                                 <FormGroup row>
@@ -448,7 +451,7 @@ class LicenseApplicationDetail extends Component {
                                         <Label>Document Type</Label>
                                     </Col>
                                     <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.documentTypeName} name="text-input" placeholder="EMPTY DATA" />
+                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.documentTypeName} name="text-input" placeholder="/" />
                                     </Col>
                                     {taskDetails.documentTypeId === "ORIGINAL"
                                         ? <>
@@ -456,7 +459,7 @@ class LicenseApplicationDetail extends Component {
                                                 <Label>Planned Return Date</Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={this.convertDate(taskDetails.plannedReturnDate)} name="text-input" placeholder="EMPTY DATA" />
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertDate(taskDetails.plannedReturnDate)} name="text-input" placeholder="/" />
                                             </Col>
                                         </>
                                         : <>
@@ -464,67 +467,227 @@ class LicenseApplicationDetail extends Component {
                                                 <Label> Watermark </Label>
                                             </Col>
                                             <Col md lg>
-                                                <Input disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="EMPTY DATA" />
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.needWatermark === "Y" ? taskDetails.watermark : "No Watermark"} name="text-input" placeholder="/" />
+                                            </Col>
+                                            {
+                                            }
+                                        </>
+
+                                    }
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Reason for no watermark</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="/" />
+                                                </Col>
+                                                < Col md lg>
+                                                    <Label>Deliver Ways</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                            : <>
+                                                < Col md lg>
+                                                    <Label>Deliver Ways</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Delivery Address</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                        : <>
+                                            < Col md lg>
+                                                <Label>Deliver Ways</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
+                                            </Col>
+                                            <Col md lg>
+                                                <Label>Delivery Address</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </>
+                                    }
+
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Delivery Address</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Receiver</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                            : <>
+                                                <Col md lg>
+                                                    <Label>Receiver</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Deliver Express Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                        : <>
+                                            <Col md lg>
+                                                <Label>Receiver</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
+                                            </Col>
+                                            <Col md lg>
+                                                <Label>Deliver Express Number</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </>
+                                    }
+
+
+
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Deliver Express Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Receiver Mobile Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                            : <>
+                                                <Col md lg>
+                                                    <Label>Receiver Mobile Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Return Way</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                        : <>
+                                            <Col md lg>
+                                                <Label>Receiver Mobile Number</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
+                                            </Col>
+                                            <Col md lg>
+                                                <Label>Return Way</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </>
+                                    }
+
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Return Way</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Senior Manager or above of Requestor Department</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                            : <>
+                                                <Col md lg>
+                                                    <Label>Senior Manager or above of Requestor Department</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Return Express Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                        : <>
+                                            <Col md lg>
+                                                <Label>Senior Manager or above of Requestor Department</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
+                                            </Col>
+                                            <Col md lg>
+                                                <Label>Return Express Number</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
                                             </Col>
                                         </>
                                     }
                                 </FormGroup>
                                 <FormGroup row>
-                                    <Col md lg>
-                                        <Label>Deliver Ways</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="EMPTY DATA" />
-                                    </Col>
-                                    <Col md lg>
-                                        <Label>Delivery Address</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="EMPTY DATA" />
-                                    </Col>
-                                </FormGroup>
-                                <FormGroup row>
-                                    <Col md lg>
-                                        <Label>Receiver</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="EMPTY DATA" />
-                                    </Col>
-                                    <Col md lg>
-                                        <Label>Deliver Express Number</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
-                                    </Col>
-
-                                </FormGroup>
-                                <FormGroup row>
-                                    <Col md lg>
-                                        <Label>Receiver Mobile Number</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="EMPTY DATA" />
-                                    </Col>
-                                    <Col md lg>
-                                        <Label>Return Way</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
-                                    </Col>
-                                </FormGroup>
-                                <FormGroup row>
-                                    <Col md lg>
-                                        <Label>Senior Manager or above of Requestor Department</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="EMPTY DATA" />
-                                    </Col>
-                                    <Col md lg>
-                                        <Label>Return Express Number</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
-                                    </Col>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Return Express Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label></Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    {/* <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" /> */}
+                                                </Col>
+                                            </>
+                                            : null
+                                        : null
+                                    }
                                 </FormGroup>
                             </Col>
                             {page === "mypendingtask"
@@ -537,10 +700,10 @@ class LicenseApplicationDetail extends Component {
                                                     ?
                                                     <FormGroup onChange={this.handleRadio} >
                                                         <Label>Deliver Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                                         <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
                                                             <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
+                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
                                                                 <Row> &nbsp; </Row>
                                                                 <div>Reciever: {taskDetails.expDeliveryReceiver}</div>
                                                                 <div>Address: {taskDetails.expDeliveryAddress}</div>
@@ -569,10 +732,10 @@ class LicenseApplicationDetail extends Component {
                                                 <Col>
                                                     <FormGroup onChange={this.handleRadio} >
                                                         <Label>Return Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                                         <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
                                                             <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
+                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
                                                                 <Row> &nbsp; </Row>
                                                                 {/* <div>Reciever: </div>
                                                                 <div>Address: </div>
@@ -599,9 +762,11 @@ class LicenseApplicationDetail extends Component {
                                         <Col>&nbsp;</Col>
                                     </Row>
                                     <Row>
-                                        {taskDetails.actions.map((action, index) =>
-                                            <Button className="mx-1" key={index} color={action.action === "approve" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
-                                        )}
+                                        <Col>
+                                            {taskDetails.actions.map((action, index) =>
+                                                <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
+                                            )}
+                                        </Col>
                                     </Row>
                                 </div>
 
@@ -612,10 +777,10 @@ class LicenseApplicationDetail extends Component {
                                                 <Col>
                                                     <FormGroup onChange={this.handleRadio} >
                                                         <Label>Return Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面城, Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
                                                         <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
                                                             <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="number" placeholder="Please enter the Express Number" />
+                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
                                                                 <Row> &nbsp; </Row>
                                                                 {/* <div>Reciever: </div>
                                                             <div>Address: </div>
@@ -679,17 +844,19 @@ class LicenseApplicationDetail extends Component {
                             }
                         </CardBody>
                         <CardFooter>
-                            <Row><Col><h4>Approval History</h4></Col></Row>
+                            {taskDetails.histories.length !== 0
+                                ? <Row><Col><h4>Approval History</h4></Col></Row>
+                                : null}
                             {taskDetails.histories.map((history, index) =>
                                 <div key={index}>
-                                    <Row className="bottom-border"></Row>
+                                    <hr></hr>
                                     <Row>
                                         {/* <Col md="1">
                                             <img src={history.approvedByAvatarUrl} className="img-avatar" alt="Avatar" />
                                         </Col> */}
                                         <Col md="8">
-                                            <h5>{history.approvedByName} (000)<span> <Badge color="success">{history.approvalStatus}</Badge></span></h5>
-                                            <div><b>Approved On:</b> {this.convertApprovedDate(history.approvedDate)}</div>
+                                            <h5>{history.approvedByName}<span> <Badge color={history.stateIndicatorColor.toLowerCase()}>{history.stateIndicator}</Badge></span></h5>
+                                            <div>{this.convertApprovedDate(history.approvedDate)}</div>
                                             <small>{history.comments}</small>
                                         </Col>
                                     </Row>

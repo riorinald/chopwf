@@ -38,7 +38,7 @@ class ChopApplication extends Component {
 
       loading: false,
       page: 0,
-      limit: 20,
+      limit: 10,
       totalPages: 3,
 
       modal: false,
@@ -65,28 +65,11 @@ class ChopApplication extends Component {
         documentCheckByName: "",
         statusName: "",
         createdDate: "",
-        createdByName: ""
+        createdByName: "",
+        departmentId: ""
       },
-
-      status: [
-        "Recall",
-        "Pending for Document check by (L4 or above) Approval ",
-        "Pending for Department Head Approval",
-        "Bring the Original Documents for Chop",
-        "Pending for Chop Owner Approval",
-        "Send Back to Requestor",
-        "Rejected",
-        "Pending for Chop Keeper Acknowledge Lend Out",
-        "Pending Chop Keeper Acknowledge Return",
-        "Completed",
-        "Draft",
-        "Pending Requestor Return/Extension",
-        "Pending Department Head Approval for Extension",
-        "Pending Chop Keeper Approval for extension",
-        "Pending Chop Owner Approval for extension",
-        "Chop request expired after 30 days",
-        "Pending Requestor Return"
-      ]
+      departments: [],
+      status: []
 
     }
     this.getApplications = this.getApplications.bind(this);
@@ -96,16 +79,18 @@ class ChopApplication extends Component {
     // this.dateChange = this.dateChange.bind(this);
   }
   componentDidMount() {
-    this.getApplications(1, 20);
+    this.getApplications(1, this.state.limit);
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
+    this.getData("departments", `${config.url}/departments`);
+
     this.getStatusList();
 
   }
 
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: !this.state.loading })
-    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&requestNum=${this.state.searchOption.requestNum}&applicationTypeName=${this.state.searchOption.applicationTypeName}&chopTypeName=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&page=${pageNumber}&pagesize=${pageSize}`,
+    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.pageCount === 0 ? 1 : res.data.pageCount })
         console.log(res.data)
@@ -141,7 +126,7 @@ class ChopApplication extends Component {
   }
 
   async getStatusList() {
-    const res = await Axios.get(`${config.url}/statuses?category=chop`)
+    const res = await Axios.get(`${config.url}/statuses?category=chop`, { headers: { Pragma: 'no-cache' } })
     this.setState({ status: res.data })
   }
 
@@ -338,9 +323,9 @@ class ChopApplication extends Component {
                   Filter: ({ filter, onChange }) => {
                     return (
                       <Input type="select" value={this.state.searchOption.applicationTypeName} onChange={this.handleSearch('applicationTypeName')} >
-                        <option value="">Please Select</option>
+                        <option value="">Please Select </option>
                         {this.state.applicationTypes.map(type =>
-                          <option key={type.appTypeId} value={type.appTypeName} >{type.appTypeName}</option>
+                          <option key={type.appTypeId} value={type.appTypeId} >{type.appTypeName}</option>
                         )}
                       </Input>
 
@@ -360,9 +345,9 @@ class ChopApplication extends Component {
                   Filter: ({ filter, onChange }) => {
                     return (
                       <Input type="select" value={this.state.searchOption.chopTypeName} onChange={this.handleSearch('chopTypeName')} >
-                        <option value="">Please Select</option>
+                        <option value="">Please Select </option>
                         {this.state.chopTypes.map(type =>
-                          <option key={type.chopTypeId} value={type.chopTypeName} >{type.chopTypeName}</option>
+                          <option key={type.chopTypeId} value={type.chopTypeId} >{type.chopTypeName}</option>
                         )}
                       </Input>
 
@@ -371,34 +356,49 @@ class ChopApplication extends Component {
                 },
                 {
 
-                  Header: "Document Name English",
+                  Header: "Document Name (EN)",
                   accessor: "documentNameEnglish",
-                  width: this.getColumnWidth('documentNameEnglish', "Document Name English"),
+                  width: this.getColumnWidth('documentNameEnglish', "Document Name (EN)"),
                   // Cell: this.renderEditable,
                   Cell: row => (
-                    <div> {this.getDeptHeads(row.original.documentNameEnglish)} </div>
+                    <div> <span title={this.getDeptHeads(row.original.documentNameEnglish)} >{this.getDeptHeads(row.original.documentNameEnglish)}</span> </div>
                   ),
                   style: { textAlign: "center" },
                   filterable: false
                 },
                 {
 
-                  Header: "Document Name Chinese",
+                  Header: "Document Name (CN)",
                   accessor: "documentNameChinese",
-                  width: this.getColumnWidth('documentNameChinese', "Document Name Chinese"),
+                  width: this.getColumnWidth('documentNameChinese', "Document Name (CN)"),
                   // Cell: this.renderEditable,
                   Cell: row => (
-                    <div> {this.getDeptHeads(row.original.documentNameChinese)} </div>
+                    <div> <span title={this.getDeptHeads(row.original.documentNameChinese)}>{this.getDeptHeads(row.original.documentNameChinese)}</span> </div>
                   ),
                   style: { textAlign: "center" },
                   filterable: false
                 },
                 {
-                  Header: "Document Check By",
-                  accessor: "documentCheckByName",
-                  width: this.getColumnWidth('documentCheckByName', "Document Check By"),
+
+                  Header: "Department",
+                  accessor: "departmentName",
+                  width: this.getColumnWidth('departmentName', "Department"),
                   Cell: this.renderEditable,
-                  style: { textAlign: "center" }
+                  filterMethod: (filter, row) => {
+                    return row[filter.id] === filter.value;
+                  },
+                  Filter: ({ filter, onChange }) => {
+                    return (
+                      <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
+                        <option value="" > Please Select </option>
+                        {this.state.departments.map((dept, index) =>
+                          <option key={index} value={dept.deptId} >{dept.deptName}</option>
+                        )}
+                      </Input>
+
+                    )
+                  },
+                  style: { textAlign: "center" },
                 },
                 {
                   Header: "Department Head",
@@ -417,16 +417,28 @@ class ChopApplication extends Component {
                   Cell: this.renderEditable,
                   style: { textAlign: "center" }
                 },
+
+                {
+                  Header: "Document Check By",
+                  accessor: "documentCheckByName",
+                  width: this.getColumnWidth('documentCheckByName', "Document Check By"),
+                  Cell: row => (
+                    <div> {this.getDeptHeads(row.original.documentCheckByName)} </div>
+                  ),
+                  style: { textAlign: "center" }
+                },
                 {
                   Header: "Status",
                   accessor: "statusName",
                   width: this.getColumnWidth('statusName', "Status"),
-                  Cell: this.renderEditable,
+                  Cell: row => (
+                    <div><span title={row.original.statusName}>{row.original.statusName}</span></div>
+                  ),
                   style: { textAlign: "center" },
                   Filter: ({ filter, onChange }) => {
                     return (
                       <Input type="select" value={this.state.searchOption.statusName} onChange={this.handleSearch('statusName')} >
-                        <option value="" >Please Select a status</option>
+                        <option value="" > Please Select </option>
                         {this.state.status.map((stat, index) =>
                           <option key={index} value={stat.statusName} >{stat.statusName}</option>
                         )}
@@ -452,7 +464,7 @@ class ChopApplication extends Component {
                   style: { textAlign: "center" }
                 }
               ]}
-              defaultPageSize={20}
+              defaultPageSize={this.state.limit}
               manual
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {
@@ -565,7 +577,7 @@ class ChopApplication extends Component {
                 // >
                 //   <small 
                 style={{ color: "red" }} >
-                Please select From and To date !!!
+                Please select From and To date!
               {/* </small> */}
               </div>
               : null
