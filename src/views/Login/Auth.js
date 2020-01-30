@@ -2,7 +2,7 @@ import React, { Component,useEffect } from 'react';
 import axios from 'axios';
 import { Redirect,NavLink } from 'react-router-dom';
 import { fakeAuth } from '../../App';
-import {Card, CardBody, Row, Spinner, UncontrolledAlert } from 'reactstrap';
+import {Card, CardBody, Row, Spinner, Alert } from 'reactstrap';
 import config from '../../config';
 import { access } from 'fs';
 import qs from 'querystring';
@@ -18,14 +18,41 @@ class Authenticated extends Component {
       loading: true,
       isExpired: false,
       info: '',
-      timer: 5
+      color:'',
+      timer: 6
     };
   }
   
   componentDidMount(){
     const code = this.props.location.code
+    const param = qs.parse(this.props.location.search.slice(1))
     if (code){
       this.exchangeToken(code);
+    }
+    if (param){
+      console.log(param)
+      if(localStorage.getItem('userId') === param.userid){
+        if(param.workflow){
+          this.props.history.push({
+            pathname:`${param.workflow}/mypendingtask/details/`,
+            state:{redirected:true, taskId:param.taskid}
+          })
+        }
+        else{
+          this.props.history.push({
+            pathname:`${param.workflow}/mypendingtask/details/`,
+            state:{redirected:true, taskId:param.taskid}
+          })
+      }
+    }
+    else{
+      this.setState({
+        loading:false,
+        info: "Login required",
+        color: "danger",
+        isExpired: true})
+      this.countDown()
+      }
     }
   }
   
@@ -57,7 +84,8 @@ class Authenticated extends Component {
             if(err.response){
               this.setState({
                 loading: false,
-                info:"OAuth server unreachable",
+                info:'error:' + err.response,
+                color: "danger",
                 isExpired:true
               })
                 console.log(err.response)
@@ -66,12 +94,13 @@ class Authenticated extends Component {
               this.setState({
                 loading: false,
                 info:"OAuth server unreachable",
+                color: "danger",
                 isExpired:true
               })
                 console.log(err)
             }
             // this.props.history.push({pathname:'/login',search:null})
-            setTimeout(this.countDownRedirect(),1000)
+            setTimeout(this.countDown(),1000)
         })
   }
 
@@ -97,6 +126,7 @@ class Authenticated extends Component {
             this.setState({
               loading:false,
               info: "openId not authenticated",
+              color: "danger",
             })  
           })
   }
@@ -124,17 +154,18 @@ class Authenticated extends Component {
                   this.setState({
                     loading: false, 
                     info: info,
+                    color: "danger",
                     redirectOuth:true
                   })
-                  this.countDownRedirect()
+                  this.countDown()
                   this.redirect()
                 }
             })
     } catch (error) {
         if (error.response){
-        this.setState({ info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system." });
+        this.setState({ info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.", color:"success" });
         } else {
-        this.setState({ info: "server unreachable"});
+        this.setState({ info: "server unreachable", color: "danger",});
         }   
     }
 }
@@ -165,7 +196,7 @@ class Authenticated extends Component {
     fakeAuth.authenticate(() => {});
   }
 
-  countDownRedirect = () => {
+  countDown = () => {
     setInterval(() => {
       if(this.state.timer !== 0){
         this.downcrement();
@@ -191,22 +222,21 @@ class Authenticated extends Component {
     }
     const authenticated = <label className="display-5 mb-4">Authenticated as {this.state.userDetails.sub || localStorage.getItem('userId')}</label>
     const notAuth = <label className="display-5 mb-4">You are not Authenticated</label>
-    const loading = <div> <Spinner type='grow' color="info" /> </div>
+    const loading = <div className="display-5">Loading <Spinner type='grow' color="info" /> </div>
     return(
     <div style={{ backgroundColor: "#2F353A" }}>
-    <Row className="centerd">
-      <Card className="shadow-lg p-3 rounded">
+      <Card className="centerd shadow-lg mt-5
+       p-3 rounded">
         <CardBody>
           {this.state.loading ? loading : 
-          <>
+          <div>
             {this.state.userDetails || localStorage.getItem('userId') ? authenticated : notAuth}
-            <UncontrolledAlert color="secondary">{this.state.info}</UncontrolledAlert >
-            <p className="mt-3"><center>redirect in {this.state.timer}</center></p>
-          </>
+            <Alert color={this.state.color} ><center>{this.state.info}</center></Alert >
+            <p className="mt-3"><center style={{color:'grey'}}>Redirect in {this.state.timer}</center></p>
+          </div>  
           }   
         </CardBody>
       </Card>
-    </Row>
     </div >
     )}
   
