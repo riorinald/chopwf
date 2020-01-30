@@ -177,7 +177,9 @@ class LicenseInstruction extends Component {
                         <Collapse isOpen={!this.state.editable}>
                             <Row>
                                 <Col style={{ textAlign: "center" }} >
-                                    <img style={{ cursor: "pointer", textAlign: "center" }} onClick={this.viewOrDownloadFile} src="https://img.icons8.com/dotty/80/000000/user-manual.png" />
+                                    <div style={{ fontSize: "60px" }} >
+                                        <i style={{ cursor: "pointer" }} onClick={this.viewOrDownloadFile} className="fa-lg fa-file-pdf-o fa" aria-hidden="true"></i>
+                                    </div>
                                     <div><Label>User Guide</Label></div>
                                 </Col>
                             </Row>

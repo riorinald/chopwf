@@ -48,10 +48,6 @@ const SelectTable = selectTableHOC(ReactTable);
 
 
 
-const notes = <p>如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。
-    <br/> <br/>
-  For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly.
-  If you have any questions regarding the application process, please feel free to contact HR. </p>;
 
 const reactSelectControl = {
     control: styles => ({ ...styles, borderColor: '#F86C6B', boxShadow: '0 0 0 0px #F86C6B', ':hover': { ...styles[':hover'], borderColor: '#F86C6B' } }),
@@ -76,6 +72,17 @@ class EditRequest extends Component {
         this.state = {
             selectAll: false,
             selection: [],
+
+            noteInfo: [
+                {
+                    chinese: "如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
+                    english: "For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
+                },
+                {
+                    chinese: "如您需要在含有个人身份信息（如身份信息、护照信息）的文件上盖章，请不要上传附件或者遮盖关键信息后再上传。",
+                    english: "If you need to chop on personal information (e.g. ID info, Passport info) related documents, please don’t upload them into system or upload after covering key information. "
+                }
+            ],
 
             loading: true,
             taskDetails: {
@@ -1993,7 +2000,7 @@ class EditRequest extends Component {
                             <Card className="animated fadeIn">
                                 <CardHeader>
                                     <Button onClick={() => this.goBack()}>Back</Button> &nbsp;
-                             Edit Request <small className="d-sm-down-none">- {taskDetails.requestNum}</small>
+                             Edit Request <small>- {taskDetails.requestNum}</small>
                                 </CardHeader>
                                 <CardBody color="dark">
                                     {taskDetails.currentStatusId === "SENDBACKED"
@@ -2022,9 +2029,15 @@ class EditRequest extends Component {
                                         : null
                                     }
                                     <FormGroup>
-                                        <h5>NOTES :</h5>
-                                        <p>{this.state.noteInfo.chinese}</p>
-                                        <p>{this.state.noteInfo.english}</p>
+                                        <h5><b>NOTES :</b></h5>
+                                        <ol>
+                                            {this.state.noteInfo.map((info, index) => (
+                                                <li key={index} >
+                                                    <b><p> {info.chinese} </p></b>
+                                                    <b><p> {info.english} </p></b>
+                                                </li>
+                                            ))}
+                                        </ol>
                                     </FormGroup>
                                     <Form className="form-horizontal">
                                         <FormGroup>
@@ -2663,7 +2676,7 @@ class EditRequest extends Component {
                                                                 <hr></hr>
                                                                 <Row className="text-md-left text-center">
                                                                     <Col sm md="10" lg>
-                                                                        <h5>{history.approvedByName}<span> <Badge color={history.stateIndicator === "SENDBACK" || history.stateIndicator === "REJECTED" ? "danger" : "success"}>{history.stateIndicator}</Badge></span></h5>
+                                                                        <h5>{history.approvedByName}<span> <Badge color={history.stateIndicatorColor.toLowerCase()}>{history.stateIndicator}</Badge></span></h5>
                                                                         <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
                                                                         <Col className="p-0"> <p>{history.comments}</p> </Col>
                                                                     </Col>
