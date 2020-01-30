@@ -287,7 +287,7 @@ class Myapps extends Component {
                   Header: "Chop Type",
                   accessor: "chopTypeName",
                   Cell: this.renderEditable,
-                  style: { textAlign: "center", whiteSpace: 'unset'  },
+                  style: { textAlign: "center", whiteSpace: 'unset' },
                   width: this.getColumnWidth('chopTypeName', "Chop Type"),
                   filterMethod: (filter, row) => {
                     return row[filter.id] === filter.value;
@@ -325,7 +325,7 @@ class Myapps extends Component {
                   Cell: row => (
                     <div> <span title={this.getDeptHeads(row.original.documentNameChinese)}>{this.getDeptHeads(row.original.documentNameChinese)}</span> </div>
                   ),
-                  style: { textAlign: "center"  },
+                  style: { textAlign: "center" },
                   filterable: false
                 },
                 {
@@ -381,7 +381,9 @@ class Myapps extends Component {
                   Header: "Status",
                   accessor: "statusName",
                   width: this.getColumnWidth('statusName', "Status"),
-                  Cell: this.renderEditable,
+                  Cell: row => (
+                    <div><span title={row.original.statusName}>{row.original.statusName}</span></div>
+                  ),
                   style: { textAlign: "center" },
                   Filter: ({ filter, onChange }) => {
                     return (

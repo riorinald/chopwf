@@ -39,6 +39,8 @@ class LicenseMyPendingTasks extends Component {
                 createdByName: "",
                 departmentId: ""
             },
+            totalPages: 1,
+            page: 1,
             limit: 10,
             returnDateView: "",
             createdDateView: "",
@@ -69,7 +71,7 @@ class LicenseMyPendingTasks extends Component {
     }
 
     componentDidMount() {
-        this.getPendingTasks()
+        this.getPendingTasks(this.state.page, this.state.limit)
         this.getLicenseNames();
         this.getData('seniorManagers');
         // this.getSeniorManagers();
@@ -114,13 +116,13 @@ class LicenseMyPendingTasks extends Component {
 
     }
 
-    async getPendingTasks() {
+    async getPendingTasks(page, pageSize) {
         const searchOption = this.state.searchOption
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=pending&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentId=${searchOption.departmentId}`,
+        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=pending&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentId=${searchOption.departmentId}&page=${page}&pageSize=${pageSize}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
-                this.setState({ pendingTasks: res.data, loading: false })
+                this.setState({ pendingTasks: res.data.licenses, totalPages: res.data.pageCount, loading: false })
             })
     }
 
@@ -203,7 +205,7 @@ class LicenseMyPendingTasks extends Component {
 
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            this.getPendingTasks()
+            this.getPendingTasks(this.state.page, this.state.limit)
         }
     }
 
@@ -222,12 +224,12 @@ class LicenseMyPendingTasks extends Component {
     };
 
     render() {
-        const { pendingTasks, licenseNames, seniorManagers, departments, statusName, returnDateView, createdDateView } = this.state
+        const { pendingTasks, licenseNames, seniorManagers, departments, statusName, returnDateView, createdDateView, totalPages } = this.state
         return (
             <div className="animated fadeIn">
                 <h4>My Pending Tasks</h4>
                 <Card onKeyDown={this.handleKeyDown}>
-                    <CardHeader>My Pending Tasks <Button className="float-right" onClick={this.getPendingTasks} >Search</Button></CardHeader>
+                    <CardHeader>My Pending Tasks <Button className="float-right" onClick={() => this.getPendingTasks(this.state.page, this.state.limit)} >Search</Button></CardHeader>
                     <CardBody>
                         <ReactTable
                             data={pendingTasks}
@@ -457,12 +459,15 @@ class LicenseMyPendingTasks extends Component {
                                 }
                             ]}
                             defaultPageSize={this.state.limit}
-                            // pages={this.state.page}
-                            // manual
-                            // onPageChange={(e)=>{this.setState({page: e})}}
-                            // canNextpage={true}
+                            manual
+                            onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getPendingTasks(e + 1, this.state.limit)) }}
+                            onPageSizeChange={(pageSize, page) => {
+                                this.setState({ limit: pageSize, page: page + 1 });
+                                this.getPendingTasks(page + 1, pageSize)
+                            }}
                             className="-striped -highlight"
                             loading={this.state.loading}
+                            pages={totalPages}
                             getTrProps={(state, rowInfo) => {
                                 if (rowInfo && rowInfo.row) {
                                     return {

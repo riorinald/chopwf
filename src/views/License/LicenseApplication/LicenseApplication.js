@@ -39,6 +39,8 @@ class LicenseApplication extends Component {
                 createdByName: "",
                 departmentId: ""
             },
+            totalPages: 1,
+            page: 1,
             limit: 10,
             returnDateView: "",
             createdDateView: "",
@@ -55,7 +57,7 @@ class LicenseApplication extends Component {
     }
 
     componentDidMount() {
-        this.getLicenseApplications()
+        this.getLicenseApplications(this.state.page, this.state.limit)
         this.getLicenseNames();
         this.getData('seniorManagers');
         // this.getSeniorManagers();
@@ -97,13 +99,13 @@ class LicenseApplication extends Component {
 
     }
 
-    async getLicenseApplications() {
+    async getLicenseApplications(page, pageSize) {
         const searchOption = this.state.searchOption
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=all&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentId=${searchOption.departmentId}`,
+        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=all&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentId=${searchOption.departmentId}&page=${page}&pageSize=${pageSize}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
-                this.setState({ licenseApplication: res.data, loading: false })
+                this.setState({ licenseApplication: res.data.licenses, totalPages: res.data.pageCount, loading: false })
             })
     }
 
@@ -187,7 +189,7 @@ class LicenseApplication extends Component {
 
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            this.getLicenseApplications()
+            this.getLicenseApplications(this.state.page, this.state.limit)
         }
     }
 
@@ -206,12 +208,13 @@ class LicenseApplication extends Component {
     };
 
     render() {
-        const { licenseApplication, licenseNames, seniorManagers, departments, statusName, returnDateView, createdDateView } = this.state
+        const { licenseApplication, licenseNames, seniorManagers, departments, statusName, returnDateView, createdDateView, totalPages } = this.state
         return (
             <div className="animated fadeIn" >
                 <h4>License Applications</h4>
                 <Card onKeyDown={this.handleKeyDown}>
-                    <CardHeader>LICENSE APPLICATIONS <Button className="float-right" onClick={this.getLicenseApplications} >Search</Button></CardHeader>
+
+                    <CardHeader>LICENSE APPLICATIONS <Button className="float-right" onClick={() => this.getLicenseApplications(this.state.page, this.state.limit)} >Search</Button></CardHeader>
                     <CardBody>
                         <ReactTable
                             data={licenseApplication}
@@ -441,12 +444,15 @@ class LicenseApplication extends Component {
                                 }
                             ]}
                             defaultPageSize={this.state.limit}
-                            // pages={this.state.page}
-                            // manual
-                            // onPageChange={(e)=>{this.setState({page: e})}}
-                            // canNextpage={true}
+                            manual
+                            onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getLicenseApplications(e + 1, this.state.limit)) }}
+                            onPageSizeChange={(pageSize, page) => {
+                                this.setState({ limit: pageSize, page: page + 1 });
+                                this.getLicenseApplications(page + 1, pageSize)
+                            }}
                             className="-striped -highlight"
                             loading={this.state.loading}
+                            pages={totalPages}
                             getTrProps={(state, rowInfo) => {
                                 if (rowInfo && rowInfo.row) {
                                     return {

@@ -184,10 +184,16 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       validateForm: [],
-      noteInfo: {
-        chinese: "如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
-        english: "For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
-      },
+      noteInfo: [
+        {
+          chinese: "如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
+          english: "For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
+        },
+        {
+          chinese: "如您需要在含有个人身份信息（如身份信息、护照信息）的文件上盖章，请不要上传附件或者遮盖关键信息后再上传。",
+          english: "If you need to chop on personal information (e.g. ID info, Passport info) related documents, please don’t upload them into system or upload after covering key information. "
+        }
+      ],
       mask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[A-Z]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
       // mask: "a-a-a-9999-9999",
       selectInfo: '',
@@ -222,7 +228,6 @@ class Create extends Component {
   };
 
   componentDidMount() {
-    // this.getData("noteInfo", 'http://5b7aa3bb6b74010014ddb4f6.mockapi.io/config/1');
     this.getUserData();
     this.getData("department", `${config.url}/departments`);
     this.getData("applicationTypes", `${config.url}/apptypes`);
@@ -730,8 +735,8 @@ class Create extends Component {
       this.setState({ selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
         this.getDocCheckBy(event.target.value, this.state.teamSelected)
-        this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
-        })
+        // this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
+        // })
         this.getDocCheckBy(event.target.value, this.state.teamSelected)
       }
       this.setState({ documentTableCNIPS: [], documentTableLTI: [] })
@@ -914,10 +919,10 @@ class Create extends Component {
           this.setState({ contractValid: false, contractError: message })
           break;
         }
-        if (i === 10 && value[11]==='-') {
+        if (i === 10 && value[11] === '-') {
           isdigit1 = true
         }
-        else{
+        else {
           let message = "Please add ( - ) after 4 digits of year"
           this.setState({ contractValid: false, contractError: message })
         }
@@ -979,11 +984,11 @@ class Create extends Component {
           this.setState({ contractValid: false, contractError: message })
           break;
         }
-        if (i === 9 && value[10]==='-') {
+        if (i === 9 && value[10] === '-') {
           console.log(i, value[i])
           isdigit1 = true
         }
-        else{
+        else {
           let message = "Please add ( - ) after 4 digits of year"
           this.setState({ contractValid: false, contractError: message })
         }
@@ -1892,10 +1897,17 @@ class Create extends Component {
               <CardHeader>Create New Request</CardHeader>
               <CardBody>
                 <FormGroup>
-                  <h5>NOTES :</h5>
-                  {/* {this.state.noteInfo.notes || <Skeleton count={3}/>} */}
-                  <p>{this.state.noteInfo.chinese}</p>
-                  <p>{this.state.noteInfo.english}</p>
+                  <h5><b>NOTES :</b></h5>
+                  <ol>
+                    {this.state.noteInfo.map((info, index) => (
+                      <li key={index} >
+                        <b><p> {info.chinese} </p></b>
+                        <b><p> {info.english} </p></b>
+                      </li>
+                    ))}
+                  </ol>
+                  {/* <p>{this.state.noteInfo.chinese}</p> */}
+                  {/* <p>{this.state.noteInfo.english}</p> */}
                 </FormGroup>
                 <Form className="form-horizontal" innerRef={this.formRef}>
                   {/* <FormGroup>

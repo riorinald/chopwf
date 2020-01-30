@@ -444,7 +444,9 @@ class MyPendingTasks extends Component {
                                     Header: "Status",
                                     accessor: "statusName",
                                     width: this.getColumnWidth('statusName', "Status"),
-                                    Cell: this.renderEditable,
+                                    Cell: row => (
+                                        <div><span title={row.original.statusName}>{row.original.statusName}</span></div>
+                                    ),
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;
                                     },

@@ -40,6 +40,8 @@ class LicenseMyApplications extends Component {
                 createdByName: "",
                 departmentId: ""
             },
+            totalPages: 1,
+            page: 1,
             limit: 10,
             returnDateView: "",
             createdDateView: "",
@@ -71,7 +73,7 @@ class LicenseMyApplications extends Component {
     }
 
     componentDidMount() {
-        this.getMyApplications()
+        this.getMyApplications(this.state.page, this.state.limit)
         this.getLicenseNames();
         this.getData('seniorManagers');
         // this.getSeniorManagers();
@@ -115,14 +117,14 @@ class LicenseMyApplications extends Component {
 
     }
 
-    async getMyApplications() {
+    async getMyApplications(page, pageSize) {
         const { searchOption } = this.state
         console.log(searchOption)
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentId=${searchOption.departmentId}`,
+        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentId=${searchOption.departmentId}&page=${page}&pageSize=${pageSize}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
-                this.setState({ applications: res.data, loading: false })
+                this.setState({ applications: res.data.licenses, totalPages: res.data.pageCount, loading: false })
             })
     }
 
@@ -209,7 +211,7 @@ class LicenseMyApplications extends Component {
     }
 
     search() {
-        this.getMyApplications()
+        this.getMyApplications(this.state.page, this.state.limit)
     }
 
     dateChange = (name, view) => date => {
@@ -227,7 +229,7 @@ class LicenseMyApplications extends Component {
     };
 
     render() {
-        const { applications, seniorManagers, licenseNames, statusName, returnDateView, createdDateView } = this.state
+        const { applications, seniorManagers, licenseNames, statusName, returnDateView, createdDateView, totalPages } = this.state
 
 
 
@@ -468,12 +470,15 @@ class LicenseMyApplications extends Component {
                                 }
                             ]}
                             defaultPageSize={this.state.limit}
-                            // pages={this.state.page}
-                            // manual
-                            // onPageChange={(e)=>{this.setState({page: e})}}
-                            // canNextpage={true}
+                            manual
+                            onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getMyApplications(e + 1, this.state.limit)) }}
+                            onPageSizeChange={(pageSize, page) => {
+                                this.setState({ limit: pageSize, page: page + 1 });
+                                this.getMyApplications(page + 1, pageSize)
+                            }}
                             className="-striped -highlight"
                             loading={this.state.loading}
+                            pages={totalPages}
                             getTrProps={(state, rowInfo) => {
                                 if (rowInfo && rowInfo.row) {
                                     return {
