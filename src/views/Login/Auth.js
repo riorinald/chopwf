@@ -13,11 +13,11 @@ class Authenticated extends Component {
     super(props);
     this.state = {
       userDetails:'',
-      redirectOuth: false,
       token: '',
       loading: true,
       isExpired: false,
       info: '',
+      redirectTo: '/login',
       color:'',
       timer: 6
     };
@@ -46,12 +46,24 @@ class Authenticated extends Component {
       }
     }
     else{
-      this.setState({
-        loading:false,
-        info: "Login required",
-        color: "danger",
-        isExpired: true})
-      this.countDown()
+      if(param.workflow){
+        this.setState({
+          loading:false,
+          info: "Login required",
+          color: "danger",
+          redirectTo: '/login'+this.props.location.search        
+        })
+        this.countDown()
+      }
+      else {
+        this.setState({
+          loading:false,
+          info: "Login required",
+          color: "danger",
+          redirectTo: '/login'
+        })
+        this.countDown()
+        }
       }
     }
   }
@@ -155,7 +167,7 @@ class Authenticated extends Component {
                     loading: false, 
                     info: info,
                     color: "danger",
-                    redirectOuth:true
+                    redirectTo:'/portal'
                   })
                   this.countDown()
                   this.redirect()
@@ -164,7 +176,8 @@ class Authenticated extends Component {
     } catch (error) {
         if (error.response){
         this.setState({ info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.", color:"success" });
-        } else {
+        }
+        else {
         this.setState({ info: "server unreachable", color: "danger",});
         }   
     }
@@ -202,7 +215,6 @@ class Authenticated extends Component {
         this.downcrement();
         }
       }, 1000);
-
   }
   
   downcrement = () => {
@@ -213,13 +225,9 @@ class Authenticated extends Component {
 
   render(){
     if (this.state.timer === 0){
-      if (this.state.redirectOuth) {
-        return <Redirect to={`/portal`} />
-      }
-      if (this.state.isExpired) {
-        return <Redirect to={`/login`} />
-      }
+        return <Redirect to={this.state.redirectTo} />
     }
+
     const authenticated = <label className="display-5 mb-4">Authenticated as {this.state.userDetails.sub || localStorage.getItem('userId')}</label>
     const notAuth = <label className="display-5 mb-4">You are not Authenticated</label>
     const loading = <div className="display-5">Loading <Spinner type='grow' color="info" /> </div>

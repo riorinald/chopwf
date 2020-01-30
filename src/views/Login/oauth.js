@@ -10,8 +10,9 @@ const pathname=`https://sso-int.daimler.com/as/authorization.oauth2?response_typ
 
 
 const Oauth = (props) => {  
-console.log('redirect')
-  return <>{window.location.replace(pathname)}
+console.log('redirect', pathname)
+  return <>
+    {window.location.replace(pathname)}
   </>
 } 
 

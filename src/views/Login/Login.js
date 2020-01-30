@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Redirect,NavLink } from 'react-router-dom';
 import { fakeAuth } from '../../App';
 import config from '../../config';
-import queryString from 'query-string';
+import qs from 'querystring';
 
 import {
     Form,
@@ -51,13 +51,18 @@ class Login extends Component {
     }
 
     componentDidMount(){
-        const src = queryString.parse(this.props.location.search)
+        const param = qs.parse(this.props.location.search)
 
-        if (src.code){
-            console.log('code acquired!', src.code)
+        if (param.code){
+            console.log('code acquired!', param.code)
             this.props.history.push({
                 pathname:'/authenticated',
-                code: src.code
+                code: param.code
+            })
+        }
+        if (param.userid){
+            this.setState({
+                username: param.userid
             })
         }
     }
@@ -126,6 +131,25 @@ class Login extends Component {
                     console.log(res.data)
 
                     if (res.data.status === "success") {
+                        let param = qs.parse(this.props.location.search.slice(1))
+                        if(param.workflow && param.taskid && param.userid){
+                            if(param.workflow){
+                                localStorage.setItem('application', param.workflow.toUpperCase())
+                                fakeAuth.authenticate(() => {});
+                                this.props.history.push({
+                                  pathname:`${param.workflow}/mypendingtask/details/`,
+                                  state:{redirected:true, taskId:param.taskid}
+                                })
+                              }
+                              else{
+                                localStorage.setItem('application', param.workflow.toUpperCase())
+                                fakeAuth.authenticate(() => {});
+                                this.props.history.push({
+                                  pathname:`${param.workflow}/mypendingtask/details/`,
+                                  state:{redirected:true, taskId:param.taskid}
+                                })
+                            }
+                        }
                         this.setState({ info: info})
                         setTimeout(this.redirect, 1000);
                     }
