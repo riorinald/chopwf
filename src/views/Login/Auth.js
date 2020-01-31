@@ -169,7 +169,7 @@ class Authenticated extends Component {
                   this.setState({
                     loading: false, 
                     info: info,
-                    color: "danger",
+                    color: "success",
                     redirectTo:'/portal'
                   })
                   this.countDown()
@@ -178,7 +178,7 @@ class Authenticated extends Component {
             })
     } catch (error) {
         if (error.response){
-        this.setState({ info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.", color:"success" });
+        this.setState({ info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.", color:"danger" });
         }
         else {
         this.setState({ info: "server unreachable", color: "danger",});
