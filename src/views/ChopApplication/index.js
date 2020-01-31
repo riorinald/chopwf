@@ -504,7 +504,7 @@ class ChopApplication extends Component {
                         });
                       }
                       // console.log(rowInfo.original);
-                      this.goToDetails(rowInfo.original.taskId, `/chopapps/details/${rowInfo.original.applicationTypeId}`)
+                      this.goToDetails(rowInfo.original.taskId, `/chopapps/details`)
                       this.setState({ selectedId: rowInfo.original.taskId })
                       // console.log(this.state.rowEdit);
 
