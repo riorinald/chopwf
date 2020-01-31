@@ -968,12 +968,12 @@ class EditRequest extends Component {
             errorMessage.push("Please select a valid document.<br />")
         }
         if (this.state.isLTI) {
-            if (this.state.editRequestForm.engName === "" && this.state.editRequestForm.cnName === "") {
-                errorMessage.push("Please input document name in English and Chinese.<br />")
+            if (this.state.editRequestForm.engName === "") {
+                errorMessage.push("Please input document name in English.<br />")
                 typeValid = false
             }
-            if (this.state.invalidEnglish === true) {
-                errorMessage.push("Please input document name in English with English character.<br />")
+            if (this.state.editRequestForm.cnName === "") {
+                errorMessage.push("Please input document name in Chinese.<br />")
                 typeValid = false
             }
             if (this.state.invalidChinese === true) {
