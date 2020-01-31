@@ -170,10 +170,6 @@ class EditRequest extends Component {
             chopTypes: [],
             documents: [],
             teams: [],
-            noteInfo: { 
-                chinese:"如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
-                english:"For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
-              },
             msgTooltip: '[I / S ]-[ A / L / IA / R ]-[ O / P / S] \n e.g "S-A-O-9999-9999"',
             ioTooltip: false,
             tempDocument: [],
