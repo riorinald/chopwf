@@ -19,7 +19,7 @@ class Authenticated extends Component {
       info: '',
       redirectTo: '/login',
       color:'',
-      timer: 6
+      timer: 5
     };
   }
   
@@ -29,40 +29,43 @@ class Authenticated extends Component {
     if (code){
       this.exchangeToken(code);
     }
-    if (param){
-      console.log(param)
-      if(localStorage.getItem('userId') === param.userid){
-        if(param.workflow){
-          this.props.history.push({
-            pathname:`${param.workflow}/mypendingtask/details/`,
-            state:{redirected:true, taskId:param.taskid}
-          })
+    else {
+      if (param.workflow && param.taskid && param.userid){
+        console.log(param)
+        if(localStorage.getItem('userId') === param.userid){
+          if(param.workflow === 'license'){
+            this.props.history.push({
+              pathname:`${param.workflow}/mypendingtask/details/`,
+              state:{redirected:true, taskId:param.taskid}
+            })
+          }
+          else{
+            console.log(param)
+            this.props.history.push({
+              pathname:`/mypendingtask/details/`,
+              state:{redirected:true, taskId:param.taskid}
+            })
         }
-        else{
-          this.props.history.push({
-            pathname:`${param.workflow}/mypendingtask/details/`,
-            state:{redirected:true, taskId:param.taskid}
+      }
+      else{
+        if(param.workflow){
+          this.setState({
+            loading:false,
+            info: "Login required",
+            color: "danger",
+            redirectTo: '/login'+this.props.location.search        
           })
-      }
-    }
-    else{
-      if(param.workflow){
-        this.setState({
-          loading:false,
-          info: "Login required",
-          color: "danger",
-          redirectTo: '/login'+this.props.location.search        
-        })
-        this.countDown()
-      }
-      else {
-        this.setState({
-          loading:false,
-          info: "Login required",
-          color: "danger",
-          redirectTo: '/login'
-        })
-        this.countDown()
+          this.countDown()
+        }
+        else {
+          this.setState({
+            loading:false,
+            info: "Login required",
+            color: "danger",
+            redirectTo: '/login'
+          })
+          this.countDown()
+          }
         }
       }
     }
