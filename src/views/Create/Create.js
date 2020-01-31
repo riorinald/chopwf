@@ -1300,6 +1300,9 @@ class Create extends Component {
       this.setState({ documentTableLTU: this.state.selectedDocs })
       document.getElementById("documentTableLTU").className = ""
     }
+    else {
+      this.setState({ documentTableLTU: [] })
+    }
   }
 
 
@@ -1376,6 +1379,9 @@ class Create extends Component {
 
   uploadDocument = event => {
     if (event.target.files[0]) {
+      let last = event.target.files[0].name.split('.').length
+      let extension = event.target.files[0].name.split('.')[last - 1]
+      console.log()
       this.setState({
         docSelected: event.target.files[0],
         docAttachedName: event.target.files[0].name

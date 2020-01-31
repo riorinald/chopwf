@@ -39,7 +39,7 @@ const routesRequestor = [
   { path: '/create', exact: true, name: 'Create', component: Redirect },
   { path: '/create/:company', exact: true, name: 'Create', component: Create },
   { path: '/myapps', exact: true, name: 'Myapps', component: Myapps },
-  { path: '/:page/details/:appid', exact: true, name: 'Details', component: TaskDetails },
+  { path: '/:page/details', exact: true, name: 'Details', component: TaskDetails },
 
   { path: '/mypendingtask', exact: true, name: 'MyPendingTasks', component: MyPendingTasks },
   // { path: '/dashboard', name: 'Dashboard', component: Dashboard },

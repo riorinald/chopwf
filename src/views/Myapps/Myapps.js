@@ -478,7 +478,7 @@ class Myapps extends Component {
                         this.goToEditRequest(rowInfo.original.taskId)
                       }
                       else {
-                        this.goToDetails(rowInfo.original.taskId, `/myapps/details/${rowInfo.original.applicationTypeId}`)
+                        this.goToDetails(rowInfo.original.taskId, `/myapps/details`)
                       }
 
                     },
