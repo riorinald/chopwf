@@ -469,7 +469,7 @@ class LicenseCreate extends Component {
             <div className="animated fadeIn">
                 <h4>Create</h4>
                 <Card>
-                    <CardHeader>REQUEST LICENSE</CardHeader>
+                    <CardHeader>Create new request</CardHeader>
                     <CardBody>
                         <Form className="form-horizontal" innerRef={this.formRef}>
                             <FormGroup>
@@ -517,7 +517,7 @@ class LicenseCreate extends Component {
                             <FormGroup onChange={this.handleRadio("licensePurpose")} >
                                 <Label >License Purpose</Label>
                                 <CustomInput type="radio" id="licensePurpose1" name="licensePurpose" value="LVFP" label="城市备案 Local VRB Filling Purpose" />
-                                <CustomInput type="radio" id="licensePurpose2" name="licensePurpose" value="MFP" label="城抵押 Mortgage Filling Purpose" />
+                                <CustomInput type="radio" id="licensePurpose2" name="licensePurpose" value="MFP" label="抵押 Mortgage Filling Purpose" />
                                 <CustomInput type="radio" id="licensePurpose3" name="licensePurpose" value="PS" label="其他 Please specify:">
                                     <Collapse isOpen={formData.licensePurpose === "PS"}>
                                         <Input id="specificPurpose" type="text" maxLength={500} onChange={this.handleChange("specificPurpose")} value={formData.specificPurpose} />

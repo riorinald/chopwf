@@ -230,6 +230,27 @@ class ChopApplication extends Component {
     this.setState({ filtered: filtered });
   };
 
+
+  searchDateChange = (name, view) => date => {
+
+
+    let dates = ""
+    if (date) {
+      let month = date.getMonth()
+      dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+    }
+
+    // console.log(this.state.page, this.state.limit)
+    this.setState({ [view]: date });
+    this.setState(prevState => ({
+      searchOption: {
+        ...prevState.searchOption,
+        [name]: dates
+      }
+    }))
+    // this.getPendingTasks(this.state.page, this.state.limit)
+  };
+
   dateChange = (name, view) => date => {
     let month = date.getMonth()
 
@@ -269,6 +290,7 @@ class ChopApplication extends Component {
   }
 
   goToDetails(id, url) {
+    console.log(id, url)
     this.props.history.push({
       pathname: url,
       state: { taskId: id }
@@ -299,6 +321,7 @@ class ChopApplication extends Component {
                 this.setState({ filtered: filtered })
                 this.onFilteredChangeCustom(value, column.id || column.accessor);
               }}
+              getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
               defaultFilterMethod={(filter, row, column) => {
 
                 const id = filter.pivotId || filter.id;
@@ -454,6 +477,23 @@ class ChopApplication extends Component {
                   Cell: row => (
                     <div> {this.convertDate(row.original.createdDate)} </div>
                   ),
+                  filterMethod: (filter, row) => {
+                    return row[filter.id] === filter.value;
+                  },
+                  Filter: ({ filter, onChange }) => {
+                    return (
+                      <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
+                        className="form-control" dateFormat="yyyy/MM/dd"
+                        peekNextMonth
+                        showMonthDropdown
+                        showYearDropdown
+                        selected={this.state.dateView1}
+                        isClearable
+                        getTheadFilterThProps
+                        onChange={this.searchDateChange("createdDate", "dateView1")}
+                      />
+                    )
+                  },
                   style: { textAlign: "center" }
                 },
                 {

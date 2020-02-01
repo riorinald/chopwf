@@ -41,7 +41,8 @@ class Instruction extends Component {
             width: 0,
             editable: false,
             b64String: "",
-            userGuideFile: null
+            userGuideFile: null,
+            documentName: ""
         };
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         this.makeEditable = this.makeEditable.bind(this);
@@ -77,8 +78,6 @@ class Instruction extends Component {
             alert("Instructions updated")
             //codes to update instructions to the database
             this.updateInstructions("USERINSTRUCTIONS", this.state.b64String)
-            // this.updateInstructions("APPLICANT")
-            // this.updateInstructions("APPROVERS")
         }
         this.setState({ editable: !this.state.editable })
     }
@@ -95,7 +94,7 @@ class Instruction extends Component {
         let file = null
         if (event.target.files[0]) {
             this.getBase64(event.target.files[0], (result) => {
-                this.setState({ b64String: result })
+                this.setState({ b64String: result, documentName: event.target.files[0].name })
                 // 
             })
         }
@@ -121,6 +120,7 @@ class Instruction extends Component {
         let newFormData = new FormData()
 
         newFormData.append("sectionData", b64)
+        newFormData.append("documentFileName", this.state.documentName)
 
         await Axios.put(`${config.url}/userInstructions/chop/${sectionId}/${localStorage.getItem('userId')}`, newFormData).then(res => {
         })

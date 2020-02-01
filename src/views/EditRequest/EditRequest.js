@@ -1879,10 +1879,11 @@ class EditRequest extends Component {
 
         if (this.state.taskDetails.applicationTypeId === "LTU") {
             let documents = this.state.taskDetails.documents
-            if (this.state.taskDetails.documents === this.state.tempDocument) {
-                documents = []
-            }
-            for (let i = 0; i < this.state.taskDetails.documents.length; i++) {
+            console.log(documents)
+            // if (documents === this.state.tempDocument) {
+            // documents = []
+            // }
+            for (let i = 0; i < documents.length; i++) {
                 postReq.append(`DocumentIds[${i}]`, documents[i].documentId);
             }
         }
