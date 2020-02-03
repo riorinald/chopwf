@@ -69,7 +69,7 @@ class Instruction extends Component {
     }
 
     async getUserInstructions(sectionId, name) {
-        this.setState({ loading: TextTrackCueList })
+        this.setState({ loading: true })
         await Axios.get(`${config.url}/userinstructions/chop/${sectionId}`, { headers: { Pragma: 'no-cache' } }).then((res) => {
             this.setState({ [name]: res.data.sectionData, userGuideFile: this.dataURLtoFile(`data:application/pdf;base64,${res.data.sectionData}`), loading: false })
         })
@@ -170,9 +170,9 @@ class Instruction extends Component {
         let { loading } = this.state
         return (
             <div className="animated fadeIn">
-                <h2>User Guide</h2>
+                <h4>User Guide</h4>
                 <Card >
-                    <CardHeader><h5 style={{ float: "left" }}>{this.state.workflow}</h5>
+                    <CardHeader><div style={{ float: "left" }}>{this.state.workflow}</div>
                         {localStorage.getItem('viewAdminChop') === "true"
                             ? <div style={{ float: "right" }}>
                                 {!this.state.editable ? Edit : Apply}

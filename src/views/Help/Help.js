@@ -358,7 +358,7 @@ class Help extends Component {
         const Apply = <Button color="success" onClick={this.makeEditable}>APPLY</Button>
         return (
             <div className="animated fadeIn">
-                <h2 >Help</h2>
+                <h4 >Help</h4>
                 <Card>
                     <CardBody>
                         <div style={{ float: "left", marginTop: "5px", paddingRight: "10px" }} ><b>Chop Keeper Information</b></div>

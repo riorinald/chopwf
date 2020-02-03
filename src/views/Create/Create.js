@@ -169,7 +169,7 @@ class Create extends Component {
       contractValid: true,
 
       checkDetails: {},
-
+      wrongDocError: "",
 
       reqInfo: [
         { id: "deptSelected", valid: false },
@@ -1382,15 +1382,31 @@ class Create extends Component {
   };
 
   uploadDocument = event => {
+    let ext = ["ipg", "png", "xls", "xlsm", "xlsx", "email", "jpeg", "txt", "rtf", "tiff", "tif", "doc", "docx", "pdf", "pdfx", "bmp"]
+    let valid = false
     if (event.target.files[0]) {
       let last = event.target.files[0].name.split('.').length
       let extension = event.target.files[0].name.split('.')[last - 1]
-      console.log()
-      this.setState({
-        docSelected: event.target.files[0],
-        docAttachedName: event.target.files[0].name
-
-      })
+      console.log(extension)
+      for (let i = 0; i < ext.length; i++) {
+        if (ext[i] === extension) {
+          valid = true
+          break;
+        }
+        else {
+          valid = false
+        }
+      }
+      if (valid) {
+        this.setState({
+          docSelected: event.target.files[0],
+          docAttachedName: event.target.files[0].name,
+          wrongDocError: ""
+        })
+      }
+      else {
+        this.setState({ wrongDocError: "Please attach a valid document !" })
+      }
     }
     event.target.value = null
   }
@@ -1769,6 +1785,7 @@ class Create extends Component {
                 <CustomInput id="docFileName" onChange={this.uploadDocument}
                   accept=".ipg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp"
                   type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
+                <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
               </FormGroup>
             </Col>
             <Col xl={1}>
@@ -1923,6 +1940,7 @@ class Create extends Component {
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
                         <b><span> {info.chinese} </span></b>
+                        <p></p>
                         <b><p> {info.english} </p></b>
                       </li>
                     ))}
