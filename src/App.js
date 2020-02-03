@@ -7,7 +7,7 @@ import Cookies from 'universal-cookie';
 import './App.scss';
 
 export const fakeAuth = {
-  isAuthenticated: localStorage.getItem('authenticate')  === 'true' ? true : false,
+  // isAuthenticated: localStorage.getItem('authenticate')  === 'true' ? true : false,
   authenticate(cb) {
     
     this.isAuthenticated = true
@@ -50,11 +50,11 @@ const PrivateRoute = ({component: Component, ...rest}) => (
 
 class App extends Component {
 
-addChangeListener(fakeAuth){
-  fakeAuth.signOut()
-}
+// addChangeListener(fakeAuth){
+//   fakeAuth.signOut()
+// }
 
-  render() {
+render() {
     return (
       <Router basename='/CLWF/'>
         <React.Suspense fallback={loading()}>
@@ -63,8 +63,8 @@ addChangeListener(fakeAuth){
             <Route exact path="/authenticated" name="auth" render={props => <AuthPage {...props} />} />
             <Route exact path="/page404" name="Page 404" render={props => <Page404 {...props} />} />
             <Route exact path="/portal" name="Portal" render={props => <Portal {...props} />} />
-            <Route path='/login' component={Login} /> 
-            <Route path='/Logout' component={Logout} />  
+            <Route path='/login' name="login" render={props=> <Login {...props} />} /> 
+            <Route path='/Logout' name="logout" render={props=> <Logout {...props} />} />  
             {/* {fakeAuth.isAuthenticated
               ? <Route path="/" name="Home" render={props => <DefaultLayout {...props} />} />
               : <Redirect to='/login' />
