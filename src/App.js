@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import {Spinner} from 'reactstrap';
+import Cookies from 'universal-cookie';
 
 // import { renderRoutes } from 'react-router-config';
 import './App.scss';
@@ -20,6 +21,8 @@ export const fakeAuth = {
   }
 }
 
+const cookies = new Cookies();
+
 const Login = React.lazy(() => import('./views/Login/Login'));
 const Logout = React.lazy(() => import('./views/Logout/Logout'));
 
@@ -36,14 +39,20 @@ const Oauth = React.lazy(()=> import('./views/Login/oauth'))
 
 const PrivateRoute = ({component: Component, ...rest}) => (
   <Route {...rest} render={props => (
-    fakeAuth.isAuthenticated === true 
+    fakeAuth.isAuthenticated === true && cookies.get('userInfo', {path:'/'})
     ? <Component {...props}/>
-    : <Redirect to='/login'/>
+    : cookies.get('userInfo', {path:'/'})
+      ? <Redirect to='/login'/>
+      : <Redirect to='/authenticated?session=expired'/>
   )}/>
 )
 
 
 class App extends Component {
+
+addChangeListener(fakeAuth){
+  fakeAuth.signOut()
+}
 
   render() {
     return (

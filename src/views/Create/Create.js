@@ -1921,8 +1921,8 @@ class Create extends Component {
                   <ol>
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
-                        <b><p> {info.chinese} </p></b>
-                        <b><p> {info.english} </p></b>
+                        <p> {info.chinese} </p>
+                        <p> {info.english} </p>
                       </li>
                     ))}
                   </ol>
