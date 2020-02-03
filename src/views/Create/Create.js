@@ -569,7 +569,7 @@ class Create extends Component {
   }
 
   convertExpDate(dateValue) {
-    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
     return regEx;
   }
   changeDeptHeads(heads) {
@@ -1532,6 +1532,7 @@ class Create extends Component {
       while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
       }
+      console.log(mime)
 
       return new File([u8arr], filename, { type: mime });
     }
@@ -1918,16 +1919,14 @@ class Create extends Component {
               <CardBody>
                 <FormGroup>
                   <h5><b>NOTES :</b></h5>
-                  <ol>
+                  <ol id="notes" className="font-weight-bold">
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
-                        <p> {info.chinese} </p>
-                        <p> {info.english} </p>
+                        <p> {info.chinese} </p> 
+                        <p> {info.english} </p> 
                       </li>
                     ))}
                   </ol>
-                  {/* <p>{this.state.noteInfo.chinese}</p> */}
-                  {/* <p>{this.state.noteInfo.english}</p> */}
                 </FormGroup>
                 <Form className="form-horizontal" innerRef={this.formRef}>
                   {/* <FormGroup>

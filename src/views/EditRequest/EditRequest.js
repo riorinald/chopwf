@@ -348,7 +348,7 @@ class EditRequest extends Component {
     }
 
     convertExpDate(dateValue) {
-        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
         return regEx;
     }
 
@@ -357,8 +357,9 @@ class EditRequest extends Component {
         let regEx = ""
         let dateView = null
         if (dateValue !== "00010101" && dateValue !== "" && dateValue !== "/") {
-            regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
+            regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
             dateView = new Date(regEx)
+            console.log(dateView)
         }
 
         this.setState({ [view]: dateView })
@@ -2004,7 +2005,7 @@ class EditRequest extends Component {
         return (
             <LegalEntity.Consumer>{
                 ContextValue => (
-                    <div>
+                    <div style={{ fontFamily: "sans-serif" }}>
                         {!this.state.loading ?
                             <Card className="animated fadeIn">
                                 <CardHeader>
@@ -2039,14 +2040,14 @@ class EditRequest extends Component {
                                     }
                                     <FormGroup>
                                         <h5><b>NOTES :</b></h5>
-                                        <ol>
-                                            {noteInfo.map((info, index) => (
+                                            <ol id="notes" className="font-weight-bold">
+                                                {this.state.noteInfo.map((info, index) => (
                                                 <li key={index} >
-                                                    <b><p> {info.chinese} </p></b>
-                                                    <b><p> {info.english} </p></b>
+                                                    <p> {info.chinese} </p> 
+                                                    <p> {info.english} </p> 
                                                 </li>
-                                            ))}
-                                        </ol>
+                                                ))}
+                                            </ol>
                                     </FormGroup>
                                     <Form className="form-horizontal">
                                         <FormGroup>
