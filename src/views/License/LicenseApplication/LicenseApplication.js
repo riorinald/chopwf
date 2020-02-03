@@ -214,7 +214,7 @@ class LicenseApplication extends Component {
                 <h4>License Applications</h4>
                 <Card onKeyDown={this.handleKeyDown}>
 
-                    <CardHeader>LICENSE APPLICATIONS <Button className="float-right" onClick={() => this.getLicenseApplications(this.state.page, this.state.limit)} >Search</Button></CardHeader>
+                    <CardHeader>License Applications <Button className="float-right" onClick={() => this.getLicenseApplications(this.state.page, this.state.limit)} >Search</Button></CardHeader>
                     <CardBody>
                         <ReactTable
                             data={licenseApplication}

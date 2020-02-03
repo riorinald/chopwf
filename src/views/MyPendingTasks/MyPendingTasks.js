@@ -289,7 +289,7 @@ class MyPendingTasks extends Component {
                 {/* {this.state.show? */}
                 <Card onKeyDown={this.handleKeyDown} >
                     <CardHeader >
-                        Pending Tasks <Button className="float-right" onClick={this.search} >Search</Button>
+                        My Pending Tasks <Button className="float-right" onClick={this.search} >Search</Button>
                     </CardHeader>
                     <CardBody >
                         <ReactTable

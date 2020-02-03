@@ -177,6 +177,7 @@ class EditRequest extends Component {
             contractNumNotes: "",
             contractError: "",
             checkDetails: { deptTempSelected: "null", chopTypeTempSelected: "null", teamTempSelected: "null" },
+            wrongDocError: ""
         }
         this.getTaskDetails = this.getTaskDetails.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -886,16 +887,35 @@ class EditRequest extends Component {
     }
 
     uploadDocument = event => {
+        let ext = ["ipg", "png", "xls", "xlsm", "xlsx", "email", "jpeg", "txt", "rtf", "tiff", "tif", "doc", "docx", "pdf", "pdfx", "bmp"]
+        let valid = false
         if (event.target.files[0]) {
-            let file = event.target.files[0]
-            // console.log(file)
-            let fileName = event.target.files[0].name
-            this.setState(state => {
-                let editRequestForm = this.state.editRequestForm
-                editRequestForm.docSelected = file
-                editRequestForm.docAttachedName = fileName
-                return { editRequestForm }
-            })
+            let last = event.target.files[0].name.split('.').length
+            let extension = event.target.files[0].name.split('.')[last - 1]
+            for (let i = 0; i < ext.length; i++) {
+                if (ext[i] === extension) {
+                    valid = true
+                    break;
+                }
+                else {
+                    valid = false
+                }
+            }
+            if (valid) {
+                let file = event.target.files[0]
+                let fileName = event.target.files[0].name
+                this.setState(state => {
+                    let editRequestForm = this.state.editRequestForm
+                    editRequestForm.docSelected = file
+                    editRequestForm.docAttachedName = fileName
+                    return { editRequestForm }
+                })
+                this.setState({ wrongDocError: "" })
+            }
+            else {
+                this.setState({ wrongDocError: "Please attach a valid document !" })
+            }
+
         }
         event.target.value = null
     }
@@ -2349,6 +2369,7 @@ class EditRequest extends Component {
                                                                 <CustomInput
                                                                     accept=".ipg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, docx, .pdf, .pdfx, .bmp"
                                                                     id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" label={editRequestForm.docAttachedName} />
+                                                                <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
                                                             </FormGroup>
                                                         </Col>
                                                         <Col xl={1}>
