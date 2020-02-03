@@ -46,7 +46,7 @@ class TaskDetails extends Component {
             this.goBack(false)
         }
         else {
-            this.setState({ page: this.props.match.params.page, appType: this.props.match.params.appid })
+            this.setState({ page: this.props.match.params.page})
             this.getTaskDetails(this.props.location.state.taskId)
         }
     }
@@ -56,7 +56,7 @@ class TaskDetails extends Component {
         let userId = localStorage.getItem('userId')
         await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`, { headers: { Pragma: 'no-cache' } }).then(res => {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
-            this.setState({ taskDetails: res.data, loading: false })
+            this.setState({ taskDetails: res.data, appType: res.data.applicationTypeId, loading: false })
             console.log(res.data)
         })
         // this.getUserDetails()

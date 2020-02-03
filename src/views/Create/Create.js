@@ -1112,8 +1112,12 @@ class Create extends Component {
       errorMessage.push("Please select a valid document.<br />")
     }
     if (this.state.isLTI) {
-      if (this.state.engName === "" && this.state.cnName === "") {
-        errorMessage.push("Please input document name in English and Chinese.<br />")
+      if (this.state.engName === "") {
+        errorMessage.push("Please input document name in English.<br />")
+        typeValid = false
+      }
+      if (this.state.cnName === "") {
+        errorMessage.push("Please input document name in Chinese.<br />")
         typeValid = false
       }
       if (this.state.invalidEnglish === true) {
@@ -1300,6 +1304,9 @@ class Create extends Component {
       this.setState({ documentTableLTU: this.state.selectedDocs })
       document.getElementById("documentTableLTU").className = ""
     }
+    else {
+      this.setState({ documentTableLTU: [] })
+    }
   }
 
 
@@ -1376,6 +1383,9 @@ class Create extends Component {
 
   uploadDocument = event => {
     if (event.target.files[0]) {
+      let last = event.target.files[0].name.split('.').length
+      let extension = event.target.files[0].name.split('.')[last - 1]
+      console.log()
       this.setState({
         docSelected: event.target.files[0],
         docAttachedName: event.target.files[0].name
@@ -1386,8 +1396,9 @@ class Create extends Component {
   }
 
   handleSelectOption = sname => newValue => {
+    console.log(sname, newValue)
 
-    if (newValue)
+    if (newValue) {
       if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
         if (newValue) {
           this.setState({ selectedOption: { [sname]: newValue }, [sname]: newValue })
@@ -1404,6 +1415,15 @@ class Create extends Component {
         }
         this.setState({ selectedOption: { [sname]: newValue }, [sname]: newValue.value })
       }
+    }
+    else {
+      if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
+        this.setState({ selectedOption: { [sname]: newValue }, [sname]: [] })
+      }
+      else {
+        this.setState({ selectedOption: { [sname]: newValue }, [sname]: "" })
+      }
+    }
 
   }
 

@@ -540,7 +540,7 @@ class MyPendingTasks extends Component {
                                                 this.goToEditRequest(rowInfo.original.taskId)
                                             }
                                             else {
-                                                this.goToDetails(rowInfo.original.taskId, `/mypendingtask/details/${rowInfo.original.applicationTypeId}`)
+                                                this.goToDetails(rowInfo.original.taskId, `/mypendingtask/details`)
                                                 // this.goToDetails(rowInfo.original.taskId, `/ mypendingtask / details / CNIPS`)
                                             }
 

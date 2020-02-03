@@ -41,7 +41,8 @@ class LicenseInstruction extends Component {
             width: 0,
             editable: false,
             b64String: "",
-            userGuideFile: null
+            userGuideFile: null,
+            documentName: ""
         };
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         this.makeEditable = this.makeEditable.bind(this);
@@ -95,7 +96,7 @@ class LicenseInstruction extends Component {
         let file = null
         if (event.target.files[0]) {
             this.getBase64(event.target.files[0], (result) => {
-                this.setState({ b64String: result })
+                this.setState({ b64String: result, documentName: event.target.files[0].name })
                 // 
             })
         }
@@ -124,6 +125,7 @@ class LicenseInstruction extends Component {
         let newFormData = new FormData()
 
         newFormData.append("sectionData", b64)
+        newFormData.append("documentFileName", this.state.documentName)
 
         await Axios.put(`${config.url}/userInstructions/license/${sectionId}/${localStorage.getItem('userId')}`, newFormData).then(res => {
         })

@@ -970,12 +970,12 @@ class EditRequest extends Component {
             errorMessage.push("Please select a valid document.<br />")
         }
         if (this.state.isLTI) {
-            if (this.state.editRequestForm.engName === "" && this.state.editRequestForm.cnName === "") {
-                errorMessage.push("Please input document name in English and Chinese.<br />")
+            if (this.state.editRequestForm.engName === "") {
+                errorMessage.push("Please input document name in English.<br />")
                 typeValid = false
             }
-            if (this.state.invalidEnglish === true) {
-                errorMessage.push("Please input document name in English with English character.<br />")
+            if (this.state.editRequestForm.cnName === "") {
+                errorMessage.push("Please input document name in Chinese.<br />")
                 typeValid = false
             }
             if (this.state.invalidChinese === true) {
@@ -1078,15 +1078,27 @@ class EditRequest extends Component {
     addDocumentLTU() {
         if (this.state.selectedDocs.length !== 0) {
             document.getElementById("documentTableLTU").className = "form-control"
-        }
-
-        this.state.selectedDocs.map(doc => {
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
-                taskDetails.documents = taskDetails.documents.concat(doc)
-                return { taskDetails }
+                taskDetails.documents = this.state.selectedDocs
+                return taskDetails
             })
-        })
+        }
+        else {
+            this.setState(state => {
+                let taskDetails = this.state.taskDetails
+                taskDetails.documents = []
+                return taskDetails
+            })
+        }
+
+        // this.state.selectedDocs.map(doc => {
+        //     this.setState(state => {
+        //         let taskDetails = this.state.taskDetails
+        //         taskDetails.documents = taskDetails.documents.concat(doc)
+        //         return { taskDetails }
+        //     })
+        // })
     }
 
 
@@ -1869,10 +1881,11 @@ class EditRequest extends Component {
 
         if (this.state.taskDetails.applicationTypeId === "LTU") {
             let documents = this.state.taskDetails.documents
-            if (this.state.taskDetails.documents === this.state.tempDocument) {
-                documents = []
-            }
-            for (let i = 0; i < this.state.taskDetails.documents.length; i++) {
+            console.log(documents)
+            // if (documents === this.state.tempDocument) {
+            // documents = []
+            // }
+            for (let i = 0; i < documents.length; i++) {
                 postReq.append(`DocumentIds[${i}]`, documents[i].documentId);
             }
         }
@@ -1986,7 +1999,7 @@ class EditRequest extends Component {
 
 
     render() {
-        const { taskDetails, appTypes, dateView1, deptHeads, usersList, docCheckBy, selectedDeptHeads, selectedDocCheckBy, editRequestForm } = this.state
+        const { taskDetails, appTypes, dateView1, deptHeads, usersList, docCheckBy, selectedDeptHeads, selectedDocCheckBy, editRequestForm, noteInfo } = this.state
 
         this.validator.purgeFields();
 
@@ -2029,7 +2042,7 @@ class EditRequest extends Component {
                                     <FormGroup>
                                         <h5><b>NOTES :</b></h5>
                                         <ol>
-                                            {this.state.noteInfo.map((info, index) => (
+                                            {noteInfo.map((info, index) => (
                                                 <li key={index} >
                                                     <b><p> {info.chinese} </p></b>
                                                     <b><p> {info.english} </p></b>
