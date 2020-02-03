@@ -2006,7 +2006,7 @@ class EditRequest extends Component {
         return (
             <LegalEntity.Consumer>{
                 ContextValue => (
-                    <div>
+                    <div style={{ fontFamily: "sans-serif" }}>
                         {!this.state.loading ?
                             <Card className="animated fadeIn">
                                 <CardHeader>
@@ -2041,14 +2041,14 @@ class EditRequest extends Component {
                                     }
                                     <FormGroup>
                                         <h5><b>NOTES :</b></h5>
-                                        <ol>
-                                            {noteInfo.map((info, index) => (
+                                            <ol id="notes" className="font-weight-bold">
+                                                {this.state.noteInfo.map((info, index) => (
                                                 <li key={index} >
-                                                    <b><p> {info.chinese} </p></b>
-                                                    <b><p> {info.english} </p></b>
+                                                    <p> {info.chinese} </p> 
+                                                    <p> {info.english} </p> 
                                                 </li>
-                                            ))}
-                                        </ol>
+                                                ))}
+                                            </ol>
                                     </FormGroup>
                                     <Form className="form-horizontal">
                                         <FormGroup>

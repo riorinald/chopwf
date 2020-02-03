@@ -1919,16 +1919,14 @@ class Create extends Component {
               <CardBody>
                 <FormGroup>
                   <h5><b>NOTES :</b></h5>
-                  <ol>
+                  <ol id="notes" className="font-weight-bold">
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
-                        <b><span> {info.chinese} </span></b>
-                        <b><p> {info.english} </p></b>
+                        <p> {info.chinese} </p> 
+                        <p> {info.english} </p> 
                       </li>
                     ))}
                   </ol>
-                  {/* <p>{this.state.noteInfo.chinese}</p> */}
-                  {/* <p>{this.state.noteInfo.english}</p> */}
                 </FormGroup>
                 <Form className="form-horizontal" innerRef={this.formRef}>
                   {/* <FormGroup>
