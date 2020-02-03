@@ -68,7 +68,8 @@ class LicenseInstruction extends Component {
 
     async getUserInstructions(sectionId, name) {
         const res = await Axios.get(`${config.url}/userinstructions/license/${sectionId}`, { headers: { Pragma: 'no-cache' } })
-        this.setState({ [name]: res.data.sectionData, userGuideFile: this.dataURLtoFile(res.data.sectionData, "User guide") })
+        console.log(res.data)
+        this.setState({ [name]: res.data, userGuideFile: res.data !== null ? this.dataURLtoFile(res.data, "User guide") : "" })
         // console.log(res.data)
     }
 

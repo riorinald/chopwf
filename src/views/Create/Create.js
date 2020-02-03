@@ -1532,6 +1532,7 @@ class Create extends Component {
       while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
       }
+      console.log(mime)
 
       return new File([u8arr], filename, { type: mime });
     }
@@ -1921,7 +1922,7 @@ class Create extends Component {
                   <ol>
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
-                        <b><p> {info.chinese} </p></b>
+                        <b><span> {info.chinese} </span></b>
                         <b><p> {info.english} </p></b>
                       </li>
                     ))}
