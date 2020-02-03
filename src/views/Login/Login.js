@@ -169,7 +169,7 @@ class Login extends Component {
     
     setCookies(data){
         let expired = new Date
-        expired.setTime(expired.getTime() + (1*60*1000));
+        expired.setTime(expired.getTime() + (720*60*1000));
         console.log(expired)
         cookies.set('userInfo', data, { path: '/', expires:expired });
     }
