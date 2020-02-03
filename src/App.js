@@ -6,8 +6,12 @@ import Cookies from 'universal-cookie';
 // import { renderRoutes } from 'react-router-config';
 import './App.scss';
 
+const cookies = new Cookies();
+
 export const fakeAuth = {
-  // isAuthenticated: localStorage.getItem('authenticate')  === 'true' ? true : false,
+  // isAuthenticated: cookies.get('userInfo', {path:'/'}) ? true : false,
+  isAuthenticated: LocalStorage.getItem('authenticate')  === 'true' ? true : false,
+  
   authenticate(cb) {
     
     this.isAuthenticated = true
@@ -21,7 +25,6 @@ export const fakeAuth = {
   }
 }
 
-const cookies = new Cookies();
 
 const Login = React.lazy(() => import('./views/Login/Login'));
 const Logout = React.lazy(() => import('./views/Logout/Logout'));
