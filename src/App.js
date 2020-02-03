@@ -10,7 +10,7 @@ const cookies = new Cookies();
 
 export const fakeAuth = {
   // isAuthenticated: cookies.get('userInfo', {path:'/'}) ? true : false,
-  isAuthenticated: LocalStorage.getItem('authenticate')  === 'true' ? true : false,
+  isAuthenticated: localStorage.getItem('authenticate')  === 'true' ? true : false,
   
   authenticate(cb) {
     
