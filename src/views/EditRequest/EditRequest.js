@@ -349,7 +349,7 @@ class EditRequest extends Component {
     }
 
     convertExpDate(dateValue) {
-        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
         return regEx;
     }
 
@@ -358,8 +358,9 @@ class EditRequest extends Component {
         let regEx = ""
         let dateView = null
         if (dateValue !== "00010101" && dateValue !== "" && dateValue !== "/") {
-            regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1,$2,$3')
+            regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
             dateView = new Date(regEx)
+            console.log(dateView)
         }
 
         this.setState({ [view]: dateView })
