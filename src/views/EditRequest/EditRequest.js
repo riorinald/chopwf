@@ -49,7 +49,6 @@ const SelectTable = selectTableHOC(ReactTable);
 
 
 
-
 const reactSelectControl = {
     control: styles => ({ ...styles, borderColor: '#F86C6B', boxShadow: '0 0 0 0px #F86C6B', ':hover': { ...styles[':hover'], borderColor: '#F86C6B' } }),
     menuPortal: base => ({ ...base, zIndex: 9999 })

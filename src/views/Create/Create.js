@@ -218,7 +218,7 @@ class Create extends Component {
     this.handleSelectOption = this.handleSelectOption.bind(this);
     this.checkDept = this.checkDept.bind(this);
 
-    this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
+    this.validator = new SimpleReactValidator({autoForceUpdate: this, locale: 'en'});
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
     this.hideDoc = this.hideDoc.bind(this);
