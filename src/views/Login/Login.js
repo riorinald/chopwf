@@ -171,7 +171,7 @@ class Login extends Component {
         let expired = new Date
         expired.setTime(expired.getTime() + (720*60*1000));
         console.log(expired)
-        cookies.set('userInfo', data, { path: '/', expires:expired });
+        cookies.set('userInfo', data, { path:'clwf', expires:expired });
     }
 
     redirect(){

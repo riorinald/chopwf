@@ -7,7 +7,6 @@ import config from '../../config';
 import qs from 'querystring';
 import JWT from 'jsonwebtoken';
 import Cookies from 'universal-cookie';
-import { userInfo } from 'os';
 
 
 const scope ="openid"
@@ -167,7 +166,11 @@ class Authenticated extends Component {
        await axios.get(`https://sso-int.daimler.com/idp/userinfo.openid`, config)
           .then(res => {
 
-            this.setState({ loading: false, userDetails: res.data})
+            this.setState({ 
+              loading: false, 
+              userDetails: res.data,
+              title: "Authenticated as " + res.data.sub
+              })
             localStorage.setItem('userId', res.data.sub)
             credentials.username = res.data.sub
             this.validate(credentials)
@@ -268,22 +271,24 @@ class Authenticated extends Component {
         return <Redirect to={this.state.redirectTo} />
     }
     return(
-    <div style={{ backgroundColor: "#2F353A" }}>
+    <>
       <Card className="centerd shadow-lg mt-5 p-3 rounded">
         <CardBody className="text-center">
           {this.state.loading
            ? <div className="display-5">Loading <Spinner type='grow' color="info" /> </div>
            : <> 
-            <label className="display-5 mb-4 "><center>{this.state.title} {this.state.userDetails.sub || cookies.get(userInfo.userid)}</center></label>
-            <Alert color={this.state.color} ><center>{this.state.info}</center></Alert >
+            <label className="display-5 mb-4 ">{this.state.title}</label>
+            <Alert color={this.state.color} >{this.state.info}</Alert >
+            {this.state.isExpired ?
             <Button className="btn-openid btn-brand mb-2" onClick= {event =>  window.location.href = pathname} >
                 <i className="fa fa-openid"></i><span>Daimler OpenID Auth</span> </Button>
-            <p className="mt-3 mb-0"><center style={{color:'grey'}}>Redirect in {this.state.timer}</center></p>
+            : null}
+            <p className="mt-3 mb-0"><span style={{color:'grey'}}>Redirect in {this.state.timer}</span></p>
             </>  
          }   
         </CardBody>
       </Card>
-    </div >
+    </>
     )}
   
   }

@@ -21,6 +21,8 @@ import "react-table/react-table.css"
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import PropTypes from "prop-types";
 import LegalEntity from '../../context';
+
+import {getCookies} from '../../functions/Authorize'
 // import Skeleton from 'react-loading-skeleton';
 
 
@@ -54,6 +56,7 @@ import {
   Tooltip,
   UncontrolledTooltip,
 } from 'reactstrap';
+import { userInfo } from '../../context/UserInfo';
 
 
 const SelectTable = selectTableHOC(ReactTable);
@@ -325,6 +328,9 @@ class Create extends Component {
 
 
   async submitRequest(isSubmitted) {
+
+    const userCookie = getCookies()
+
     console.log("SUBMIT")
     let useInOffice = "Y"
     let isConnectChop = "N"
@@ -334,7 +340,7 @@ class Create extends Component {
     isConnectChop = this.state.connectingChop ? "Y" : "N"
     IsConfirmed = this.state.agreeTerms ? "Y" : "N"
     let postReq = new FormData();
-    postReq.append("UserId", this.state.userId);
+    postReq.append("UserId", userCookie.userId);
     postReq.append("EmployeeNum", this.state.employeeId);
     postReq.append("TelephoneNum", this.state.telNumber);
     postReq.append("CompanyId", this.props.legalName);

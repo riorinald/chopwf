@@ -9,8 +9,8 @@ import './App.scss';
 const cookies = new Cookies();
 
 export const fakeAuth = {
-  // isAuthenticated: cookies.get('userInfo', {path:'/'}) ? true : false,
-  isAuthenticated: localStorage.getItem('authenticate')  === 'true' ? true : false,
+  isAuthenticated: cookies.get('userInfo', {path:'clwf'}) ? true : false,
+  // isAuthenticated: localStorage.getItem('authenticate')  === 'true' ? true : false,
   
   authenticate(cb) {
     
@@ -42,9 +42,9 @@ const Oauth = React.lazy(()=> import('./views/Login/oauth'))
 
 const PrivateRoute = ({component: Component, ...rest}) => (
   <Route {...rest} render={props => (
-    fakeAuth.isAuthenticated === true && cookies.get('userInfo', {path:'/'})
+    fakeAuth.isAuthenticated === true && cookies.get('userInfo', {path:'clwf'})
     ? <Component {...props}/>
-    : cookies.get('userInfo', {path:'/'})
+    : cookies.get('userInfo', {path:'clwf'})
       ? <Redirect to='/login'/>
       : <Redirect to='/authenticated?session=expired'/>
   )}/>
