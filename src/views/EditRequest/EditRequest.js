@@ -1693,6 +1693,7 @@ class EditRequest extends Component {
             text: '',
             footer: '',
             allowOutsideClick: false,
+            showConfirmButton: true,
             onClose: () => { this.props.history.push(`/${this.props.match.params.page}`) },
             onBeforeOpen: () => {
                 Swal.showLoading()
@@ -1730,10 +1731,11 @@ class EditRequest extends Component {
                             msg = "Validation Errors occured"
                         }
                         Swal.update({
-                            title: stat ? error.response.data.title : "ERROR",
+                            title: "ERROR",
                             text: msg,
                             type: 'error'
                         })
+                        Swal.hideLoading()
                     })
             }
         })
@@ -2061,14 +2063,14 @@ class EditRequest extends Component {
                                     }
                                     <FormGroup>
                                         <h5><b>NOTES :</b></h5>
-                                            <ol id="notes" className="font-weight-bold">
-                                                {this.state.noteInfo.map((info, index) => (
+                                        <ol id="notes" className="font-weight-bold">
+                                            {this.state.noteInfo.map((info, index) => (
                                                 <li key={index} >
-                                                    <p> {info.chinese} </p> 
-                                                    <p> {info.english} </p> 
+                                                    <p> {info.chinese} </p>
+                                                    <p> {info.english} </p>
                                                 </li>
-                                                ))}
-                                            </ol>
+                                            ))}
+                                        </ol>
                                     </FormGroup>
                                     <Form className="form-horizontal">
                                         <FormGroup>

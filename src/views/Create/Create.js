@@ -513,6 +513,7 @@ class Create extends Component {
       text: '',
       footer: '',
       allowOutsideClick: false,
+      showConfirmButton: true,
       onClose: () => { if (!showError) { this.formReset() } },
       onBeforeOpen: () => {
         Swal.showLoading()
@@ -537,13 +538,14 @@ class Create extends Component {
             let err3 = ""
             if (error.response) {
               console.log(error.response)
-              let keys = Object.keys(error.response.data.errors)
-              err = keys.join(',')
-              keys.map(key => {
-                // console.log(error.response.data.errors[key].join(','))
-                err2.push(error.response.data.errors[key].join(','))
-              })
-              err3 = err2.join(';')
+              err3 = error.response.message
+              // let keys = Object.keys(error.response.data.errors)
+              // err = keys.join(',')
+              // keys.map(key => {
+              // console.log(error.response.data.errors[key].join(','))
+              // err2.push(error.response.data.errors[key].join(','))
+              // })
+              // err3 = err2.join(';')
             }
             Swal.update({
               title: "Error",
@@ -1939,8 +1941,8 @@ class Create extends Component {
                   <ol id="notes" className="font-weight-bold">
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
-                        <p> {info.chinese} </p> 
-                        <p> {info.english} </p> 
+                        <p> {info.chinese} </p>
+                        <p> {info.english} </p>
                       </li>
                     ))}
                   </ol>
