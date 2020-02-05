@@ -54,11 +54,11 @@ class Administration extends Component {
     getData() {
         Axios.get(`${config.url}/notes/0`)
             .then(res => {
-                let tempNotes = res.data.noteContent.split(';')
+                let tempNotes = res.data.noteContent.split('%')
                 for (let i = 0; i < tempNotes.length; i++) {
                     let obj = {
-                        chinese: tempNotes[i].split(',')[0],
-                        english: tempNotes[i].split(',')[1]
+                        chinese: tempNotes[i].split('#')[0],
+                        english: tempNotes[i].split('#')[1]
                     }
                     this.setState({
                         notes: this.state.notes.concat(obj)
@@ -105,7 +105,12 @@ class Administration extends Component {
 
     putNotes = () => {
         let postData = new FormData()
-        let notes = this.state.notes.join(';')
+        let tempArray = []
+        this.state.notes.map(note => {
+            let str = note.chinese + '#' + note.english
+            tempArray.push(str)
+        })
+        let notes = tempArray.join('%')
         postData.append('noteContent', notes)
         Axios.put(`${config.url}/notes/0`, postData)
             .then((res) => {

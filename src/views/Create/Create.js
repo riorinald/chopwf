@@ -185,16 +185,7 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       validateForm: [],
-      noteInfo: [
-        {
-          chinese: "如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
-          english: "For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
-        },
-        {
-          chinese: "如您需要在含有个人身份信息（如身份信息、护照信息）的文件上盖章，请不要上传附件或者遮盖关键信息后再上传。",
-          english: "If you need to chop on personal information (e.g. ID info, Passport info) related documents, please don’t upload them into system or upload after covering key information. "
-        }
-      ],
+      noteInfo: [],
       mask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[A-Z]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
       // mask: "a-a-a-9999-9999",
       selectInfo: '',
@@ -240,8 +231,20 @@ class Create extends Component {
 
   }
 
-  getNotes(){
-    
+  getNotes() {
+    axios.get(`${config.url}/notes/0`)
+      .then(res => {
+        let tempNotes = res.data.noteContent.split('%')
+        for (let i = 0; i < tempNotes.length; i++) {
+          let obj = {
+            chinese: tempNotes[i].split('#')[0],
+            english: tempNotes[i].split('#')[1]
+          }
+          this.setState({
+            noteInfo: this.state.noteInfo.concat(obj)
+          })
+        }
+      })
   }
 
   setContractNotes() {
@@ -2212,7 +2215,7 @@ class Create extends Component {
                       <Label>Return Date</Label>
                       <Row />
                       <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                        className="form-control" required dateFormat="yyyy/MM/dd" 
+                        className="form-control" required dateFormat="yyyy/MM/dd"
                         selected={this.state.dateView2}
                         onChange={this.dateChange("returnDate", "dateView2")}
                         minDate={new Date()} maxDate={addDays(new Date(), 30)} />
