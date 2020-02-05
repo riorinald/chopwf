@@ -50,7 +50,8 @@ class DefaultLayout extends Component {
       chopKeeperCompany: localStorage.getItem('chopKeeperCompanyIds').split(','),
       showChopAdmin: false,
       showLicenseAdmin: false,
-      newRoutes: []
+      newRoutes: [],
+      isLoading: false
     }
     this.handleLegalEntity = this.handleLegalEntity.bind(this)
   }
@@ -59,6 +60,14 @@ class DefaultLayout extends Component {
     this.setState({
       legalEntity: _State.legalEntity
     })
+  }
+  
+  componentDidUpdate(prevProps, prevState){
+    if (prevState.isLoading !== this.state.isLoading) {
+      this.setState({
+        isLoading: false
+      })
+    }
   }
 
   changeWorkflow = (value) => {
@@ -78,22 +87,35 @@ class DefaultLayout extends Component {
   }
 
   changeEntity = workflow => event => {
-    if (workflow === "LICENSE") {
-      this.props.history.push(`/${workflow.toLowerCase()}/create`)
-      window.location.reload();
-    }
-    else {
-      this.props.history.push(`/create/${event.target.value}`)
-      window.location.reload();
-    }
-
-    this.setState({
-      legalEntity: event.target.value,
-      application: workflow,
-    },
+    if (workflow === localStorage.getItem('application')){
+      this.setState({
+        legalEntity: event.target.value,
+        application: workflow,
+        isLoading: true
+      },    
       localStorage.setItem("application", workflow),
       localStorage.setItem("legalEntity", event.target.value)
-    )
+      )
+      if (this.props.location.pathname.match('create')===1) {
+        this.props.history.push(`/create/${event.target.value}`)
+      }
+    }
+    else{
+      if (workflow === "LICENSE") {
+        this.props.history.push(`/${workflow.toLowerCase()}/create`)
+      }
+      else {
+        this.props.history.push(`/create/${event.target.value}`)
+      }
+      this.setState({
+        legalEntity: event.target.value,
+        application: workflow,
+        isLoading: true
+      },    
+      localStorage.setItem("application", workflow),
+      localStorage.setItem("legalEntity", event.target.value)
+      )
+    }
   }
 
   toggle = (name) => () => {
@@ -236,6 +258,9 @@ class DefaultLayout extends Component {
               <DefaultHeader state={this.state} toggle={this.toggle} changeEntity={this.changeEntity} changeWorkflow={this.changeWorkflow} onLogout={e => this.signOut(e)} />
             </Suspense>
           </AppHeader>
+          {this.state.isLoading ?
+          <Spinner />
+          :
           <div className="app-body">
             <AppSidebar fixed display="lg">
               <AppSidebarHeader />
@@ -272,12 +297,8 @@ class DefaultLayout extends Component {
                 </Suspense>
               </Container>
             </main>
-            {/* <AppAside fixed>
-            <Suspense fallback={this.loading()}>
-              <DefaultAside />
-            </Suspense>
-          </AppAside> */}
           </div>
+          }
           <AppFooter>
             <Suspense fallback={this.loading()}>
               <DefaultFooter />
