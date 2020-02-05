@@ -12,6 +12,7 @@ import config from '../../config';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import InputMask from "react-input-mask";
+import theme from '../theme.css'
 
 
 class MyPendingTasks extends Component {

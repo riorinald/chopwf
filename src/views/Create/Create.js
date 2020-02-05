@@ -60,6 +60,7 @@ const SelectTable = selectTableHOC(ReactTable);
 
 const animatedComponents = makeAnimated();
 
+
 // var NewFormData = require('formdata-polyfill')
 
 class Create extends Component {
@@ -218,7 +219,7 @@ class Create extends Component {
     this.handleSelectOption = this.handleSelectOption.bind(this);
     this.checkDept = this.checkDept.bind(this);
 
-    this.validator = new SimpleReactValidator({autoForceUpdate: this, locale: 'en'});
+    this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
     this.hideDoc = this.hideDoc.bind(this);
@@ -234,8 +235,13 @@ class Create extends Component {
     this.getData("chopTypes", `${config.url}/choptypes?companyid=` + this.props.legalName);
     // resetMounted.setMounted()
     this.setContractNotes();
+    this.getNotes()
 
 
+  }
+
+  getNotes(){
+    
   }
 
   setContractNotes() {
@@ -1587,6 +1593,32 @@ class Create extends Component {
       pointer = {}
     }
 
+    const getYear = date => {
+      console.log(date.getFullYear())
+      return date.getFullYear()
+    }
+
+    const year = (new Date()).getFullYear();
+    const years = Array.from(new Array(2), (val, index) => index + year);
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
+    const getMonth = date => {
+      let month = date.getMonth()
+      return months[month]
+    }
+
     const reactSelectControl = {
       control: styles => ({ ...styles, borderColor: '#F86C6B', boxShadow: '0 0 0 0px #F86C6B', ':hover': { ...styles[':hover'], borderColor: '#F86C6B' } }),
       menuPortal: base => ({ ...base, zIndex: 9999 })
@@ -1830,7 +1862,7 @@ class Create extends Component {
             : null}
         </InputGroup>
         <Modal color="info" size="xl" toggle={this.hideDoc} isOpen={this.state.showDoc} >
-          <ModalHeader className="center"> Select Documents </ModalHeader>
+          <ModalHeader toggle={this.hideDoc} className="center"> Select Documents  </ModalHeader>
           <ModalBody>
             <SelectTable
               {...this.props}
@@ -2009,6 +2041,46 @@ class Create extends Component {
                       <Label>Effective Period</Label>
                       <DatePicker autoComplete="off" id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        renderCustomHeader={({
+                          date,
+                          changeYear,
+                          changeMonth,
+                          decreaseMonth,
+                          increaseMonth,
+                          prevMonthButtonDisabled,
+                          nextMonthButtonDisabled
+                        }) => (
+                            <div
+                              style={{
+                                margin: 10,
+                                display: "flex",
+                                justifyContent: "center"
+                              }}
+                            >
+                              <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                              <Input
+                                value={getYear(date)}
+                                onChange={({ target: { value } }) => changeYear(value)}
+                                type="select">
+                                {years.map(option => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                changeMonth(months.indexOf(value))
+                              } type="select">
+                                {months.map((option) => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                            </div>
+                          )}
                         peekNextMonth
                         showMonthDropdown
                         showYearDropdown
@@ -2140,7 +2212,7 @@ class Create extends Component {
                       <Label>Return Date</Label>
                       <Row />
                       <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                        className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        className="form-control" required dateFormat="yyyy/MM/dd" 
                         selected={this.state.dateView2}
                         onChange={this.dateChange("returnDate", "dateView2")}
                         minDate={new Date()} maxDate={addDays(new Date(), 30)} />
@@ -2207,7 +2279,7 @@ class Create extends Component {
 
                   {this.state.isLTI
                     ? <FormGroup>
-                      <Label>Document Check By <i className="fa fa-user" /></Label>
+                      <Label>Document Check By <i className="fa fa-user" /> PB7 or above </Label>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect
                         id="docCheckByLTI"

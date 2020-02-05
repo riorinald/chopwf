@@ -18,6 +18,7 @@ import {
 } from 'reactstrap';
 import config from '../../../config';
 import DatePicker from 'react-datepicker';
+import theme from '../../theme.css'
 import "react-datepicker/dist/react-datepicker.css";
 
 class LicenseMyPendingTasks extends Component {

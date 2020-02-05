@@ -14,6 +14,7 @@ import {
   Input,
   Row
 } from 'reactstrap';
+import theme from '../theme.css'
 import ReactTable from "react-table";
 import "react-table/react-table.css"
 // import ChopApplicationDetail from './ChopApplicationDetail';

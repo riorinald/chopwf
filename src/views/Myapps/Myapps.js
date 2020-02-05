@@ -14,6 +14,7 @@ import config from '../../config';
 // import ApplicationDetail from './ApplicationDetail';
 import { Redirect } from 'react-router-dom';
 // import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
+import theme from '../theme.css'
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 

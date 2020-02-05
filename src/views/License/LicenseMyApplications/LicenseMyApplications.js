@@ -19,6 +19,7 @@ import {
 import config from '../../../config';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import theme from '../../theme.css'
 
 
 class LicenseMyApplications extends Component {
