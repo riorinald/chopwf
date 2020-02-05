@@ -21,7 +21,7 @@ import Axios from 'axios';
 import config from '../../config';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import checkAdmin from '../../checkAdmin'
+import Authorize from '../../functions/Authorize'
 
 class ChopApplication extends Component {
   constructor(props) {
@@ -80,18 +80,15 @@ class ChopApplication extends Component {
     // this.dateChange = this.dateChange.bind(this);
   }
   componentDidMount() {
-    checkAdmin.check(this.props.legalName, "CHOP", (cb) => {
-      this.setState({ isAdmin: checkAdmin.isAdmin })
-      if (checkAdmin.isAdmin) {
+    const isAdmin = Authorize.check(this.props.legalName, Authorize.getCookies().chopKeeperCompanyIds)
+      if (isAdmin) {
+        this.setState({ isAdmin: isAdmin })
         this.getApplications(1, this.state.limit);
         this.getData("applicationTypes", `${config.url}/apptypes`);
         this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
         this.getData("departments", `${config.url}/departments`);
         this.getStatusList();
       }
-    })
-
-
   }
 
   async getApplications(pageNumber, pageSize) {

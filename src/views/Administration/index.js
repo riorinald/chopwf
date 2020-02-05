@@ -15,7 +15,7 @@ import selectTableHOC from "react-table/lib/hoc/selectTable";
 import qs from 'qs'
 import PropTypes from 'prop-types';
 import Papa from 'papaparse';
-import checkAdmin from '../../checkAdmin'
+import Authorize from '../../functions/Authorize'
 
 const SelectTable = selectTableHOC(ReactTable);
 
@@ -47,14 +47,17 @@ class Administration extends Component {
     }
 
     componentDidMount() {
-        checkAdmin.check(this.props.legalName, "CHOP", (cb) => {
-            this.setState({ isAdmin: checkAdmin.isAdmin })
-            if (checkAdmin.isAdmin) {
+        const legalEntity = this.props.legalName
+        const adminEntity = Authorize.getCookies().chopKeeperCompanyIds
+
+        const isAdmin = Authorize.check(legalEntity, adminEntity)
+        // const isAdmin = Authorize.check(this.props.legalName, Authorize.getCookies().chopKeeperCompanyIds)
+        
+            if (isAdmin) {
+                this.setState({ isAdmin: isAdmin })
                 this.getData();
                 this.getBranch();
-            }
-        })
-
+        }
     }
 
     getData() {

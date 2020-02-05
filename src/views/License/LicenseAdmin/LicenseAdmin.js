@@ -12,7 +12,7 @@ import config from '../../../config';
 import Papa from 'papaparse';
 import "react-table/react-table.css"
 import ReactTable from "react-table";
-import checkAdmin from '../../../checkAdmin'
+import Authorize from '../../../functions/Authorize' 
 
 
 
@@ -38,9 +38,10 @@ class LicenseAdmin extends Component {
         this.toggleAccordion = this.toggleAccordion.bind(this)
     }
     componentDidMount() {
-        checkAdmin.check(this.props.legalName, "LICENSE", (cb) => {
-            this.setState({ isAdmin: checkAdmin.isAdmin })
-        })
+        const isAdmin = Authorize.check(this.props.legalName, Authorize.getCookies().licenseAdminCompanyIds)
+            if (isAdmin) {
+                this.setState({ isAdmin: isAdmin })
+        }
     }
 
     handleFiles = (event) => {

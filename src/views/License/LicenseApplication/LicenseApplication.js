@@ -19,7 +19,7 @@ import {
 import config from '../../../config';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import checkAdmin from '../../../checkAdmin'
+import Authorize from '../../../functions/Authorize' 
 
 class LicenseApplication extends Component {
     constructor(props) {
@@ -59,19 +59,17 @@ class LicenseApplication extends Component {
     }
 
     componentDidMount() {
-        checkAdmin.check(this.props.legalName, "LICENSE", () => {
-            this.setState({ isAdmin: checkAdmin.isAdmin })
-            if (checkAdmin.isAdmin) {
+        const isAdmin = Authorize.check(this.props.legalName, Authorize.getCookies().licenseAdminCompanyIds)
+            if (isAdmin) {
+                this.setState({ isAdmin: isAdmin })
                 this.getLicenseApplications(this.state.page, this.state.limit)
                 this.getLicenseNames();
                 this.getData('seniorManagers');
-                // this.getSeniorManagers();
                 this.getData('departments');
                 this.getStatusList();
+                // this.getSeniorManagers();
             }
-        })
-
-    }
+   }
 
     async getLicenseNames() {
 
