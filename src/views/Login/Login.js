@@ -15,6 +15,7 @@ import {
     Navbar, NavbarBrand, Nav, NavItem,
     Modal, ModalHeader, ModalBody, ModalFooter
 } from 'reactstrap';
+import Authorize from '../../functions/Authorize'
 
 // const scope="email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly";
 // const client_id="414328176448-a8id4cjtkim0f3ag4nli28hjbcqte4su.apps.googleusercontent.com";
@@ -130,7 +131,7 @@ class Login extends Component {
                     localStorage.setItem('licenseAdminCompanyIds', res.data.licenseAdminCompanyIds)
                     localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
 
-                    this.setCookies(res.data)
+                    Authorize.setCookies(res.data)
 
                     console.log(res.data)
 
@@ -167,13 +168,6 @@ class Login extends Component {
         }
     }
     
-    setCookies(data){
-        let expired = new Date
-        expired.setTime(expired.getTime() + (720*60*1000));
-        console.log(expired)
-        cookies.set('userInfo', data, { path:'clwf', expires:expired });
-    }
-
     redirect(){
         fakeAuth.authenticate(() => {
             this.setState({ redirectToReferrer: true })

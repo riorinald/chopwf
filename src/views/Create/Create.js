@@ -22,7 +22,7 @@ import selectTableHOC from "react-table/lib/hoc/selectTable";
 import PropTypes from "prop-types";
 import LegalEntity from '../../context';
 
-import {getCookies} from '../../functions/Authorize'
+import Authorize from '../../functions/Authorize'
 // import Skeleton from 'react-loading-skeleton';
 
 
@@ -329,7 +329,7 @@ class Create extends Component {
 
   async submitRequest(isSubmitted) {
 
-    const userCookie = getCookies()
+    const userCookie = Authorize.getCookies()
 
     console.log("SUBMIT")
     let useInOffice = "Y"

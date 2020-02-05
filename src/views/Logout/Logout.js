@@ -22,7 +22,7 @@ const Logout = (props) => {
 	const logout = () => setTimeout(setRedirect((redirect+1)),5000)
 
 	localStorage.clear()
-	cookies.remove('userInfo',{path:'clwf'})
+	cookies.remove('userInfo',{path:'/'})
 
 	fakeAuth.signOut(() => {logout()})
 
