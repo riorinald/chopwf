@@ -21,6 +21,7 @@ export const fakeAuth = {
   signOut(cb) {
     this.isAuthenticated = false
     localStorage.clear();
+    cookies.remove('userInfo',{path:'/'})
     setTimeout(cb, 100)
   }
 }
