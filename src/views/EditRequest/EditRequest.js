@@ -431,8 +431,8 @@ class EditRequest extends Component {
 
         //CNIPS
         if (temporary.applicationTypeId === "CNIPS") {
-            temporary.contractSignedByFirstPersonOption = this.getOption(temporary.contractSignedByFirstPerson)
-            temporary.contractSignedBySecondPersonOption = this.getOption(temporary.contractSignedBySecondPerson)
+            temporary.contractSignedByFirstPersonOption = this.getOptionAllUsers(temporary.contractSignedByFirstPerson)
+            temporary.contractSignedBySecondPersonOption = this.getOptionAllUsers(temporary.contractSignedBySecondPerson)
         }
 
         //LTU
@@ -572,13 +572,13 @@ class EditRequest extends Component {
         );
     };
     filterColors1 = (inputValue) => {
-        return this.state.deptHeads.filter(i =>
+        return this.state.usersList.filter(i =>
             i.value !== this.state.taskDetails.contractSignedBySecondPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
         );
     };
 
     filterColors2 = (inputValue) => {
-        return this.state.deptHeads.filter(i =>
+        return this.state.usersList.filter(i =>
             i.value !== this.state.taskDetails.contractSignedByFirstPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
         );
     };
@@ -1493,7 +1493,7 @@ class EditRequest extends Component {
             }, () => console.log(this.state.taskDetails.selectedOption))
         }
 
-        else if (sname === "responsiblePerson" || sname === "pickUpBy") {
+        else if (sname === "responsiblePerson" || sname === "pickUpBy" || sname === "contractSignedByFirstPerson"|| sname === "contractSignedBySecondPerson" ) {
             if (newValue) {
                 this.setState(state => {
                     let taskDetails = this.state.taskDetails
@@ -1526,7 +1526,7 @@ class EditRequest extends Component {
                     })
                     taskDetails[sname] = newValue.value
                     return { taskDetails }
-                }, console.log(this.state.taskDetails.contractSignedByFirstPerson))
+                }, console.log(this.state.taskDetails.contractSignedByFirstPerson)) 
             }
             else {
                 this.setState(state => {
@@ -2590,8 +2590,9 @@ class EditRequest extends Component {
                                                     <Col className="py-2" xs={12} md={6} lg={6}>
                                                         <AsyncSelect
                                                             id="contractSignedByFirstPerson"
+                                                            isClearable
                                                             loadOptions={this.loadOptionsDeptContract1}
-                                                            value={deptHeads[taskDetails.contractSignedByFirstPersonOption]}
+                                                            value={usersList[taskDetails.contractSignedByFirstPersonOption]}
                                                             onChange={this.handleSelectOption("contractSignedByFirstPerson")}
                                                             menuPortalTarget={document.body}
                                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -2605,8 +2606,9 @@ class EditRequest extends Component {
                                                     <Col className="py-2" xs={12} md={6} lg={6}>
                                                         <AsyncSelect
                                                             id="contractSignedBySecondPerson"
+                                                            isClearable
                                                             loadOptions={this.loadOptionsDeptContract2}
-                                                            value={deptHeads[taskDetails.contractSignedBySecondPersonOption]}
+                                                            value={usersList[taskDetails.contractSignedBySecondPersonOption]}
                                                             onChange={this.handleSelectOption("contractSignedBySecondPerson")}
                                                             menuPortalTarget={document.body}
                                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
