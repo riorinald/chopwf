@@ -12,6 +12,7 @@ import config from '../../../config';
 import Papa from 'papaparse';
 import "react-table/react-table.css"
 import ReactTable from "react-table";
+import checkAdmin from '../../../checkAdmin'
 
 
 
@@ -31,9 +32,15 @@ class LicenseAdmin extends Component {
                 exportProfileTo: ""
             },
             newLicenseAdmins: [],
-            updateAdmins: false
+            updateAdmins: false,
+            isAdmin: false
         }
         this.toggleAccordion = this.toggleAccordion.bind(this)
+    }
+    componentDidMount() {
+        checkAdmin.check(this.props.legalName, "LICENSE", (cb) => {
+            this.setState({ isAdmin: checkAdmin.isAdmin })
+        })
     }
 
     handleFiles = (event) => {
@@ -101,8 +108,9 @@ class LicenseAdmin extends Component {
 
     render() {
 
-        const { exportFromDateView, newLicenseAdmins, exportToDateView, exportFromProfileDateView, exportToProfileDateView, collapse } = this.state
-
+        const { isAdmin, exportFromDateView, newLicenseAdmins, exportToDateView, exportFromProfileDateView, exportToProfileDateView, collapse } = this.state
+        if (!isAdmin)
+            return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
         return (
             <div>
                 <h4>License Admin</h4>

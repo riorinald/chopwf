@@ -15,6 +15,7 @@ import selectTableHOC from "react-table/lib/hoc/selectTable";
 import qs from 'qs'
 import PropTypes from 'prop-types';
 import Papa from 'papaparse';
+import checkAdmin from '../../checkAdmin'
 
 const SelectTable = selectTableHOC(ReactTable);
 
@@ -31,7 +32,8 @@ class Administration extends Component {
             editable: false,
             showModal: false,
             accordion: [true, false, false, false],
-            tempFileURL: ""
+            tempFileURL: "",
+            isAdmin: false
         }
         // this.handleChange = this.handleChange.bind(this);
     }
@@ -45,8 +47,14 @@ class Administration extends Component {
     }
 
     componentDidMount() {
-        this.getData();
-        this.getBranch();
+        checkAdmin.check(this.props.legalName, "CHOP", (cb) => {
+            this.setState({ isAdmin: checkAdmin.isAdmin })
+            if (checkAdmin.isAdmin) {
+                this.getData();
+                this.getBranch();
+            }
+        })
+
     }
 
     getData() {
@@ -214,7 +222,7 @@ class Administration extends Component {
 
     render() {
 
-        if (this.props.roleId === "REQUESTOR")
+        if (!this.state.isAdmin)
             return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
 
         return (

@@ -21,7 +21,7 @@ import Axios from 'axios';
 import config from '../../config';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { CSVLink, CSVDownload } from "react-csv";
+import checkAdmin from '../../checkAdmin'
 
 class ChopApplication extends Component {
   constructor(props) {
@@ -69,7 +69,8 @@ class ChopApplication extends Component {
         departmentId: ""
       },
       departments: [],
-      status: []
+      status: [],
+      isAdmin: false
 
     }
     this.getApplications = this.getApplications.bind(this);
@@ -79,12 +80,17 @@ class ChopApplication extends Component {
     // this.dateChange = this.dateChange.bind(this);
   }
   componentDidMount() {
-    this.getApplications(1, this.state.limit);
-    this.getData("applicationTypes", `${config.url}/apptypes`);
-    this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
-    this.getData("departments", `${config.url}/departments`);
+    checkAdmin.check(this.props.legalName, "CHOP", (cb) => {
+      this.setState({ isAdmin: checkAdmin.isAdmin })
+      if (checkAdmin.isAdmin) {
+        this.getApplications(1, this.state.limit);
+        this.getData("applicationTypes", `${config.url}/apptypes`);
+        this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
+        this.getData("departments", `${config.url}/departments`);
+        this.getStatusList();
+      }
+    })
 
-    this.getStatusList();
 
   }
 
@@ -298,9 +304,9 @@ class ChopApplication extends Component {
   }
 
   render() {
-    const { applications, modal, exportFromDateView, exportToDateView, exportDate, validDate, totalPages } = this.state
+    const { isAdmin, applications, modal, exportFromDateView, exportToDateView, exportDate, validDate, totalPages } = this.state
     // let columnData = Object.keys(applications[0])
-    if (this.props.roleId === "REQUESTOR")
+    if (!isAdmin)
       return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
     return (
 
@@ -623,17 +629,6 @@ class ChopApplication extends Component {
               : null
             }
             <Button color="primary" onClick={this.exportLogs} >Export Logs</Button>
-            {/* <CSVLink
-              data={applications}
-              filename={`CHOP${this.props.legalName}${this.getCurrentDate()}.csv`}
-              className="btn btn-primary"
-              target="_blank"
-              onClick={() => {
-                return this.exportLogs()
-              }}
-            >
-              Export Logs </CSVLink> */}
-            {/* <Button color="primary" onClick={this.exportLogs}>Export Logs</Button>{' '} */}
             <Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
           </ModalFooter>
         </Modal>

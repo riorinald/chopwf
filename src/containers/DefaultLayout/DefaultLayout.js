@@ -252,7 +252,7 @@ class DefaultLayout extends Component {
               <Container fluid >
                 <Suspense fallback={this.loading()}>
                   <Switch>
-                    {this.getRoute(localStorage.getItem('application')).map((route, idx) => {
+                    {routes.map((route, idx) => {
                       return route.component ? (
                         <Route
                           key={idx}
@@ -266,8 +266,7 @@ class DefaultLayout extends Component {
                               {...props} routes={route.routes} />
                           )} />
                       ) : (null);
-                    })
-                    }
+                    })}
                     <Redirect from="/" to={{ pathname: "/404" }} />
                   </Switch>
                 </Suspense>

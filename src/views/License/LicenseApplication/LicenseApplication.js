@@ -19,6 +19,7 @@ import {
 import config from '../../../config';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import checkAdmin from '../../../checkAdmin'
 
 class LicenseApplication extends Component {
     constructor(props) {
@@ -49,7 +50,8 @@ class LicenseApplication extends Component {
             seniorManagers: [],
             departments: [],
             licenseNames: [],
-            statusName: []
+            statusName: [],
+            isAdmin: false
         }
         this.onFilteredChangeCustom = this.onFilteredChangeCustom.bind(this)
         this.getLicenseApplications = this.getLicenseApplications.bind(this)
@@ -57,12 +59,18 @@ class LicenseApplication extends Component {
     }
 
     componentDidMount() {
-        this.getLicenseApplications(this.state.page, this.state.limit)
-        this.getLicenseNames();
-        this.getData('seniorManagers');
-        // this.getSeniorManagers();
-        this.getData('departments');
-        this.getStatusList();
+        checkAdmin.check(this.props.legalName, "LICENSE", () => {
+            this.setState({ isAdmin: checkAdmin.isAdmin })
+            if (checkAdmin.isAdmin) {
+                this.getLicenseApplications(this.state.page, this.state.limit)
+                this.getLicenseNames();
+                this.getData('seniorManagers');
+                // this.getSeniorManagers();
+                this.getData('departments');
+                this.getStatusList();
+            }
+        })
+
     }
 
     async getLicenseNames() {
@@ -111,7 +119,7 @@ class LicenseApplication extends Component {
 
     async getStatusList() {
         const res = await Axios.get(`${config.url}/statuses?category=license`, { headers: { Pragma: 'no-cache' } })
-        console.log(res.data)
+        // console.log(res.data)
         this.setState({ statusName: res.data })
     }
 
@@ -208,7 +216,9 @@ class LicenseApplication extends Component {
     };
 
     render() {
-        const { licenseApplication, licenseNames, seniorManagers, departments, statusName, returnDateView, createdDateView, totalPages } = this.state
+        const { isAdmin, licenseApplication, licenseNames, seniorManagers, departments, statusName, returnDateView, createdDateView, totalPages } = this.state
+        if (!isAdmin)
+            return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
         return (
             <div className="animated fadeIn" >
                 <h4>License Applications</h4>

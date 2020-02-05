@@ -28,7 +28,7 @@ const LicenseHelp = React.lazy(() => import('./views/License/LicenseHelp'));
 
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
-const routesRequestor = [
+const routes = [
   // { path: '/', exact: true, name: 'Home' },
   // { path: '/create', name: 'Create', component: Redirect},
   // { path: '/MBAFC/create', name: 'Create', component: Create},
@@ -39,46 +39,7 @@ const routesRequestor = [
   { path: '/create', exact: true, name: 'Create', component: Redirect },
   { path: '/create/:company', exact: true, name: 'Create', component: Create },
   { path: '/myapps', exact: true, name: 'Myapps', component: Myapps },
-  { path: '/:page/details', exact: true, name: 'Details', component: TaskDetails },
-
-  { path: '/mypendingtask', exact: true, name: 'MyPendingTasks', component: MyPendingTasks },
-  // { path: '/dashboard', name: 'Dashboard', component: Dashboard },
-  { path: '/instruction', exact: true, name: 'Insctructions', component: Instructions },
-  { path: '/help', exact: true, name: 'Help', component: Help },
-  { path: '/login', name: 'Login', component: Login },
-  { path: '/:page/editrequest', exact: true, name: 'EditRequest', component: EditRequest },
-  ,
-  { path: '/404', name: 'page404', component: page404 },
-
-  { path: '/license/create', exact: true, name: 'Create Request', component: LicenseCreate },
-  { path: '/license/myapplication', exact: true, name: 'My Application', component: LicenseMyApplications },
-  // { path: '/license/myapplication/details', exact:true, name: 'My Application', component: LicenseApplicationDetail },
-  { path: '/license/mypendingtask', exact: true, name: 'My Pending Task', component: LicenseMyPendingTasks },
-
-  // { path: '/license/admin', exact: true, name: 'License Admin', component: LicenseAdmin },
-  { path: '/license/:page/details', exact: true, name: 'Task Details', component: LicenseTaskDetails },
-  { path: '/license/:page/edit', exact: true, name: 'Edit Details', component: LicenseEditRequest },
-  { path: '/license/instruction', exact: true, name: 'License Instruction', component: LicenseInstruction },
-  { path: '/license/help', exact: true, name: 'License Help', component: LicenseHelp },
-
-
-
-
-
-];
-
-const routesChopAdmin = [
-  // { path: '/', exact: true, name: 'Home' },
-  // { path: '/create', name: 'Create', component: Redirect},
-  // { path: '/MBAFC/create', name: 'Create', component: Create},
-  // { path: '/MBLC/create', name: 'Create', component: Create},
-  // { path: '/MBIA/create', name: 'Create', component: Create},
-  // { path: '/DMT/create', name: 'Create', component: Create},
-
-  { path: '/create', exact: true, name: 'Create', component: Redirect },
-  { path: '/create/:company', exact: true, name: 'Create', component: Create },
-  { path: '/myapps', exact: true, name: 'Myapps', component: Myapps },
-  { path: '/:page/details', exact: true, name: 'Details', component: TaskDetails },
+  { path: '/:page/details/:appid', exact: true, name: 'Details', component: TaskDetails },
 
   { path: '/mypendingtask', exact: true, name: 'MyPendingTasks', component: MyPendingTasks },
   { path: '/chopapps', name: 'ChopApplication', component: ChopApps },
@@ -87,57 +48,24 @@ const routesChopAdmin = [
   { path: '/help', exact: true, name: 'Help', component: Help },
   { path: '/login', name: 'Login', component: Login },
   { path: '/:page/editrequest', exact: true, name: 'EditRequest', component: EditRequest },
-  { path: '/404', name: 'page404', component: page404 },
-  { path: '/license/create', exact: true, name: 'Create Request', component: LicenseCreate },
-  { path: '/license/myapplication', exact: true, name: 'My Application', component: LicenseMyApplications },
-  // { path: '/license/myapplication/details', exact:true, name: 'My Application', component: LicenseApplicationDetail },
-  { path: '/license/mypendingtask', exact: true, name: 'My Pending Task', component: LicenseMyPendingTasks },
   { path: '/chopadmin', exact: true, nme: 'Administration', component: Administration },
-  // { path: '/license/admin', exact: true, name: 'License Admin', component: LicenseAdmin },
-  { path: '/license/:page/details', exact: true, name: 'Task Details', component: LicenseTaskDetails },
-  { path: '/license/:page/edit', exact: true, name: 'Edit Details', component: LicenseEditRequest },
-  { path: '/license/instruction', exact: true, name: 'License Instruction', component: LicenseInstruction },
-  { path: '/license/help', exact: true, name: 'License Help', component: LicenseHelp },
-
-
-
-
-
-];
-
-const routesLicenseAdmin = [
-  // { path: '/', exact: true, name: 'Home' },
-  // { path: '/create', name: 'Create', component: Redirect},
-  // { path: '/MBAFC/create', name: 'Create', component: Create},
-  // { path: '/MBLC/create', name: 'Create', component: Create},
-  // { path: '/MBIA/create', name: 'Create', component: Create},
-  // { path: '/DMT/create', name: 'Create', component: Create},
-
-  { path: '/create', exact: true, name: 'Create', component: Redirect },
-  { path: '/create/:company', exact: true, name: 'Create', component: Create },
-  { path: '/myapps', exact: true, name: 'Myapps', component: Myapps },
-  { path: '/:page/details', exact: true, name: 'Details', component: TaskDetails },
-
-  { path: '/mypendingtask', exact: true, name: 'MyPendingTasks', component: MyPendingTasks },
-  // { path: '/dashboard', name: 'Dashboard', component: Dashboard },
-  { path: '/instruction', exact: true, name: 'Insctructions', component: Instructions },
-  { path: '/help', exact: true, name: 'Help', component: Help },
-  { path: '/login', name: 'Login', component: Login },
-  { path: '/:page/editrequest', exact: true, name: 'EditRequest', component: EditRequest },
-  { path: '/license/admin-apps', exact: true, name: 'License Application', component: LicenseApplication },
   { path: '/404', name: 'page404', component: page404 },
+
   { path: '/license/create', exact: true, name: 'Create Request', component: LicenseCreate },
   { path: '/license/myapplication', exact: true, name: 'My Application', component: LicenseMyApplications },
   // { path: '/license/myapplication/details', exact:true, name: 'My Application', component: LicenseApplicationDetail },
   { path: '/license/mypendingtask', exact: true, name: 'My Pending Task', component: LicenseMyPendingTasks },
-  // { path: '/chopadmin', exact: true, nme: 'Administration', component: Administration },
+  { path: '/license/admin-apps', exact: true, name: 'License Application', component: LicenseApplication },
   { path: '/license/admin', exact: true, name: 'License Admin', component: LicenseAdmin },
   { path: '/license/:page/details', exact: true, name: 'Task Details', component: LicenseTaskDetails },
   { path: '/license/:page/edit', exact: true, name: 'Edit Details', component: LicenseEditRequest },
   { path: '/license/instruction', exact: true, name: 'License Instruction', component: LicenseInstruction },
   { path: '/license/help', exact: true, name: 'License Help', component: LicenseHelp },
-];
 
-const routes = { routesRequestor, routesChopAdmin, routesLicenseAdmin }
+
+
+
+
+];
 
 export default routes;
