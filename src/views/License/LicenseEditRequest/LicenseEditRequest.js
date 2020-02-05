@@ -37,6 +37,8 @@ import config from '../../../config'
 import axios from 'axios'
 import makeAnimated from 'react-select/animated';
 import Swal from 'sweetalert2';
+import Authorize from '../../../functions/Authorize'
+
 
 
 
@@ -143,7 +145,7 @@ class LicenseEditRequest extends Component {
 
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem('userId')}`,
+        await Axios.get(`${config.url}/licenses/${taskId}?userId=${Authorize.getCookies().userId}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let temp = res.data

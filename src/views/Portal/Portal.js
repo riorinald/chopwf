@@ -13,7 +13,8 @@ import {
 import LegalEntity from '../../context';
 import Axios from 'axios';
 import config from '../../config';
-import UserInfo from '../../context/UserInfo'
+import Authorize from '../../functions/Authorize'
+
 
 const DefaultFooter = React.lazy(() => import('../../containers/DefaultLayout/DefaultFooter'));
 
@@ -37,7 +38,7 @@ class Portal extends Component {
 
   async getUserDetails() {
     this.setState({ loading: true })
-    await Axios.get(`${config.url}/users/${localStorage.getItem('userId')}`,{ headers: { Pragma: 'no-cache' } })
+    await Axios.get(`${config.url}/users/${Authorize.getCookies().userId}`,{ headers: { Pragma: 'no-cache' } })
 		.then(res => {
 			this.setState({ userDetails: res.data, loading: false })
 			switch(res.data.companyCode){

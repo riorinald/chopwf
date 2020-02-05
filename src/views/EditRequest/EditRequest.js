@@ -40,6 +40,8 @@ import PropTypes from "prop-types";
 import SimpleReactValidator from 'simple-react-validator';
 import LegalEntity from '../../context';
 import TextareaAutosize from 'react-autosize-textarea';
+import Authorize from '../../functions/Authorize'
+
 
 
 
@@ -234,7 +236,7 @@ class EditRequest extends Component {
 
     async getDocCheckBy(deptId, teamId, chopTypeId, callback) {
         console.log("getting lvl4 users")
-        await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&choptypeid=${chopTypeId}&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`,
+        await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&choptypeid=${chopTypeId}&companyid=${this.props.legalName}&userid=${Authorize.getCookies().userId}`,
             { headers: { Pragma: 'no-cache' } }).then(res => {
                 let arr = []
                 for (let i = 0; i < res.data.length; i++) {
@@ -250,7 +252,7 @@ class EditRequest extends Component {
         this.setState({ deptHeads: [] })
         let url = ""
         if (category === "deptHeads") {
-            url = `${config.url}/users?category=normal&companyid=${this.props.legalName}&userid=${localStorage.getItem('userId')}`
+            url = `${config.url}/users?category=normal&companyid=${this.props.legalName}&userid=${Authorize.getCookies().userId}`
         }
         else {
             url = `${config.url}/users?category=normal&companyid=${this.props.legalName}`
@@ -416,7 +418,7 @@ class EditRequest extends Component {
 
     async getTaskDetails(id) {
         this.setState({ loading: true })
-        const response = await Axios.get(`${config.url}/tasks/${id}?userid=${localStorage.getItem('userId')}`, { headers: { Pragma: 'no-cache' } })
+        const response = await Axios.get(`${config.url}/tasks/${id}?userid=${Authorize.getCookies().userId}`, { headers: { Pragma: 'no-cache' } })
         let temporary = response.data
         if (temporary.departmentId !== "") {
             this.getTeams(temporary.departmentId)
@@ -1861,7 +1863,7 @@ class EditRequest extends Component {
 
         let returnDate = this.state.taskDetails.returnDate ? this.state.taskDetails.returnDate : ""
 
-        let userId = localStorage.getItem('userId')
+        let userId = Authorize.getCookies().userId
         let postReq = new FormData();
         postReq.append("UserId", userId);
         postReq.append("EmployeeNum", this.state.taskDetails.requestorUser.employeeNum);

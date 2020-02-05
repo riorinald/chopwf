@@ -6,6 +6,8 @@ import { fakeAuth } from '../../App';
 import { withRouter } from 'react-router-dom';
 import Axios from 'axios';
 import config from '../../config';
+import Authorize from '../../functions/Authorize'
+
 
 const propTypes = {
   children: PropTypes.node,
@@ -41,7 +43,7 @@ class DefaultHeader extends Component {
 
   async getUserDetails() {
     this.setState({ loading: true })
-    await Axios.get(`${config.url}/users/${localStorage.getItem('userId')}`,{ headers: { Pragma: 'no-cache' } }).then(res => {
+    await Axios.get(`${config.url}/users/${Authorize.getCookies().userId}`,{ headers: { Pragma: 'no-cache' } }).then(res => {
       this.setState({ userDetails: res.data, loading: false })
     })
   }

@@ -16,6 +16,8 @@ import Select from 'react-select'
 import Swal from 'sweetalert2';
 import AsyncSelect from 'react-select/async';
 import makeAnimated from 'react-select/animated';
+import Authorize from '../../../functions/Authorize'
+
 
 
 const animatedComponents = makeAnimated();
@@ -90,7 +92,7 @@ class LicenseCreate extends Component {
     //Get User Infromation from database
     async getUserData() {
         let ticket = localStorage.getItem('ticket')
-        let userId = localStorage.getItem('userId')
+        let userId = Authorize.getCookies().userId
         const res = await axios.get(`${config.url}/users/` + userId, { headers: { Pragma: 'no-cache', 'ticket': ticket } })
         this.setState(state => {
             let formData = this.state.formData

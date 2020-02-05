@@ -28,6 +28,8 @@ import {
 import { tsExpressionWithTypeArguments } from '@babel/types';
 import Axios from 'axios';
 import config from '../../../config';
+import Authorize from '../../../functions/Authorize'
+
 
 class LicenseInstruction extends Component {
     constructor(props) {
@@ -135,7 +137,7 @@ class LicenseInstruction extends Component {
         newFormData.append("sectionData", b64)
         newFormData.append("documentFileName", this.state.documentName)
 
-        await Axios.put(`${config.url}/userInstructions/license/${sectionId}/${localStorage.getItem('userId')}`, newFormData)
+        await Axios.put(`${config.url}/userInstructions/license/${sectionId}/${Authorize.getCookies().userId}`, newFormData)
             .then(res => {
                 cb(res.data)
             })

@@ -93,7 +93,7 @@ class ChopApplication extends Component {
 
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: !this.state.loading })
-    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`,
+    await Axios.get(`${config.url}/tasks?category=all&userid=${Authorize.getCookies().userId}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.pageCount === 0 ? 1 : res.data.pageCount })
         console.log(res.data)
@@ -274,10 +274,10 @@ class ChopApplication extends Component {
     let to = this.state.exportDate.exportTo
     console.log(from, to)
     if (from !== "" && to !== "") {
-      let url = `${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${localStorage.getItem('userId')}`
+      let url = `${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${Authorize.getCookies().userId}`
       window.open(url, "_blank")
       console.log(`Exporting Logs from ${from} to ${to}`)
-      // await Axios.get(`${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${localStorage.getItem('userId')}`)
+      // await Axios.get(`${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${Authorize.getCookies().userId}`)
       //   .then(res => {
       //     // console.log(res.data.fileContents)
       //   })

@@ -16,6 +16,8 @@ import { Redirect } from 'react-router-dom';
 // import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import Authorize from '../../functions/Authorize'
+
 
 class Myapps extends Component {
   constructor(props) {
@@ -34,7 +36,7 @@ class Myapps extends Component {
       limit: 10,
 
 
-      username: localStorage.getItem('userId'),
+      username: Authorize.getCookies().userId,
 
       applications: [],
       applicationDetail: [],

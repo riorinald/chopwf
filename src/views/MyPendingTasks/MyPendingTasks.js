@@ -12,6 +12,8 @@ import config from '../../config';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import InputMask from "react-input-mask";
+import Authorize from '../../functions/Authorize'
+
 
 
 class MyPendingTasks extends Component {
@@ -137,7 +139,7 @@ class MyPendingTasks extends Component {
 
     async getPendingTasks(pageNumber, pageSize) {
         this.setState({ loading: !this.state.loading })
-        let userId = localStorage.getItem('userId')
+        let userId = Authorize.getCookies().userId
         // let userId = "josh@otds.admin"
         let url = `${config.url}/tasks?category=pending&companyid=${this.props.legalName}&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`
         const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } })

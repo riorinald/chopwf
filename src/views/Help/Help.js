@@ -13,6 +13,8 @@ import {
 
 import Axios from 'axios';
 import config from '../../config'
+import Authorize from '../../functions/Authorize'
+
 
 
 class Help extends Component {
@@ -146,7 +148,7 @@ class Help extends Component {
         let postData = new FormData()
         postData.append('sectionData', details)
         postData.append('sectionId', `${name}${index}`)
-        await Axios.post(`${config.url}/helps/chop/${localStorage.getItem('userId')}`, postData)
+        await Axios.post(`${config.url}/helps/chop/${Authorize.getCookies().userId}`, postData)
             .then(result => {
                 // console.log(result.data)
             })
@@ -158,7 +160,7 @@ class Help extends Component {
     async updateChopKeeperDetails(details, index, name) {
         let postData = new FormData()
         postData.append('sectionData', details)
-        await Axios.put(`${config.url}/helps/chop/${name}${index}/${localStorage.getItem('userId')}`, postData)
+        await Axios.put(`${config.url}/helps/chop/${name}${index}/${Authorize.getCookies().userId}`, postData)
             .then(result => {
                 // console.log(result.data)
             })
@@ -168,7 +170,7 @@ class Help extends Component {
     }
 
     async deleteChopKeeper(index, name) {
-        await Axios.delete(`${config.url}/helps/chop/${name}${index}/${localStorage.getItem('userId')}`)
+        await Axios.delete(`${config.url}/helps/chop/${name}${index}/${Authorize.getCookies().userId}`)
             .then(result => {
                 console.log(result.data)
             })

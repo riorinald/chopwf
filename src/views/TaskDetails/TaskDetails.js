@@ -14,8 +14,10 @@ import config from '../../config';
 import Swal from 'sweetalert2';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
+import Authorize from '../../functions/Authorize'
 import { STU, LTU, LTI, CNIPS } from './viewDetails';
 import { BSTU, BLTU, BLTI, BCNIPS } from './viewBranchDetails';
+
 // import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
 
 
@@ -53,7 +55,7 @@ class TaskDetails extends Component {
 
     async getTaskDetails(id) {
         this.setState({ loading: true })
-        let userId = localStorage.getItem('userId')
+        let userId = Authorize.getCookies().userId
         await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`, { headers: { Pragma: 'no-cache' } }).then(res => {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
             this.setState({ taskDetails: res.data, appType: res.data.applicationTypeId, loading: false })
@@ -112,7 +114,7 @@ class TaskDetails extends Component {
 
     approve(action) {
         let data = {
-            userId: localStorage.getItem('userId'),
+            userId: Authorize.getCookies().userId,
             comments: this.state.comments
         }
 

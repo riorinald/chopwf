@@ -13,6 +13,8 @@ import {
 
 import Axios from 'axios';
 import config from '../../../config'
+import Authorize from '../../../functions/Authorize'
+
 
 
 class LicenseHelp extends Component {
@@ -146,7 +148,7 @@ class LicenseHelp extends Component {
         let postData = new FormData()
         postData.append('sectionData', details)
         postData.append('sectionId', `${name}${index}`)
-        await Axios.post(`${config.url}/helps/license/${localStorage.getItem('userId')}`, postData)
+        await Axios.post(`${config.url}/helps/license/${Authorize.getCookies().userId}`, postData)
             .then(result => {
                 // console.log(result.data)
             })
@@ -158,7 +160,7 @@ class LicenseHelp extends Component {
     async updateChopKeeperDetails(details, index, name) {
         let postData = new FormData()
         postData.append('sectionData', details)
-        await Axios.put(`${config.url}/helps/license/${name}${index}/${localStorage.getItem('userId')}`, postData)
+        await Axios.put(`${config.url}/helps/license/${name}${index}/${Authorize.getCookies().userId}`, postData)
             .then(result => {
                 // console.log(result.data)
             })

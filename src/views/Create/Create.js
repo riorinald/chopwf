@@ -588,7 +588,7 @@ class Create extends Component {
 
   async getUserData() {
     let ticket = localStorage.getItem('ticket')
-    let userId = localStorage.getItem('userId')
+    let userId = Authorize.getCookies().userId
     // let userId = "josh@otds.admin"
     // let userId = "daniel@otds.admin"
     await axios.get(`${config.url}/users/` + userId, { headers: { Pragma: 'no-cache', 'ticket': ticket } })

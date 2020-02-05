@@ -7,6 +7,7 @@ import config from '../../config';
 import qs from 'querystring';
 import JWT from 'jsonwebtoken';
 import Cookies from 'universal-cookie';
+import Authorize from '../../functions/Authorize'
 
 
 const scope ="openid"
@@ -55,7 +56,7 @@ class Authenticated extends Component {
       }
       else if (param.workflow && param.taskid && param.userid){
         console.log(param)
-        if(localStorage.getItem('userId') === param.userid){
+        if(Authorize.getCookies().userId === param.userid){
           if(param.workflow === 'license'){
             this.props.history.push({
               pathname:`${param.workflow}/mypendingtask/details/`,
