@@ -97,7 +97,7 @@ class LicenseEditRequest extends Component {
     }
 
     async getSeniorManagers() {
-        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${Authorize.getCookies().userId}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let arr1 = []
@@ -406,7 +406,7 @@ class LicenseEditRequest extends Component {
 
     submitRequest(isSubmitted) {
         let postReq = new FormData();
-        postReq.append("UserId", localStorage.getItem("userId"));
+        postReq.append("UserId", Authorize.getCookies().userId);
         postReq.append("EmployeeNumber", this.state.taskDetails.employeeNum);
         postReq.append("TelephoneNumber", this.state.taskDetails.telephoneNum);
         postReq.append("CompanyId", this.props.legalName);

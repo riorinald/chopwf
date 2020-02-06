@@ -14,6 +14,8 @@ import {
 import config from '../../../config';
 import Swal from 'sweetalert2';
 import TextareaAutosize from 'react-autosize-textarea';
+import Authorize from '../../../functions/Authorize'
+
 
 
 class LicenseApplicationDetail extends Component {
@@ -52,7 +54,7 @@ class LicenseApplicationDetail extends Component {
 
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem("userId")}`, { headers: { Pragma: 'no-cache' } })
+        await Axios.get(`${config.url}/licenses/${taskId}?userId=${Authorize.getCookies().userId}`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 console.log(res.data)
                 let currentStatusArr = res.data.allStages.filter(stage => stage.state === "CURRENT")
@@ -184,7 +186,7 @@ class LicenseApplicationDetail extends Component {
             valid = true
         }
         let postReq = new FormData();
-        postReq.append("UserId", localStorage.getItem("userId"));
+        postReq.append("UserId", Authorize.getCookies().userId);
         postReq.append("Comments", this.state.comments);
         postReq.append("ReturnWay", this.state.deliverWay);
         postReq.append("ExpressNumber", this.state.expressNumber);
