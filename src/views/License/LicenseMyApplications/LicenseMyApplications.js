@@ -17,6 +17,7 @@ import {
     Collapse
 } from 'reactstrap';
 import config from '../../../config';
+import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import theme from '../../theme.css'
@@ -39,7 +40,7 @@ class LicenseMyApplications extends Component {
                 plannedReturnDate: "",
                 createdDate: "",
                 createdByName: "",
-                departmentId: ""
+                departmentName: ""
             },
             totalPages: 1,
             page: 1,
@@ -122,7 +123,7 @@ class LicenseMyApplications extends Component {
         const { searchOption } = this.state
         console.log(searchOption)
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentId=${searchOption.departmentId}&page=${page}&pageSize=${pageSize}`,
+        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentname=${searchOption.departmentName}&page=${page}&pageSize=${pageSize}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 this.setState({ applications: res.data.licenses, totalPages: res.data.pageCount, loading: false })
@@ -218,9 +219,9 @@ class LicenseMyApplications extends Component {
     dateChange = (name, view) => date => {
         let dates = ""
         if (date) {
-            let month = date.getMonth()
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
-        }
+      let tempDate = format(date, "yyyy-MM-dd").split('T')[0];
+      dates = tempDate.replace(/-/g, "")
+    }
         this.setState({ [view]: date });
         this.setState(state => {
             let searchOption = this.state.searchOption
@@ -287,20 +288,6 @@ class LicenseMyApplications extends Component {
                                     accessor: "departmentName",
                                     width: this.getColumnWidth('departmentName', "Department"),
                                     Cell: this.renderEditable,
-                                    filterMethod: (filter, row) => {
-                                        return row[filter.id] === filter.value;
-                                    },
-                                    Filter: ({ filter, onChange }) => {
-                                        return (
-                                            <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
-                                                <option value="" >Please Select a department</option>
-                                                {this.state.departments.map((dept, index) =>
-                                                    <option key={index} value={dept.deptId} >{dept.deptName}</option>
-                                                )}
-                                            </Input>
-
-                                        )
-                                    },
                                     style: { textAlign: "center" },
                                 },
                                 {
