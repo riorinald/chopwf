@@ -58,14 +58,16 @@ class Authenticated extends Component {
         const userInfo = cookies.get('userInfo', {path:'/'})
         if(userInfo && userInfo.userId === param.userid){
           if(param.workflow === 'license'){
-            localStorage.setItem('legalEntity', param.companyid)
+            localStorage.setItem('legalEntity', param.companyid.toUpperCase())
+            localStorage.setItem('application', param.workflow.toUpperCase())
             this.props.history.push({
               pathname:`${param.workflow}/mypendingtask/details/`,
               state:{redirected:true, taskId:param.licenseid}
             })
           }
           else{
-            localStorage.setItem('legalEntity', param.companyid)
+            localStorage.setItem('legalEntity', param.companyid.toUpperCase())
+            localStorage.setItem('application', param.workflow.toUpperCase())
             this.props.history.push({
               pathname:`/mypendingtask/details/`,
               state:{redirected:true, taskId:param.taskid}
