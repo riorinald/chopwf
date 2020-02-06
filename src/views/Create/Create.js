@@ -836,7 +836,7 @@ class Create extends Component {
     }
 
     else if (name === "numOfPages") {
-      if (value.length > 9) {
+      if (/[a-z]/i.test(value) | value.length > 9) {
         value = this.state.numOfPages
         this.setState({ invalidNumberOfPages: true })
         event.target.className = "is-invalidform-control"
