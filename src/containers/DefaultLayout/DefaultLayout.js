@@ -35,7 +35,7 @@ class DefaultLayout extends Component {
     if (e) {
       e.preventDefault()
     }
-    this.props.history.push('/login')
+    this.props.history.push('/logout')
   }
 
   constructor(props) {
@@ -249,7 +249,6 @@ class DefaultLayout extends Component {
 
 
   render() {
-    let { newRoutes } = this.state
     return (
       <div className="app">
         <LegalEntity.Provider value={{ legalEntity: label[this.state.legalEntity] }}>

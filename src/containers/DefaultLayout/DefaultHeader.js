@@ -19,7 +19,7 @@ const AuthButton = withRouter(({ history }) => (
 
   fakeAuth.isAuthenticated
     // ? <Button onClick={() => { fakeAuth.signout(() => history.push('/')) }}>Sign out</Button>
-    ? <DropdownItem onClick={() => { fakeAuth.signOut(() => history.push('/')) }} ><i className="fa fa-lock" ></i> Logout</DropdownItem>
+    ? <DropdownItem onClick={() => { fakeAuth.signOut(() => history.push('/logout')) }} ><i className="fa fa-lock" ></i> Logout</DropdownItem>
     : ""
 )
 )
