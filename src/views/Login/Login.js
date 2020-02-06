@@ -137,17 +137,19 @@ class Login extends Component {
 
                     if (res.data.status === "success") {
                         let param = qs.parse(this.props.location.search.slice(1))
-                        if(param.workflow && param.taskid && param.userid){
+                        if(param.workflow && param.companyid && param.userid){
                             if(param.workflow === 'license'){
                                 localStorage.setItem('application', param.workflow.toUpperCase())
+                                localStorage.setItem('legalEntity', param.companyid.toUpperCase())
                                 fakeAuth.authenticate(() => {});
                                 this.props.history.push({
                                   pathname:`${param.workflow}/mypendingtask/details/`,
-                                  state:{redirected:true, taskId:param.taskid}
+                                  state:{redirected:true, taskId:param.licenseid}
                                 })
                               }
                               else{
                                 localStorage.setItem('application', param.workflow.toUpperCase())
+                                localStorage.setItem('legalEntity', param.companyid.toUpperCase())
                                 fakeAuth.authenticate(() => {});
                                 this.props.history.push({
                                   pathname:`/mypendingtask/details/`,

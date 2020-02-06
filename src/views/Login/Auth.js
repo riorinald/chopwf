@@ -41,57 +41,60 @@ class Authenticated extends Component {
       this.exchangeToken(code);
     }
     else {
-      if (param.session){
-        this.setState({
-            loading:false,
-            title: 'Session Expired',
-            info: "Your Session is expired. Please do relogin",
-            color: "danger",
-            isExpired:true,
-            timer: 10,
-            redirectTo: '/login'+this.props.location.search    
-          })
-          localStorage.clear()
-          this.countDown()
+      if(param.session === 'expired'){
+      this.setState({
+          loading:false,
+          title: 'Session Expired',
+          info: "Your Session is expired. Please do relogin",
+          color: "danger",
+          isExpired:true,
+          timer: 10,
+          redirectTo: '/login'+this.props.location.search    
+        })
+        localStorage.clear()
+        this.countDown()
       }
-      else if (param.workflow && param.taskid && param.userid){
-        console.log(param)
-        if(Authorize.getCookies().userId === param.userid){
+      else if (param.workflow && param.companyid && param.userid){
+        const userInfo = cookies.get('userInfo', {path:'/'})
+        if(userInfo && userInfo.userId === param.userid){
           if(param.workflow === 'license'){
+            localStorage.setItem('legalEntity', param.companyid)
             this.props.history.push({
               pathname:`${param.workflow}/mypendingtask/details/`,
-              state:{redirected:true, taskId:param.taskid}
+              state:{redirected:true, taskId:param.licenseid}
             })
           }
           else{
-            console.log(param)
+            localStorage.setItem('legalEntity', param.companyid)
             this.props.history.push({
               pathname:`/mypendingtask/details/`,
               state:{redirected:true, taskId:param.taskid}
             })
-        }
-      }
-      else{
-        if(param.workflow){
-          this.setState({
-            loading:false,
-            title: 'You are not Authenticated',
-            info: "Login required",
-            color: "danger",
-            redirectTo: '/login'+this.props.location.search        
-          })
-          this.countDown()
-        }
-        else {
-          this.setState({
-            loading:false,
-            title: 'You are not Authenticated',
-            info: "Login required",
-            color: "danger",
-            redirectTo: '/login'
-          })
-          this.countDown()
           }
+        }
+        else{
+          if(param.workflow && userInfo){
+            this.setState({
+              loading:false,
+              title: 'You are not Authorized',
+              info: "Session user does not match with the redirect URL",
+              isExpired: false,
+              color: "danger",
+              redirectTo: '/login' + this.props.location.search        
+            })
+            cookies.remove('userInfo',{path:'/'})
+            this.countDown()
+          }
+          else {
+            this.setState({
+              loading:false,
+              title: 'You are not Authenticated',
+              info: "Login required to see the apllication details",
+              color: "danger",
+              redirectTo: '/login' + this.props.location.search 
+            })
+            this.countDown()
+            }
         }
       }
       else {
@@ -213,6 +216,8 @@ class Authenticated extends Component {
                     color: "success",
                     redirectTo:'/portal'
                   })
+
+                  Authorize.setCookies(res.data)
                   this.countDown()
                   this.redirect()
                 }
