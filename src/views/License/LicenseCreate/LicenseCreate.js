@@ -591,7 +591,7 @@ class LicenseCreate extends Component {
                                 <FormGroup onChange={this.handleChange("deliverWay")} >
                                     <Label>Deliver Way</Label>
                                     <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                    <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number" />
+                                    <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express" />
                                     {formData.documentType === "ORIGINAL"
                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', formData.deliverWay, 'required')}</small>
                                         : null}

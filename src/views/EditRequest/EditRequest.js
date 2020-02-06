@@ -433,8 +433,8 @@ class EditRequest extends Component {
 
         //CNIPS
         if (temporary.applicationTypeId === "CNIPS") {
-            temporary.contractSignedByFirstPersonOption = this.getOption(temporary.contractSignedByFirstPerson)
-            temporary.contractSignedBySecondPersonOption = this.getOption(temporary.contractSignedBySecondPerson)
+            temporary.contractSignedByFirstPersonOption = this.getOptionAllUsers(temporary.contractSignedByFirstPerson)
+            temporary.contractSignedBySecondPersonOption = this.getOptionAllUsers(temporary.contractSignedBySecondPerson)
         }
 
         //LTU
@@ -574,13 +574,13 @@ class EditRequest extends Component {
         );
     };
     filterColors1 = (inputValue) => {
-        return this.state.deptHeads.filter(i =>
+        return this.state.usersList.filter(i =>
             i.value !== this.state.taskDetails.contractSignedBySecondPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
         );
     };
 
     filterColors2 = (inputValue) => {
-        return this.state.deptHeads.filter(i =>
+        return this.state.usersList.filter(i =>
             i.value !== this.state.taskDetails.contractSignedByFirstPerson && i.label.toLowerCase().includes(inputValue.toLowerCase())
         );
     };
@@ -1495,7 +1495,7 @@ class EditRequest extends Component {
             }, () => console.log(this.state.taskDetails.selectedOption))
         }
 
-        else if (sname === "responsiblePerson" || sname === "pickUpBy") {
+        else if (sname === "responsiblePerson" || sname === "pickUpBy" || sname === "contractSignedByFirstPerson"|| sname === "contractSignedBySecondPerson" ) {
             if (newValue) {
                 this.setState(state => {
                     let taskDetails = this.state.taskDetails
@@ -1528,7 +1528,7 @@ class EditRequest extends Component {
                     })
                     taskDetails[sname] = newValue.value
                     return { taskDetails }
-                }, console.log(this.state.taskDetails.contractSignedByFirstPerson))
+                }, console.log(this.state.taskDetails.contractSignedByFirstPerson)) 
             }
             else {
                 this.setState(state => {
@@ -1694,6 +1694,7 @@ class EditRequest extends Component {
             text: '',
             footer: '',
             allowOutsideClick: false,
+            showConfirmButton: true,
             onClose: () => { this.props.history.push(`/${this.props.match.params.page}`) },
             onBeforeOpen: () => {
                 Swal.showLoading()
@@ -1731,10 +1732,11 @@ class EditRequest extends Component {
                             msg = "Validation Errors occured"
                         }
                         Swal.update({
-                            title: stat ? error.response.data.title : "ERROR",
+                            title: "ERROR",
                             text: msg,
                             type: 'error'
                         })
+                        Swal.hideLoading()
                     })
             }
         })
@@ -2048,7 +2050,7 @@ class EditRequest extends Component {
                                                                 bar
                                                                 animated={stage.state === "CURRENT" ? true : false}
                                                                 striped={stage.state !== "CURRENT"}
-                                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "primary" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                                 // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                                 value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                             </Progress>
@@ -2062,14 +2064,14 @@ class EditRequest extends Component {
                                     }
                                     <FormGroup>
                                         <h5><b>NOTES :</b></h5>
-                                            <ol id="notes" className="font-weight-bold">
-                                                {this.state.noteInfo.map((info, index) => (
+                                        <ol id="notes" className="font-weight-bold">
+                                            {this.state.noteInfo.map((info, index) => (
                                                 <li key={index} >
-                                                    <p> {info.chinese} </p> 
-                                                    <p> {info.english} </p> 
+                                                    <p> {info.chinese} </p>
+                                                    <p> {info.english} </p>
                                                 </li>
-                                                ))}
-                                            </ol>
+                                            ))}
+                                        </ol>
                                     </FormGroup>
                                     <Form className="form-horizontal">
                                         <FormGroup>
@@ -2213,7 +2215,7 @@ class EditRequest extends Component {
                                                             : null}
                                                     </InputGroup>
                                                     <Modal color="info" size="xl" toggle={this.hideDoc} isOpen={this.state.showDoc} >
-                                                        <ModalHeader className="center"> Select Documents </ModalHeader>
+                                                        <ModalHeader toggle={this.hideDoc} className="center"> Select Documents </ModalHeader>
                                                         <ModalBody>
                                                             <SelectTable
                                                                 {...this.props}
@@ -2551,7 +2553,7 @@ class EditRequest extends Component {
 
                                         <Collapse isOpen={taskDetails.applicationTypeId === "LTI" || taskDetails.applicationTypeId === "LTU"}>
                                             <FormGroup>
-                                                <Label>Document Check By <i className="fa fa-user" /></Label>
+                                                <Label>Document Check By <i className="fa fa-user" /> PB7 or above</Label>
                                                 {taskDetails.applicationTypeId === "LTI" ?
                                                     <AsyncSelect
                                                         id="documentCheckBy"
@@ -2590,8 +2592,9 @@ class EditRequest extends Component {
                                                     <Col className="py-2" xs={12} md={6} lg={6}>
                                                         <AsyncSelect
                                                             id="contractSignedByFirstPerson"
+                                                            isClearable
                                                             loadOptions={this.loadOptionsDeptContract1}
-                                                            value={deptHeads[taskDetails.contractSignedByFirstPersonOption]}
+                                                            value={usersList[taskDetails.contractSignedByFirstPersonOption]}
                                                             onChange={this.handleSelectOption("contractSignedByFirstPerson")}
                                                             menuPortalTarget={document.body}
                                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -2605,8 +2608,9 @@ class EditRequest extends Component {
                                                     <Col className="py-2" xs={12} md={6} lg={6}>
                                                         <AsyncSelect
                                                             id="contractSignedBySecondPerson"
+                                                            isClearable
                                                             loadOptions={this.loadOptionsDeptContract2}
-                                                            value={deptHeads[taskDetails.contractSignedBySecondPersonOption]}
+                                                            value={usersList[taskDetails.contractSignedBySecondPersonOption]}
                                                             onChange={this.handleSelectOption("contractSignedBySecondPerson")}
                                                             menuPortalTarget={document.body}
                                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}

@@ -14,11 +14,13 @@ import {
   Input,
   Row
 } from 'reactstrap';
+import theme from '../theme.css'
 import ReactTable from "react-table";
 import "react-table/react-table.css"
 // import ChopApplicationDetail from './ChopApplicationDetail';
 import Axios from 'axios';
 import config from '../../config';
+import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import Authorize from '../../functions/Authorize'
@@ -66,7 +68,7 @@ class ChopApplication extends Component {
         statusName: "",
         createdDate: "",
         createdByName: "",
-        departmentId: ""
+        departmentName: ""
       },
       departments: [],
       status: [],
@@ -93,7 +95,7 @@ class ChopApplication extends Component {
 
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: !this.state.loading })
-    await Axios.get(`${config.url}/tasks?category=all&userid=${Authorize.getCookies().userId}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`,
+    await Axios.get(`${config.url}/tasks?category=all&userid=${localStorage.getItem('userId')}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentname=${this.state.searchOption.departmentName}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.pageCount === 0 ? 1 : res.data.pageCount })
         console.log(res.data)
@@ -148,7 +150,7 @@ class ChopApplication extends Component {
   }
 
   search = () => {
-    this.getApplications(this.state.page, this.state.limit)
+    this.getApplications(1, this.state.limit)
   }
 
   convertDate(dateValue) {
@@ -259,7 +261,8 @@ class ChopApplication extends Component {
 
     let dates = ""
     if (date) {
-      dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+      let tempDate = format(date, "yyyy-MM-dd").split('T')[0];
+      dates = tempDate.replace(/-/g, "")
     }
     this.setState({ [view]: date, validDate: true });
     this.setState(state => {
@@ -410,20 +413,6 @@ class ChopApplication extends Component {
                   accessor: "departmentName",
                   width: this.getColumnWidth('departmentName', "Department"),
                   Cell: this.renderEditable,
-                  filterMethod: (filter, row) => {
-                    return row[filter.id] === filter.value;
-                  },
-                  Filter: ({ filter, onChange }) => {
-                    return (
-                      <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
-                        <option value="" > Please Select </option>
-                        {this.state.departments.map((dept, index) =>
-                          <option key={index} value={dept.deptId} >{dept.deptName}</option>
-                        )}
-                      </Input>
-
-                    )
-                  },
                   style: { textAlign: "center" },
                 },
                 {

@@ -628,7 +628,7 @@ class LicenseEditRequest extends Component {
                                                         bar
                                                         animated={stage.state === "CURRENT" ? true : false}
                                                         striped={stage.state !== "CURRENT"}
-                                                        color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                        color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "primary" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                         // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                         value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                     </Progress>
@@ -765,7 +765,7 @@ class LicenseEditRequest extends Component {
                                     <FormGroup onChange={this.handleChange("deliverWayId")} >
                                         <Label>Deliver Way</Label>
                                         <CustomInput type="radio" id="deliverWay1" defaultChecked={taskDetails.deliverWayId === "F2F"} name="deliverWayId" value="F2F" label="面对面, Face to face" />
-                                        <CustomInput type="radio" id="deliverWay2" defaultChecked={taskDetails.deliverWayId === "EXPRESS"} name="deliverWayId" value="EXPRESS" label="快递 Express: Express Number" />
+                                        <CustomInput type="radio" id="deliverWay2" defaultChecked={taskDetails.deliverWayId === "EXPRESS"} name="deliverWayId" value="EXPRESS" label="快递 Express" />
                                         {taskDetails.documentTypeId === "ORIGINAL"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', taskDetails.deliverWayId, 'required')}</small>
                                             : null}

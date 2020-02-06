@@ -1,0 +1,3 @@
+.ReactTable .rt-tbody :last-child.rt-tr-group{
+    margin-bottom: 20px;
+}

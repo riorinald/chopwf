@@ -63,6 +63,7 @@ const SelectTable = selectTableHOC(ReactTable);
 
 const animatedComponents = makeAnimated();
 
+
 // var NewFormData = require('formdata-polyfill')
 
 class Create extends Component {
@@ -187,16 +188,7 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       validateForm: [],
-      noteInfo: [
-        {
-          chinese: "如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
-          english: "For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
-        },
-        {
-          chinese: "如您需要在含有个人身份信息（如身份信息、护照信息）的文件上盖章，请不要上传附件或者遮盖关键信息后再上传。",
-          english: "If you need to chop on personal information (e.g. ID info, Passport info) related documents, please don’t upload them into system or upload after covering key information. "
-        }
-      ],
+      noteInfo: [],
       mask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[A-Z]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
       // mask: "a-a-a-9999-9999",
       selectInfo: '',
@@ -221,7 +213,7 @@ class Create extends Component {
     this.handleSelectOption = this.handleSelectOption.bind(this);
     this.checkDept = this.checkDept.bind(this);
 
-    this.validator = new SimpleReactValidator({autoForceUpdate: this, locale: 'en'});
+    this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
     this.hideDoc = this.hideDoc.bind(this);
@@ -237,8 +229,25 @@ class Create extends Component {
     this.getData("chopTypes", `${config.url}/choptypes?companyid=` + this.props.legalName);
     // resetMounted.setMounted()
     this.setContractNotes();
+    this.getNotes()
 
 
+  }
+
+  getNotes() {
+    axios.get(`${config.url}/notes/0`)
+      .then(res => {
+        let tempNotes = res.data.noteContent.split('%')
+        for (let i = 0; i < tempNotes.length; i++) {
+          let obj = {
+            chinese: tempNotes[i].split('#')[0],
+            english: tempNotes[i].split('#')[1]
+          }
+          this.setState({
+            noteInfo: this.state.noteInfo.concat(obj)
+          })
+        }
+      })
   }
 
   setContractNotes() {
@@ -519,6 +528,7 @@ class Create extends Component {
       text: '',
       footer: '',
       allowOutsideClick: false,
+      showConfirmButton: true,
       onClose: () => { if (!showError) { this.formReset() } },
       onBeforeOpen: () => {
         Swal.showLoading()
@@ -543,13 +553,14 @@ class Create extends Component {
             let err3 = ""
             if (error.response) {
               console.log(error.response)
-              let keys = Object.keys(error.response.data.errors)
-              err = keys.join(',')
-              keys.map(key => {
-                // console.log(error.response.data.errors[key].join(','))
-                err2.push(error.response.data.errors[key].join(','))
-              })
-              err3 = err2.join(';')
+              err3 = error.response.message
+              // let keys = Object.keys(error.response.data.errors)
+              // err = keys.join(',')
+              // keys.map(key => {
+              // console.log(error.response.data.errors[key].join(','))
+              // err2.push(error.response.data.errors[key].join(','))
+              // })
+              // err3 = err2.join(';')
             }
             Swal.update({
               title: "Error",
@@ -831,7 +842,7 @@ class Create extends Component {
     }
 
     else if (name === "numOfPages") {
-      if (value.length > 9) {
+      if (/[a-z]/i.test(value) | value.length > 9) {
         value = this.state.numOfPages
         this.setState({ invalidNumberOfPages: true })
         event.target.className = "is-invalidform-control"
@@ -1591,6 +1602,32 @@ class Create extends Component {
       pointer = {}
     }
 
+    const getYear = date => {
+      console.log(date.getFullYear())
+      return date.getFullYear()
+    }
+
+    const year = (new Date()).getFullYear();
+    const years = Array.from(new Array(2), (val, index) => index + year);
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
+    const getMonth = date => {
+      let month = date.getMonth()
+      return months[month]
+    }
+
     const reactSelectControl = {
       control: styles => ({ ...styles, borderColor: '#F86C6B', boxShadow: '0 0 0 0px #F86C6B', ':hover': { ...styles[':hover'], borderColor: '#F86C6B' } }),
       menuPortal: base => ({ ...base, zIndex: 9999 })
@@ -1834,7 +1871,7 @@ class Create extends Component {
             : null}
         </InputGroup>
         <Modal color="info" size="xl" toggle={this.hideDoc} isOpen={this.state.showDoc} >
-          <ModalHeader className="center"> Select Documents </ModalHeader>
+          <ModalHeader toggle={this.hideDoc} className="center"> Select Documents  </ModalHeader>
           <ModalBody>
             <SelectTable
               {...this.props}
@@ -1945,8 +1982,8 @@ class Create extends Component {
                   <ol id="notes" className="font-weight-bold">
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
-                        <p> {info.chinese} </p> 
-                        <p> {info.english} </p> 
+                        <p> {info.chinese} </p>
+                        <p> {info.english} </p>
                       </li>
                     ))}
                   </ol>
@@ -2013,6 +2050,46 @@ class Create extends Component {
                       <Label>Effective Period</Label>
                       <DatePicker autoComplete="off" id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        renderCustomHeader={({
+                          date,
+                          changeYear,
+                          changeMonth,
+                          decreaseMonth,
+                          increaseMonth,
+                          prevMonthButtonDisabled,
+                          nextMonthButtonDisabled
+                        }) => (
+                            <div
+                              style={{
+                                margin: 10,
+                                display: "flex",
+                                justifyContent: "center"
+                              }}
+                            >
+                              <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                              <Input
+                                value={getYear(date)}
+                                onChange={({ target: { value } }) => changeYear(value)}
+                                type="select">
+                                {years.map(option => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                changeMonth(months.indexOf(value))
+                              } type="select">
+                                {months.map((option) => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                            </div>
+                          )}
                         peekNextMonth
                         showMonthDropdown
                         showYearDropdown
@@ -2144,7 +2221,7 @@ class Create extends Component {
                       <Label>Return Date</Label>
                       <Row />
                       <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                        className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        className="form-control" required dateFormat="yyyy/MM/dd"
                         selected={this.state.dateView2}
                         onChange={this.dateChange("returnDate", "dateView2")}
                         minDate={new Date()} maxDate={addDays(new Date(), 30)} />
@@ -2211,7 +2288,7 @@ class Create extends Component {
 
                   {this.state.isLTI
                     ? <FormGroup>
-                      <Label>Document Check By <i className="fa fa-user" /></Label>
+                      <Label>Document Check By <i className="fa fa-user" /> PB7 or above </Label>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect
                         id="docCheckByLTI"
