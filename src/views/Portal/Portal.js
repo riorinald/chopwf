@@ -14,6 +14,7 @@ import LegalEntity from '../../context';
 import Axios from 'axios';
 import config from '../../config';
 import Authorize from '../../functions/Authorize'
+import ChopIcon from '../../assets/img/Chop.png'
 
 
 const DefaultFooter = React.lazy(() => import('../../containers/DefaultLayout/DefaultFooter'));
@@ -109,7 +110,7 @@ class Portal extends Component {
                   <CardBody>
                     <h6>CHOP WORKFLOW APPLICATION</h6>
                     <Col className="text-center p-4">
-                      <i className="fa fa-sitemap fa-5x"></i>
+                    <img src={ChopIcon} width="75px" style={{position:'relative'}} alt="ChopIcon" />
                     </Col>
                   </CardBody>
                 </Card>
