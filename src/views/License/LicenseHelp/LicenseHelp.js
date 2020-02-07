@@ -170,7 +170,7 @@ class LicenseHelp extends Component {
     }
 
     async deleteChopKeeper(index, name) {
-        await Axios.delete(`${config.url}/helps/license/${name}${index}/${localStorage.getItem('userId')}`)
+        await Axios.delete(`${config.url}/helps/license/${name}${index}/${Authorize.getCookies().userId}}`)
             .then(result => {
                 console.log(result.data)
             })

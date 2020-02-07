@@ -21,7 +21,7 @@ import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import theme from '../../theme.css'
 import "react-datepicker/dist/react-datepicker.css";
-import Authorize from '../../../functions/Authorize' 
+import Authorize from '../../../functions/Authorize'
 
 class LicenseApplication extends Component {
     constructor(props) {
@@ -110,7 +110,7 @@ class LicenseApplication extends Component {
     async getLicenseApplications(page, pageSize) {
         const searchOption = this.state.searchOption
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=all&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentname=${searchOption.departmentName}&page=${page}&pageSize=${pageSize}`,
+        await Axios.get(`${config.url}/licenses?userId=${Authorize.getCookies().userId}&companyid=${this.props.legalName}&category=all&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentname=${searchOption.departmentName}&page=${page}&pageSize=${pageSize}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 this.setState({ licenseApplication: res.data.licenses, totalPages: res.data.pageCount, loading: false })
