@@ -2,6 +2,7 @@ import React, { Component, Suspense } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import * as router from 'react-router-dom';
 import { Container, Spinner } from 'reactstrap';
+import Authorize from '../../functions/Authorize' 
 
 import {
   AppAside,
@@ -42,12 +43,12 @@ class DefaultLayout extends Component {
     super(props);
     this.state = {
       legalEntity: localStorage.getItem('legalEntity'),
-      roleId: localStorage.getItem("roleId"),
-      cAdmin: localStorage.getItem("isChopKeeper"),
-      lAdmin: localStorage.getItem('isLicenseAdmin'),
       application: localStorage.getItem('application'),
-      licenseAdminCompany: localStorage.getItem('licenseAdminCompanyIds').split(','),
-      chopKeeperCompany: localStorage.getItem('chopKeeperCompanyIds').split(','),
+      roleId: Authorize.getCookies().roleId,
+      cAdmin: Authorize.getCookies().isChopKeeper,
+      lAdmin: Authorize.getCookies().isLicenseAdmin,
+      licenseAdminCompany: Authorize.getCookies().licenseAdminCompanyIds,
+      chopKeeperCompany: Authorize.getCookies().licenseAdminCompanyIds,
       showChopAdmin: false,
       showLicenseAdmin: false,
       newRoutes: [],
