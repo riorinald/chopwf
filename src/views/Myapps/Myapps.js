@@ -11,9 +11,11 @@ import ReactTable from "react-table";
 import "react-table/react-table.css"
 import Axios from 'axios';
 import config from '../../config';
+import { format } from 'date-fns';
 // import ApplicationDetail from './ApplicationDetail';
 import { Redirect } from 'react-router-dom';
 // import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
+import theme from '../theme.css'
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -54,7 +56,7 @@ class Myapps extends Component {
         statusName: "",
         createdDate: "",
         createdByName: "",
-        departmentId: ""
+        departmentName: ""
       },
 
       status: [],
@@ -83,10 +85,10 @@ class Myapps extends Component {
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: true })
     // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
-    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`,
+    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentname=${this.state.searchOption.departmentName}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } })
       .then(res => {
-        this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false })
+        this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false, page: res.data.page, limit: res.data.pageSize })
         console.log(res.data)
       })
 
@@ -107,12 +109,12 @@ class Myapps extends Component {
   }
 
   search = () => {
-    this.getApplications(this.state.page, this.state.limit)
+    this.getApplications(1, this.state.limit)
   }
 
   onKeyPressed = (e) => {
     if (e.key === "Enter") {
-      this.getApplications(this.state.page, this.state.limit)
+      this.getApplications(1, this.state.limit)
     }
   }
 
@@ -167,8 +169,8 @@ class Myapps extends Component {
 
     let dates = ""
     if (date) {
-      let month = date.getMonth()
-      dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+      let tempDate = format(date, "yyyy-MM-dd").split('T')[0];
+      dates = tempDate.replace(/-/g, "")
     }
 
     // console.log(this.state.page, this.state.limit)
@@ -334,20 +336,6 @@ class Myapps extends Component {
                   accessor: "departmentName",
                   width: this.getColumnWidth('departmentName', "Department"),
                   Cell: this.renderEditable,
-                  filterMethod: (filter, row) => {
-                    return row[filter.id] === filter.value;
-                  },
-                  Filter: ({ filter, onChange }) => {
-                    return (
-                      <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
-                        <option value="" >Please Select </option>
-                        {this.state.departments.map((dept, index) =>
-                          <option key={index} value={dept.deptId} >{dept.deptName}</option>
-                        )}
-                      </Input>
-
-                    )
-                  },
                   style: { textAlign: "center" },
                 },
                 {
@@ -445,6 +433,7 @@ class Myapps extends Component {
               ]}
               defaultPageSize={this.state.limit}
               manual
+              page={this.state.page - 1}
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {
                 this.setState({ limit: pageSize, page: page + 1 });

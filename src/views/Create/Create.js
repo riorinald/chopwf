@@ -60,6 +60,7 @@ const SelectTable = selectTableHOC(ReactTable);
 
 const animatedComponents = makeAnimated();
 
+
 // var NewFormData = require('formdata-polyfill')
 
 class Create extends Component {
@@ -184,16 +185,7 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       validateForm: [],
-      noteInfo: [
-        {
-          chinese: "如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
-          english: "For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
-        },
-        {
-          chinese: "如您需要在含有个人身份信息（如身份信息、护照信息）的文件上盖章，请不要上传附件或者遮盖关键信息后再上传。",
-          english: "If you need to chop on personal information (e.g. ID info, Passport info) related documents, please don’t upload them into system or upload after covering key information. "
-        }
-      ],
+      noteInfo: [],
       mask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[A-Z]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
       // mask: "a-a-a-9999-9999",
       selectInfo: '',
@@ -234,8 +226,25 @@ class Create extends Component {
     this.getData("chopTypes", `${config.url}/choptypes?companyid=` + this.props.legalName);
     // resetMounted.setMounted()
     this.setContractNotes();
+    this.getNotes()
 
 
+  }
+
+  getNotes() {
+    axios.get(`${config.url}/notes/0`)
+      .then(res => {
+        let tempNotes = res.data.noteContent.split('%')
+        for (let i = 0; i < tempNotes.length; i++) {
+          let obj = {
+            chinese: tempNotes[i].split('#')[0],
+            english: tempNotes[i].split('#')[1]
+          }
+          this.setState({
+            noteInfo: this.state.noteInfo.concat(obj)
+          })
+        }
+      })
   }
 
   setContractNotes() {
@@ -357,6 +366,7 @@ class Create extends Component {
     postReq.append("IsSubmitted", isSubmitted);
     postReq.append("isConnectChop", isConnectChop);
     postReq.append("BranchId", this.state.branchSelected)
+
 
     //Single Document Check By in LTU
     if (this.state.isLTU) {
@@ -513,6 +523,7 @@ class Create extends Component {
       text: '',
       footer: '',
       allowOutsideClick: false,
+      showConfirmButton: true,
       onClose: () => { if (!showError) { this.formReset() } },
       onBeforeOpen: () => {
         Swal.showLoading()
@@ -537,13 +548,14 @@ class Create extends Component {
             let err3 = ""
             if (error.response) {
               console.log(error.response)
-              let keys = Object.keys(error.response.data.errors)
-              err = keys.join(',')
-              keys.map(key => {
-                // console.log(error.response.data.errors[key].join(','))
-                err2.push(error.response.data.errors[key].join(','))
-              })
-              err3 = err2.join(';')
+              err3 = error.response.message
+              // let keys = Object.keys(error.response.data.errors)
+              // err = keys.join(',')
+              // keys.map(key => {
+              // console.log(error.response.data.errors[key].join(','))
+              // err2.push(error.response.data.errors[key].join(','))
+              // })
+              // err3 = err2.join(';')
             }
             Swal.update({
               title: "Error",
@@ -663,9 +675,41 @@ class Create extends Component {
     let value = event.target.value
     this.setState({ agreeTerms: false })
     if (name === "appTypeSelected") {
+
+      this.setState({
+        // deptSelected: "",
+        chopTypeSelected: "",
+        branchSelected: "",
+        effectivePeriod: "",
+        returnDate: "",
+        purposeOfUse: "",
+        numOfPages: "",
+        addressTo: "",
+        remark: "",
+        teamSelected: "",
+        pickUpBy: "",
+        resPerson: "",
+        contractSign1: "",
+        contractSign2: "",
+        documentCheckBy: "",
+        selectedDeptHeads: [],
+        departmentHeads: [],
+        dateView1: null,
+        dateView2: null,
+        documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: []
+      })
+
+      this.setState(state => {
+        let { selectedOption } = this.state
+        selectedOption.pickUpBy = ""
+        selectedOption.resPerson = ""
+        selectedOption.contractSign1 = ""
+        selectedOption.contractSign2 = ""
+        return selectedOption
+      })
       this.setValidateForm(event.target.value)
       //Clear Doc Table and agreeTerms
-      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
+      // this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
 
       //Update Chop Types
       this.getChopTypes(this.props.legalName, event.target.value)
@@ -825,7 +869,7 @@ class Create extends Component {
     }
 
     else if (name === "numOfPages") {
-      if (value.length > 9) {
+      if (/[a-z]/i.test(value) | value.length > 9) {
         value = this.state.numOfPages
         this.setState({ invalidNumberOfPages: true })
         event.target.className = "is-invalidform-control"
@@ -1389,7 +1433,7 @@ class Create extends Component {
       let extension = event.target.files[0].name.split('.')[last - 1]
       console.log(extension)
       for (let i = 0; i < ext.length; i++) {
-        if (ext[i] === extension) {
+        if (ext[i] === extension || ext[i].toUpperCase() === extension) {
           valid = true
           break;
         }
@@ -1583,6 +1627,32 @@ class Create extends Component {
     }
     else {
       pointer = {}
+    }
+
+    const getYear = date => {
+      console.log(date.getFullYear())
+      return date.getFullYear()
+    }
+
+    const year = (new Date()).getFullYear();
+    const years = Array.from(new Array(2), (val, index) => index + year);
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
+    const getMonth = date => {
+      let month = date.getMonth()
+      return months[month]
     }
 
     const reactSelectControl = {
@@ -1828,7 +1898,7 @@ class Create extends Component {
             : null}
         </InputGroup>
         <Modal color="info" size="xl" toggle={this.hideDoc} isOpen={this.state.showDoc} >
-          <ModalHeader className="center"> Select Documents </ModalHeader>
+          <ModalHeader toggle={this.hideDoc} className="center"> Select Documents  </ModalHeader>
           <ModalBody>
             <SelectTable
               {...this.props}
@@ -1939,8 +2009,8 @@ class Create extends Component {
                   <ol id="notes" className="font-weight-bold">
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
-                        <p> {info.chinese} </p> 
-                        <p> {info.english} </p> 
+                        <p> {info.chinese} </p>
+                        <p> {info.english} </p>
                       </li>
                     ))}
                   </ol>
@@ -1967,8 +2037,8 @@ class Create extends Component {
                   </FormGroup>
                   <FormGroup>
                     <Label>Dept.</Label>
-                    <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
-                      <option disabled value="0">Please select . . .</option>
+                    <Input value={this.state.deptSelected} id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} name="dept">
+                      <option disabled value="">Please select . . .</option>
                       {this.state.department.map((option, index) => (
                         <option value={option.deptId} label={option.dept} key={option.deptId}>
                           {option.deptName}
@@ -1990,9 +2060,10 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Application Type</Label>
                     <Input ref={this.appTypeSelected} type="select"
-                      onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" defaultValue="0" name="select"
+                      onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" name="select"
+                      defaultValue=""
                       onBlur={() => this.validator.showMessageFor('aplicationType')}>
-                      <option disabled value="0">Please select . . .</option>
+                      <option disabled value="">Please select . . .</option>
                       {this.state.applicationTypes.map((option, id) => (
 
                         <option value={option.appTypeId} key={option.appTypeId}>{option.appTypeName}</option>
@@ -2007,6 +2078,46 @@ class Create extends Component {
                       <Label>Effective Period</Label>
                       <DatePicker autoComplete="off" id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        renderCustomHeader={({
+                          date,
+                          changeYear,
+                          changeMonth,
+                          decreaseMonth,
+                          increaseMonth,
+                          prevMonthButtonDisabled,
+                          nextMonthButtonDisabled
+                        }) => (
+                            <div
+                              style={{
+                                margin: 10,
+                                display: "flex",
+                                justifyContent: "center"
+                              }}
+                            >
+                              <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                              <Input
+                                value={getYear(date)}
+                                onChange={({ target: { value } }) => changeYear(value)}
+                                type="select">
+                                {years.map(option => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                changeMonth(months.indexOf(value))
+                              } type="select">
+                                {months.map((option) => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                            </div>
+                          )}
                         peekNextMonth
                         showMonthDropdown
                         showYearDropdown
@@ -2023,7 +2134,7 @@ class Create extends Component {
                     <FormGroup>
                       <Label>Entitled Team</Label>
                       <small className="ml-2">Please select your team's name from dropdown list, if your team is not included, please contact respective chop keeper. </small>
-                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} value={this.state.teamSelected} type="select">
+                      <Input id="teamSelected" name="team" value={this.state.teamSelected} onChange={this.handleChange("teamSelected")} value={this.state.teamSelected} type="select">
                         <option value="" disabled>Please select a team</option>
                         {this.state.teams.map((team, index) =>
                           <option key={index} value={team.teamId}>{team.teamName}</option>
@@ -2035,29 +2146,12 @@ class Create extends Component {
                     </FormGroup>
                   </Collapse>
 
-
-                  {/* 
-                  <Collapse isOpen={this.state.isLTU}>
-                    <FormGroup>
-                      <Label>Entitled Team</Label>
-                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
-                        <option value="0" disabled>Please select a team</option>
-                        {this.state.teams.map((team, index) =>
-                          <option key={index} value={team.teamId}>{team.teamName}</option>
-                        )}
-                      </Input>
-                      {this.state.isLTU
-                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Entitled Team', this.state.teamSelected, 'required')}</small>
-                        : null}
-                    </FormGroup>
-                  </Collapse> */}
-
                   <FormGroup>
                     <Label>Chop Type</Label>
-                    <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected"
+                    <Input ref={this.chopTypeSelected} value={this.state.chopTypeSelected} type="select" id="chopTypeSelected"
                       onClick={() => { this.getChopTypes(this.props.legalName, this.state.appTypeSelected) }}
-                      onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
-                      <option disabled value="0">Please select ..</option>
+                      onChange={this.handleChange("chopTypeSelected")} name="chopType" >
+                      <option disabled value="">Please select ..</option>
                       {this.state.chopTypes.map((option, id) => (
                         <option key={option.chopTypeId} value={option.chopTypeId}> {this.props.legalName} {option.chopTypeName}</option>
                       ))}
@@ -2069,8 +2163,8 @@ class Create extends Component {
                   {this.state.showBranches
                     ? <FormGroup>
                       <Label>Branch Company Chop</Label>
-                      <Input onChange={this.handleChange("branchSelected")} type="select" defaultValue="0">
-                        <option value="0" disabled>Please specify your Branch Company Chop</option>
+                      <Input onChange={this.handleChange("branchSelected")} type="select" value={this.state.branchSelected}>
+                        <option value="" disabled>Please specify your Branch Company Chop</option>
                         {this.state.branches.map((branch, index) =>
                           <option value={branch.branchId} key={index}>{branch.branchName}</option>
                         )}
@@ -2092,7 +2186,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Purpose of Use</Label>
                     <InputGroup>
-                      <Input maxLength={500} spellCheck="true" ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                      <Input value={this.state.purposeOfUse} maxLength={500} spellCheck="true" ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of Use', this.state.purposeOfUse, 'required')}</small>
                   </FormGroup>
@@ -2138,7 +2232,7 @@ class Create extends Component {
                       <Label>Return Date</Label>
                       <Row />
                       <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                        className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        className="form-control" required dateFormat="yyyy/MM/dd"
                         selected={this.state.dateView2}
                         onChange={this.dateChange("returnDate", "dateView2")}
                         minDate={new Date()} maxDate={addDays(new Date(), 30)} />
@@ -2154,6 +2248,7 @@ class Create extends Component {
                         onBlur={this.checkDepartment}
                         isClearable
                         classNamePrefix="rs"
+                        value={this.state.selectedOption.resPerson}
                         loadOptions={loadUsers}
                         onChange={this.handleSelectOption("resPerson")}
                         menuPortalTarget={document.body}
@@ -2168,7 +2263,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Address to</Label>
                     <InputGroup>
-                      <Input maxLength={200} ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
+                      <Input value={this.state.addressTo} maxLength={200} ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Address To', this.state.addressTo, 'required')}</small>
                   </FormGroup>
@@ -2181,6 +2276,7 @@ class Create extends Component {
                         id="pickUpBy"
                         isClearable
                         loadOptions={loadUsers}
+                        value={this.state.selectedOption.pickUpBy}
                         isClearable
                         onBlur={this.checkDepartment}
                         onChange={this.handleSelectOption("pickUpBy")}
@@ -2198,14 +2294,14 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Remark <small className="ml-2"> Please enter the remarks, e.g. telephone number of pick up person.</small> </Label>
                     <InputGroup>
-                      <Input autoComplete="off" maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
+                      <Input value={this.state.remarks} autoComplete="off" maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Remark', this.state.remarks, 'required')}</small>
                   </FormGroup>
 
                   {this.state.isLTI
                     ? <FormGroup>
-                      <Label>Document Check By <i className="fa fa-user" /></Label>
+                      <Label>Document Check By <i className="fa fa-user" /> PB7 or above </Label>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect
                         id="docCheckByLTI"
@@ -2235,6 +2331,7 @@ class Create extends Component {
                             id="contractSign1"
                             onBlur={this.checkDepartment}
                             loadOptions={loadOptionsContract1}
+                            value={this.state.selectedOption.contractSign1}
                             onChange={this.handleSelectOption("contractSign1")}
                             menuPortalTarget={document.body}
                             isClearable
@@ -2251,6 +2348,7 @@ class Create extends Component {
                             id="contractSign2"
                             onBlur={this.checkDepartment}
                             loadOptions={loadOptionsContract2}
+                            value={this.state.selectedOption.contractSign2}
                             onChange={this.handleSelectOption("contractSign2")}
                             menuPortalTarget={document.body}
                             isClearable

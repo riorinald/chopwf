@@ -740,7 +740,7 @@ class LicenseApplicationDetail extends Component {
                                                                 {/* <div>Reciever: </div>
                                                                 <div>Address: </div>
                                                                 <div>Mobile No. :</div> */}
-                                                                <div>Express Number: {expressNumber} </div>
+                                                                {/* <div>Express Number: {expressNumber} </div> */}
 
                                                             </Collapse>
                                                         </CustomInput>

@@ -1,0 +1,7 @@
+{
+    "name": "Logout",
+    "version": "0.0.0",
+    "private": true,
+    "main": "./Logout.js"
+  }
+  
