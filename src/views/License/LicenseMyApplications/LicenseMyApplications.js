@@ -214,7 +214,7 @@ class LicenseMyApplications extends Component {
     }
 
     search() {
-        this.getMyApplications(this.state.page, this.state.limit)
+        this.getMyApplications(1, this.state.limit)
     }
 
     dateChange = (name, view) => date => {
@@ -460,6 +460,7 @@ class LicenseMyApplications extends Component {
                             ]}
                             defaultPageSize={this.state.limit}
                             manual
+                            page={this.state.page - 1}
                             onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getMyApplications(e + 1, this.state.limit)) }}
                             onPageSizeChange={(pageSize, page) => {
                                 this.setState({ limit: pageSize, page: page + 1 });

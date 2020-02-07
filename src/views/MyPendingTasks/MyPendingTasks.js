@@ -260,7 +260,7 @@ class MyPendingTasks extends Component {
 
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            this.getPendingTasks(this.state.page, this.state.limit)
+            this.getPendingTasks(1, this.state.limit)
         }
     }
 
@@ -311,6 +311,7 @@ class MyPendingTasks extends Component {
                             getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
                             defaultPageSize={this.state.limit}
                             manual
+                            page={this.state.page - 1}
                             onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getPendingTasks(e + 1, this.state.limit)) }}
                             onPageSizeChange={(pageSize, page) => {
                                 this.setState({ limit: pageSize, page: page + 1 });

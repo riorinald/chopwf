@@ -90,7 +90,7 @@ class Myapps extends Component {
     await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentname=${this.state.searchOption.departmentName}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } })
       .then(res => {
-        this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false })
+        this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false, page: res.data.page, limit: res.data.pageSize })
         console.log(res.data)
       })
 
@@ -116,7 +116,7 @@ class Myapps extends Component {
 
   onKeyPressed = (e) => {
     if (e.key === "Enter") {
-      this.getApplications(this.state.page, this.state.limit)
+      this.getApplications(1, this.state.limit)
     }
   }
 
@@ -435,6 +435,7 @@ class Myapps extends Component {
               ]}
               defaultPageSize={this.state.limit}
               manual
+              page={this.state.page - 1}
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {
                 this.setState({ limit: pageSize, page: page + 1 });

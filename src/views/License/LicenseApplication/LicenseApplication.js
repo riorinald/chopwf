@@ -197,7 +197,7 @@ class LicenseApplication extends Component {
 
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            this.getLicenseApplications(this.state.page, this.state.limit)
+            this.getLicenseApplications(1, this.state.limit)
         }
     }
 
@@ -224,7 +224,7 @@ class LicenseApplication extends Component {
                 <h4>License Applications</h4>
                 <Card onKeyDown={this.handleKeyDown}>
 
-                    <CardHeader>License Applications <Button className="float-right" onClick={() => this.getLicenseApplications(this.state.page, this.state.limit)} >Search</Button></CardHeader>
+                    <CardHeader>License Applications <Button className="float-right" onClick={() => this.getLicenseApplications(1, this.state.limit)} >Search</Button></CardHeader>
                     <CardBody>
                         <ReactTable
                             data={licenseApplication}
@@ -441,6 +441,7 @@ class LicenseApplication extends Component {
                             ]}
                             defaultPageSize={this.state.limit}
                             manual
+                            page={this.state.page - 1}
                             onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getLicenseApplications(e + 1, this.state.limit)) }}
                             onPageSizeChange={(pageSize, page) => {
                                 this.setState({ limit: pageSize, page: page + 1 });
