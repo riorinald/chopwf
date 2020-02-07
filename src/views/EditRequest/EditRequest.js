@@ -127,8 +127,10 @@ class EditRequest extends Component {
                 nextStatusName: "",
                 teamId: "",
                 teamName: "",
-                effectivePeriod: ""
+                effectivePeriod: "",
             },
+
+            selectedOption:{},
 
             modal: false,
             validateForm: [],
@@ -441,7 +443,7 @@ class EditRequest extends Component {
             if (temporary.teamId !== "" && temporary.departmentId !== "") {
                 this.getDocCheckBy(temporary.departmentId, temporary.teamId, temporary.chopTypeId, (callback) => {
                     temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
-                    temporary.selectedOption = temporary.documentCheckBy.length !== 0 ? this.getSelected(temporary.documentCheckBy) : null
+                    temporary.documentCheckBy = temporary.documentCheckBy.length !== 0 ? this.getSelected(temporary.documentCheckBy) : null
                 })
             }
         }
@@ -478,7 +480,7 @@ class EditRequest extends Component {
         }
         temporary.departmentId = temporary.departmentId.toLowerCase()
         // console.log(temporary.requestorUser)
-        this.setState({ taskDetails: temporary, tempDocument: temporary.documents, loading: false })
+        this.setState({ selectedOption: {documentCheckBy:temporary.documentCheckBy}, taskDetails: temporary, tempDocument: temporary.documents, loading: false })
         console.log(temporary)
 
     }
@@ -718,7 +720,7 @@ class EditRequest extends Component {
                     taskDetails.teamId = ""
                     taskDetails.documentCheckBy = []
                     taskDetails.docCheckByOption = ""
-                    taskDetails.selectedOption = null
+                    this.state.selectedOption.documentCheckBy = null
                     return { taskDetails }
                 })
             }
@@ -731,7 +733,7 @@ class EditRequest extends Component {
                     taskDetails.documentCheckBy = []
                     taskDetails.documents = []
                     taskDetails.docCheckByOption = ""
-                    taskDetails.selectedOption = null
+                    this.state.selectedOption.documentCheckBy = null
                     return taskDetails
                 })
                 this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.chopTypeId, (callback) => { })
@@ -762,7 +764,7 @@ class EditRequest extends Component {
                     taskDetails.documents = []
                     taskDetails.documentCheckBy = []
                     taskDetails.docCheckByOption = ""
-                    taskDetails.selectedOption = null
+                    this.state.selectedOption.documentCheckBy = null
                     return taskDetails
                 })
             }
@@ -1487,11 +1489,11 @@ class EditRequest extends Component {
             // console.log(this.state.docCheckBy)
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
-                taskDetails.selectedOption = newValue
+                this.state.selectedOption.documentCheckBy = newValue
                 taskDetails.documentCheckBy = value
                 taskDetails.docCheckByOption = option
                 return { taskDetails }
-            }, () => console.log(this.state.taskDetails.selectedOption))
+            }, () => console.log(this.state.selectedOption.documentCheckBy))
         }
 
         else if (sname === "responsiblePerson" || sname === "pickUpBy") {
@@ -2567,7 +2569,7 @@ class EditRequest extends Component {
                                                         id="documentCheckBy"
                                                         options={docCheckBy}
                                                         isClearable
-                                                        value={taskDetails.selectedOption}
+                                                        value={this.state.selectedOption.documentCheckBy}
                                                         menuPortalTarget={document.body}
                                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                                         onChange={this.handleSelectOption("documentCheckBy1")}
