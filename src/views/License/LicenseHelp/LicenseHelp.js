@@ -148,10 +148,10 @@ class LicenseHelp extends Component {
         postData.append('sectionId', `${name}${index}`)
         await Axios.post(`${config.url}/helps/license/${localStorage.getItem('userId')}`, postData)
             .then(result => {
-                // console.log(result.data)
+                console.log(result.data)
             })
             .catch(error => {
-                // console.log(error)
+                console.log(error)
             })
     }
 
@@ -160,10 +160,20 @@ class LicenseHelp extends Component {
         postData.append('sectionData', details)
         await Axios.put(`${config.url}/helps/license/${name}${index}/${localStorage.getItem('userId')}`, postData)
             .then(result => {
-                // console.log(result.data)
+                console.log(result.data)
             })
             .catch(error => {
-                // console.log(error)
+                console.log(error)
+            })
+    }
+
+    async deleteChopKeeper(index, name) {
+        await Axios.delete(`${config.url}/helps/license/${name}${index}/${localStorage.getItem('userId')}`)
+            .then(result => {
+                console.log(result.data)
+            })
+            .catch(error => {
+                console.log(error)
             })
     }
 
@@ -180,7 +190,7 @@ class LicenseHelp extends Component {
                 array.push(contactPersons)
                 array.push(chopKeepers[i].location)
                 let finalString = array.join(';')
-                // console.log(finalString)
+                console.log(finalString)
                 if (i < this.state.existingCKLength) {
                     this.updateChopKeeperDetails(finalString, i, "chopKeeper")
                     // console.log("Chop keeper details updated")
@@ -206,7 +216,7 @@ class LicenseHelp extends Component {
                 }
 
             }
-            window.location.reload()
+            // window.location.reload()
             //codes to update instructions to the database
         }
         this.setState(state => ({
@@ -237,6 +247,7 @@ class LicenseHelp extends Component {
         this.setState({
             chopKeepers: chopKeepersCopy
         })
+        this.deleteChopKeeper(index, "chopKeeper")
     }
 
     addQA() {
@@ -257,6 +268,7 @@ class LicenseHelp extends Component {
         this.setState({
             QA: QaCopy
         })
+        this.deleteChopKeeper(index, "question")
     }
 
     addChopType(index) {
@@ -313,12 +325,12 @@ class LicenseHelp extends Component {
             <tr key={index}>
                 <td>{table.chopType.map((type, i) =>
                     <div key={i}>
-                        <Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the license type" defaultValue={type}></Input><Button onClick={() => this.deleteChopType(index, i)} color="danger">Delete</Button></Form><br />
+                        <Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the chop type" defaultValue={type}></Input><Button onClick={() => this.deleteChopType(index, i)} color="danger">Delete</Button></Form><br />
                     </div>
                 )}
                     <Button onClick={() => this.addChopType(index)} >Add New Chop Type</Button>
                 </td>
-                <td><Form><Input type="text" placeholder="Please enter the license keeper" onChange={this.handleChange("chopKeeper", index)} defaultValue={table.chopKeeper}></Input></Form></td>
+                <td><Form><Input type="text" placeholder="Please enter the chop keeper" onChange={this.handleChange("chopKeeper", index)} defaultValue={table.chopKeeper}></Input></Form></td>
                 <td> {table.contactPerson.map((person, i) =>
                     <div key={i}><Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("contactPerson", i, index)} placeholder="Please enter the name of the contact person" defaultValue={person}></Input><Button onClick={() => this.deleteContactPerson(index, i)} color="danger">Delete</Button></Form><br /></div>)}
                     <Button onClick={() => this.addContactPerson(index)} >Add New Contact Person</Button></td>
@@ -346,7 +358,7 @@ class LicenseHelp extends Component {
         const Apply = <Button color="success" onClick={this.makeEditable}>APPLY</Button>
         return (
             <div className="animated fadeIn">
-                <h2 >Help</h2>
+                <h4 >Help</h4>
                 <Card>
                     <CardBody>
                         <div style={{ float: "left", marginTop: "5px", paddingRight: "10px" }} ><b>Chop Keeper Information</b></div>

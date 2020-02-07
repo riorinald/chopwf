@@ -4,6 +4,7 @@ import { Redirect,NavLink } from 'react-router-dom';
 import { fakeAuth } from '../../App';
 import config from '../../config';
 import qs from 'querystring';
+import Cookies from 'universal-cookie';
 
 import {
     Form,
@@ -26,6 +27,7 @@ const client_secret="5dd084f6-d9da-452a-86ee-45a6d301439f"
 const redirect_uri="https%3A%2F%2Fdocms.es.corpintra.net%2Fclwf%2Flogin%3Fauthhandler%3DDaimler_OpenID"
 const pathname=`https://sso-int.daimler.com/as/authorization.oauth2?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}`
 
+const cookies = new Cookies();
 
 class Login extends Component {
     constructor(props) {
@@ -128,12 +130,14 @@ class Login extends Component {
                     localStorage.setItem('licenseAdminCompanyIds', res.data.licenseAdminCompanyIds)
                     localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
 
+                    this.setCookies(res.data)
+
                     console.log(res.data)
 
                     if (res.data.status === "success") {
                         let param = qs.parse(this.props.location.search.slice(1))
                         if(param.workflow && param.taskid && param.userid){
-                            if(param.workflow){
+                            if(param.workflow === 'license'){
                                 localStorage.setItem('application', param.workflow.toUpperCase())
                                 fakeAuth.authenticate(() => {});
                                 this.props.history.push({
@@ -145,7 +149,7 @@ class Login extends Component {
                                 localStorage.setItem('application', param.workflow.toUpperCase())
                                 fakeAuth.authenticate(() => {});
                                 this.props.history.push({
-                                  pathname:`${param.workflow}/mypendingtask/details/`,
+                                  pathname:`/mypendingtask/details/`,
                                   state:{redirected:true, taskId:param.taskid}
                                 })
                             }
@@ -161,6 +165,13 @@ class Login extends Component {
             this.setState({ info: "server unreachable"});
             }   
         }
+    }
+    
+    setCookies(data){
+        let expired = new Date
+        expired.setTime(expired.getTime() + (720*60*1000));
+        console.log(expired)
+        cookies.set('userInfo', data, { path: '/', expires:expired });
     }
 
     redirect(){

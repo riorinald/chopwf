@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { fakeAuth } from '../../App';
 import {Card, CardBody, Row, Alert } from 'reactstrap';
+import Cookies from 'universal-cookie';
 
 // let timer = 5
 
@@ -16,10 +17,12 @@ import {Card, CardBody, Row, Alert } from 'reactstrap';
 
 const Logout = (props) => {
 	let [redirect, setRedirect] = useState(0);
+	const cookies = new Cookies();
 	
 	const logout = () => setTimeout(setRedirect((redirect+1)),5000)
 
 	localStorage.clear()
+	cookies.remove('userInfo',{path:'/'})
 
 	fakeAuth.signOut(() => {logout()})
 

@@ -469,7 +469,7 @@ class LicenseCreate extends Component {
             <div className="animated fadeIn">
                 <h4>Create</h4>
                 <Card>
-                    <CardHeader>REQUEST LICENSE</CardHeader>
+                    <CardHeader>Create new request</CardHeader>
                     <CardBody>
                         <Form className="form-horizontal" innerRef={this.formRef}>
                             <FormGroup>
@@ -517,7 +517,7 @@ class LicenseCreate extends Component {
                             <FormGroup onChange={this.handleRadio("licensePurpose")} >
                                 <Label >License Purpose</Label>
                                 <CustomInput type="radio" id="licensePurpose1" name="licensePurpose" value="LVFP" label="城市备案 Local VRB Filling Purpose" />
-                                <CustomInput type="radio" id="licensePurpose2" name="licensePurpose" value="MFP" label="城抵押 Mortgage Filling Purpose" />
+                                <CustomInput type="radio" id="licensePurpose2" name="licensePurpose" value="MFP" label="抵押 Mortgage Filling Purpose" />
                                 <CustomInput type="radio" id="licensePurpose3" name="licensePurpose" value="PS" label="其他 Please specify:">
                                     <Collapse isOpen={formData.licensePurpose === "PS"}>
                                         <Input id="specificPurpose" type="text" maxLength={500} onChange={this.handleChange("specificPurpose")} value={formData.specificPurpose} />
@@ -589,7 +589,7 @@ class LicenseCreate extends Component {
                                 <FormGroup onChange={this.handleChange("deliverWay")} >
                                     <Label>Deliver Way</Label>
                                     <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                    <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number" />
+                                    <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express" />
                                     {formData.documentType === "ORIGINAL"
                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', formData.deliverWay, 'required')}</small>
                                         : null}

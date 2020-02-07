@@ -46,7 +46,7 @@ class TaskDetails extends Component {
             this.goBack(false)
         }
         else {
-            this.setState({ page: this.props.match.params.page, appType: this.props.match.params.appid })
+            this.setState({ page: this.props.match.params.page})
             this.getTaskDetails(this.props.location.state.taskId)
         }
     }
@@ -56,7 +56,7 @@ class TaskDetails extends Component {
         let userId = localStorage.getItem('userId')
         await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`, { headers: { Pragma: 'no-cache' } }).then(res => {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
-            this.setState({ taskDetails: res.data, loading: false })
+            this.setState({ taskDetails: res.data, appType: res.data.applicationTypeId, loading: false })
             console.log(res.data)
         })
         // this.getUserDetails()
@@ -104,7 +104,7 @@ class TaskDetails extends Component {
     }
 
     convertDate(dateValue) {
-        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
         return regEx
     }
 
@@ -184,7 +184,7 @@ class TaskDetails extends Component {
 
 
     convertExpDate(dateValue) {
-        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
         return regEx;
     }
 
@@ -321,7 +321,7 @@ class TaskDetails extends Component {
                                                 bar
                                                 animated={stage.state === "CURRENT" ? true : false}
                                                 striped={stage.state !== "CURRENT"}
-                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "primary" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                 // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                 value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                             </Progress>

@@ -11,7 +11,9 @@ import Axios from 'axios';
 import config from '../../config';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { format } from 'date-fns';
 import InputMask from "react-input-mask";
+import theme from '../theme.css'
 
 
 class MyPendingTasks extends Component {
@@ -49,7 +51,7 @@ class MyPendingTasks extends Component {
                 statusName: "",
                 createdDate: "",
                 createdByName: "",
-                departmentId: ""
+                departmentName: ""
             },
 
             //data retrieved from database
@@ -94,7 +96,7 @@ class MyPendingTasks extends Component {
     }
 
     convertDate(dateValue) {
-        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
         return regEx
     }
 
@@ -139,7 +141,7 @@ class MyPendingTasks extends Component {
         this.setState({ loading: !this.state.loading })
         let userId = localStorage.getItem('userId')
         // let userId = "josh@otds.admin"
-        let url = `${config.url}/tasks?category=pending&companyid=${this.props.legalName}&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`
+        let url = `${config.url}/tasks?category=pending&companyid=${this.props.legalName}&userid=${userId}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentname=${this.state.searchOption.departmentName}&page=${pageNumber}&pagesize=${pageSize}`
         const response = await Axios.get(url, { headers: { Pragma: 'no-cache' } })
         this.setState({ pendingTasks: response.data.tasks, totalPages: response.data.pageCount, loading: !this.state.loading })
         // array = response.data
@@ -172,9 +174,9 @@ class MyPendingTasks extends Component {
 
         let dates = ""
         if (date) {
-            let month = date.getMonth()
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
-        }
+      let tempDate = format(date, "yyyy-MM-dd").split('T')[0];
+      dates = tempDate.replace(/-/g, "")
+    }
 
         // console.log(this.state.page, this.state.limit)
         this.setState({ [view]: date });
@@ -252,7 +254,7 @@ class MyPendingTasks extends Component {
     }
 
     search() {
-        this.getPendingTasks(this.state.page, this.state.limit)
+        this.getPendingTasks(1, this.state.limit)
     }
 
     handleKeyDown = (e) => {
@@ -289,7 +291,7 @@ class MyPendingTasks extends Component {
                 {/* {this.state.show? */}
                 <Card onKeyDown={this.handleKeyDown} >
                     <CardHeader >
-                        Pending Tasks <Button className="float-right" onClick={this.search} >Search</Button>
+                        My Pending Tasks <Button className="float-right" onClick={this.search} >Search</Button>
                     </CardHeader>
                     <CardBody >
                         <ReactTable
@@ -395,20 +397,6 @@ class MyPendingTasks extends Component {
                                     accessor: "departmentName",
                                     width: this.getColumnWidth('departmentName', "Department"),
                                     Cell: this.renderEditable,
-                                    filterMethod: (filter, row) => {
-                                        return row[filter.id] === filter.value;
-                                    },
-                                    Filter: ({ filter, onChange }) => {
-                                        return (
-                                            <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
-                                                <option value="" >Please Select </option>
-                                                {this.state.departments.map((dept, index) =>
-                                                    <option key={index} value={dept.deptId} >{dept.deptName}</option>
-                                                )}
-                                            </Input>
-
-                                        )
-                                    },
                                     style: { textAlign: "center" },
                                 },
                                 {
@@ -540,7 +528,7 @@ class MyPendingTasks extends Component {
                                                 this.goToEditRequest(rowInfo.original.taskId)
                                             }
                                             else {
-                                                this.goToDetails(rowInfo.original.taskId, `/mypendingtask/details/${rowInfo.original.applicationTypeId}`)
+                                                this.goToDetails(rowInfo.original.taskId, `/mypendingtask/details`)
                                                 // this.goToDetails(rowInfo.original.taskId, `/ mypendingtask / details / CNIPS`)
                                             }
 

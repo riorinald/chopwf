@@ -1,12 +1,22 @@
-import React, { Component,useEffect } from 'react';
+import React, { Component } from 'react';
 import axios from 'axios';
-import { Redirect,NavLink } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { fakeAuth } from '../../App';
-import {Card, CardBody, Row, Spinner, Alert } from 'reactstrap';
+import {Card, CardBody, Button, Spinner, Alert } from 'reactstrap';
 import config from '../../config';
-import { access } from 'fs';
 import qs from 'querystring';
 import JWT from 'jsonwebtoken';
+import Cookies from 'universal-cookie';
+import { userInfo } from 'os';
+
+
+const scope ="openid"
+const client_id="812da7d2-b74a-484d-82a3-d30ff8ae6f9c"
+const client_secret="5dd084f6-d9da-452a-86ee-45a6d301439f"
+const redirect_uri="https%3A%2F%2Fdocms.es.corpintra.net%2Fclwf%2Flogin%3Fauthhandler%3DDaimler_OpenID"
+const pathname=`https://sso-int.daimler.com/as/authorization.oauth2?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}`
+
+const cookies = new Cookies();
 
 class Authenticated extends Component { 
   constructor(props) {
@@ -19,7 +29,8 @@ class Authenticated extends Component {
       info: '',
       redirectTo: '/login',
       color:'',
-      timer: 6
+      timer: 5,
+      title: 'Authenticated as'
     };
   }
   
@@ -29,41 +40,69 @@ class Authenticated extends Component {
     if (code){
       this.exchangeToken(code);
     }
-    if (param){
-      console.log(param)
-      if(localStorage.getItem('userId') === param.userid){
-        if(param.workflow){
-          this.props.history.push({
-            pathname:`${param.workflow}/mypendingtask/details/`,
-            state:{redirected:true, taskId:param.taskid}
-          })
-        }
-        else{
-          this.props.history.push({
-            pathname:`${param.workflow}/mypendingtask/details/`,
-            state:{redirected:true, taskId:param.taskid}
-          })
-      }
-    }
-    else{
-      if(param.workflow){
+    else {
+      if (param.session){
         this.setState({
-          loading:false,
-          info: "Login required",
-          color: "danger",
-          redirectTo: '/login'+this.props.location.search        
-        })
-        this.countDown()
+            loading:false,
+            title: 'Session Expired',
+            info: "Your Session is expired. Please do relogin",
+            color: "danger",
+            isExpired:true,
+            timer: 10,
+            redirectTo: '/login'+this.props.location.search    
+          })
+          localStorage.clear()
+          this.countDown()
+      }
+      else if (param.workflow && param.taskid && param.userid){
+        console.log(param)
+        if(localStorage.getItem('userId') === param.userid){
+          if(param.workflow === 'license'){
+            this.props.history.push({
+              pathname:`${param.workflow}/mypendingtask/details/`,
+              state:{redirected:true, taskId:param.taskid}
+            })
+          }
+          else{
+            console.log(param)
+            this.props.history.push({
+              pathname:`/mypendingtask/details/`,
+              state:{redirected:true, taskId:param.taskid}
+            })
+        }
+      }
+      else{
+        if(param.workflow){
+          this.setState({
+            loading:false,
+            title: 'You are not Authenticated',
+            info: "Login required",
+            color: "danger",
+            redirectTo: '/login'+this.props.location.search        
+          })
+          this.countDown()
+        }
+        else {
+          this.setState({
+            loading:false,
+            title: 'You are not Authenticated',
+            info: "Login required",
+            color: "danger",
+            redirectTo: '/login'
+          })
+          this.countDown()
+          }
+        }
       }
       else {
         this.setState({
           loading:false,
+          title: 'You are not Authenticated',
           info: "Login required",
           color: "danger",
           redirectTo: '/login'
         })
         this.countDown()
-        }
       }
     }
   }
@@ -96,18 +135,18 @@ class Authenticated extends Component {
             if(err.response){
               this.setState({
                 loading: false,
+                title: 'You are not Authenticated',
                 info:'error:' + err.response,
                 color: "danger",
-                isExpired:true
               })
                 console.log(err.response)
                 console.log(err.response.statusText)}
             else {
               this.setState({
                 loading: false,
+                title: 'You are not Authenticated',
                 info:"OAuth server unreachable",
                 color: "danger",
-                isExpired:true
               })
                 console.log(err)
             }
@@ -137,6 +176,7 @@ class Authenticated extends Component {
             console.log(err)
             this.setState({
               loading:false,
+              title: 'You are not Authenticated',
               info: "openId not authenticated",
               color: "danger",
             })  
@@ -166,7 +206,7 @@ class Authenticated extends Component {
                   this.setState({
                     loading: false, 
                     info: info,
-                    color: "danger",
+                    color: "success",
                     redirectTo:'/portal'
                   })
                   this.countDown()
@@ -175,7 +215,7 @@ class Authenticated extends Component {
             })
     } catch (error) {
         if (error.response){
-        this.setState({ info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.", color:"success" });
+        this.setState({ info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.", color:"danger" });
         }
         else {
         this.setState({ info: "server unreachable", color: "danger",});
@@ -227,22 +267,20 @@ class Authenticated extends Component {
     if (this.state.timer === 0){
         return <Redirect to={this.state.redirectTo} />
     }
-
-    const authenticated = <label className="display-5 mb-4">Authenticated as {this.state.userDetails.sub || localStorage.getItem('userId')}</label>
-    const notAuth = <label className="display-5 mb-4">You are not Authenticated</label>
-    const loading = <div className="display-5">Loading <Spinner type='grow' color="info" /> </div>
     return(
     <div style={{ backgroundColor: "#2F353A" }}>
-      <Card className="centerd shadow-lg mt-5
-       p-3 rounded">
-        <CardBody>
-          {this.state.loading ? loading : 
-          <div>
-            {this.state.userDetails || localStorage.getItem('userId') ? authenticated : notAuth}
+      <Card className="centerd shadow-lg mt-5 p-3 rounded">
+        <CardBody className="text-center">
+          {this.state.loading
+           ? <div className="display-5">Loading <Spinner type='grow' color="info" /> </div>
+           : <> 
+            <label className="display-5 mb-4 "><center>{this.state.title} {this.state.userDetails.sub || cookies.get(userInfo.userid)}</center></label>
             <Alert color={this.state.color} ><center>{this.state.info}</center></Alert >
-            <p className="mt-3"><center style={{color:'grey'}}>Redirect in {this.state.timer}</center></p>
-          </div>  
-          }   
+            <Button className="btn-openid btn-brand mb-2" onClick= {event =>  window.location.href = pathname} >
+                <i className="fa fa-openid"></i><span>Daimler OpenID Auth</span> </Button>
+            <p className="mt-3 mb-0"><center style={{color:'grey'}}>Redirect in {this.state.timer}</center></p>
+            </>  
+         }   
         </CardBody>
       </Card>
     </div >

@@ -21,7 +21,8 @@ import {
     ListGroupItem,
     CustomInput,
     InputGroup,
-    Collapse
+    Collapse,
+    Spinner
 
 } from 'reactstrap';
 import { tsExpressionWithTypeArguments } from '@babel/types';
@@ -32,7 +33,7 @@ class LicenseInstruction extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            workflow: `${this.props.legalName} WORKFLOW USER GUIDE`,
+            workflow: `${this.props.legalName} Workflow User Guide`,
             applicantInstructions: [],
             approverInstructions: [],
             screenshots: [],
@@ -41,7 +42,9 @@ class LicenseInstruction extends Component {
             width: 0,
             editable: false,
             b64String: "",
-            userGuideFile: null
+            userGuideFile: null,
+            documentName: "",
+            loading: false
         };
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         this.makeEditable = this.makeEditable.bind(this);
@@ -66,19 +69,25 @@ class LicenseInstruction extends Component {
     }
 
     async getUserInstructions(sectionId, name) {
-        const res = await Axios.get(`${config.url}/userinstructions/license/${sectionId}`, { headers: { Pragma: 'no-cache' } })
-        this.setState({ [name]: res.data.sectionData, userGuideFile: this.dataURLtoFile(res.data.sectionData, "User guide") })
+        this.setState({ loading: true })
+        await Axios.get(`${config.url}/userinstructions/license/${sectionId}`, { headers: { Pragma: 'no-cache' } }).then(res => {
+            console.log(res.data)
+            this.setState({ [name]: res.data.sectionData, userGuideFile: this.dataURLtoFile(`data:application/pdf;base64,${res.data.sectionData}`), loading: false })
+        })
         // console.log(res.data)
     }
 
 
     makeEditable() {
         if (this.state.editable) {
-            alert("Instructions updated")
+            this.setState({ loading: true })
             //codes to update instructions to the database
-            this.updateInstructions("USERINSTRUCTIONS", this.state.b64String)
-            // this.updateInstructions("APPLICANT")
-            // this.updateInstructions("APPROVERS")
+            this.updateInstructions("USERINSTRUCTIONS", this.state.b64String, (cb) => {
+                console.log(cb)
+                this.setState({ loading: false })
+                window.location.reload()
+            })
+
         }
         this.setState({ editable: !this.state.editable })
     }
@@ -86,16 +95,17 @@ class LicenseInstruction extends Component {
     getBase64(file, callback) {
         let reader = new FileReader();
         reader.onload = function () {
-            callback(reader.result)
+            var b64 = reader.result.replace(/^data:.+;base64,/, '')   //87576ef7365r73d=
+            callback(b64)
         };
         reader.readAsDataURL(file)
     }
 
     handleFileUpload(event) {
-        let file = null
+        let file = event.target.files[0]
         if (event.target.files[0]) {
             this.getBase64(event.target.files[0], (result) => {
-                this.setState({ b64String: result })
+                this.setState({ b64String: result, documentName: file.name })
                 // 
             })
         }
@@ -119,21 +129,26 @@ class LicenseInstruction extends Component {
             return ""
     }
 
-    async updateInstructions(sectionId, b64) {
+    async updateInstructions(sectionId, b64, cb) {
         console.log(b64)
         let newFormData = new FormData()
-
         newFormData.append("sectionData", b64)
+        newFormData.append("documentFileName", this.state.documentName)
 
-        await Axios.put(`${config.url}/userInstructions/license/${sectionId}/${localStorage.getItem('userId')}`, newFormData).then(res => {
-        })
+        await Axios.put(`${config.url}/userInstructions/license/${sectionId}/${localStorage.getItem('userId')}`, newFormData)
+            .then(res => {
+                cb(res.data)
+            })
+            .catch(error => {
+                cb(error)
+            })
     }
 
     viewOrDownloadFile() {
+        console.log(this.state.b64String)
 
-        if (this.state.b64String !== "") {
-            var arr = this.state.b64String.split(','),
-                mime = arr[0].match(/:(.*?);/)[1]
+        if (this.state.b64String !== "" && this.state.userGuideFile) {
+            var mime = "data:application/pdf;"
             let file = this.state.userGuideFile
             var blobUrl = new Blob([file], { type: mime })
             if (window.navigator && window.navigator.msSaveOrOpenBlob) {
@@ -152,12 +167,12 @@ class LicenseInstruction extends Component {
     render() {
         const Edit = <img onClick={this.makeEditable} width="20px" src={editIcon} />
         const Apply = <Button color="primary" onClick={this.makeEditable}>APPLY</Button>
-
+        let { loading } = this.state
         return (
             <div className="animated fadeIn">
-                <h2>User Guide</h2>
+                <h4>User Guide</h4>
                 <Card >
-                    <CardHeader><h5 style={{ float: "left" }}>{this.state.workflow}</h5>
+                    <CardHeader><div style={{ float: "left" }}>{this.state.workflow}</div>
                         {localStorage.getItem('viewAdminLicense') === "true"
                             ? <div style={{ float: "right" }}>
                                 {!this.state.editable ? Edit : Apply}
@@ -166,24 +181,28 @@ class LicenseInstruction extends Component {
                     </CardHeader>
 
                     <CardBody>
-                        <Collapse isOpen={this.state.editable}>
-                            <Form>
-                                <FormGroup>
-                                    <Label>Add new user guide</Label>
-                                    <CustomInput label="User Guide" id="userGuideUpload" onChange={this.handleFileUpload} type="file" accept=".pdf" />
-                                </FormGroup>
-                            </Form>
-                        </Collapse>
-                        <Collapse isOpen={!this.state.editable}>
-                            <Row>
-                                <Col style={{ textAlign: "center" }} >
-                                    <div style={{ fontSize: "60px" }} >
-                                        <i style={{ cursor: "pointer" }} onClick={this.viewOrDownloadFile} className="fa-lg fa-file-pdf-o fa" aria-hidden="true"></i>
-                                    </div>
-                                    <div><Label>User Guide</Label></div>
-                                </Col>
-                            </Row>
-                        </Collapse>
+                        {loading
+                            ? <div style={{ textAlign: "center" }} ><Spinner></Spinner></div>
+                            : <><Collapse isOpen={this.state.editable}>
+                                <Form>
+                                    <FormGroup>
+                                        <Label>Add new user guide</Label>
+                                        <CustomInput label="User Guide" id="userGuideUpload" onChange={this.handleFileUpload} type="file" accept=".pdf" />
+                                    </FormGroup>
+                                </Form>
+                            </Collapse>
+                                <Collapse isOpen={!this.state.editable}>
+                                    <Row>
+                                        <Col style={{ textAlign: "center" }} >
+                                            <div style={{ fontSize: "60px" }} >
+                                                <i style={{ cursor: "pointer" }} onClick={this.viewOrDownloadFile} className="fa-lg fa-file-pdf-o fa" aria-hidden="true"></i>
+                                            </div>
+                                            <div><Label>User Guide</Label></div>
+                                        </Col>
+                                    </Row>
+                                </Collapse>
+                            </>
+                        }
                     </CardBody>
                 </Card>
             </div>

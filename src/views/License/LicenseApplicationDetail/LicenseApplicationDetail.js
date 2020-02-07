@@ -69,7 +69,7 @@ class LicenseApplicationDetail extends Component {
 
 
     convertDate(dateValue) {
-        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
         return regEx
     }
 
@@ -378,7 +378,7 @@ class LicenseApplicationDetail extends Component {
                                                     bar
                                                     animated={stage.state === "CURRENT" ? true : false}
                                                     striped={true}
-                                                    color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                    color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "primary" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                     // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "green" : "secondary  "}
                                                     value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "white" : stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                 </Progress>
@@ -410,7 +410,7 @@ class LicenseApplicationDetail extends Component {
                                 </Col>
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col md><h5><i className="fa fa-tablet mr-2" /> +86 10 {taskDetails.telephoneNum} </h5></Col>
+                                        <Col md><h5><i className="fa fa-tablet mr-2" />{taskDetails.telephoneNum} </h5></Col>
                                     </Row>
                                     <Row>
                                         <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.email}</h5></Col>

@@ -60,6 +60,7 @@ const SelectTable = selectTableHOC(ReactTable);
 
 const animatedComponents = makeAnimated();
 
+
 // var NewFormData = require('formdata-polyfill')
 
 class Create extends Component {
@@ -169,7 +170,7 @@ class Create extends Component {
       contractValid: true,
 
       checkDetails: {},
-
+      wrongDocError: "",
 
       reqInfo: [
         { id: "deptSelected", valid: false },
@@ -184,16 +185,7 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       validateForm: [],
-      noteInfo: [
-        {
-          chinese: "如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
-          english: "For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
-        },
-        {
-          chinese: "如您需要在含有个人身份信息（如身份信息、护照信息）的文件上盖章，请不要上传附件或者遮盖关键信息后再上传。",
-          english: "If you need to chop on personal information (e.g. ID info, Passport info) related documents, please don’t upload them into system or upload after covering key information. "
-        }
-      ],
+      noteInfo: [],
       mask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[A-Z]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
       // mask: "a-a-a-9999-9999",
       selectInfo: '',
@@ -218,7 +210,7 @@ class Create extends Component {
     this.handleSelectOption = this.handleSelectOption.bind(this);
     this.checkDept = this.checkDept.bind(this);
 
-    this.validator = new SimpleReactValidator({autoForceUpdate: this, locale: 'en'});
+    this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
     this.hideDoc = this.hideDoc.bind(this);
@@ -234,8 +226,25 @@ class Create extends Component {
     this.getData("chopTypes", `${config.url}/choptypes?companyid=` + this.props.legalName);
     // resetMounted.setMounted()
     this.setContractNotes();
+    this.getNotes()
 
 
+  }
+
+  getNotes() {
+    axios.get(`${config.url}/notes/0`)
+      .then(res => {
+        let tempNotes = res.data.noteContent.split('%')
+        for (let i = 0; i < tempNotes.length; i++) {
+          let obj = {
+            chinese: tempNotes[i].split('#')[0],
+            english: tempNotes[i].split('#')[1]
+          }
+          this.setState({
+            noteInfo: this.state.noteInfo.concat(obj)
+          })
+        }
+      })
   }
 
   setContractNotes() {
@@ -513,6 +522,7 @@ class Create extends Component {
       text: '',
       footer: '',
       allowOutsideClick: false,
+      showConfirmButton: true,
       onClose: () => { if (!showError) { this.formReset() } },
       onBeforeOpen: () => {
         Swal.showLoading()
@@ -537,13 +547,14 @@ class Create extends Component {
             let err3 = ""
             if (error.response) {
               console.log(error.response)
-              let keys = Object.keys(error.response.data.errors)
-              err = keys.join(',')
-              keys.map(key => {
-                // console.log(error.response.data.errors[key].join(','))
-                err2.push(error.response.data.errors[key].join(','))
-              })
-              err3 = err2.join(';')
+              err3 = error.response.message
+              // let keys = Object.keys(error.response.data.errors)
+              // err = keys.join(',')
+              // keys.map(key => {
+              // console.log(error.response.data.errors[key].join(','))
+              // err2.push(error.response.data.errors[key].join(','))
+              // })
+              // err3 = err2.join(';')
             }
             Swal.update({
               title: "Error",
@@ -569,7 +580,7 @@ class Create extends Component {
   }
 
   convertExpDate(dateValue) {
-    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
     return regEx;
   }
   changeDeptHeads(heads) {
@@ -825,7 +836,7 @@ class Create extends Component {
     }
 
     else if (name === "numOfPages") {
-      if (value.length > 9) {
+      if (/[a-z]/i.test(value) | value.length > 9) {
         value = this.state.numOfPages
         this.setState({ invalidNumberOfPages: true })
         event.target.className = "is-invalidform-control"
@@ -1112,8 +1123,12 @@ class Create extends Component {
       errorMessage.push("Please select a valid document.<br />")
     }
     if (this.state.isLTI) {
-      if (this.state.engName === "" && this.state.cnName === "") {
-        errorMessage.push("Please input document name in English and Chinese.<br />")
+      if (this.state.engName === "") {
+        errorMessage.push("Please input document name in English.<br />")
+        typeValid = false
+      }
+      if (this.state.cnName === "") {
+        errorMessage.push("Please input document name in Chinese.<br />")
         typeValid = false
       }
       if (this.state.invalidEnglish === true) {
@@ -1300,6 +1315,9 @@ class Create extends Component {
       this.setState({ documentTableLTU: this.state.selectedDocs })
       document.getElementById("documentTableLTU").className = ""
     }
+    else {
+      this.setState({ documentTableLTU: [] })
+    }
   }
 
 
@@ -1375,19 +1393,39 @@ class Create extends Component {
   };
 
   uploadDocument = event => {
+    let ext = ["ipg", "png", "xls", "xlsm", "xlsx", "email", "jpeg", "txt", "rtf", "tiff", "tif", "doc", "docx", "pdf", "pdfx", "bmp"]
+    let valid = false
     if (event.target.files[0]) {
-      this.setState({
-        docSelected: event.target.files[0],
-        docAttachedName: event.target.files[0].name
-
-      })
+      let last = event.target.files[0].name.split('.').length
+      let extension = event.target.files[0].name.split('.')[last - 1]
+      console.log(extension)
+      for (let i = 0; i < ext.length; i++) {
+        if (ext[i] === extension) {
+          valid = true
+          break;
+        }
+        else {
+          valid = false
+        }
+      }
+      if (valid) {
+        this.setState({
+          docSelected: event.target.files[0],
+          docAttachedName: event.target.files[0].name,
+          wrongDocError: ""
+        })
+      }
+      else {
+        this.setState({ wrongDocError: "Please attach a valid document !" })
+      }
     }
     event.target.value = null
   }
 
   handleSelectOption = sname => newValue => {
+    console.log(sname, newValue)
 
-    if (newValue)
+    if (newValue) {
       if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
         if (newValue) {
           this.setState({ selectedOption: { [sname]: newValue }, [sname]: newValue })
@@ -1404,6 +1442,15 @@ class Create extends Component {
         }
         this.setState({ selectedOption: { [sname]: newValue }, [sname]: newValue.value })
       }
+    }
+    else {
+      if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
+        this.setState({ selectedOption: { [sname]: newValue }, [sname]: [] })
+      }
+      else {
+        this.setState({ selectedOption: { [sname]: newValue }, [sname]: "" })
+      }
+    }
 
   }
 
@@ -1512,6 +1559,7 @@ class Create extends Component {
       while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
       }
+      console.log(mime)
 
       return new File([u8arr], filename, { type: mime });
     }
@@ -1546,6 +1594,32 @@ class Create extends Component {
     }
     else {
       pointer = {}
+    }
+
+    const getYear = date => {
+      console.log(date.getFullYear())
+      return date.getFullYear()
+    }
+
+    const year = (new Date()).getFullYear();
+    const years = Array.from(new Array(2), (val, index) => index + year);
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
+    const getMonth = date => {
+      let month = date.getMonth()
+      return months[month]
     }
 
     const reactSelectControl = {
@@ -1748,6 +1822,7 @@ class Create extends Component {
                 <CustomInput id="docFileName" onChange={this.uploadDocument}
                   accept=".ipg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp"
                   type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
+                <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
               </FormGroup>
             </Col>
             <Col xl={1}>
@@ -1790,7 +1865,7 @@ class Create extends Component {
             : null}
         </InputGroup>
         <Modal color="info" size="xl" toggle={this.hideDoc} isOpen={this.state.showDoc} >
-          <ModalHeader className="center"> Select Documents </ModalHeader>
+          <ModalHeader toggle={this.hideDoc} className="center"> Select Documents  </ModalHeader>
           <ModalBody>
             <SelectTable
               {...this.props}
@@ -1898,16 +1973,14 @@ class Create extends Component {
               <CardBody>
                 <FormGroup>
                   <h5><b>NOTES :</b></h5>
-                  <ol>
+                  <ol id="notes" className="font-weight-bold">
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
-                        <b><p> {info.chinese} </p></b>
-                        <b><p> {info.english} </p></b>
+                        <p> {info.chinese} </p>
+                        <p> {info.english} </p>
                       </li>
                     ))}
                   </ol>
-                  {/* <p>{this.state.noteInfo.chinese}</p> */}
-                  {/* <p>{this.state.noteInfo.english}</p> */}
                 </FormGroup>
                 <Form className="form-horizontal" innerRef={this.formRef}>
                   {/* <FormGroup>
@@ -1971,6 +2044,46 @@ class Create extends Component {
                       <Label>Effective Period</Label>
                       <DatePicker autoComplete="off" id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        renderCustomHeader={({
+                          date,
+                          changeYear,
+                          changeMonth,
+                          decreaseMonth,
+                          increaseMonth,
+                          prevMonthButtonDisabled,
+                          nextMonthButtonDisabled
+                        }) => (
+                            <div
+                              style={{
+                                margin: 10,
+                                display: "flex",
+                                justifyContent: "center"
+                              }}
+                            >
+                              <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                              <Input
+                                value={getYear(date)}
+                                onChange={({ target: { value } }) => changeYear(value)}
+                                type="select">
+                                {years.map(option => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                changeMonth(months.indexOf(value))
+                              } type="select">
+                                {months.map((option) => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                            </div>
+                          )}
                         peekNextMonth
                         showMonthDropdown
                         showYearDropdown
@@ -2102,7 +2215,7 @@ class Create extends Component {
                       <Label>Return Date</Label>
                       <Row />
                       <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                        className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        className="form-control" required dateFormat="yyyy/MM/dd"
                         selected={this.state.dateView2}
                         onChange={this.dateChange("returnDate", "dateView2")}
                         minDate={new Date()} maxDate={addDays(new Date(), 30)} />
@@ -2169,7 +2282,7 @@ class Create extends Component {
 
                   {this.state.isLTI
                     ? <FormGroup>
-                      <Label>Document Check By <i className="fa fa-user" /></Label>
+                      <Label>Document Check By <i className="fa fa-user" /> PB7 or above </Label>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect
                         id="docCheckByLTI"
