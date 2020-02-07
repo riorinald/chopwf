@@ -207,7 +207,7 @@ class LicenseMyPendingTasks extends Component {
 
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            this.getPendingTasks(this.state.page, this.state.limit)
+            this.getPendingTasks(1, this.state.limit)
         }
     }
 
@@ -231,7 +231,7 @@ class LicenseMyPendingTasks extends Component {
             <div className="animated fadeIn">
                 <h4>My Pending Tasks</h4>
                 <Card onKeyDown={this.handleKeyDown}>
-                    <CardHeader>My Pending Tasks <Button className="float-right" onClick={() => this.getPendingTasks(this.state.page, this.state.limit)} >Search</Button></CardHeader>
+                    <CardHeader>My Pending Tasks <Button className="float-right" onClick={() => this.getPendingTasks(1, this.state.limit)} >Search</Button></CardHeader>
                     <CardBody>
                         <ReactTable
                             data={pendingTasks}
@@ -453,6 +453,7 @@ class LicenseMyPendingTasks extends Component {
                                 this.setState({ limit: pageSize, page: page + 1 });
                                 this.getPendingTasks(page + 1, pageSize)
                             }}
+                            page={this.state.page - 1}
                             className="-striped -highlight"
                             loading={this.state.loading}
                             pages={totalPages}
