@@ -38,7 +38,10 @@ class LicenseAdmin extends Component {
         this.toggleAccordion = this.toggleAccordion.bind(this)
     }
     componentDidMount() {
-        const isAdmin = Authorize.check(this.props.legalName, Authorize.getCookies().licenseAdminCompanyIds)
+        const legalEntity = this.props.legalName
+        const adminEntity = Authorize.getCookies().licenseAdminCompanyIds
+
+        const isAdmin = Authorize.check(legalEntity, adminEntity)
             if (isAdmin) {
                 this.setState({ isAdmin: isAdmin })
         }

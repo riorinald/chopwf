@@ -82,7 +82,10 @@ class ChopApplication extends Component {
     // this.dateChange = this.dateChange.bind(this);
   }
   componentDidMount() {
-    const isAdmin = Authorize.check(this.props.legalName, Authorize.getCookies().chopKeeperCompanyIds)
+    const legalEntity = this.props.legalName
+    const adminEntity = Authorize.getCookies().chopKeeperCompanyIds
+    const isAdmin = Authorize.check(legalEntity, adminEntity)
+    
       if (isAdmin) {
         this.setState({ isAdmin: isAdmin })
         this.getApplications(1, this.state.limit);

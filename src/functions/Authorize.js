@@ -16,7 +16,7 @@ const getCookies = () => {
 
 const setCookies = (data) => {
 		let minutes = 720 //set Expired in minutes
-		let expiredIn = new Date
+		let expiredIn = new Date()
 		expiredIn.setTime(expiredIn.getTime() + (minutes*60*1000));
 		console.log('SET COOKIE EXP', expiredIn)
 		cookies.set('userInfo', data, { path:'/', expires: expiredIn });
@@ -26,12 +26,12 @@ const check = (legalEntity, adminEntity) => {
 		let isAdmin = false
 		for (let i = 0; i < adminEntity.length; i++) {
 			if (adminEntity[i] === legalEntity) {
-				console.log('authorized')
 				isAdmin = true
+				console.log('authorized', isAdmin, legalEntity, adminEntity)
 				return isAdmin
 			}
 			else {
-				console.log('Unauthorized')
+				console.log('Unauthorized', isAdmin, legalEntity, adminEntity)
 				isAdmin = false
 				return isAdmin 
 			}
