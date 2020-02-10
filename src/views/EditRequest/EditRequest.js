@@ -119,7 +119,7 @@ class EditRequest extends Component {
                 teamName: "",
                 effectivePeriod: "",
             },
-            selectedOption: {},
+            selectedOption:{documentCheckBy:null},
 
             modal: false,
             validateForm: [],
@@ -777,7 +777,6 @@ class EditRequest extends Component {
                 taskDetails.contractSignedByFirstPerson = ""
                 taskDetails.contractSignedByFirstPersonOption = null
                 taskDetails.documentCheckBy = ""
-                taskDetails.selectedOption = {}
                 taskDetails.selectedDeptHeads = []
                 taskDetails.departmentHeads = []
                 taskDetails.isUseInOffice = "Y"
@@ -1491,9 +1490,11 @@ class EditRequest extends Component {
         })
         if (sname === "documentCheckBy1") {
             let element = document.getElementById("documentCheckBy")
+            if (element) {
             element.classList.contains("form-control")
                 ? element.className = "is-valid form-control"
                 : element.className = "isValid"
+            }
         }
         else {
             let element = document.getElementById(sname)
@@ -2611,7 +2612,7 @@ class EditRequest extends Component {
                                                     />
                                                     :
                                                     <Select
-                                                        id="documentCheckBy"
+                                                        id="documentCheckBy1"
                                                         options={docCheckBy}
                                                         isClearable
                                                         value={this.state.selectedOption.documentCheckBy}
