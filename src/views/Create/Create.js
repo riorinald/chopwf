@@ -1217,9 +1217,9 @@ class Create extends Component {
           docName: this.state.docAttachedName,
           docURL: URL.createObjectURL(this.state.docSelected),
         }
-        this.getBase64(this.state.docSelected, (result) => {
-          obj.documentBase64String = result
-        })
+        // this.getBase64(this.state.docSelected, (result) => {
+        //   obj.documentBase64String = result
+        // })
 
         console.log(obj.docURL)
         this.setState({
@@ -1247,6 +1247,7 @@ class Create extends Component {
   getBase64(file, callback) {
     let reader = new FileReader();
     reader.onload = function () {
+      console.log(reader.result)
       callback(reader.result.replace(/^data:.+;base64,/, ''))
     };
     reader.readAsDataURL(file)
@@ -1541,7 +1542,7 @@ class Create extends Component {
             }
             else {
               // Swal.hideLoading();
-              Swal.close();    
+              Swal.close();
               this.setState({ showDoc: true })
             }
           })

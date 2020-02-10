@@ -86,18 +86,18 @@ class LicenseApplication extends Component {
         this.setState({ [name]: res.data })
     }
     goToDetails(taskId, status) {
-        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACKED") {
-            this.props.history.push({
-                pathname: `admin-apps/edit`,
-                state: { redirected: true, taskId: taskId }
-            })
-        }
-        else {
-            this.props.history.push({
-                pathname: `admin-apps/details`,
-                state: { redirected: true, taskId: taskId }
-            })
-        }
+        // if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACKED") {
+        //     this.props.history.push({
+        //         pathname: `admin-apps/edit`,
+        //         state: { redirected: true, taskId: taskId }
+        //     })
+        // }
+        // else {
+        this.props.history.push({
+            pathname: `admin-apps/details`,
+            state: { redirected: true, taskId: taskId }
+        })
+        // }
 
     }
 
@@ -198,9 +198,9 @@ class LicenseApplication extends Component {
     dateChange = (name, view) => date => {
         let dates = ""
         if (date) {
-      let tempDate = format(date, "yyyy-MM-dd").split('T')[0];
-      dates = tempDate.replace(/-/g, "")
-    }
+            let tempDate = format(date, "yyyy-MM-dd").split('T')[0];
+            dates = tempDate.replace(/-/g, "")
+        }
         this.setState({ [view]: date });
         this.setState(state => {
             let searchOption = this.state.searchOption

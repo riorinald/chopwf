@@ -2037,20 +2037,20 @@ class EditRequest extends Component {
     }
 
     viewOrDownloadFile(b64, type, name, url) {
-        if (b64 !== "") {
-            let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
-            var blobUrl = new Blob([file], { type: type })
-            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-                window.navigator.msSaveOrOpenBlob(blobUrl, name)
-                return;
-            }
-            else {
-                window.open(url, "_blank")
-            }
+        // if (b64 !== "") {
+        let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+        var blobUrl = new Blob([file], { type: type })
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(blobUrl, name)
+            return;
         }
         else {
-            alert("BASE 64 String is empty !!!")
+            window.open(url, "_blank")
         }
+        // }
+        // else {
+        // alert("BASE 64 String is empty !!!")
+        // }
     }
 
     getBase64(file, callback) {
@@ -2697,8 +2697,8 @@ class EditRequest extends Component {
                                                     onChange={this.handleSelectOption("departmentHeads")}
                                                     menuPortalTarget={document.body}
                                                     components={animatedComponents}
-                                                    styles={taskDetails.deptHeadSelected === null ? reactSelectControl : ""} 
-                                                    />
+                                                    styles={taskDetails.deptHeadSelected === null ? reactSelectControl : ""}
+                                                />
                                                 <InputGroup>
                                                     {taskDetails.applicationTypeId === "STU" || taskDetails.applicationTypeId === "LTI"
                                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Department Heads', taskDetails.departmentHeads, 'required')}</small>

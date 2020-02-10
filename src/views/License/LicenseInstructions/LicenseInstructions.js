@@ -147,7 +147,7 @@ class LicenseInstruction extends Component {
     viewOrDownloadFile() {
         console.log(this.state.b64String)
 
-        if (this.state.b64String !== "" && this.state.userGuideFile) {
+        if (this.state.userGuideFile) {
             var mime = "data:application/pdf;"
             let file = this.state.userGuideFile
             var blobUrl = new Blob([file], { type: mime })
