@@ -419,17 +419,17 @@ class Myapps extends Component {
                   Cell: this.renderEditable,
                   style: { textAlign: "center" }
                 },
-                {
-                  Header: "New Return Date",
-                  accessor: "newReturnDate",
-                  filterable: false,
-                  width: this.getColumnWidth('newReturnDate', "New Return Date"),
-                  // Cell: this.renderEditable,
-                  Cell: row => (
-                    <div> {this.convertDate(row.original.newReturnDate)} </div>
-                  ),
-                  style: { textAlign: "center" }
-                },
+                // {
+                //   Header: "New Return Date",
+                //   accessor: "newReturnDate",
+                //   filterable: false,
+                //   width: this.getColumnWidth('newReturnDate', "New Return Date"),
+                //   // Cell: this.renderEditable,
+                //   Cell: row => (
+                //     <div> {this.convertDate(row.original.newReturnDate)} </div>
+                //   ),
+                //   style: { textAlign: "center" }
+                // },
               ]}
               defaultPageSize={this.state.limit}
               manual
