@@ -1534,14 +1534,14 @@ class Create extends Component {
             if (numberOfDocuments === 0) {
               Swal.update({
                 title: "No Documents",
-                html: 'there is no Documents in this appliction. ',
+                html: 'There is no documents in this appliction. ',
                 type: "warning"
               })
               Swal.hideLoading()
             }
             else {
               // Swal.hideLoading();
-              Swal.close();
+              Swal.close();    
               this.setState({ showDoc: true })
             }
           })

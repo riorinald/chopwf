@@ -120,7 +120,7 @@ class EditRequest extends Component {
                 effectivePeriod: "",
             },
 
-            selectedOption:{},
+            selectedOption: {},
 
             modal: false,
             validateForm: [],
@@ -490,7 +490,7 @@ class EditRequest extends Component {
         }
         temporary.departmentId = temporary.departmentId.toLowerCase()
         // console.log(temporary.requestorUser)
-        this.setState({ selectedOption: {documentCheckBy:temporary.documentCheckBy}, taskDetails: temporary, tempDocument: temporary.documents, loading: false })
+        this.setState({ selectedOption: { documentCheckBy: temporary.documentCheckBy }, taskDetails: temporary, tempDocument: temporary.documents, loading: false })
         console.log(temporary)
 
     }
@@ -774,7 +774,7 @@ class EditRequest extends Component {
                 taskDetails.contractSignedByFirstPerson = ""
                 taskDetails.contractSignedByFirstPersonOption = null
                 taskDetails.documentCheckBy = ""
-                taskDetails.selectedOption = null
+                taskDetails.selectedOption = {}
                 taskDetails.selectedDeptHeads = []
                 taskDetails.departmentHeads = []
                 taskDetails.isUseInOffice = "Y"
@@ -1495,7 +1495,7 @@ class EditRequest extends Component {
                 : element.className = "isValid"
         }
 
-        if (sname === "departmentHeads" || sname === "documentCheckBy") {
+        if (sname === "departmentHeads" || sname === "documentCheckBy") {      
             let value = []
             if (sname === "departmentHeads") {
                 this.setState({ selectedDeptHeads: newValue })
@@ -1512,7 +1512,7 @@ class EditRequest extends Component {
                 let taskDetails = this.state.taskDetails
                 taskDetails[sname] = value
                 return { taskDetails }
-            })
+            }, () => console.log(this.state.selectedDeptHeads))
         }
 
         else if (sname === "documentCheckBy1") {
