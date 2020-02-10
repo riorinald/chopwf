@@ -28,6 +28,7 @@ const DefaultAside = React.lazy(() => import('./DefaultAside'));
 const DefaultFooter = React.lazy(() => import('./DefaultFooter'));
 const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
 
+
 class DefaultLayout extends Component {
 
   loading = () => <div className="animated fadeIn pt-1 text-center"><Spinner /></div>
@@ -39,16 +40,18 @@ class DefaultLayout extends Component {
     this.props.history.push('/logout')
   }
 
+
   constructor(props) {
     super(props);
+    const cookiesInfo = Authorize.getCookies()
     this.state = {
       legalEntity: localStorage.getItem('legalEntity'),
       application: localStorage.getItem('application'),
-      roleId: Authorize.getCookies().roleId,
-      cAdmin: Authorize.getCookies().isChopKeeper,
-      lAdmin: Authorize.getCookies().isLicenseAdmin,
-      licenseAdminCompany: Authorize.getCookies().licenseAdminCompanyIds,
-      chopKeeperCompany: Authorize.getCookies().licenseAdminCompanyIds,
+      roleId: cookiesInfo.roleId,
+      cAdmin: cookiesInfo.isChopKeeper,
+      lAdmin: cookiesInfo.isLicenseAdmin,
+      licenseAdminCompany: cookiesInfo.licenseAdminCompanyIds,
+      chopKeeperCompany: cookiesInfo.chopKeeperCompanyIds,
       showChopAdmin: false,
       showLicenseAdmin: false,
       newRoutes: [],
@@ -125,69 +128,7 @@ class DefaultLayout extends Component {
     });
   }
 
-  getRoute(application) {
-    let { licenseAdminCompany, legalEntity, chopKeeperCompany } = this.state
-    switch (application) {
-      case 'CHOP':
-        if (this.state.cAdmin === 'N') {
-          localStorage.setItem('viewAdminChop', false)
-          return routes.routesRequestor;
-        }
-        if (this.state.cAdmin === 'Y') {
-          let show = false
-          for (let i = 0; i < chopKeeperCompany.length; i++) {
-            if (chopKeeperCompany[i] === legalEntity) {
-              localStorage.setItem('viewAdminChop', true)
-              show = true
-              break;
-            }
-            else {
-              localStorage.setItem('viewAdminChop', false)
-              show = false
-            }
-          }
-          if (show)
-            return routes.routesChopAdmin;
-          else
-            return routes.routesRequestor;
-        }
-        else return this.signOut();
-        console.log('error! Roles not match, no sideBarNav');
-
-      case 'LICENSE':
-        if (this.state.lAdmin === 'N') {
-          localStorage.setItem('viewAdminLicense', false)
-          return routes.routesRequestor;
-        }
-        if (this.state.lAdmin === 'Y') {
-          let show = false
-          for (let i = 0; i < licenseAdminCompany.length; i++) {
-            if (licenseAdminCompany[i] === legalEntity) {
-              localStorage.setItem('viewAdminLicense', true)
-              show = true
-              break;
-            }
-            else {
-              localStorage.setItem('viewAdminLicense', false)
-              show = false
-            }
-          }
-          if (show)
-            return routes.routesLicenseAdmin;
-          else
-            return routes.routesRequestor;
-        }
-        else return this.signOut();
-        console.log('error! Roles not match, no sideBarNav');
-
-      default:
-        return this.signOut();
-        console.log('error! workflow application not match, no sideBarNav');
-    }
-  }
-
-
-  handleSideBarNav(application) {
+handleSideBarNav(application) {
     let { licenseAdminCompany, legalEntity, chopKeeperCompany } = this.state
     switch (application) {
       case 'CHOP':

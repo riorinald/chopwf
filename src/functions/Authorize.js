@@ -24,18 +24,18 @@ const setCookies = (data) => {
 
 const check = (legalEntity, adminEntity) => {
 		let isAdmin = false
-		for (let i = 0; i < adminEntity.length; i++) {
-			if (adminEntity[i] === legalEntity) {
-				isAdmin = true
-				console.log('authorized', isAdmin, legalEntity, adminEntity)
-				return isAdmin
-			}
-			else {
-				console.log('Unauthorized', isAdmin, legalEntity, adminEntity)
-				isAdmin = false
-				return isAdmin 
-			}
-		}
+		// for (let i = 0; i < adminEntity.length; i++) {
+		// 	if (adminEntity[i] === legalEntity) {
+		// 		isAdmin = true
+		// 		console.log('authorized', isAdmin, legalEntity, adminEntity)
+		// 	}
+		// 	else {
+		// 		isAdmin = false
+		// 		console.log('Unauthorized', isAdmin, legalEntity, adminEntity)
+		// 	}
+		// }
+		isAdmin = (adminEntity.indexOf(legalEntity) > -1);
+		return isAdmin
 	}
 
 const Authorize = ({getCookies, setCookies, check})
