@@ -7,7 +7,7 @@ import {
     Label,
     Progress, UncontrolledTooltip,
     Badge,
-    Modal, ModalBody, ModalFooter, ModalHeader,
+    Modal, ModalBody, ModalFooter, ModalHeader, Spinner,
 } from 'reactstrap';
 import Axios from 'axios';
 import config from '../../config';
@@ -35,6 +35,7 @@ class TaskDetails extends Component {
             loading: true,
             page: "",
             appType: "",
+            isExpired: false
         }
 
         this.goBack = this.goBack.bind(this)
@@ -58,6 +59,11 @@ class TaskDetails extends Component {
         let userId = Authorize.getCookies().userId
         await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`, { headers: { Pragma: 'no-cache' } }).then(res => {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
+
+            if(res.data.actions.length === 0){
+                console.log('expired')
+                this.setState({isExpired: true})
+            }
             this.setState({ taskDetails: res.data, appType: res.data.applicationTypeId, loading: false })
             console.log(res.data)
         })
@@ -290,9 +296,17 @@ class TaskDetails extends Component {
 
     render() {
 
-        const { taskDetails, userDetails, loading, showModal, page, appType } = this.state
-        const viewDetail = null
+        const { taskDetails, loading, showModal, page, appType, isExpired } = this.state
 
+        if (page === 'mypendingtask' && isExpired){
+            return <>
+                <Card className="animated fadeIn">
+                    <CardBody>
+                        <h5>Task is no longer in the pending list.</h5>
+                    </CardBody>
+                </Card>
+                </>
+        }
         return (
             <div className="animated fadeIn">
                 {!loading ?
@@ -518,7 +532,8 @@ class TaskDetails extends Component {
 
                         </CardBody>
                     </Card>
-                    : null
+                    : 
+                    <div className="animated fadeIn pt-3 text-center"><Spinner /> <br />Loading ...</div>
                 }
             </div>
         )
