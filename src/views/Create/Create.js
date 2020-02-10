@@ -675,7 +675,6 @@ class Create extends Component {
     let value = event.target.value
     this.setState({ agreeTerms: false })
     if (name === "appTypeSelected") {
-
       this.setState({
         // deptSelected: "",
         chopTypeSelected: "",

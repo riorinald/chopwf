@@ -119,7 +119,7 @@ class EditRequest extends Component {
                 teamName: "",
                 effectivePeriod: "",
             },
-            selectedOption:{documentCheckBy:null},
+            selectedOption: { documentCheckBy: null },
 
             modal: false,
             validateForm: [],
@@ -777,14 +777,13 @@ class EditRequest extends Component {
                 taskDetails.contractSignedByFirstPerson = ""
                 taskDetails.contractSignedByFirstPersonOption = null
                 taskDetails.documentCheckBy = ""
-                taskDetails.selectedDeptHeads = []
                 taskDetails.departmentHeads = []
                 taskDetails.isUseInOffice = "Y"
                 selectedOption.documentCheckBy = null
                 editRequestForm.collapseUIO = true
                 return { taskDetails, editRequestForm, selectedOption }
             })
-            this.setState({ dateView1: null, dateView2: null })
+            this.setState({ dateView1: null, dateView2: null, selectedDeptHeads: [] })
             this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${event.target.value}`);
         }
 
@@ -1073,7 +1072,8 @@ class EditRequest extends Component {
         }
         else {
             for (let i = 0; i < doc.length; i++) {
-                if (doc[i].docName === this.state.editRequestForm.docAttachedName) {
+                console.log(doc[i].documentFileName, this.state.editRequestForm.docAttachedName)
+                if (doc[i].documentFileName === this.state.editRequestForm.docAttachedName) {
                     valid = false
                     break
                 }
@@ -1491,9 +1491,9 @@ class EditRequest extends Component {
         if (sname === "documentCheckBy1") {
             let element = document.getElementById("documentCheckBy")
             if (element) {
-            element.classList.contains("form-control")
-                ? element.className = "is-valid form-control"
-                : element.className = "isValid"
+                element.classList.contains("form-control")
+                    ? element.className = "is-valid form-control"
+                    : element.className = "isValid"
             }
         }
         else {
@@ -2404,11 +2404,16 @@ class EditRequest extends Component {
                                                         </Col>
                                                         <Col md>
                                                             <FormGroup>
-                                                                {/* <Label>Chinese Name</Label> */}
-                                                                <Input value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="500" placeholder="Please describe in Chinese (Optional)" />
-                                                                {this.state.invalidChinese
-                                                                    ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
-                                                                    : null
+                                                                {taskDetails.applicationTypeId === "LTI"
+                                                                    ? <>
+                                                                        <Input value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="500" placeholder="Please describe in Chinese" />
+                                                                        {this.state.invalidChinese
+                                                                            ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
+                                                                            : null
+                                                                        }
+                                                                    </>
+                                                                    :
+                                                                    <Input value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="500" placeholder="Please describe in Chinese (Optional)" />
                                                                 }
                                                             </FormGroup>
                                                         </Col>
