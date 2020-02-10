@@ -528,7 +528,7 @@ class LicenseEditRequest extends Component {
 
                         Swal.update({
                             title: "Request Deleted",
-                            text: `The request has been successfully deleted.`,
+                            text: `The request has been deleted.`,
                             type: "success",
 
                         })
