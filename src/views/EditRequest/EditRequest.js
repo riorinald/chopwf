@@ -119,8 +119,7 @@ class EditRequest extends Component {
                 teamName: "",
                 effectivePeriod: "",
             },
-
-            selectedOption:{documentCheckBy:null},
+            selectedOption: {},
 
             modal: false,
             validateForm: [],
@@ -490,7 +489,7 @@ class EditRequest extends Component {
         }
         temporary.departmentId = temporary.departmentId.toLowerCase()
         // console.log(temporary.requestorUser)
-        this.setState({ selectedOption: {documentCheckBy:temporary.documentCheckBy}, taskDetails: temporary, tempDocument: temporary.documents, loading: false })
+        this.setState({ selectedOption: { documentCheckBy: temporary.documentCheckBy }, taskDetails: temporary, tempDocument: temporary.documents, loading: false })
         console.log(temporary)
 
     }
@@ -753,7 +752,7 @@ class EditRequest extends Component {
         }
         else if (name === "applicationTypeId") {
             // this.formRef.current.reset()
-            this.setState({applicationTypeId:value})
+            this.setState({ applicationTypeId: value })
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
                 let editRequestForm = this.state.editRequestForm
@@ -778,12 +777,13 @@ class EditRequest extends Component {
                 taskDetails.contractSignedByFirstPerson = ""
                 taskDetails.contractSignedByFirstPersonOption = null
                 taskDetails.documentCheckBy = ""
+                taskDetails.selectedOption = {}
                 taskDetails.selectedDeptHeads = []
                 taskDetails.departmentHeads = []
                 taskDetails.isUseInOffice = "Y"
                 selectedOption.documentCheckBy = null
                 editRequestForm.collapseUIO = true
-                return { taskDetails, editRequestForm, selectedOption}
+                return { taskDetails, editRequestForm, selectedOption }
             })
             this.setState({ dateView1: null, dateView2: null })
             this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${event.target.value}`);
@@ -893,21 +893,21 @@ class EditRequest extends Component {
                 this.setState(state => {
                     let { editRequestForm } = this.state
                     editRequestForm[name] = value
-                    return { editRequestForm}
+                    return { editRequestForm }
                 })
-                this.setState({invalidChinese: false})
+                this.setState({ invalidChinese: false })
                 event.target.className = "d-block is-valid form-control"
-              }
-              else {
+            }
+            else {
                 this.setState(state => {
                     let { editRequestForm } = this.state
                     editRequestForm[name] = value
                     return { editRequestForm }
                 })
-                this.setState({invalidChinese: true})
+                this.setState({ invalidChinese: true })
                 event.target.className = "d-block form-control is-invalid"
                 console.warn("chinese invalid")
-              }
+            }
 
             // event.target.className = "form-control"
             // }
@@ -1497,10 +1497,10 @@ class EditRequest extends Component {
         }
         else {
             let element = document.getElementById(sname)
-            if(element){
-            element.classList.contains("form-control")
-                ? element.className = "is-valid form-control"
-                : element.className = "isValid"
+            if (element) {
+                element.classList.contains("form-control")
+                    ? element.className = "is-valid form-control"
+                    : element.className = "isValid"
             }
         }
 
@@ -1521,7 +1521,7 @@ class EditRequest extends Component {
                 let taskDetails = this.state.taskDetails
                 taskDetails[sname] = value
                 return { taskDetails }
-            })
+            }, () => console.log(this.state.selectedDeptHeads))
         }
 
         else if (sname === "documentCheckBy1") {
@@ -1854,23 +1854,23 @@ class EditRequest extends Component {
         for (let i = 0; i < details.length; i++) {
             console.log(details[i])
             var element = document.getElementById(details[i])
-            let states =  details[i]
+            let states = details[i]
             if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
-                if(element !== null){
+                if (element !== null) {
                     if (tempCheck === 0) {
                         element.focus()
-                        }   
-                tempCheck = 1
-                element.classList.contains("form-control")
-                    ? element.className = "is-invalid form-control"
-                    : element.className = "notValid"
+                    }
+                    tempCheck = 1
+                    element.classList.contains("form-control")
+                        ? element.className = "is-invalid form-control"
+                        : element.className = "notValid"
                 }
             }
             else {
-                if(element !== null){
-                element.classList.contains("form-control")
-                    ? element.className = "is-valid form-control"
-                    : element.className = "isValid"
+                if (element !== null) {
+                    element.classList.contains("form-control")
+                        ? element.className = "is-valid form-control"
+                        : element.className = "isValid"
                 }
             }
         }
@@ -1987,8 +1987,8 @@ class EditRequest extends Component {
                     postReq.append(`Documents[${temp}].Attachment.File`, documentSelected);
                     postReq.append(`Documents[${temp}].DocumentNameEnglish`, this.state.taskDetails.documents[i].documentNameEnglish);
                     postReq.append(`Documents[${temp}].DocumentNameChinese`, this.state.taskDetails.documents[i].documentNameChinese);
-                        if (this.state.taskDetails.applicationTypeId === "CNIPS") {
-                            for (let j = 0; j < this.state.taskDetails.documents[i].contractNums.length; j++) {
+                    if (this.state.taskDetails.applicationTypeId === "CNIPS") {
+                        for (let j = 0; j < this.state.taskDetails.documents[i].contractNums.length; j++) {
                         }
                     }
                 }
