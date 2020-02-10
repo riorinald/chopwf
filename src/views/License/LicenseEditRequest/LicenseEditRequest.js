@@ -530,7 +530,7 @@ class LicenseEditRequest extends Component {
 
                         Swal.update({
                             title: "Request Deleted",
-                            text: `The request has been successfully deleted.`,
+                            text: `The request has been deleted.`,
                             type: "success",
 
                         })
@@ -615,7 +615,7 @@ class LicenseEditRequest extends Component {
                             &nbsp;&nbsp; EDIT REQUEST - {taskDetails.requestNum}
                         </CardHeader>
                         <CardBody>
-                            {taskDetails.currentStatusId === "SENDBACKED"
+                            {taskDetails.currentStatusId === "SENDBACKED" || taskDetails.currentStatusId === "RECALLED"
                                 ? <Row>
                                     <Col className="mb-4">
                                         <Progress multi>
@@ -628,7 +628,26 @@ class LicenseEditRequest extends Component {
                                                         bar
                                                         animated={stage.state === "CURRENT" ? true : false}
                                                         striped={stage.state !== "CURRENT"}
-                                                        color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                        color=
+                                                        {
+                                                            taskDetails.currentStatusId === "SENDBACKED" ?
+                                                                stage.state === "CURRENT" ?
+                                                                    "danger" :
+                                                                    stage.state === "FINISHED" ?
+                                                                        "success" :
+                                                                        "secondary" :
+                                                                taskDetails.currentStatusId === "RECALLED" ?
+                                                                    stage.state === "CURRENT" ?
+                                                                        "primary" :
+                                                                        stage.state === "FINISHED" ?
+                                                                            "success" :
+                                                                            "secondary" :
+                                                                    stage.state === "CURRENT" ?
+                                                                        "warning" :
+                                                                        stage.state === "FINISHED" ?
+                                                                            "success" :
+                                                                            "secondary"
+                                                        }
                                                         // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                         value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                     </Progress>

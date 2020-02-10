@@ -10,7 +10,7 @@ export const label = {
     MBIA: {
         name: 'MBIA',
         contractChop: <p>
-            <b>MBIA</b> MBIA Contract Chop hasn’t been initicated to be used yet.  For any other contracts (e.g. purchase orders/release orders) and agreements, please select <b>Company Chop.</b>.
+            <b>MBIA</b> Contract Chop hasn’t been initiated to be used yet. Please select <b> Company Chop </b> for purchase orders/release orders, contracts and agreements.
         </p>
     },
     MBLC: {
@@ -23,7 +23,7 @@ export const label = {
     DMT: {
         name: 'DMT',
         contractChop: <p>
-            <b>DMT</b> China Contract Chop hasn’t been initiated to be used yet. Please select <b>Company Chop </b> for PO/RO/Contract/Agreement.
+            <b>DMT</b> China Contract Chop hasn’t been initiated to be used yet. Please select <b> Company Chop </b> for purchase orders/release orders, contracts and agreements.
         </p>
     },
 

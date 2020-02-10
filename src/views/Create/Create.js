@@ -681,7 +681,6 @@ class Create extends Component {
     let value = event.target.value
     this.setState({ agreeTerms: false })
     if (name === "appTypeSelected") {
-
       this.setState({
         // deptSelected: "",
         chopTypeSelected: "",
@@ -1223,9 +1222,9 @@ class Create extends Component {
           docName: this.state.docAttachedName,
           docURL: URL.createObjectURL(this.state.docSelected),
         }
-        this.getBase64(this.state.docSelected, (result) => {
-          obj.documentBase64String = result
-        })
+        // this.getBase64(this.state.docSelected, (result) => {
+        //   obj.documentBase64String = result
+        // })
 
         console.log(obj.docURL)
         this.setState({
@@ -1253,6 +1252,7 @@ class Create extends Component {
   getBase64(file, callback) {
     let reader = new FileReader();
     reader.onload = function () {
+      console.log(reader.result)
       callback(reader.result.replace(/^data:.+;base64,/, ''))
     };
     reader.readAsDataURL(file)
@@ -1540,7 +1540,7 @@ class Create extends Component {
             if (numberOfDocuments === 0) {
               Swal.update({
                 title: "No Documents",
-                html: 'there is no Documents in this appliction. ',
+                html: 'There is no documents in this appliction. ',
                 type: "warning"
               })
               Swal.hideLoading()

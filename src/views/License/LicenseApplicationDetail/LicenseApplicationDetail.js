@@ -28,6 +28,7 @@ class LicenseApplicationDetail extends Component {
             loading: true,
             page: "",
             comments: "",
+            wrongDocError: "",
             currentStatus: "",
             deliverWay: "",
             expressNumber: "",
@@ -221,7 +222,7 @@ class LicenseApplicationDetail extends Component {
 
                             Swal.update({
                                 title: res.data.message,
-                                text: `The request has been ${res.data.message}`,
+                                text: `The request has been ${res.data.message.toLowerCase()}.`,
                                 type: "success",
 
                             })
@@ -278,7 +279,11 @@ class LicenseApplicationDetail extends Component {
     }
 
     uploadDocument(event) {
+        let ext = ["ipg", "png", "xls", "xlsm", "xlsx", "email", "jpeg", "txt", "rtf", "tiff", "tif", "doc", "docx", "pdf", "pdfx", "bmp"]
+        let extValid = false
         if (event.target.files.length !== 0) {
+            let last = event.target.files[0].name.split('.').length
+            let extension = event.target.files[0].name.split('.')[last - 1]
             let valid = true
             let file = event.target.files[0]
             let fileName = file.name
@@ -291,7 +296,16 @@ class LicenseApplicationDetail extends Component {
                     valid = true
                 }
             }
-            if (valid) {
+            for (let i = 0; i < ext.length; i++) {
+                if (ext[i] === extension || ext[i].toUpperCase() === extension) {
+                    extValid = true
+                    break;
+                }
+                else {
+                    extValid = false
+                }
+            }
+            if (valid && extValid) {
                 let Url = URL.createObjectURL(file)
 
                 let obj = {
@@ -299,17 +313,23 @@ class LicenseApplicationDetail extends Component {
                     fileName: fileName,
                     url: Url
                 }
+                this.setState({ wrongDocError: "" })
                 this.setState(state => {
                     const documents = this.state.documents.concat(obj)
                     return { documents }
                 })
             }
             else {
-                Swal.fire({
-                    title: "Document Exists ",
-                    html: `The document has already been added to the list !`,
-                    type: "warning",
-                })
+                if (!valid) {
+                    Swal.fire({
+                        title: "Document Exists ",
+                        html: `The document has already been added to the list !`,
+                        type: "warning",
+                    })
+                }
+                else if (!extValid) {
+                    this.setState({ wrongDocError: "Please attach a valid document !" })
+                }
             }
         }
     }
@@ -380,7 +400,25 @@ class LicenseApplicationDetail extends Component {
                                                     bar
                                                     animated={stage.state === "CURRENT" ? true : false}
                                                     striped={true}
-                                                    color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                    color={
+                                                        taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ?
+                                                            stage.state === "CURRENT" ?
+                                                                "danger" :
+                                                                stage.state === "FINISHED" ?
+                                                                    "success"
+                                                                    : "secondary"
+                                                            : taskDetails.currentStatusId === "RECALLED" ?
+                                                                stage.state === "CURRENT" ?
+                                                                    "primary" :
+                                                                    stage.state === "FINISHED" ?
+                                                                        "success"
+                                                                        : "secondary"
+                                                                : stage.state === "CURRENT" ?
+                                                                    "warning" :
+                                                                    stage.state === "FINISHED" ?
+                                                                        "success" :
+                                                                        "secondary"
+                                                    }
                                                     // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "green" : "secondary  "}
                                                     value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "white" : stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                 </Progress>
@@ -718,9 +756,11 @@ class LicenseApplicationDetail extends Component {
                                                     :
                                                     <FormGroup>
                                                         <Label>Attach Document</Label>
-                                                        <CustomInput id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" />
-                                                        &nbsp;
-                                                    <Collapse isOpen={documents.length !== 0}>
+                                                        <CustomInput
+                                                            accept=".ipg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp"
+                                                            id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" />
+                                                        &nbsp; <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
+                                                        <Collapse isOpen={documents.length !== 0}>
                                                             {documents.map((doc, index) =>
                                                                 <div key={index} style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(doc.file)}> {doc.fileName} </div>
                                                             )}
