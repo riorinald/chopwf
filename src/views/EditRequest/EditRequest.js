@@ -1118,6 +1118,8 @@ class EditRequest extends Component {
                 })
 
                 document.getElementById("documents").className = ""
+                document.getElementById("cnName").className = "form-control"
+
 
                 this.setState(state => {
                     let { editRequestForm } = this.state
@@ -2688,14 +2690,15 @@ class EditRequest extends Component {
                                                 <Label>Department Heads <i className="fa fa-user" /></Label>
                                                 <small> &ensp; If you apply for {this.props.legalName} Company Chop, then Department Head shall be from {this.legalName} entity.</small>
                                                 <AsyncSelect
-                                                    id="departmentHeads selectedDeptHeads"
+                                                    id="departmentHeads"
                                                     loadOptions={this.loadOptionsDept}
                                                     isMulti
                                                     value={selectedDeptHeads}
                                                     onChange={this.handleSelectOption("departmentHeads")}
                                                     menuPortalTarget={document.body}
                                                     components={animatedComponents}
-                                                    styles={taskDetails.deptHeadSelected === null ? reactSelectControl : ""} />
+                                                    styles={taskDetails.deptHeadSelected === null ? reactSelectControl : ""} 
+                                                    />
                                                 <InputGroup>
                                                     {taskDetails.applicationTypeId === "STU" || taskDetails.applicationTypeId === "LTI"
                                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Department Heads', taskDetails.departmentHeads, 'required')}</small>
