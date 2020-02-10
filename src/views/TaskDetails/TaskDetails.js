@@ -46,7 +46,7 @@ class TaskDetails extends Component {
             this.goBack(false)
         }
         else {
-            this.setState({ page: this.props.match.params.page})
+            this.setState({ page: this.props.match.params.page })
             this.getTaskDetails(this.props.location.state.taskId)
         }
     }
@@ -270,20 +270,20 @@ class TaskDetails extends Component {
     }
 
     viewOrDownloadFile(b64, type, name) {
-        if (b64 !== "") {
-            let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
-            var blobUrl = new Blob([file], { type: type })
-            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-                window.navigator.msSaveOrOpenBlob(blobUrl, name)
-                return;
-            }
-            else {
-                window.open(URL.createObjectURL(file), "_blank")
-            }
+        // if (b64 !== "") {
+        let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+        var blobUrl = new Blob([file], { type: type })
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(blobUrl, name)
+            return;
         }
         else {
-            alert("BASE 64 String is empty !!!")
+            window.open(URL.createObjectURL(file), "_blank")
         }
+        // }
+        // else {
+        //     alert("BASE 64 String is empty !!!")
+        // }
     }
 
     render() {
@@ -321,7 +321,7 @@ class TaskDetails extends Component {
                                                 bar
                                                 animated={stage.state === "CURRENT" ? true : false}
                                                 striped={stage.state !== "CURRENT"}
-                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "primary" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                 // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                 value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                             </Progress>
@@ -410,14 +410,14 @@ class TaskDetails extends Component {
                                                             Header: "Document Name (English)",
                                                             accessor: "documentNameEnglish",
                                                             width: 250,
-                                                            style: { 'white-space': 'normal' }
+                                                            style: { 'whiteSpace': 'normal' }
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
                                                             Header: "Document Name (Chinese)",
                                                             accessor: "documentNameChinese",
                                                             width: 250,
-                                                            style: { 'white-space': 'normal' }
+                                                            style: { 'whiteSpace': 'normal' }
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
