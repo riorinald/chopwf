@@ -1990,6 +1990,7 @@ class EditRequest extends Component {
                     postReq.append(`Documents[${temp}].DocumentNameChinese`, this.state.taskDetails.documents[i].documentNameChinese);
                     if (this.state.taskDetails.applicationTypeId === "CNIPS") {
                         for (let j = 0; j < this.state.taskDetails.documents[i].contractNums.length; j++) {
+                            postReq.append(`Documents[${temp}].ContractNums[${j}]`, this.state.taskDetails.documents[i].contractNums[j]);
                         }
                     }
                 }
@@ -2161,7 +2162,7 @@ class EditRequest extends Component {
                                         <FormGroup>
                                             <Label>Tel. </Label>
                                             <InputGroup>
-                                                <Input onChange={this.handleUserChange("telephoneNum")} name="telephoneNum" value={taskDetails.requestorUser.telephoneNum} id="telephoneNum" size="16" type="text" />
+                                                <Input onChange={this.handleUserChange("telephoneNum")} name="telephoneNum" value={taskDetails.telephoneNum} id="telephoneNum" size="16" type="text" />
                                             </InputGroup>
                                             <InputGroup>
                                                 <small style={{ color: '#F86C6B' }} >{this.validator.message('Telephone Number', taskDetails.requestorUser.telephoneNum, 'required')}</small>

@@ -1630,7 +1630,6 @@ class Create extends Component {
     }
 
     const getYear = date => {
-      console.log(date.getFullYear())
       return date.getFullYear()
     }
 
