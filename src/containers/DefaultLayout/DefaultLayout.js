@@ -100,7 +100,7 @@ class DefaultLayout extends Component {
       localStorage.setItem("application", workflow),
       localStorage.setItem("legalEntity", event.target.value)
       )
-      if (this.props.location.pathname.match('create')===1) {
+      if (this.props.location.pathname.match('create').index === 1) {
         this.props.history.push(`/create/${event.target.value}`)
       }
     }
