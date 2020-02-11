@@ -39,7 +39,7 @@ class ChopApplication extends Component {
       chopTypes: [],
 
       loading: false,
-      page: 0,
+      page: 1,
       limit: 10,
       totalPages: 3,
 
@@ -556,7 +556,7 @@ class ChopApplication extends Component {
 
 
         <Modal isOpen={modal} toggle={this.toggleModal}>
-          <ModalHeader >Export Logs</ModalHeader>
+          <ModalHeader toggle={this.toggleModal} >Export Logs</ModalHeader>
           <ModalBody>
             <FormGroup>
               <Label>Select Date Range</Label>

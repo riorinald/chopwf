@@ -12,6 +12,7 @@ import config from '../../../config';
 import Papa from 'papaparse';
 import "react-table/react-table.css"
 import ReactTable from "react-table";
+import Swal from 'sweetalert2';
 
 
 
@@ -23,23 +24,35 @@ class LicenseAdmin extends Component {
             exportToDateView: "",
             exportFromProfileDateView: "",
             exportToProfileDateView: "",
-            collapse: 1,
+            collapse: 3,
             exportDate: {
                 exportLogsFrom: "",
                 exportLogsTo: "",
                 exportProfileFrom: "",
                 exportProfileTo: ""
             },
-            newLicenseAdmins: [],
+            csvFile: null,
+            newLicenseAdmins: [
+                {}
+            ],
             updateAdmins: false
         }
         this.toggleAccordion = this.toggleAccordion.bind(this)
+        this.saveAllData = this.saveAllData.bind(this)
+    }
+
+    componentDidMount(){
+        this.getLicenseCSV()
+    }
+
+    getLicenseCSV(){
+        
     }
 
     handleFiles = (event) => {
         // Check for the various File API support.
         let files = event.target.files[0];
-
+        this.setState({ csvFile: files })
         if (window.FileReader) {
             // FileReader are supported.
             this.getAsText(files);
@@ -99,6 +112,49 @@ class LicenseAdmin extends Component {
         this.setState({ collapse: newTab })
     }
 
+    getColumnWidth = (accessor, headerText) => {
+        let { newLicenseAdmins } = this.state
+        let max = 0
+        const maxWidth = 260;
+        const magicSpacing = 10;
+
+        for (var i = 0; i < newLicenseAdmins.length; i++) {
+            if (newLicenseAdmins[i] !== undefined && newLicenseAdmins[i][accessor] !== null) {
+                if (JSON.stringify(newLicenseAdmins[i][accessor] || 'null').length > max) {
+                    max = JSON.stringify(newLicenseAdmins[i][accessor] || 'null').length;
+                }
+            }
+        }
+
+        return Math.min(maxWidth, Math.max(max, headerText.length) * magicSpacing);
+    }
+
+    saveAllData() {
+        let { csvFile } = this.state
+        let postData = new FormData()
+        postData.append('Documents[0].Attachment.File', csvFile)
+        postData.append('Documents[0].Attachment.Nam', csvFile.name)
+        Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${localStorage.getItem('userId')}`, postData)
+            .then(res => {
+                Swal.fire({
+                    title: "Updated",
+                    type: "success",
+                    timer: 1500,
+                    timerProgressBar: true
+                })
+                this.setState({ newLicenseAdmins: res.data })
+            })
+            .catch(err => {
+                Swal.fire({
+                    title: "Error",
+                    type: "error",
+                    timer: 1500,
+                    timerProgressBar: true
+                })
+                console.log(err)
+            })
+    }
+
     render() {
 
         const { exportFromDateView, newLicenseAdmins, exportToDateView, exportFromProfileDateView, exportToProfileDateView, collapse } = this.state
@@ -111,6 +167,38 @@ class LicenseAdmin extends Component {
                     <CardBody>
                         <Row>
                             <Col>
+                                <Card className="mb-4">
+                                    <CardHeader>
+                                        <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(3)}>
+                                            <h5 className="m-0 p-0">Update Departments </h5>
+                                        </Button>
+                                    </CardHeader>
+                                    <Collapse isOpen={collapse === 3}>
+                                        <CardBody>
+                                            <Row>
+                                                <Col>
+
+                                                </Col>
+                                            </Row>
+                                        </CardBody>
+                                    </Collapse>
+                                </Card>
+                                <Card className="mb-4">
+                                    <CardHeader>
+                                        <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(4)}>
+                                            <h5 className="m-0 p-0">Update License Names </h5>
+                                        </Button>
+                                    </CardHeader>
+                                    <Collapse isOpen={collapse === 4}>
+                                        <CardBody>
+                                            <Row>
+                                                <Col>
+
+                                                </Col>
+                                            </Row>
+                                        </CardBody>
+                                    </Collapse>
+                                </Card>
                                 <Card className="mb-4">
                                     <CardHeader>
                                         <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(1)}>
@@ -228,16 +316,25 @@ class LicenseAdmin extends Component {
                                                     <Collapse isOpen={newLicenseAdmins.length !== 0}>
                                                         <FormGroup>
                                                             <ReactTable
-                                                                data={this.state.newLicenseAdmins}
+                                                                data={newLicenseAdmins}
                                                                 defaultPageSize={10}
                                                                 className="-striped -highlight"
-                                                                columns={[
-                                                                    {
-                                                                        Header: 'Demo',
-                                                                        accessor: 'policyID',
-                                                                        style: { textAlign: "left" }
+                                                                columns={Object.keys(newLicenseAdmins[0]).map((key, index) => {
+                                                                    return {
+                                                                        Header: key,
+                                                                        accessor: key,
+                                                                        style: { textAlign: "left" },
+                                                                        width: this.getColumnWidth(key, key)
                                                                     }
-                                                                ]}
+                                                                })}
+
+                                                            // {[
+                                                            //     {
+                                                            //         Header: 'Demo',
+                                                            //         accessor: 'policyID',
+                                                            //         style: { textAlign: "left" }
+                                                            //     }
+                                                            // ]}
                                                             />
                                                         </FormGroup>
                                                     </Collapse>
@@ -251,7 +348,7 @@ class LicenseAdmin extends Component {
                         </Row>
                     </CardBody>
                     <CardFooter>
-                        <Button color="success" >Save</Button>
+                        <Button color="success" onClick={this.saveAllData} >Save</Button>
                     </CardFooter>
                 </Card>
 
