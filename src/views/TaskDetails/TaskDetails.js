@@ -415,7 +415,7 @@ class TaskDetails extends Component {
                                         <Button color="primary" onClick={this.toggleView}>View Documents</Button>
 
                                         <Modal color="info" size="xl" toggle={this.toggleView} isOpen={showModal} >
-                                            <ModalHeader className="center"> Documents </ModalHeader>
+                                            <ModalHeader toggle={this.toggleView} className="center"> Documents </ModalHeader>
                                             <ModalBody>
                                                 <ReactTable
                                                     data={taskDetails.documents}

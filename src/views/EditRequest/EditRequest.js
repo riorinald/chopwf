@@ -1033,7 +1033,7 @@ class EditRequest extends Component {
         if (this.state.editRequestForm.docSelected === null) {
             errorMessage.push("Please select a valid document.<br />")
         }
-        if (this.state.applicationTypeId === 'LTI') {
+        if (this.state.taskDetails.applicationTypeId === 'LTI') {
             if (this.state.editRequestForm.engName === "") {
                 errorMessage.push("Please input document name in English.<br />")
                 typeValid = false
