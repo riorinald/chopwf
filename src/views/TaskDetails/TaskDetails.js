@@ -381,7 +381,7 @@ class TaskDetails extends Component {
                                 </Col>
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col md><h5><i className="fa fa-tablet mr-2" /> {taskDetails.telephoneNum} </h5></Col>
+                                        <Col md><h5><i className="fa fa-tablet mr-2" /> {taskDetails.requestorUser.telephoneNum} </h5></Col>
                                     </Row>
                                     <Row>
                                         <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.requestorUser.email}</h5></Col>
