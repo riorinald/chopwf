@@ -42,12 +42,15 @@ class LicenseAdmin extends Component {
         this.saveAllData = this.saveAllData.bind(this)
     }
 
-    componentDidMount(){
+    componentDidMount() {
         this.getLicenseCSV()
     }
 
-    getLicenseCSV(){
-        
+    getLicenseCSV() {
+        Axios.get(`${config.url}/licenses/licensemanagement`)
+            .then(res => {
+                this.setState({ newLicenseAdmins: res.data })
+            })
     }
     componentDidMount() {
         const legalEntity = this.props.legalName
@@ -152,7 +155,7 @@ class LicenseAdmin extends Component {
                     timer: 1500,
                     timerProgressBar: true
                 })
-                this.setState({ newLicenseAdmins: res.data })
+                this.getLicenseCSV()
             })
             .catch(err => {
                 Swal.fire({
