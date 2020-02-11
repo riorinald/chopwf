@@ -134,7 +134,7 @@ class LicenseApplicationDetail extends Component {
             //     })
             // }
         }
-        else if (this.state.currentStatus === "PENDINGREQUESTORRETURN") {
+        else if (this.state.currentStatus === "PENDINGREQUESTORRETURN" || currentStatus === "PENDINGLICENSEADMINACKLENDOUT") {
             if (this.state.taskDetails.documentTypeId === "ORIGINAL") {
                 if (this.state.deliverWay === "Express") {
                     if (this.state.expressNumber !== "") {
@@ -767,7 +767,7 @@ class LicenseApplicationDetail extends Component {
                                                 }
                                             </Col>
                                         </Row>
-                                        : currentStatus === "PENDINGREQUESTORRETURN"
+                                        : currentStatus === "PENDINGREQUESTORRETURN" || currentStatus === "PENDINGLICENSEADMINACKLENDOUT"
                                             ? <Row>
                                                 <Col>
                                                     <FormGroup onChange={this.handleRadio} >
@@ -812,7 +812,7 @@ class LicenseApplicationDetail extends Component {
 
                                 : page === "myapplication"
                                     ? <div>
-                                        {currentStatus === "PENDINGREQUESTORRETURN"
+                                        {currentStatus === "PENDINGREQUESTORRETURN" || currentStatus === "PENDINGLICENSEADMINACKLENDOUT"
                                             ? <Row>
                                                 <Col>
                                                     <FormGroup onChange={this.handleRadio} >
@@ -834,7 +834,7 @@ class LicenseApplicationDetail extends Component {
                                                 </Col>
                                             </Row>
                                             : null}
-                                        {currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
+                                        {currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN" || currentStatus === "PENDINGLICENSEADMINACKLENDOUT"
                                             ?
                                             taskDetails.actions.map((action, index) =>
                                                 <Button
