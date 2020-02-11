@@ -134,7 +134,7 @@ class LicenseApplicationDetail extends Component {
             //     })
             // }
         }
-        else if (this.state.currentStatus === "PENDINGREQUESTORRETURN" || currentStatus === "PENDINGLICENSEADMINACKLENDOUT") {
+        else if (this.state.currentStatus === "PENDINGREQUESTORRETURN") {
             if (this.state.taskDetails.documentTypeId === "ORIGINAL") {
                 if (this.state.deliverWay === "Express") {
                     if (this.state.expressNumber !== "") {
@@ -172,7 +172,7 @@ class LicenseApplicationDetail extends Component {
     updated(action) {
         console.log(action)
         let valid = false
-        if (this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
+        if (this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN" || this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT") {
 
             if (action === "approve" || action === "requestorreturn") {
                 valid = this.validate()
@@ -768,25 +768,33 @@ class LicenseApplicationDetail extends Component {
                                             </Col>
                                         </Row>
                                         : currentStatus === "PENDINGREQUESTORRETURN" || currentStatus === "PENDINGLICENSEADMINACKLENDOUT"
-                                            ? <Row>
-                                                <Col>
-                                                    <FormGroup onChange={this.handleRadio} >
-                                                        <Label>Return Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
-                                                            <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
-                                                                <Row> &nbsp; </Row>
-                                                                {/* <div>Reciever: </div>
-                                                                <div>Address: </div>
-                                                                <div>Mobile No. :</div> */}
-                                                                {/* <div>Express Number: {expressNumber} </div> */}
+                                            ? currentStatus === "PENDINGLICENSEADMINACKLENDOUT"
+                                                ? <Row>
+                                                    <Col>
+                                                        <FormGroup onChange={this.handleRadio} >
+                                                            <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                        </FormGroup>
+                                                    </Col>
+                                                </Row>
+                                                : <Row>
+                                                    <Col>
+                                                        <FormGroup onChange={this.handleRadio} >
+                                                            <Label>Return Way</Label>
+                                                            <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
+                                                            <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
+                                                                <Collapse isOpen={deliverWay === "Express"}>
+                                                                    <Input autoComplete="off" id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                                    <Row> &nbsp; </Row>
+                                                                    {/* <div>Reciever: </div>
+                                                                    <div>Address: </div>
+                                                                    <div>Mobile No. :</div> */}
+                                                                    {/* <div>Express Number: {expressNumber} </div> */}
 
-                                                            </Collapse>
-                                                        </CustomInput>
+                                                                </Collapse>
+                                                            </CustomInput>
 
-                                                    </FormGroup>
-                                                </Col>
+                                                        </FormGroup>
+                                                    </Col>
                                             </Row>
                                             : null
                                     }
