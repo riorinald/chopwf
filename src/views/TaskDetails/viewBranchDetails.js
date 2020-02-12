@@ -48,7 +48,7 @@ const BCNIPS = (props) => {
                                 <Label>Tel.</Label>
                             </Col>
                             <Col md lg={4}>
-                                    <TextareaAutosize className="form-control" disabled value={props.taskDetails.requestorUser.telephoneNum} id="telephoneNum" name="telephoneNum" placeholder="/" />
+                                    <TextareaAutosize className="form-control" disabled value={props.taskDetails.telephoneNum} id="telephoneNum" name="telephoneNum" placeholder="/" />
                                 </Col>
                             <Col md lg={2}>
                                 <Label>Dept.</Label>
@@ -179,7 +179,7 @@ const BLTI = (props) => {
                                   <Label>Tel.</Label>
                               </Col>
                               <Col md lg={4}>
-                                      <TextareaAutosize className="form-control" disabled value={props.taskDetails.requestorUser.telephoneNum} id="telephoneNum" name="telephoneNum" placeholder="/" />
+                                      <TextareaAutosize className="form-control" disabled value={props.taskDetails.telephoneNum} id="telephoneNum" name="telephoneNum" placeholder="/" />
                                   </Col>
                               <Col md lg={2}>
                                   <Label>Dept.</Label>
@@ -279,7 +279,7 @@ const BLTI = (props) => {
                                   <Label>Tel.</Label>
                               </Col>
                               <Col md lg={4}>
-                                      <TextareaAutosize className="form-control" disabled value={props.taskDetails.requestorUser.telephoneNum} id="telephoneNum" name="telephoneNum" placeholder="/" />
+                                      <TextareaAutosize className="form-control" disabled value={props.taskDetails.telephoneNum} id="telephoneNum" name="telephoneNum" placeholder="/" />
                                   </Col>
                               <Col md lg={2}>
                                   <Label>Dept.</Label>
@@ -384,7 +384,7 @@ const BLTI = (props) => {
                                   <Label>Tel.</Label>
                               </Col>
                               <Col md lg={4}>
-                                      <TextareaAutosize className="form-control" disabled value={props.taskDetails.requestorUser.telephoneNum} id="telephoneNum" name="telephoneNum" placeholder="/" />
+                                      <TextareaAutosize className="form-control" disabled value={props.taskDetails.telephoneNum} id="telephoneNum" name="telephoneNum" placeholder="/" />
                                   </Col>
                               <Col md lg={2}>
                                   <Label>Dept.</Label>
