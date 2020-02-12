@@ -2234,7 +2234,7 @@ class Create extends Component {
                       <Label>Return Date</Label>
                       <Row />
                       <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                        className="form-control" required dateFormat="yyyy/MM/dd"
+                        className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                         selected={this.state.dateView2}
                         onChange={this.dateChange("returnDate", "dateView2")}
                         minDate={new Date()} maxDate={addDays(new Date(), 30)} />

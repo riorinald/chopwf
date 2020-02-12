@@ -389,15 +389,16 @@ class TaskDetails extends Component {
                                 </Col>
                             </Row>
                             {this.handleViews(appType)}
-                            <Row>
-                                <FormGroup>
+                            {/* <Row> */}
+                            {/* <FormGroup> */}
+                            <Col>
+                                <Row>
                                     <Col>
-                                        <Label>Documents</Label>
-                                    </Col>
-                                    <Col>
+                                        <FormGroup>
+                                            <Label>Documents</Label><br></br>
 
-                                        <Button color="primary" onClick={this.toggleView}>View Documents</Button>
-
+                                            <Button color="primary" onClick={this.toggleView}>View Documents</Button>
+                                        </FormGroup>
                                         <Modal color="info" size="xl" toggle={this.toggleView} isOpen={showModal} >
                                             <ModalHeader toggle={this.toggleView} className="center"> Documents </ModalHeader>
                                             <ModalBody>
@@ -480,8 +481,10 @@ class TaskDetails extends Component {
                                             </ModalFooter>
                                         </Modal>
                                     </Col>
-                                </FormGroup>
-                            </Row>
+                                </Row>
+                            </Col>
+                            {/* </FormGroup> */}
+                            {/* </Row> */}
                             {page === "mypendingtask"
                                 ? <div>
                                     <Row>
