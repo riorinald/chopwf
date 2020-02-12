@@ -603,6 +603,31 @@ class LicenseEditRequest extends Component {
             callback(filterReceiver(inputValue));
         }
 
+        const getYear = date => {
+            return date.getFullYear()
+        }
+
+        const year = (new Date()).getFullYear();
+        const years = Array.from(new Array(2), (val, index) => index + year);
+        const months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
+        const getMonth = date => {
+            let month = date.getMonth()
+            return months[month]
+        }
+
         return (
             <div>
                 <h4>Edit Request</h4>
@@ -765,6 +790,46 @@ class LicenseEditRequest extends Component {
                                         <Label>Planned Return Date:</Label>
                                         <DatePicker id="plannedReturnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
                                             className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                                            renderCustomHeader={({
+                                                date,
+                                                changeYear,
+                                                changeMonth,
+                                                decreaseMonth,
+                                                increaseMonth,
+                                                prevMonthButtonDisabled,
+                                                nextMonthButtonDisabled
+                                            }) => (
+                                                    <div
+                                                        style={{
+                                                            margin: 10,
+                                                            display: "flex",
+                                                            justifyContent: "center"
+                                                        }}
+                                                    >
+                                                        <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                        <Input
+                                                            value={getYear(date)}
+                                                            onChange={({ target: { value } }) => changeYear(value)}
+                                                            type="select">
+                                                            {years.map(option => (
+                                                                <option key={option} value={option}>
+                                                                    {option}
+                                                                </option>
+                                                            ))}
+                                                        </Input>
+                                                        <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                            changeMonth(months.indexOf(value))
+                                                        } type="select">
+                                                            {months.map((option) => (
+                                                                <option key={option} value={option}>
+                                                                    {option}
+                                                                </option>
+                                                            ))}
+                                                        </Input>
+                                                        <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+     
+                                                    </div>
+                                                )}
                                             showMonthDropdown
                                             showYearDropdown
                                             minDate={new Date()}

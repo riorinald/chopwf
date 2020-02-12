@@ -795,7 +795,7 @@ class LicenseApplicationDetail extends Component {
 
                                                         </FormGroup>
                                                     </Col>
-                                            </Row>
+                                                </Row>
                                             : null
                                     }
                                     <Row>
@@ -858,7 +858,7 @@ class LicenseApplicationDetail extends Component {
 
                                     </div>
                                     : null}
-                            {currentStatus === "COMPLETED"
+                            {/* {currentStatus === "COMPLETED"
                                 ?
                                 <Collapse isOpen={taskDetails.documents.length !== 0}>
                                     <Col className="mb-4">
@@ -877,7 +877,6 @@ class LicenseApplicationDetail extends Component {
                                                             <td className="smallTd"> {index + 1} </td>
                                                             <td>
                                                                 <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${doc.documentFileType};base64,${doc.documentBase64String}`, doc.documentName))} > {doc.documentName} </div>
-                                                                {/* <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a> */}
                                                             </td>
                                                         </tr>
                                                     )}
@@ -887,9 +886,8 @@ class LicenseApplicationDetail extends Component {
                                         </FormGroup>
                                     </Col>
                                 </Collapse>
-                                // </Row>
                                 : ""
-                            }
+                            } */}
                         </CardBody>
                         <CardFooter>
                             {taskDetails.histories.length !== 0
