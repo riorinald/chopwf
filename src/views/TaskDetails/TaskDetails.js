@@ -515,7 +515,7 @@ class TaskDetails extends Component {
                             {/* </FormGroup> */}
                             {/* </Row> */}
                             {page === "mypendingtask"
-                                ? <div>
+                                ? <div className="px-2 pt-2">
                                     <Row>
                                         <Col> <h4>Comments</h4></Col>
                                     </Row>
@@ -544,14 +544,14 @@ class TaskDetails extends Component {
 
                             {taskDetails.histories.length !== 0
                                 ? <Row>
-                                    <Col> <h4>Approval Histories</h4></Col>
+                                    <Col className="mx-2 mt-2"> <h4>Approval Histories</h4></Col>
                                 </Row>
                                 : null}
 
                             {taskDetails.histories.map((history, index) =>
                                 <div key={index}>
                                     <hr></hr>
-                                    <Row className="text-md-left text-center">
+                                    <Row className="pl-2 text-md-left text-center">
                                         {/* <Col xs="12" sm="12" md="2" lg="1">
                                             <img src={history.approvedByAvatarUrl} className="img-avaa img-responsive" alt="Avatar" />
                                         </Col> */}
