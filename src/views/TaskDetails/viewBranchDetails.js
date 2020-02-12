@@ -10,35 +10,6 @@ import {
 } from 'reactstrap';
 import TextareaAutosize from 'react-autosize-textarea';
 
-function convertDate(dateValue) {
-    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
-    return regEx
-}
-
-function expandRow(value){
-    let row = 1
-    if (value.length < 70){
-        row = 2
-    }
-    if (value.length < 140){
-        row = 3
-    }
-    if (value.length < 210){
-        row = 4
-    }
-    if (value.length < 380){
-        row = 5
-    }
-    if (value.length > 380){
-        row = 7
-    }
-    if (value.length > 450){
-        row = 10
-    }
-    console.log(row, value)
-    return row
-}
-
 
 const BCNIPS = (props) => { 
   return <> 
@@ -114,7 +85,7 @@ const BCNIPS = (props) => {
                                     <Label>Return Date</Label>
                                 </Col>
                                 <Col md lg={4}>
-                                    <TextareaAutosize className="form-control" disabled value={convertDate(props.taskDetails.returnDate)} id="returnDate" name="returnDate" placeholder="/" />
+                                    <TextareaAutosize className="form-control" disabled value={props.taskDetails.returnDate} id="returnDate" name="returnDate" placeholder="/" />
                                 </Col>
                                 <Col md lg={2}>
                                     <Label>Responsible Person</Label>
@@ -199,7 +170,7 @@ const BLTI = (props) => {
                                   <Label>Effective Period</Label>
                               </Col>
                               <Col md lg={4}>
-                                    <TextareaAutosize className="form-control" disabled value={convertDate(props.taskDetails.effectivePeriod)} id="effectivePeriod" name="effectivePeriod" placeholder="/" />
+                                    <TextareaAutosize className="form-control" disabled value={props.taskDetails.effectivePeriod} id="effectivePeriod" name="effectivePeriod" placeholder="/" />
                               </Col>
                           </FormGroup>
                           <FormGroup row>
@@ -255,8 +226,8 @@ const BLTI = (props) => {
                                   <Label>Department Heads</Label>
                               </Col>
                               <Col id="deptHead" md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.setArray(props.taskDetails.departmentHeadsName)} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
-                                  <UncontrolledTooltip placement="right" target="deptHead">{props.setArray(props.taskDetails.departmentHeadsName)}</UncontrolledTooltip>
+                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.departmentHeadsName} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
+                                  <UncontrolledTooltip placement="right" target="deptHead">{props.taskDetails.departmentHeadsName}</UncontrolledTooltip>
                               </Col>
                           </FormGroup>
                           <FormGroup>
@@ -456,7 +427,7 @@ const BLTI = (props) => {
                                       <Label>Return Date</Label>
                                   </Col>
                                   <Col md lg={4}>
-                                      <TextareaAutosize className="form-control" disabled value={convertDate(props.taskDetails.returnDate)} id="returnDate" name="returnDate" placeholder="/" />
+                                      <TextareaAutosize className="form-control" disabled value={props.taskDetails.returnDate} id="returnDate" name="returnDate" placeholder="/" />
                                   </Col>
                                   <Col md lg={2}>
                                       <Label>Responsible Person</Label>
@@ -486,8 +457,8 @@ const BLTI = (props) => {
                                   <Label>Department Heads</Label>
                               </Col>
                               <Col id="deptHead" md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.setArray(props.taskDetails.departmentHeadsName)} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
-                                  <UncontrolledTooltip placement="right" target="deptHead">{props.setArray(props.taskDetails.departmentHeadsName)}</UncontrolledTooltip>
+                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.departmentHeadsName} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
+                                  <UncontrolledTooltip placement="right" target="deptHead">{props.taskDetails.departmentHeadsName}</UncontrolledTooltip>
                               </Col>
                               <Col md lg={2}>
                                   <Label>Confirm</Label>

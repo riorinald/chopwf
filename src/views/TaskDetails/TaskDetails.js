@@ -57,6 +57,7 @@ class TaskDetails extends Component {
         await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`, { headers: { Pragma: 'no-cache' } }).then(res => {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
             this.setState({ taskDetails: res.data, appType: res.data.applicationTypeId, loading: false })
+            this.convertTaskDetails()
             console.log(res.data)
         })
         // this.getUserDetails()
@@ -76,7 +77,20 @@ class TaskDetails extends Component {
     }
 
     setArray(data) {
-        return data.join("; ")
+        console.log(Array.isArray(data))
+        if(Array.isArray(data)){
+            return data.join("; ")
+        } else {
+            return data
+        }
+    }
+
+    convertBool(data){
+        if (data === 'Y'){
+            return 'Yes'
+        }else{
+            return 'No'
+        }
     }
 
     // setArray = () => {
@@ -211,6 +225,21 @@ class TaskDetails extends Component {
             default:
                 return null
         }
+    }
+
+
+    convertTaskDetails(){
+        console.log(this.setArray(this.state.taskDetails.departmentHeadsName))
+        this.setState(prevState  =>({
+            taskDetails:{
+            ...prevState.taskDetails,
+                returnDate: this.convertDate(this.state.taskDetails.returnDate),
+                effectivePeriod: this.convertDate(this.state.taskDetails.effectivePeriod),
+                isUseInOffice: this.convertBool(this.state.taskDetails.isUseInOffice),
+                connectChop: this.convertBool(this.state.taskDetails.connectChop),
+                departmentHeadsName: this.setArray(this.state.taskDetails.departmentHeadsName)
+            }
+        }))
     }
 
     handleViews(appType) {
@@ -349,7 +378,7 @@ class TaskDetails extends Component {
                                 </Progress>
                             </Col>
                             <Row className="mb-3">
-                                <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
+                                <Col xs="12" md lg><span className=" ml-3 display-5"> {taskDetails.requestNum}</span></Col>
                             </Row>
                             <Row>
                                 {/* <Col> */}
@@ -362,7 +391,7 @@ class TaskDetails extends Component {
 
                             </Row>
                             <Row className="mb-4">
-                                <Col xs="12" sm="12" md lg className="text-md-left text-center">
+                                <Col xs="12" sm="12" md lg className="ml-3 text-md-left text-center">
                                     <Row>
                                         {/* <Col xs={12} sm={12} md={4} lg={2}>
                                             <img src={taskDetails.createdByPhotoUrl} className="img-avaa img-responsive center-block" alt="picture" />
@@ -373,7 +402,7 @@ class TaskDetails extends Component {
                                             </Row>
                                             <Row>
                                                 <Col xs={12} sm={12} md={6} lg={6}>
-                                                    <h6><center className="boxs">APPLICANT</center></h6>
+                                                    <h6><center className="boxs mr-4">APPLICANT</center></h6>
                                                 </Col>
                                             </Row>
                                         </Col>
@@ -381,10 +410,10 @@ class TaskDetails extends Component {
                                 </Col>
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col md><h5><i className="fa fa-tablet mr-2" /> {taskDetails.requestorUser.telephoneNum} </h5></Col>
+                                        <Col className="pl-0" md><h5><i className="fa fa-tablet mr-2" /> {taskDetails.requestorUser.telephoneNum} </h5></Col>
                                     </Row>
                                     <Row>
-                                        <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.requestorUser.email}</h5></Col>
+                                        <Col className="pl-0" md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.requestorUser.email}</h5></Col>
                                     </Row>
                                 </Col>
                             </Row>
@@ -396,9 +425,9 @@ class TaskDetails extends Component {
                                     <Col>
                                         <FormGroup>
                                             <Label>Documents</Label><br></br>
-
                                             <Button color="primary" onClick={this.toggleView}>View Documents</Button>
                                         </FormGroup>
+
                                         <Modal color="info" size="xl" toggle={this.toggleView} isOpen={showModal} >
                                             <ModalHeader toggle={this.toggleView} className="center"> Documents </ModalHeader>
                                             <ModalBody>
@@ -468,7 +497,7 @@ class TaskDetails extends Component {
                                                             Header: "Attached Document",
                                                             accessor: "documentName",
                                                             Cell: row => (
-                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} >{row.original.documentFileName}</div>
+                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} >{row.original.documentFileName}</div>
                                                             ),
                                                             show: appType !== "LTU"
                                                             // style: {textAlign: "center" },
