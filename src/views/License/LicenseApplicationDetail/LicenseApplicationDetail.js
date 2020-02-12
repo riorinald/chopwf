@@ -436,7 +436,7 @@ class LicenseApplicationDetail extends Component {
                                         {/* <Col xs={12} sm={12} md={4} lg={2}>
                                             <img src={taskDetails.histories[0].approvedByAvatarUrl} className="img-avaa img-responsive center-block" alt="picture" />
                                         </Col> */}
-                                        <Col md><h5> {taskDetails.employeeName} </h5>
+                                        <Col md><h5> {taskDetails.requestorUser.displayName1} </h5>
                                             <Row>
                                                 <Col md><h6> DFS/CN, MBAFC </h6></Col>
                                             </Row>
@@ -450,7 +450,7 @@ class LicenseApplicationDetail extends Component {
                                 </Col>
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col md><h5><i className="fa fa-tablet mr-2" />{taskDetails.telephoneNum} </h5></Col>
+                                        <Col md><h5><i className="fa fa-tablet mr-2" />{taskDetails.requestorUser.telephoneNum} </h5></Col>
                                     </Row>
                                     <Row>
                                         <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.email}</h5></Col>
@@ -460,10 +460,10 @@ class LicenseApplicationDetail extends Component {
                             <Col className="mb-4">
                                 <FormGroup row>
                                     <Col md lg>
-                                        <Label>Employee Number</Label>
+                                        <Label>Tel.</Label>
                                     </Col>
                                     <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="/" />
+                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.telephoneNum} name="text-input" placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Department</Label>
@@ -822,7 +822,7 @@ class LicenseApplicationDetail extends Component {
 
                                 : page === "myapplication"
                                     ? <div>
-                                        {currentStatus === "PENDINGREQUESTORRETURN" 
+                                        {currentStatus === "PENDINGREQUESTORRETURN"
                                             ? <Row>
                                                 <Col>
                                                     <FormGroup onChange={this.handleRadio} >
