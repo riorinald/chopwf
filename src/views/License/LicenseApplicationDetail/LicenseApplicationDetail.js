@@ -84,7 +84,7 @@ class LicenseApplicationDetail extends Component {
 
     validate() {
         let valid = false
-        if (this.state.currentStatus === "PENDINGLICENSEADMIN") {
+        if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT") {
             if (this.state.taskDetails.documentTypeId === "ORIGINAL") {
                 if (this.state.deliverWay === "Express") {
                     if (this.state.expressNumber !== "") {
@@ -172,9 +172,9 @@ class LicenseApplicationDetail extends Component {
     updated(action) {
         console.log(action)
         let valid = false
-        if (this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
+        if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
 
-            if (action === "approve" || action === "requestorreturn") {
+            if (action === "licenseadminack" || action === "requestorreturn") {
                 valid = this.validate()
             }
             else {
@@ -730,7 +730,7 @@ class LicenseApplicationDetail extends Component {
                             </Col>
                             {page === "mypendingtask"
                                 ? <div>
-                                    {currentStatus === "PENDINGLICENSEADMIN"
+                                    {currentStatus === "PENDINGLICENSEADMINACKLENDOUT"
                                         ?
                                         <Row>
                                             <Col>
