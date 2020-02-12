@@ -820,7 +820,7 @@ class LicenseApplicationDetail extends Component {
 
                                 : page === "myapplication"
                                     ? <div>
-                                        {currentStatus === "PENDINGREQUESTORRETURN" || currentStatus === "PENDINGLICENSEADMINACKLENDOUT"
+                                        {currentStatus === "PENDINGREQUESTORRETURN" 
                                             ? <Row>
                                                 <Col>
                                                     <FormGroup onChange={this.handleRadio} >
@@ -842,7 +842,7 @@ class LicenseApplicationDetail extends Component {
                                                 </Col>
                                             </Row>
                                             : null}
-                                        {currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN" || currentStatus === "PENDINGLICENSEADMINACKLENDOUT"
+                                        {currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
                                             ?
                                             taskDetails.actions.map((action, index) =>
                                                 <Button
