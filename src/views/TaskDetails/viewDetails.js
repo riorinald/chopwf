@@ -122,12 +122,12 @@ const CNIPS = (props) => {
                               </Col>
                           </FormGroup>
                           <FormGroup row>
-                              <Col md lg={2}>
+                              {/* <Col md lg={2}>
                                   <Label>Confirm</Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
-                              </Col>
+                              </Col> */}
                               <Col md lg={2}>
                                   <Label>Contract Signed By (Second Person) :  </Label>
                               </Col>
@@ -220,12 +220,12 @@ const LTI = (props) => {
                                   <TextareaAutosize className="form-control" disabled value={props.setArray(props.taskDetails.departmentHeadsName)} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
                                   <UncontrolledTooltip placement="right" target="deptHead">{props.setArray(props.taskDetails.departmentHeadsName)}</UncontrolledTooltip>
                               </Col>
-                              <Col md lg={2}>
+                              {/* <Col md lg={2}>
                                   <Label>Confirm</Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
-                              </Col>
+                              </Col> */}
                           </FormGroup>
                       </Col>
     </>
@@ -318,14 +318,14 @@ const LTI = (props) => {
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.documentCheckByName} id="documentCheckByName" name="documentCheckByName" placeholder="/" />
                               </Col>
                           </FormGroup>
-                          <FormGroup row>
+                          {/* <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Confirm</Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
                               </Col>
-                          </FormGroup>
+                          </FormGroup> */}
                       </Col>
     </>
   }
@@ -438,14 +438,14 @@ const LTI = (props) => {
                                   <UncontrolledTooltip placement="right" target="deptHead">{props.setArray(props.taskDetails.departmentHeadsName)}</UncontrolledTooltip>
                               </Col>
                           </FormGroup>
-                          <FormGroup row>
+                          {/* <FormGroup row>
                               <Col md lg={2}>
                                   <Label>Confirm</Label>
                               </Col>
                               <Col md lg={4}>
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
                               </Col>
-                          </FormGroup>
+                          </FormGroup> */}
                       </Col>
     </>
   } 
