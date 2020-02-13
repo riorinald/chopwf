@@ -871,8 +871,7 @@ class LicenseApplicationDetail extends Component {
                                     </Row>
                                 </div>
 
-
-                                : page === "myapplication"
+                                : page === "mypendingtask"
                                     ? <div>
                                         {currentStatus === "PENDINGREQUESTORRETURN"
                                             ? <Row>
@@ -890,36 +889,57 @@ class LicenseApplicationDetail extends Component {
                                                     </FormGroup>
                                                 </Col>
                                             </Row>
-                                            : null}
-                                        {currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
-                                            ? <div>
-                                                < Row >
-                                                    <Col> <h4>Comments</h4></Col>
-                                                </Row>
-                                                <Row>
-                                                    <Col >
-                                                        <Input onChange={this.handleChange("comments")} type="textarea" ></Input>
-                                                    </Col>
-                                                </Row>
-                                                <Row>
-                                                    <Col>&nbsp;</Col>
-                                                </Row>
-                                                {taskDetails.actions.map((action, index) =>
-                                                    <Button
-                                                        key={index}
-                                                        className="mr-1"
-                                                        color="success"
-                                                        onClick={() => this.updated(action.action)}
-                                                    >
-                                                        {action.actionName}
-                                                    </Button>
-                                                )}
-                                            </div>
+                                            :
+                                             null}
+                                        {page ==="mypendingtask" && currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
+                                            ?
+                                            taskDetails.actions.map((action, index) =>
+                                                <Button
+                                                    key={index}
+                                                    className="mr-1"
+                                                    color="success"
+                                                    onClick={() => this.updated(action.action)}
+                                                >
+                                                    {action.actionName}
+                                                </Button>
+                                            )
                                             : null}
 
                                     </div>
-                                    : null}
+                                    :
+                                     null}
+                            {currentStatus === "COMPLETED"
+                                ?
+                                <Collapse isOpen={taskDetails.documents.length !== 0}>
+                                    <Col className="mb-4">
+                                        <FormGroup>
+                                            <Label>Documents</Label>
+                                            <Table responsive hover bordered size="sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th className="smallTd">#</th>
+                                                        <th>Attached File</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {taskDetails.documents.map((doc, index) =>
+                                                        <tr key={index} >
+                                                            <td className="smallTd"> {index + 1} </td>
+                                                            <td>
+                                                                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${doc.documentFileType};base64,${doc.documentBase64String}`, doc.documentName))} > {doc.documentName} </div>
+                                                                {/* <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a> */}
+                                                            </td>
+                                                        </tr>
+                                                    )}
 
+                                                </tbody>
+                                            </Table>
+                                        </FormGroup>
+                                    </Col>
+                                </Collapse>
+                                // </Row>
+                                : ""
+                            }
                         </CardBody>
                         <CardFooter>
                             {taskDetails.histories.length !== 0
