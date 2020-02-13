@@ -770,7 +770,7 @@ class LicenseApplicationDetail extends Component {
                                     </Row>
                                 </div>
 
-                                : page === "myapplication"
+                                : page === "mypendingtask"
                                     ? <div>
                                         {currentStatus === "PENDINGREQUESTORRETURN"
                                             ? <Row>
@@ -793,8 +793,9 @@ class LicenseApplicationDetail extends Component {
                                                     </FormGroup>
                                                 </Col>
                                             </Row>
-                                            : null}
-                                        {currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
+                                            :
+                                             null}
+                                        {page ==="mypendingtask" && currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
                                             ?
                                             taskDetails.actions.map((action, index) =>
                                                 <Button
@@ -809,7 +810,8 @@ class LicenseApplicationDetail extends Component {
                                             : null}
 
                                     </div>
-                                    : null}
+                                    :
+                                     null}
                             {currentStatus === "COMPLETED"
                                 ?
                                 <Collapse isOpen={taskDetails.documents.length !== 0}>
