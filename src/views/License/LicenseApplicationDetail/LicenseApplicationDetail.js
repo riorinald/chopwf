@@ -263,11 +263,15 @@ class LicenseApplicationDetail extends Component {
     updated(action) {
         console.log(action)
         let valid = true
+        let deliverWay = this.state.deliverWay
         if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
             if(action === "licenseadminacklendout" || action === "requestorreturn"){
                 valid = this.validate()
             }
             else{
+                if(action === "reject" || action === "sendback"){
+                    deliverWay = ""
+                }
                 valid = true
             }
         }
@@ -277,7 +281,7 @@ class LicenseApplicationDetail extends Component {
         let postReq = new FormData();
         postReq.append("UserId", Authorize.getCookies().userId);
         postReq.append("Comments", this.state.comments);
-        postReq.append("ReturnWay", this.state.deliverWay);
+        postReq.append("ReturnWay", deliverWay);
         postReq.append("ExpressNumber", this.state.expressNumber);
         postReq.append("ExpressAddress", this.state.taskDetails.expDeliveryAddress);
         for (let i = 0; i < this.state.documents.length; i++) {
