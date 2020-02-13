@@ -56,8 +56,94 @@ class LicenseApplicationDetail extends Component {
         await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem("userId")}`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 console.log(res.data)
-                let currentStatusArr = res.data.allStages.filter(stage => stage.state === "CURRENT")
                 this.setState({ taskDetails: res.data, currentStatus: res.data.currentStatusId, loading: false, })
+
+
+
+                                                            /// TESTING - ANAND //
+                //     let obj = {}
+                //     let arr = []
+                //     let keys = ["telephoneNum", "departmentName", "licenseName", "purposeType", "documentTypeName"
+                //         , "needWatermark", "watermark", "deliveryWayName", "expDeliveryAddress", "expDeliveryReceiver"
+                //         , "expDeliveryNumber", "expDeliveryMobileNo", "returnWayName", "seniorManagers", "expReturnNumber"]
+                //     keys.map(key => {
+                //         switch (key) {
+                //             case "telephoneNum":
+                //                 obj.label = "Tel."
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "departmentName":
+                //                 obj.label = "Department Name"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "licenseName":
+                //                 obj.label = "License Name"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "purposeType":
+                //                 obj.label = "Purpose"
+                //                 obj.value = res.data[key] === "PS" ? res.data.purposeComment : res.data.purposeTypeName
+                //                 break;
+                //             case "documentTypeName":
+                //                 obj.label = "Document Type"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "plannedReturnDate":
+                //                 if (res.data.documentTypeId === "ORIGINAL") {
+                //                     obj.label = "Planned Return Date"
+                //                     obj.value = this.convertDate(res.data[key])
+                //                 }
+                //                 break;
+                //             case "needWatermark":
+                //                 if (res.data.documentTypeId === "SCANCOPY") {
+                //                     obj.label = "Watermark"
+                //                     obj.value = res.data[key] === "Y" ? res.data.watermark : "No Watermark"
+                //                 }
+                //                 break;
+                //             case "watermark":
+                //                 if (res.data.documentTypeId === "SCANCOPY" && res.data.needWatermark === "N") {
+                //                     obj.label = "Reason for no watermark"
+                //                     obj.value = res.data[key]
+                //                 }
+                //                 break;
+                //             case "deliveryWayName":
+                //                 obj.label = "Deliver Ways"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "expDeliveryAddress":
+                //                 obj.label = "Delivery Address"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "expDeliveryReceiver":
+                //                 obj.label = "Reciever"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "expDeliveryNumber":
+                //                 obj.label = "Delivery Number"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "expDeliveryMobileNo":
+                //                 obj.label = "Receiver Mobile Number"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "returnWayName":
+                //                 obj.label = "Return Way"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "seniorManagers":
+                //                 obj.label = "Senior Manager"
+                //                 obj.value = this.convertMgrs(res.data[key])
+                //                 break;
+                //             case "expReturnNumber":
+                //                 obj.label = "Return Express Number"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //         }
+                //         console.log(obj)
+                //         arr.push(obj)
+                //     })
+                //     console.log(arr)
+                                            //TESTING -- ANAND//
             })
     }
 
@@ -376,7 +462,7 @@ class LicenseApplicationDetail extends Component {
                                                     animated={stage.state === "CURRENT" ? true : false}
                                                     striped={true}
                                                     color={
-                                                        taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ?
+                                                        taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ?
                                                             stage.state === "CURRENT" ?
                                                                 "danger" :
                                                                 stage.state === "FINISHED" ?
