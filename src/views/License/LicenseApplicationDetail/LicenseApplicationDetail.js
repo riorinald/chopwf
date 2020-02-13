@@ -5,6 +5,7 @@ import Axios from 'axios';
 import {
     Card, CardBody, CardHeader, Table, Col, Row, CardFooter,
     Input,
+    FormFeedback,
     Button,
     FormGroup,
     Label,
@@ -30,7 +31,7 @@ class LicenseApplicationDetail extends Component {
             currentStatus: "",
             deliverWay: "",
             expressNumber: "",
-            comments: "",
+            invalidExpress: false,
             documents: [],
         }
         this.goBack = this.goBack.bind(this)
@@ -178,11 +179,12 @@ class LicenseApplicationDetail extends Component {
                     }
                     else {
                         valid = false
-                        Swal.fire({
-                            title: "No Express Number",
-                            html: "Please add express number !",
-                            type: "warning"
-                        })
+                        // Swal.fire({
+                        //     title: "No Express Number",
+                        //     html: "Please add express number !",
+                        //     type: "warning"
+                        // })
+                        this.setState({invalidExpress: true})
                     }
                 }
                 else if (this.state.deliverWay === "F2F") {
@@ -228,11 +230,12 @@ class LicenseApplicationDetail extends Component {
                     }
                     else {
                         valid = false
-                        Swal.fire({
-                            title: "No Express Number",
-                            html: "Please add express number !",
-                            type: "warning"
-                        })
+                        // Swal.fire({
+                        //     title: "No Express Number",
+                        //     html: "Please add express number !",
+                        //     type: "warning"
+                        // })
+                        this.setState({invalidExpress: true})
                     }
                 }
                 else if (this.state.deliverWay === "F2F") {
@@ -259,7 +262,12 @@ class LicenseApplicationDetail extends Component {
         console.log(action)
         let valid = true
         if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
-            valid = this.validate()
+            if(action === "licenseadminacklendout" || action === "requestorreturn"){
+                valid = this.validate()
+            }
+            else{
+                valid = true
+            }
         }
         else {
             valid = true
@@ -330,7 +338,7 @@ class LicenseApplicationDetail extends Component {
 
     handleChange = name => event => {
         let value = event.target.value
-        this.setState({ [name]: value })
+        this.setState({ invalidExpress:false, [name]: value })
     }
 
     convertApprovedDate(dateValue) {
@@ -425,7 +433,7 @@ class LicenseApplicationDetail extends Component {
 
 
     render() {
-        const { taskDetails, loading, page, currentStatus, expressNumber, deliverWay, documents } = this.state
+        const { taskDetails, loading, page, currentStatus, expressNumber, deliverWay, documents, invalidExpress } = this.state
         return (
             <div>
                 {!loading ?
@@ -801,10 +809,12 @@ class LicenseApplicationDetail extends Component {
                                                     ?
                                                     <FormGroup onChange={this.handleRadio} >
                                                         <Label>Deliver Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
-                                                            <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面 Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express">
+                                                            <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
+                                                                <Label>Express Number</Label>
+                                                                <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                                <FormFeedback>Express Number is required.</FormFeedback>
                                                                 <Row> &nbsp; </Row>
                                                                 <div>Reciever: {taskDetails.expDeliveryReceiver}</div>
                                                                 <div>Address: {taskDetails.expDeliveryAddress}</div>
@@ -837,10 +847,12 @@ class LicenseApplicationDetail extends Component {
                                                     <Col>
                                                         <FormGroup onChange={this.handleRadio} >
                                                             <Label>Return Way</Label>
-                                                            <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                                            <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
-                                                                <Collapse isOpen={deliverWay === "Express"}>
-                                                                    <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                            <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面 Face to face" />
+                                                            <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express">
+                                                                <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
+                                                                    <Label>Express Number</Label>
+                                                                    <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                                    <FormFeedback>You will not be able to see this</FormFeedback>
                                                                     <Row> &nbsp; </Row>
                                                                 </Collapse>
                                                             </CustomInput>
@@ -878,10 +890,12 @@ class LicenseApplicationDetail extends Component {
                                                 <Col>
                                                     <FormGroup onChange={this.handleRadio} >
                                                         <Label>Return Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
-                                                            <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面 Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express">
+                                                            <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
+                                                                <Label>Express Number</Label>
+                                                                <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                                <FormFeedback>You will not be able to see this</FormFeedback>
                                                                 <Row> &nbsp; </Row>
                                                             </Collapse>
                                                         </CustomInput>
