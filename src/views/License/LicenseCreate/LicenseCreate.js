@@ -465,6 +465,31 @@ class LicenseCreate extends Component {
             callback(filterReceiver(inputValue));
         }
 
+        const getYear = date => {
+            return date.getFullYear()
+        }
+
+        const year = (new Date()).getFullYear();
+        const years = Array.from(new Array(2), (val, index) => index + year);
+        const months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
+        const getMonth = date => {
+            let month = date.getMonth()
+            return months[month]
+        }
+
         return (
             <div className="animated fadeIn">
                 <h4>Create</h4>
@@ -472,17 +497,6 @@ class LicenseCreate extends Component {
                     <CardHeader>Create new request</CardHeader>
                     <CardBody>
                         <Form className="form-horizontal" innerRef={this.formRef}>
-                            <FormGroup>
-                                <Label>Employee Number</Label>
-                                <div className="controls">
-                                    <InputGroup className="input-prepend">
-                                        <InputGroupAddon addonType="prepend">
-                                            <InputGroupText>ID</InputGroupText>
-                                        </InputGroupAddon>
-                                        <Input autoComplete="off" disabled value={formData.employeeNum} id="prependedInput" size="16" type="text" />
-                                    </InputGroup>
-                                </div>
-                            </FormGroup>
                             <FormGroup>
                                 <Label>Telephone Number </Label>
                                 <InputGroup>
@@ -515,7 +529,7 @@ class LicenseCreate extends Component {
                             </FormGroup>
 
                             <FormGroup onChange={this.handleRadio("licensePurpose")} >
-                                <Label >License Purpose</Label>
+                                <Label >Purpose</Label>
                                 <CustomInput type="radio" id="licensePurpose1" name="licensePurpose" value="LVFP" label="城市备案 Local VRB Filling Purpose" />
                                 <CustomInput type="radio" id="licensePurpose2" name="licensePurpose" value="MFP" label="抵押 Mortgage Filling Purpose" />
                                 <CustomInput type="radio" id="licensePurpose3" name="licensePurpose" value="PS" label="其他 Please specify:">
@@ -539,8 +553,8 @@ class LicenseCreate extends Component {
 
                             <Collapse isOpen={formData.documentType === "SCANCOPY"}>
                                 <FormGroup onChange={this.handleRadio("isWatermark")}>
-                                    <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
-                                    <CustomInput type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes, Please specify watermark here:">
+                                    <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked.)</small>
+                                    <CustomInput type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes. Please specify watermark here:">
                                         <Collapse isOpen={formData.isWatermark === "Y"}>
                                             <Input id="inputWatermark1" type="text" maxLength={50} value={formData.watermark} onChange={this.handleChange("watermark")} />
                                             {formData.documentType === "SCANCOPY"
@@ -551,7 +565,7 @@ class LicenseCreate extends Component {
                                             }
                                         </Collapse>
                                     </CustomInput>
-                                    <CustomInput type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No, Please specify the reason of not adding watermark:">
+                                    <CustomInput type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No. Please specify the reason of not adding watermark:">
                                         <Collapse isOpen={formData.isWatermark === "N"}>
                                             <Input id="inputWatermark2" type="text" maxLength={50} value={formData.watermark} onChange={this.handleChange("watermark")} />
                                             {formData.documentType === "SCANCOPY"
@@ -573,6 +587,46 @@ class LicenseCreate extends Component {
                                     <Label>Planned Return Date:</Label>
                                     <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
                                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                                        renderCustomHeader={({
+                                            date,
+                                            changeYear,
+                                            changeMonth,
+                                            decreaseMonth,
+                                            increaseMonth,
+                                            prevMonthButtonDisabled,
+                                            nextMonthButtonDisabled
+                                        }) => (
+                                                <div
+                                                    style={{
+                                                        margin: 10,
+                                                        display: "flex",
+                                                        justifyContent: "center"
+                                                    }}
+                                                >
+                                                    <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                    <Input
+                                                        value={getYear(date)}
+                                                        onChange={({ target: { value } }) => changeYear(value)}
+                                                        type="select">
+                                                        {years.map(option => (
+                                                            <option key={option} value={option}>
+                                                                {option}
+                                                            </option>
+                                                        ))}
+                                                    </Input>
+                                                    <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                        changeMonth(months.indexOf(value))
+                                                    } type="select">
+                                                        {months.map((option) => (
+                                                            <option key={option} value={option}>
+                                                                {option}
+                                                            </option>
+                                                        ))}
+                                                    </Input>
+                                                    <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                                                </div>
+                                            )}
                                         showMonthDropdown
                                         minDate={new Date()}
                                         maxDate={addDays(new Date(), 30)}
@@ -588,7 +642,7 @@ class LicenseCreate extends Component {
                             <Collapse isOpen={formData.documentType === "ORIGINAL"}> */}
                                 <FormGroup onChange={this.handleChange("deliverWay")} >
                                     <Label>Deliver Way</Label>
-                                    <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
+                                    <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面 Face to face" />
                                     <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express" />
                                     {formData.documentType === "ORIGINAL"
                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', formData.deliverWay, 'required')}</small>
@@ -598,7 +652,7 @@ class LicenseCreate extends Component {
                                 <Collapse isOpen={formData.deliverWay === "Express"}>
                                     <FormGroup>
                                         <Label>Address</Label>
-                                        <Input autoComplete="off" placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
+                                        <Input maxLength="200" autoComplete="off" placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
                                         {formData.documentType === "ORIGINAL"
                                             ? formData.deliverWay === "Express"
                                                 ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
@@ -618,7 +672,7 @@ class LicenseCreate extends Component {
                                             menuPortalTarget={document.body}
                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         /> */}
-                                        <Input autoComplete="off" placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
+                                        <Input maxLength="50" autoComplete="off" placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
                                         {formData.documentType === "ORIGINAL"
                                             ? formData.deliverWay === "Express"
                                                 ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
@@ -629,7 +683,7 @@ class LicenseCreate extends Component {
 
                                     <FormGroup>
                                         <Label>Reciever Mobile Phone</Label>
-                                        <Input autoComplete="off" placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
+                                        <Input maxLength="15" autoComplete="off" placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
                                         {formData.documentType === "ORIGINAL"
                                             ? formData.deliverWay === "Express" ?
                                                 <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, formData.recieverPhone, 'required')}</small>

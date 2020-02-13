@@ -88,7 +88,7 @@ class Myapps extends Component {
     await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentname=${this.state.searchOption.departmentName}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } })
       .then(res => {
-        this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false })
+        this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false, page: res.data.page, limit: res.data.pageSize })
         console.log(res.data)
       })
 
@@ -114,7 +114,7 @@ class Myapps extends Component {
 
   onKeyPressed = (e) => {
     if (e.key === "Enter") {
-      this.getApplications(this.state.page, this.state.limit)
+      this.getApplications(1, this.state.limit)
     }
   }
 
@@ -232,6 +232,30 @@ class Myapps extends Component {
 
   render() {
     const { applications, totalPages } = this.state
+    const getYear = date => {
+      return date.getFullYear()
+    }
+
+    const year = (new Date()).getFullYear();
+    const years = Array.from(new Array(3), (val, index) => index + (year - 1));
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
+    const getMonth = date => {
+      let month = date.getMonth()
+      return months[month]
+    }
     // let columnData = Object.keys(applications[0])
     return (
       <div className="animated fadeIn">
@@ -400,6 +424,46 @@ class Myapps extends Component {
                     return (
                       <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                         className="form-control" dateFormat="yyyy/MM/dd"
+                        renderCustomHeader={({
+                          date,
+                          changeYear,
+                          changeMonth,
+                          decreaseMonth,
+                          increaseMonth,
+                          prevMonthButtonDisabled,
+                          nextMonthButtonDisabled
+                        }) => (
+                            <div
+                              style={{
+                                margin: 10,
+                                display: "flex",
+                                justifyContent: "center"
+                              }}
+                            >
+                              <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                              <Input
+                                value={getYear(date)}
+                                onChange={({ target: { value } }) => changeYear(value)}
+                                type="select">
+                                {years.map(option => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                changeMonth(months.indexOf(value))
+                              } type="select">
+                                {months.map((option) => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                            </div>
+                          )}
                         peekNextMonth
                         showMonthDropdown
                         showYearDropdown
@@ -419,20 +483,21 @@ class Myapps extends Component {
                   Cell: this.renderEditable,
                   style: { textAlign: "center" }
                 },
-                {
-                  Header: "New Return Date",
-                  accessor: "newReturnDate",
-                  filterable: false,
-                  width: this.getColumnWidth('newReturnDate', "New Return Date"),
-                  // Cell: this.renderEditable,
-                  Cell: row => (
-                    <div> {this.convertDate(row.original.newReturnDate)} </div>
-                  ),
-                  style: { textAlign: "center" }
-                },
+                // {
+                //   Header: "New Return Date",
+                //   accessor: "newReturnDate",
+                //   filterable: false,
+                //   width: this.getColumnWidth('newReturnDate', "New Return Date"),
+                //   // Cell: this.renderEditable,
+                //   Cell: row => (
+                //     <div> {this.convertDate(row.original.newReturnDate)} </div>
+                //   ),
+                //   style: { textAlign: "center" }
+                // },
               ]}
               defaultPageSize={this.state.limit}
               manual
+              page={this.state.page - 1}
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {
                 this.setState({ limit: pageSize, page: page + 1 });

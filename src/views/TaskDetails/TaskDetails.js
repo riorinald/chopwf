@@ -46,7 +46,7 @@ class TaskDetails extends Component {
             this.goBack(false)
         }
         else {
-            this.setState({ page: this.props.match.params.page})
+            this.setState({ page: this.props.match.params.page })
             this.getTaskDetails(this.props.location.state.taskId)
         }
     }
@@ -57,6 +57,7 @@ class TaskDetails extends Component {
         await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`, { headers: { Pragma: 'no-cache' } }).then(res => {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
             this.setState({ taskDetails: res.data, appType: res.data.applicationTypeId, loading: false })
+            this.convertTaskDetails()
             console.log(res.data)
         })
         // this.getUserDetails()
@@ -76,7 +77,20 @@ class TaskDetails extends Component {
     }
 
     setArray(data) {
-        return data.join("; ")
+        console.log(Array.isArray(data))
+        if(Array.isArray(data)){
+            return data.join("; ")
+        } else {
+            return data
+        }
+    }
+
+    convertBool(data){
+        if (data === 'Y'){
+            return 'Yes'
+        }else{
+            return 'No'
+        }
     }
 
     // setArray = () => {
@@ -133,7 +147,7 @@ class TaskDetails extends Component {
 
                         Swal.update({
                             title: res.data.message,
-                            text: `The request has been ${res.data.message.toLowerCase()}`,
+                            text: `The request has been ${res.data.message.toLowerCase()}.`,
                             type: "success",
 
                         })
@@ -213,6 +227,21 @@ class TaskDetails extends Component {
         }
     }
 
+
+    convertTaskDetails(){
+        console.log(this.setArray(this.state.taskDetails.departmentHeadsName))
+        this.setState(prevState  =>({
+            taskDetails:{
+            ...prevState.taskDetails,
+                returnDate: this.convertDate(this.state.taskDetails.returnDate),
+                effectivePeriod: this.convertDate(this.state.taskDetails.effectivePeriod),
+                isUseInOffice: this.convertBool(this.state.taskDetails.isUseInOffice),
+                connectChop: this.convertBool(this.state.taskDetails.connectChop),
+                departmentHeadsName: this.setArray(this.state.taskDetails.departmentHeadsName)
+            }
+        }))
+    }
+
     handleViews(appType) {
         if (this.state.taskDetails.branchId !== '') {
             switch (appType) {
@@ -270,20 +299,20 @@ class TaskDetails extends Component {
     }
 
     viewOrDownloadFile(b64, type, name) {
-        if (b64 !== "") {
-            let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
-            var blobUrl = new Blob([file], { type: type })
-            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-                window.navigator.msSaveOrOpenBlob(blobUrl, name)
-                return;
-            }
-            else {
-                window.open(URL.createObjectURL(file), "_blank")
-            }
+        // if (b64 !== "") {
+        let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+        var blobUrl = new Blob([file], { type: type })
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(blobUrl, name)
+            return;
         }
         else {
-            alert("BASE 64 String is empty !!!")
+            window.open(URL.createObjectURL(file), "_blank")
         }
+        // }
+        // else {
+        //     alert("BASE 64 String is empty !!!")
+        // }
     }
 
     render() {
@@ -321,7 +350,25 @@ class TaskDetails extends Component {
                                                 bar
                                                 animated={stage.state === "CURRENT" ? true : false}
                                                 striped={stage.state !== "CURRENT"}
-                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "primary" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                color={
+                                                    taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ?
+                                                        stage.state === "CURRENT" ?
+                                                            "danger" :
+                                                            stage.state === "FINISHED" ?
+                                                                "success" :
+                                                                "secondary" :
+                                                        taskDetails.currentStatusId === "RECALLED" ?
+                                                            stage.state === "CURRENT" ?
+                                                                "primary" :
+                                                                stage.state === "FINISHED" ?
+                                                                    "success" :
+                                                                    "secondary" :
+                                                            stage.state === "CURRENT" ?
+                                                                "warning" :
+                                                                stage.state === "FINISHED" ?
+                                                                    "success" :
+                                                                    "secondary"
+                                                }
                                                 // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                 value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                             </Progress>
@@ -331,7 +378,7 @@ class TaskDetails extends Component {
                                 </Progress>
                             </Col>
                             <Row className="mb-3">
-                                <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
+                                <Col xs="12" md lg><span className=" ml-3 display-5"> {taskDetails.requestNum}</span></Col>
                             </Row>
                             <Row>
                                 {/* <Col> */}
@@ -344,7 +391,7 @@ class TaskDetails extends Component {
 
                             </Row>
                             <Row className="mb-4">
-                                <Col xs="12" sm="12" md lg className="text-md-left text-center">
+                                <Col xs="12" sm="12" md lg className="ml-3 text-md-left text-center">
                                     <Row>
                                         {/* <Col xs={12} sm={12} md={4} lg={2}>
                                             <img src={taskDetails.createdByPhotoUrl} className="img-avaa img-responsive center-block" alt="picture" />
@@ -355,7 +402,7 @@ class TaskDetails extends Component {
                                             </Row>
                                             <Row>
                                                 <Col xs={12} sm={12} md={6} lg={6}>
-                                                    <h6><center className="boxs">APPLICANT</center></h6>
+                                                    <h6><center className="boxs mr-4">APPLICANT</center></h6>
                                                 </Col>
                                             </Row>
                                         </Col>
@@ -363,25 +410,26 @@ class TaskDetails extends Component {
                                 </Col>
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col md><h5><i className="fa fa-tablet mr-2" /> {taskDetails.requestorUser.telephoneNum} </h5></Col>
+                                        <Col className="pl-0" md><h5><i className="fa fa-tablet mr-2" /> {taskDetails.requestorUser.telephoneNum} </h5></Col>
                                     </Row>
                                     <Row>
-                                        <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.requestorUser.email}</h5></Col>
+                                        <Col className="pl-0" md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.requestorUser.email}</h5></Col>
                                     </Row>
                                 </Col>
                             </Row>
                             {this.handleViews(appType)}
-                            <Row>
-                                <FormGroup>
+                            {/* <Row> */}
+                            {/* <FormGroup> */}
+                            <Col>
+                                <Row>
                                     <Col>
-                                        <Label>Documents</Label>
-                                    </Col>
-                                    <Col>
-
-                                        <Button color="primary" onClick={this.toggleView}>View Documents</Button>
+                                        <FormGroup>
+                                            <Label>Documents</Label><br></br>
+                                            <Button color="primary" onClick={this.toggleView}>View Documents</Button>
+                                        </FormGroup>
 
                                         <Modal color="info" size="xl" toggle={this.toggleView} isOpen={showModal} >
-                                            <ModalHeader className="center"> Documents </ModalHeader>
+                                            <ModalHeader toggle={this.toggleView} className="center"> Documents </ModalHeader>
                                             <ModalBody>
                                                 <ReactTable
                                                     data={taskDetails.documents}
@@ -410,14 +458,14 @@ class TaskDetails extends Component {
                                                             Header: "Document Name (English)",
                                                             accessor: "documentNameEnglish",
                                                             width: 250,
-                                                            style: { 'white-space': 'normal' }
+                                                            style: { 'whiteSpace': 'normal' }
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
                                                             Header: "Document Name (Chinese)",
                                                             accessor: "documentNameChinese",
                                                             width: 250,
-                                                            style: { 'white-space': 'normal' }
+                                                            style: { 'whiteSpace': 'normal' }
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
@@ -449,7 +497,7 @@ class TaskDetails extends Component {
                                                             Header: "Attached Document",
                                                             accessor: "documentName",
                                                             Cell: row => (
-                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} >{row.original.documentFileName}</div>
+                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} >{row.original.documentFileName}</div>
                                                             ),
                                                             show: appType !== "LTU"
                                                             // style: {textAlign: "center" },
@@ -462,10 +510,12 @@ class TaskDetails extends Component {
                                             </ModalFooter>
                                         </Modal>
                                     </Col>
-                                </FormGroup>
-                            </Row>
+                                </Row>
+                            </Col>
+                            {/* </FormGroup> */}
+                            {/* </Row> */}
                             {page === "mypendingtask"
-                                ? <div>
+                                ? <div className="px-2 pt-2">
                                     <Row>
                                         <Col> <h4>Comments</h4></Col>
                                     </Row>
@@ -494,14 +544,14 @@ class TaskDetails extends Component {
 
                             {taskDetails.histories.length !== 0
                                 ? <Row>
-                                    <Col> <h4>Approval Histories</h4></Col>
+                                    <Col className="mx-2 mt-2"> <h4>Approval Histories</h4></Col>
                                 </Row>
                                 : null}
 
                             {taskDetails.histories.map((history, index) =>
                                 <div key={index}>
                                     <hr></hr>
-                                    <Row className="text-md-left text-center">
+                                    <Row className="pl-2 text-md-left text-center">
                                         {/* <Col xs="12" sm="12" md="2" lg="1">
                                             <img src={history.approvedByAvatarUrl} className="img-avaa img-responsive" alt="Avatar" />
                                         </Col> */}

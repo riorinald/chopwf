@@ -26,6 +26,7 @@ class LicenseApplicationDetail extends Component {
             loading: true,
             page: "",
             comments: "",
+            wrongDocError: "",
             currentStatus: "",
             deliverWay: "",
             expressNumber: "",
@@ -55,8 +56,94 @@ class LicenseApplicationDetail extends Component {
         await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem("userId")}`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 console.log(res.data)
-                let currentStatusArr = res.data.allStages.filter(stage => stage.state === "CURRENT")
                 this.setState({ taskDetails: res.data, currentStatus: res.data.currentStatusId, loading: false, })
+
+
+
+                                                            /// TESTING - ANAND //
+                //     let obj = {}
+                //     let arr = []
+                //     let keys = ["telephoneNum", "departmentName", "licenseName", "purposeType", "documentTypeName"
+                //         , "needWatermark", "watermark", "deliveryWayName", "expDeliveryAddress", "expDeliveryReceiver"
+                //         , "expDeliveryNumber", "expDeliveryMobileNo", "returnWayName", "seniorManagers", "expReturnNumber"]
+                //     keys.map(key => {
+                //         switch (key) {
+                //             case "telephoneNum":
+                //                 obj.label = "Tel."
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "departmentName":
+                //                 obj.label = "Department Name"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "licenseName":
+                //                 obj.label = "License Name"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "purposeType":
+                //                 obj.label = "Purpose"
+                //                 obj.value = res.data[key] === "PS" ? res.data.purposeComment : res.data.purposeTypeName
+                //                 break;
+                //             case "documentTypeName":
+                //                 obj.label = "Document Type"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "plannedReturnDate":
+                //                 if (res.data.documentTypeId === "ORIGINAL") {
+                //                     obj.label = "Planned Return Date"
+                //                     obj.value = this.convertDate(res.data[key])
+                //                 }
+                //                 break;
+                //             case "needWatermark":
+                //                 if (res.data.documentTypeId === "SCANCOPY") {
+                //                     obj.label = "Watermark"
+                //                     obj.value = res.data[key] === "Y" ? res.data.watermark : "No Watermark"
+                //                 }
+                //                 break;
+                //             case "watermark":
+                //                 if (res.data.documentTypeId === "SCANCOPY" && res.data.needWatermark === "N") {
+                //                     obj.label = "Reason for no watermark"
+                //                     obj.value = res.data[key]
+                //                 }
+                //                 break;
+                //             case "deliveryWayName":
+                //                 obj.label = "Deliver Ways"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "expDeliveryAddress":
+                //                 obj.label = "Delivery Address"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "expDeliveryReceiver":
+                //                 obj.label = "Reciever"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "expDeliveryNumber":
+                //                 obj.label = "Delivery Number"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "expDeliveryMobileNo":
+                //                 obj.label = "Receiver Mobile Number"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "returnWayName":
+                //                 obj.label = "Return Way"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "seniorManagers":
+                //                 obj.label = "Senior Manager"
+                //                 obj.value = this.convertMgrs(res.data[key])
+                //                 break;
+                //             case "expReturnNumber":
+                //                 obj.label = "Return Express Number"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //         }
+                //         console.log(obj)
+                //         arr.push(obj)
+                //     })
+                //     console.log(arr)
+                                            //TESTING -- ANAND//
             })
     }
 
@@ -83,7 +170,7 @@ class LicenseApplicationDetail extends Component {
 
     validate() {
         let valid = false
-        if (this.state.currentStatus === "PENDINGLICENSEADMIN") {
+        if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || this.state.currentStatus === "PENDINGLICENSEADMIN") {
             if (this.state.taskDetails.documentTypeId === "ORIGINAL") {
                 if (this.state.deliverWay === "Express") {
                     if (this.state.expressNumber !== "") {
@@ -170,15 +257,9 @@ class LicenseApplicationDetail extends Component {
 
     updated(action) {
         console.log(action)
-        let valid = false
-        if (this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
-
-            if (action === "approve" || action === "requestorreturn") {
-                valid = this.validate()
-            }
-            else {
-                valid = true
-            }
+        let valid = true
+        if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
+            valid = this.validate()
         }
         else {
             valid = true
@@ -219,7 +300,7 @@ class LicenseApplicationDetail extends Component {
 
                             Swal.update({
                                 title: res.data.message,
-                                text: `The request has been ${res.data.message}`,
+                                text: `The request has been ${res.data.message.toLowerCase()}.`,
                                 type: "success",
 
                             })
@@ -236,23 +317,6 @@ class LicenseApplicationDetail extends Component {
                         })
                 }
             })
-
-            // Axios.post(`${config.url}/licenses/${this.props.location.state.taskId}/${action}`, postReq, { headers: { 'Content-Type': 'multipart/form-data' } })
-            //     .then(res => {
-            //         Swal.fire({
-            //             title: res.data.message,
-            //             html: `The request has been ${res.data.message}`,
-            //             type: "success",
-            //             onClose: () => { this.goBack(true) }
-            //         })
-            //     })
-            //     .catch(error => {
-            //         Swal.fire({
-            //             title: "ERROR",
-            //             html: error.response.data.message,
-            //             type: "error"
-            //         })
-            //     })
         }
 
     }
@@ -276,7 +340,11 @@ class LicenseApplicationDetail extends Component {
     }
 
     uploadDocument(event) {
+        let ext = ["ipg", "png", "xls", "xlsm", "xlsx", "email", "jpeg", "txt", "rtf", "tiff", "tif", "doc", "docx", "pdf", "pdfx", "bmp"]
+        let extValid = false
         if (event.target.files.length !== 0) {
+            let last = event.target.files[0].name.split('.').length
+            let extension = event.target.files[0].name.split('.')[last - 1]
             let valid = true
             let file = event.target.files[0]
             let fileName = file.name
@@ -289,7 +357,16 @@ class LicenseApplicationDetail extends Component {
                     valid = true
                 }
             }
-            if (valid) {
+            for (let i = 0; i < ext.length; i++) {
+                if (ext[i] === extension || ext[i].toUpperCase() === extension) {
+                    extValid = true
+                    break;
+                }
+                else {
+                    extValid = false
+                }
+            }
+            if (valid && extValid) {
                 let Url = URL.createObjectURL(file)
 
                 let obj = {
@@ -297,17 +374,23 @@ class LicenseApplicationDetail extends Component {
                     fileName: fileName,
                     url: Url
                 }
+                this.setState({ wrongDocError: "" })
                 this.setState(state => {
                     const documents = this.state.documents.concat(obj)
                     return { documents }
                 })
             }
             else {
-                Swal.fire({
-                    title: "Document Exists ",
-                    html: `The document has already been added to the list !`,
-                    type: "warning",
-                })
+                if (!valid) {
+                    Swal.fire({
+                        title: "Document Exists ",
+                        html: `The document has already been added to the list !`,
+                        type: "warning",
+                    })
+                }
+                else if (!extValid) {
+                    this.setState({ wrongDocError: "Please attach a valid document !" })
+                }
             }
         }
     }
@@ -378,7 +461,25 @@ class LicenseApplicationDetail extends Component {
                                                     bar
                                                     animated={stage.state === "CURRENT" ? true : false}
                                                     striped={true}
-                                                    color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "primary" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                    color={
+                                                        taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ?
+                                                            stage.state === "CURRENT" ?
+                                                                "danger" :
+                                                                stage.state === "FINISHED" ?
+                                                                    "success"
+                                                                    : "secondary"
+                                                            : taskDetails.currentStatusId === "RECALLED" ?
+                                                                stage.state === "CURRENT" ?
+                                                                    "primary" :
+                                                                    stage.state === "FINISHED" ?
+                                                                        "success"
+                                                                        : "secondary"
+                                                                : stage.state === "CURRENT" ?
+                                                                    "warning" :
+                                                                    stage.state === "FINISHED" ?
+                                                                        "success" :
+                                                                        "secondary"
+                                                    }
                                                     // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "green" : "secondary  "}
                                                     value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "white" : stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                 </Progress>
@@ -396,7 +497,7 @@ class LicenseApplicationDetail extends Component {
                                         {/* <Col xs={12} sm={12} md={4} lg={2}>
                                             <img src={taskDetails.histories[0].approvedByAvatarUrl} className="img-avaa img-responsive center-block" alt="picture" />
                                         </Col> */}
-                                        <Col md><h5> {taskDetails.employeeName} </h5>
+                                        <Col md><h5> {taskDetails.requestorUser.displayName} </h5>
                                             <Row>
                                                 <Col md><h6> DFS/CN, MBAFC </h6></Col>
                                             </Row>
@@ -410,7 +511,7 @@ class LicenseApplicationDetail extends Component {
                                 </Col>
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col md><h5><i className="fa fa-tablet mr-2" />{taskDetails.telephoneNum} </h5></Col>
+                                        <Col md><h5><i className="fa fa-tablet mr-2" />{taskDetails.requestorUser.telephoneNum} </h5></Col>
                                     </Row>
                                     <Row>
                                         <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.email}</h5></Col>
@@ -420,10 +521,10 @@ class LicenseApplicationDetail extends Component {
                             <Col className="mb-4">
                                 <FormGroup row>
                                     <Col md lg>
-                                        <Label>Employee Number</Label>
+                                        <Label>Tel.</Label>
                                     </Col>
                                     <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="/" />
+                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.telephoneNum} name="text-input" placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Department</Label>
@@ -692,7 +793,7 @@ class LicenseApplicationDetail extends Component {
                             </Col>
                             {page === "mypendingtask"
                                 ? <div>
-                                    {currentStatus === "PENDINGLICENSEADMIN"
+                                    {currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || currentStatus === "PENDINGLICENSEADMIN"
                                         ?
                                         <Row>
                                             <Col>
@@ -716,9 +817,11 @@ class LicenseApplicationDetail extends Component {
                                                     :
                                                     <FormGroup>
                                                         <Label>Attach Document</Label>
-                                                        <CustomInput id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" />
-                                                        &nbsp;
-                                                    <Collapse isOpen={documents.length !== 0}>
+                                                        <CustomInput
+                                                            accept=".ipg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp"
+                                                            id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" />
+                                                        &nbsp; <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
+                                                        <Collapse isOpen={documents.length !== 0}>
                                                             {documents.map((doc, index) =>
                                                                 <div key={index} style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(doc.file)}> {doc.fileName} </div>
                                                             )}
@@ -727,30 +830,28 @@ class LicenseApplicationDetail extends Component {
                                                 }
                                             </Col>
                                         </Row>
-                                        : currentStatus === "PENDINGREQUESTORRETURN"
-                                            ? <Row>
-                                                <Col>
-                                                    <FormGroup onChange={this.handleRadio} >
-                                                        <Label>Return Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
-                                                            <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
-                                                                <Row> &nbsp; </Row>
-                                                                {/* <div>Reciever: </div>
-                                                                <div>Address: </div>
-                                                                <div>Mobile No. :</div> */}
-                                                                <div>Express Number: {expressNumber} </div>
+                                        : taskDetails.requestorUser.userId === localStorage.getItem('userId')
+                                            ?
+                                            currentStatus === "PENDINGREQUESTORRETURN"
+                                                ? <Row>
+                                                    <Col>
+                                                        <FormGroup onChange={this.handleRadio} >
+                                                            <Label>Return Way</Label>
+                                                            <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
+                                                            <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
+                                                                <Collapse isOpen={deliverWay === "Express"}>
+                                                                    <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                                    <Row> &nbsp; </Row>
+                                                                </Collapse>
+                                                            </CustomInput>
 
-                                                            </Collapse>
-                                                        </CustomInput>
+                                                        </FormGroup>
+                                                    </Col>
+                                                </Row>
+                                                : null
+                                            : null}
 
-                                                    </FormGroup>
-                                                </Col>
-                                            </Row>
-                                            : null
-                                    }
-                                    <Row>
+                                    < Row >
                                         <Col> <h4>Comments</h4></Col>
                                     </Row>
                                     <Row>
@@ -770,6 +871,7 @@ class LicenseApplicationDetail extends Component {
                                     </Row>
                                 </div>
 
+
                                 : page === "myapplication"
                                     ? <div>
                                         {currentStatus === "PENDINGREQUESTORRETURN"
@@ -782,11 +884,6 @@ class LicenseApplicationDetail extends Component {
                                                             <Collapse isOpen={deliverWay === "Express"}>
                                                                 <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
                                                                 <Row> &nbsp; </Row>
-                                                                {/* <div>Reciever: </div>
-                                                            <div>Address: </div>
-                                                            <div>Mobile No. :</div> */}
-                                                                <div>Express Number: {expressNumber} </div>
-
                                                             </Collapse>
                                                         </CustomInput>
 
@@ -795,53 +892,34 @@ class LicenseApplicationDetail extends Component {
                                             </Row>
                                             : null}
                                         {currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
-                                            ?
-                                            taskDetails.actions.map((action, index) =>
-                                                <Button
-                                                    key={index}
-                                                    className="mr-1"
-                                                    color="success"
-                                                    onClick={() => this.updated(action.action)}
-                                                >
-                                                    {action.actionName}
-                                                </Button>
-                                            )
+                                            ? <div>
+                                                < Row >
+                                                    <Col> <h4>Comments</h4></Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col >
+                                                        <Input onChange={this.handleChange("comments")} type="textarea" ></Input>
+                                                    </Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col>&nbsp;</Col>
+                                                </Row>
+                                                {taskDetails.actions.map((action, index) =>
+                                                    <Button
+                                                        key={index}
+                                                        className="mr-1"
+                                                        color="success"
+                                                        onClick={() => this.updated(action.action)}
+                                                    >
+                                                        {action.actionName}
+                                                    </Button>
+                                                )}
+                                            </div>
                                             : null}
 
                                     </div>
                                     : null}
-                            {currentStatus === "COMPLETED"
-                                ?
-                                <Collapse isOpen={taskDetails.documents.length !== 0}>
-                                    <Col className="mb-4">
-                                        <FormGroup>
-                                            <Label>Documents</Label>
-                                            <Table responsive hover bordered size="sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th className="smallTd">#</th>
-                                                        <th>Attached File</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {taskDetails.documents.map((doc, index) =>
-                                                        <tr key={index} >
-                                                            <td className="smallTd"> {index + 1} </td>
-                                                            <td>
-                                                                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${doc.documentFileType};base64,${doc.documentBase64String}`, doc.documentName))} > {doc.documentName} </div>
-                                                                {/* <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a> */}
-                                                            </td>
-                                                        </tr>
-                                                    )}
 
-                                                </tbody>
-                                            </Table>
-                                        </FormGroup>
-                                    </Col>
-                                </Collapse>
-                                // </Row>
-                                : ""
-                            }
                         </CardBody>
                         <CardFooter>
                             {taskDetails.histories.length !== 0
