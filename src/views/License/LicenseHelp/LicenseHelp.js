@@ -20,7 +20,7 @@ class LicenseHelp extends Component {
         super(props)
         this.state = {
             chopKeepers: {
-                columnHeader: ["Chop Type", "Chop Keeper", "Contact Person", "Location"],
+                columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
                 table: []
             },
             QA: [],
@@ -361,7 +361,7 @@ class LicenseHelp extends Component {
                 <h4 >Help</h4>
                 <Card>
                     <CardBody>
-                        <div style={{ float: "left", marginTop: "5px", paddingRight: "10px" }} ><b>Chop Keeper Information</b></div>
+                        <div style={{ float: "left", marginTop: "5px", paddingRight: "10px" }} ><b>License Admin Information</b></div>
                         <div style={{ float: "left" }}>
                             {this.state.editable ? (<Button onClick={this.addData}> Add New Data</Button>) : ""}
 
