@@ -675,7 +675,6 @@ class Create extends Component {
     let value = event.target.value
     this.setState({ agreeTerms: false })
     if (name === "appTypeSelected") {
-
       this.setState({
         // deptSelected: "",
         chopTypeSelected: "",
@@ -1217,9 +1216,9 @@ class Create extends Component {
           docName: this.state.docAttachedName,
           docURL: URL.createObjectURL(this.state.docSelected),
         }
-        this.getBase64(this.state.docSelected, (result) => {
-          obj.documentBase64String = result
-        })
+        // this.getBase64(this.state.docSelected, (result) => {
+        //   obj.documentBase64String = result
+        // })
 
         console.log(obj.docURL)
         this.setState({
@@ -1247,6 +1246,7 @@ class Create extends Component {
   getBase64(file, callback) {
     let reader = new FileReader();
     reader.onload = function () {
+      console.log(reader.result)
       callback(reader.result.replace(/^data:.+;base64,/, ''))
     };
     reader.readAsDataURL(file)
@@ -1534,7 +1534,7 @@ class Create extends Component {
             if (numberOfDocuments === 0) {
               Swal.update({
                 title: "No Documents",
-                html: 'there is no Documents in this appliction. ',
+                html: 'There is no documents in this appliction. ',
                 type: "warning"
               })
               Swal.hideLoading()
@@ -1630,7 +1630,6 @@ class Create extends Component {
     }
 
     const getYear = date => {
-      console.log(date.getFullYear())
       return date.getFullYear()
     }
 
@@ -2032,7 +2031,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Tel. </Label>
                     <InputGroup>
-                      <Input ref={this.telNumber} value={this.state.telNumber} onChange={this.handleChange("telNumber")} id="appendedInput" size="16" type="text" />
+                      <Input autoComplete="off" maxLength={20} ref={this.telNumber} value={this.state.telNumber} onChange={this.handleChange("telNumber")} id="appendedInput" size="16" type="text" />
                     </InputGroup>
                   </FormGroup>
                   <FormGroup>
@@ -2096,6 +2095,7 @@ class Create extends Component {
                             >
                               <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
                               <Input
+                                autoComplete="off"
                                 value={getYear(date)}
                                 onChange={({ target: { value } }) => changeYear(value)}
                                 type="select">
@@ -2105,7 +2105,9 @@ class Create extends Component {
                                   </option>
                                 ))}
                               </Input>
-                              <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                              <Input 
+                              autoComplete="off"
+                              value={getMonth(date)} onChange={({ target: { value } }) =>
                                 changeMonth(months.indexOf(value))
                               } type="select">
                                 {months.map((option) => (
@@ -2186,7 +2188,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Purpose of Use</Label>
                     <InputGroup>
-                      <Input value={this.state.purposeOfUse} maxLength={500} spellCheck="true" ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                      <Input autoComplete="off" value={this.state.purposeOfUse} maxLength={500} spellCheck="true" ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of Use', this.state.purposeOfUse, 'required')}</small>
                   </FormGroup>
@@ -2194,7 +2196,7 @@ class Create extends Component {
                     <FormGroup>
                       <Label>Number of Pages to Be Chopped</Label>
                       <InputGroup>
-                        <Input ref={this.numOfPages} value={this.state.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
+                        <Input autoComplete="off" ref={this.numOfPages} value={this.state.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
                       </InputGroup>
                       {this.state.invalidNumberOfPages
                         ? <small style={{ color: '#F86C6B' }} >Number of pages cannot be more than 9</small>
@@ -2232,7 +2234,7 @@ class Create extends Component {
                       <Label>Return Date</Label>
                       <Row />
                       <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                        className="form-control" required dateFormat="yyyy/MM/dd"
+                        className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                         selected={this.state.dateView2}
                         onChange={this.dateChange("returnDate", "dateView2")}
                         minDate={new Date()} maxDate={addDays(new Date(), 30)} />
@@ -2263,7 +2265,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Address to</Label>
                     <InputGroup>
-                      <Input value={this.state.addressTo} maxLength={200} ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
+                      <Input autoComplete="off" value={this.state.addressTo} maxLength={200} ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Address To', this.state.addressTo, 'required')}</small>
                   </FormGroup>
