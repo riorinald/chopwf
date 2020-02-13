@@ -106,7 +106,7 @@ class LicenseAdmin extends Component {
     exportLogs(category) {
         let from = category === "licenseLogs" ? this.state.exportDate.exportLogsFrom : this.state.exportDate.exportProfileFrom
         let to = category === "licenseLogs" ? this.state.exportDate.exportLogsTo : this.state.exportDate.exportProfileTo
-        let url = `${config.url}/licenses?userId=${localStorage.getItem("userId")}&category=${category}&startDate=${from}&endDate=${to}`
+        let url = `${config.url}/licenses?userId=${localStorage.getItem("userId")}&category=${category}&companyId=${localStorage.getItem('legalEntity')}&startDate=${from}&endDate=${to}`
         window.open(url, "_blank")
     }
 
