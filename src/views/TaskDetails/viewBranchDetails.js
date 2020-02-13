@@ -67,7 +67,7 @@ const BCNIPS = (props) => {
                                 <Label>Connecting Chop</Label>
                             </Col>
                             <Col md lg={4}>
-                                <TextareaAutosize className="form-control" disabled value={props.taskDetails.connectChop === "Y" ? "Yes" : "No"} id="connectChop" name="connectChop" placeholder="/" />
+                                <TextareaAutosize className="form-control" disabled value={props.taskDetails.connectChop} id="connectChop" name="connectChop" placeholder="/" />
                             </Col>
                         </FormGroup>
                         <FormGroup row>
@@ -75,10 +75,10 @@ const BCNIPS = (props) => {
                                 <Label>Use in Office or not</Label>
                             </Col>
                             <Col md lg={4}>
-                                <TextareaAutosize className="form-control" disabled value={props.taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} id="isUseInOffice" name="isUseInOffice" placeholder="/" />
+                                <TextareaAutosize className="form-control" disabled value={props.taskDetails.isUseInOffice} id="isUseInOffice" name="isUseInOffice" placeholder="/" />
                             </Col>
                         </FormGroup>
-                        {props.taskDetails.isUseInOffice === "N" ?
+                        {props.taskDetails.isUseInOffice === "No" ?
                         <>
                             <FormGroup row>
                                 <Col md lg={2}>
@@ -129,7 +129,7 @@ const BCNIPS = (props) => {
                                 <Label>Confirm</Label>
                             </Col>
                             <Col md lg={4}>
-                                <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
+                                <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm} id="isConfirm" name="isConfirm" placeholder="/" />
                             </Col> */}
                 <Col md lg={2}>
                     <Label>Contract Signed By (Second Person) :  </Label>
@@ -235,7 +235,7 @@ const BLTI = (props) => {
                                   <Label>Confirm</Label>
                               </Col>
                               <Col md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
+                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm} id="isConfirm" name="isConfirm" placeholder="/" />
                               </Col>
                           </FormGroup> */}
         </Col>
@@ -306,7 +306,7 @@ const BLTU = (props) => {
                     <Label>Connecting Chop</Label>
                 </Col>
                 <Col md lg={4}>
-                    <TextareaAutosize className="form-control" disabled value={props.taskDetails.connectChop === "Y" ? "Yes" : "No"} id="connectChop" name="connectChop" placeholder="/" />
+                    <TextareaAutosize className="form-control" disabled value={props.taskDetails.connectChop} id="connectChop" name="connectChop" placeholder="/" />
                 </Col>
                 <Col md lg={2}>
                     <Label>Address to</Label>
@@ -340,7 +340,7 @@ const BLTU = (props) => {
                                   <Label>Confirm</Label>
                               </Col>
                               <Col md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
+                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm} id="isConfirm" name="isConfirm" placeholder="/" />
                               </Col> */}
             </FormGroup>
         </Col>
@@ -403,7 +403,7 @@ const BLTU = (props) => {
                                   <Label>Connecting Chop</Label>
                               </Col>
                               <Col md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.connectChop === "Y" ? "Yes" : "No"} id="connectChop" name="connectChop" placeholder="/" />
+                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.connectChop} id="connectChop" name="connectChop" placeholder="/" />
                               </Col>
                           </FormGroup>
                           <FormGroup row>
@@ -411,7 +411,7 @@ const BLTU = (props) => {
                                   <Label>Use in Office or not</Label>
                               </Col>
                               <Col md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.isUseInOffice === "Y" ? "Yes" : "No"} id="isUseInOffice" name="isUseInOffice" placeholder="/" />
+                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.isUseInOffice} id="isUseInOffice" name="isUseInOffice" placeholder="/" />
                               </Col>
                               <Col md lg={2}>
                                   <Label>Address to</Label>
@@ -420,7 +420,7 @@ const BLTU = (props) => {
                                   <TextareaAutosize className="form-control" disabled style={{resize:"none"}} value={props.taskDetails.addressTo} id="addressTo" name="addressTo" placeholder="/" />
                               </Col>
                           </FormGroup>
-                          {props.taskDetails.isUseInOffice === "N" ?
+                          {props.taskDetails.isUseInOffice === "No" ?
                           <>
                               <FormGroup row>
                                   <Col md lg={2}>
@@ -464,7 +464,7 @@ const BLTU = (props) => {
                                   <Label>Confirm</Label>
                               </Col>
                               <Col md lg={4}>
-                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm === "Y" ? "Yes" : "No"} id="isConfirm" name="isConfirm" placeholder="/" />
+                                  <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm} id="isConfirm" name="isConfirm" placeholder="/" />
                               </Col> */}
             </FormGroup>
         </Col>
