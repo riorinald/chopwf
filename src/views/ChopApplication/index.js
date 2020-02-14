@@ -309,8 +309,33 @@ class ChopApplication extends Component {
   render() {
     const { isAdmin, applications, modal, exportFromDateView, exportToDateView, exportDate, validDate, totalPages } = this.state
     // let columnData = Object.keys(applications[0])
-    if (!isAdmin)
+    const getYear = date => {
+      return date.getFullYear()
+    }
+
+    const year = (new Date()).getFullYear();
+    const years = Array.from(new Array(3), (val, index) => index + (year - 1));
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
+    const getMonth = date => {
+      let month = date.getMonth()
+      return months[month]
+    }
+    if (!isAdmin){
       return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
+    }
     return (
 
       <div>
@@ -585,7 +610,46 @@ class ChopApplication extends Component {
                   <Label>To:</Label>
                   <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                     className="form-control" required dateFormat="yyyy/MM/dd"
+                    renderCustomHeader={({
+                      date,
+                      changeYear,
+                      changeMonth,
+                      decreaseMonth,
+                      increaseMonth,
+                      prevMonthButtonDisabled,
+                      nextMonthButtonDisabled
+                    }) => (
+                        <div
+                          style={{
+                            margin: 10,
+                            display: "flex",
+                            justifyContent: "center"
+                          }}
+                        >
+                          <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                          <Input
+                            value={getYear(date)}
+                            onChange={({ target: { value } }) => changeYear(value)}
+                            type="select">
+                            {years.map(option => (
+                              <option key={option} value={option}>
+                                {option}
+                              </option>
+                            ))}
+                          </Input>
+                          <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                            changeMonth(months.indexOf(value))
+                          } type="select">
+                            {months.map((option) => (
+                              <option key={option} value={option}>
+                                {option}
+                              </option>
+                            ))}
+                          </Input>
+                          <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
 
+                        </div>
+                      )}
                     showMonthDropdown
                     showYearDropdown
                     selected={exportToDateView}

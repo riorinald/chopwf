@@ -175,9 +175,9 @@ class MyPendingTasks extends Component {
 
         let dates = ""
         if (date) {
-      let tempDate = format(date, "yyyy-MM-dd").split('T')[0];
-      dates = tempDate.replace(/-/g, "")
-    }
+            let tempDate = format(date, "yyyy-MM-dd").split('T')[0];
+            dates = tempDate.replace(/-/g, "")
+        }
 
         // console.log(this.state.page, this.state.limit)
         this.setState({ [view]: date });
@@ -285,6 +285,32 @@ class MyPendingTasks extends Component {
                 {value}
             </Button>
         ))
+
+        const getYear = date => {
+            return date.getFullYear()
+        }
+
+        const year = (new Date()).getFullYear();
+        const years = Array.from(new Array(3), (val, index) => index + (year - 1));
+        const months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
+        const getMonth = date => {
+            let month = date.getMonth()
+            return months[month]
+        }
+
         return (
             <div className="animated fadeIn">
                 <h4>My Pending Tasks</h4>
@@ -468,6 +494,46 @@ class MyPendingTasks extends Component {
                                         return (
                                             <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                                                 className="form-control" dateFormat="yyyy/MM/dd"
+                                                renderCustomHeader={({
+                                                    date,
+                                                    changeYear,
+                                                    changeMonth,
+                                                    decreaseMonth,
+                                                    increaseMonth,
+                                                    prevMonthButtonDisabled,
+                                                    nextMonthButtonDisabled
+                                                }) => (
+                                                        <div
+                                                            style={{
+                                                                margin: 10,
+                                                                display: "flex",
+                                                                justifyContent: "center"
+                                                            }}
+                                                        >
+                                                            <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                            <Input
+                                                                value={getYear(date)}
+                                                                onChange={({ target: { value } }) => changeYear(value)}
+                                                                type="select">
+                                                                {years.map(option => (
+                                                                    <option key={option} value={option}>
+                                                                        {option}
+                                                                    </option>
+                                                                ))}
+                                                            </Input>
+                                                            <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                                changeMonth(months.indexOf(value))
+                                                            } type="select">
+                                                                {months.map((option) => (
+                                                                    <option key={option} value={option}>
+                                                                        {option}
+                                                                    </option>
+                                                                ))}
+                                                            </Input>
+                                                            <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                                                        </div>
+                                                    )}
                                                 peekNextMonth
                                                 showMonthDropdown
                                                 showYearDropdown

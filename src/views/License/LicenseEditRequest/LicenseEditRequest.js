@@ -605,6 +605,31 @@ class LicenseEditRequest extends Component {
             callback(filterReceiver(inputValue));
         }
 
+        const getYear = date => {
+            return date.getFullYear()
+        }
+
+        const year = (new Date()).getFullYear();
+        const years = Array.from(new Array(2), (val, index) => index + year);
+        const months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
+        const getMonth = date => {
+            let month = date.getMonth()
+            return months[month]
+        }
+
         return (
             <div>
                 <h4>Edit Request</h4>
@@ -667,20 +692,9 @@ class LicenseEditRequest extends Component {
                                     </InputGroup>
                                 </FormGroup>
                                 <FormGroup>
-                                    <Label>Employee Number</Label>
-                                    <div className="controls">
-                                        <InputGroup className="input-prepend">
-                                            <InputGroupAddon addonType="prepend">
-                                                <InputGroupText>ID</InputGroupText>
-                                            </InputGroupAddon>
-                                            <Input disabled readOnly value={taskDetails.employeeNum} id="prependedInput" size="16" type="text" />
-                                        </InputGroup>
-                                    </div>
-                                </FormGroup>
-                                <FormGroup>
                                     <Label>Telephone Number </Label>
                                     <InputGroup>
-                                        <Input onChange={this.handleChange("telephoneNum")} value={taskDetails.telephoneNum} id="telephoneNum" size="16" type="text" />
+                                        <Input onChange={this.handleChange("telephoneNum")} value={taskDetails.telephoneNum} id="telephoneNum" size="16" type="text" autoComplete="off"/>
                                     </InputGroup>
                                 </FormGroup>
                                 <FormGroup>
@@ -709,12 +723,12 @@ class LicenseEditRequest extends Component {
                                 </FormGroup>
 
                                 <FormGroup onChange={this.handleRadio("purposeType")} >
-                                    <Label >License Purpose</Label>
+                                    <Label >Purpose</Label>
                                     <CustomInput type="radio" id="licensePurpose1" name="purposeType" defaultChecked={taskDetails.purposeType === "LVFP"} value="LVFP" label="城市备案 Local VRB Filling Purpose" />
                                     <CustomInput type="radio" id="licensePurpose2" name="purposeType" defaultChecked={taskDetails.purposeType === "MFP"} value="MFP" label="城抵押 Mortgage Filling Purpose" />
                                     <CustomInput type="radio" id="licensePurpose3" name="purposeType" defaultChecked={taskDetails.purposeType === "PS"} value="PS" label="其他 Please specify:">
                                         <Collapse isOpen={taskDetails.purposeType === "PS"}>
-                                            <Input id="purposeComment" type="text" maxLength={500} onChange={this.handleChange("purposeComment")} value={taskDetails.purposeComment} />
+                                            <Input id="purposeComment" type="text" maxLength={500} onChange={this.handleChange("purposeComment")} value={taskDetails.purposeComment} autoComplete="off"/>
                                             {taskDetails.purposeType === "PS"
                                                 ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Specify Purpose', taskDetails.purposeComment, 'required')}</small>
                                                 : null}
@@ -733,10 +747,10 @@ class LicenseEditRequest extends Component {
 
                                 <Collapse isOpen={taskDetails.documentTypeId === "SCANCOPY"}>
                                     <FormGroup onChange={this.handleRadio("needWatermark")}>
-                                        <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
-                                        <CustomInput defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes, Please specify watermark here:">
+                                        <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked.)</small>
+                                        <CustomInput defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes. Please specify watermark here:">
                                             <Collapse isOpen={taskDetails.needWatermark === "Y"}>
-                                                <Input id="inputWatermark1" type="text" maxLength={50} value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
+                                                <Input id="inputWatermark1" type="text" maxLength={50} value={taskDetails.watermark} onChange={this.handleChange("watermark")} autoComplete="off"/>
                                                 {taskDetails.documentTypeId === "SCANCOPY"
                                                     ? taskDetails.needWatermark === "Y"
                                                         ? <small style={{ color: '#F86C6B' }} > {this.validator.message('Watermark', taskDetails.watermark, 'required')}</small>
@@ -745,9 +759,9 @@ class LicenseEditRequest extends Component {
                                                 }
                                             </Collapse>
                                         </CustomInput>
-                                        <CustomInput defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No, Please specify the reason of not adding watermark:">
+                                        <CustomInput defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No. Please specify the reason of not adding watermark:">
                                             <Collapse isOpen={taskDetails.needWatermark === "N"}>
-                                                <Input id="inputWatermark2" type="text" maxLength={50} value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
+                                                <Input id="inputWatermark2" type="text" maxLength={50} value={taskDetails.watermark} onChange={this.handleChange("watermark")} autoComplete="off"/>
                                                 {taskDetails.documentTypeId === "SCANCOPY"
                                                     ? taskDetails.needWatermark === "N"
                                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', taskDetails.watermark, 'required')}</small>
@@ -767,6 +781,46 @@ class LicenseEditRequest extends Component {
                                         <Label>Planned Return Date:</Label>
                                         <DatePicker id="plannedReturnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
                                             className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                                            renderCustomHeader={({
+                                                date,
+                                                changeYear,
+                                                changeMonth,
+                                                decreaseMonth,
+                                                increaseMonth,
+                                                prevMonthButtonDisabled,
+                                                nextMonthButtonDisabled
+                                            }) => (
+                                                    <div
+                                                        style={{
+                                                            margin: 10,
+                                                            display: "flex",
+                                                            justifyContent: "center"
+                                                        }}
+                                                    >
+                                                        <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                        <Input
+                                                            value={getYear(date)}
+                                                            onChange={({ target: { value } }) => changeYear(value)}
+                                                            type="select">
+                                                            {years.map(option => (
+                                                                <option key={option} value={option}>
+                                                                    {option}
+                                                                </option>
+                                                            ))}
+                                                        </Input>
+                                                        <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                            changeMonth(months.indexOf(value))
+                                                        } type="select">
+                                                            {months.map((option) => (
+                                                                <option key={option} value={option}>
+                                                                    {option}
+                                                                </option>
+                                                            ))}
+                                                        </Input>
+                                                        <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                                                    </div>
+                                                )}
                                             showMonthDropdown
                                             showYearDropdown
                                             minDate={new Date()}
@@ -783,7 +837,7 @@ class LicenseEditRequest extends Component {
 
                                     <FormGroup onChange={this.handleChange("deliverWayId")} >
                                         <Label>Deliver Way</Label>
-                                        <CustomInput type="radio" id="deliverWay1" defaultChecked={taskDetails.deliverWayId === "F2F"} name="deliverWayId" value="F2F" label="面对面, Face to face" />
+                                        <CustomInput type="radio" id="deliverWay1" defaultChecked={taskDetails.deliverWayId === "F2F"} name="deliverWayId" value="F2F" label="面对面 Face to face" />
                                         <CustomInput type="radio" id="deliverWay2" defaultChecked={taskDetails.deliverWayId === "EXPRESS"} name="deliverWayId" value="EXPRESS" label="快递 Express" />
                                         {taskDetails.documentTypeId === "ORIGINAL"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', taskDetails.deliverWayId, 'required')}</small>
@@ -794,7 +848,7 @@ class LicenseEditRequest extends Component {
                                     <Collapse isOpen={taskDetails.deliverWayId === "EXPRESS"}>
                                         <FormGroup>
                                             <Label>Address</Label>
-                                            <Input placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" />
+                                            <Input maxLength="200" placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" autoComplete="off"/>
                                             {taskDetails.documentTypeId === "ORIGINAL"
                                                 ? taskDetails.deliverWayId === "EXPRESS"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.expDeliveryAddress, 'required')}</small>
@@ -806,7 +860,7 @@ class LicenseEditRequest extends Component {
 
                                         <FormGroup>
                                             <Label>Receiver</Label>
-                                            <Input type="text" id="expDeliveryReceiver" onChange={this.handleChange("expDeliveryReceiver")} placeholder="Please specify receiver" value={taskDetails.expDeliveryReceiver} />
+                                            <Input maxLength="50" type="text" id="expDeliveryReceiver" onChange={this.handleChange("expDeliveryReceiver")} placeholder="Please specify receiver" value={taskDetails.expDeliveryReceiver} autoComplete="off" />
                                             {taskDetails.documentTypeId === "ORIGINAL"
                                                 ? taskDetails.deliverWayId === "EXPRESS"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', taskDetails.expDeliveryReceiver, 'required')}</small>
@@ -818,7 +872,7 @@ class LicenseEditRequest extends Component {
                                         <FormGroup>
                                             <Label>Reciever Mobile Phone</Label>
                                             {/* <input type="number" id="phoneNumber"></input> */}
-                                            <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="number" />
+                                            <Input maxLength="15" placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="number" autoComplete="off"/>
                                             {taskDetails.documentTypeId === "ORIGINAL"
                                                 ? taskDetails.deliverWayId === "EXPRESS"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.expDeliveryMobileNo, 'required')}</small>

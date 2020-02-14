@@ -91,35 +91,54 @@ class DefaultLayout extends Component {
   }
 
   changeEntity = workflow => event => {
-    if (workflow === localStorage.getItem('application')){
-      this.setState({
-        legalEntity: event.target.value,
-        application: workflow,
-        isLoading: true
-      },    
+    if (workflow === "LICENSE") {
+      this.props.history.push(`/${workflow.toLowerCase()}/create`)
+      // window.location.reload();
+      this.setState({isLoading:true})
+    }
+    else {
+      this.props.history.push(`/create/${event.target.value}`)
+      // window.location.reload();
+      this.setState({isLoading:true})
+
+    }
+
+    this.setState({
+      legalEntity: event.target.value,
+      application: workflow,
+    },
       localStorage.setItem("application", workflow),
       localStorage.setItem("legalEntity", event.target.value)
-      )
-      if (this.props.location.pathname.match('create').index === 1) {
-        this.props.history.push(`/create/${event.target.value}`)
-      }
-    }
-    else{
-      if (workflow === "LICENSE") {
-        this.props.history.push(`/${workflow.toLowerCase()}/create`)
-      }
-      else {
-        this.props.history.push(`/create/${event.target.value}`)
-      }
-      this.setState({
-        legalEntity: event.target.value,
-        application: workflow,
-        isLoading: true
-      },    
-      localStorage.setItem("application", workflow),
-      localStorage.setItem("legalEntity", event.target.value)
-      )
-    }
+    )
+    // if (workflow === localStorage.getItem('application')){
+    //   this.setState({
+    //     legalEntity: event.target.value,
+    //     application: workflow,
+    //     isLoading: true
+    //   },    
+    //   localStorage.setItem("application", workflow),
+    //   localStorage.setItem("legalEntity", event.target.value)
+    //   )
+    //   if (this.props.location.pathname.match('create').index === 1) {
+    //     this.props.history.push(`/create/${event.target.value}`)
+    //   }
+    // }
+    // else{
+    //   if (workflow === "LICENSE") {
+    //     this.props.history.push(`/${workflow.toLowerCase()}/create`)
+    //   }
+    //   else {
+    //     this.props.history.push(`/create/${event.target.value}`)
+    //   }
+    //   this.setState({
+    //     legalEntity: event.target.value,
+    //     application: workflow,
+    //     isLoading: true
+    //   },    
+    //   localStorage.setItem("application", workflow),
+    //   localStorage.setItem("legalEntity", event.target.value)
+    //   )
+    // }
   }
 
   toggle = (name) => () => {

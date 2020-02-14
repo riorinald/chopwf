@@ -5,6 +5,7 @@ import Axios from 'axios';
 import {
     Card, CardBody, CardHeader, Table, Col, Row, CardFooter,
     Input,
+    FormFeedback,
     Button,
     FormGroup,
     Label,
@@ -32,7 +33,7 @@ class LicenseApplicationDetail extends Component {
             currentStatus: "",
             deliverWay: "",
             expressNumber: "",
-            comments: "",
+            invalidExpress: false,
             documents: [],
         }
         this.goBack = this.goBack.bind(this)
@@ -58,8 +59,94 @@ class LicenseApplicationDetail extends Component {
         await Axios.get(`${config.url}/licenses/${taskId}?userId=${Authorize.getCookies().userId}`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 console.log(res.data)
-                let currentStatusArr = res.data.allStages.filter(stage => stage.state === "CURRENT")
                 this.setState({ taskDetails: res.data, currentStatus: res.data.currentStatusId, loading: false, })
+
+
+
+                                                            /// TESTING - ANAND //
+                //     let obj = {}
+                //     let arr = []
+                //     let keys = ["telephoneNum", "departmentName", "licenseName", "purposeType", "documentTypeName"
+                //         , "needWatermark", "watermark", "deliveryWayName", "expDeliveryAddress", "expDeliveryReceiver"
+                //         , "expDeliveryNumber", "expDeliveryMobileNo", "returnWayName", "seniorManagers", "expReturnNumber"]
+                //     keys.map(key => {
+                //         switch (key) {
+                //             case "telephoneNum":
+                //                 obj.label = "Tel."
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "departmentName":
+                //                 obj.label = "Department Name"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "licenseName":
+                //                 obj.label = "License Name"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "purposeType":
+                //                 obj.label = "Purpose"
+                //                 obj.value = res.data[key] === "PS" ? res.data.purposeComment : res.data.purposeTypeName
+                //                 break;
+                //             case "documentTypeName":
+                //                 obj.label = "Document Type"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "plannedReturnDate":
+                //                 if (res.data.documentTypeId === "ORIGINAL") {
+                //                     obj.label = "Planned Return Date"
+                //                     obj.value = this.convertDate(res.data[key])
+                //                 }
+                //                 break;
+                //             case "needWatermark":
+                //                 if (res.data.documentTypeId === "SCANCOPY") {
+                //                     obj.label = "Watermark"
+                //                     obj.value = res.data[key] === "Y" ? res.data.watermark : "No Watermark"
+                //                 }
+                //                 break;
+                //             case "watermark":
+                //                 if (res.data.documentTypeId === "SCANCOPY" && res.data.needWatermark === "N") {
+                //                     obj.label = "Reason for no watermark"
+                //                     obj.value = res.data[key]
+                //                 }
+                //                 break;
+                //             case "deliveryWayName":
+                //                 obj.label = "Deliver Ways"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "expDeliveryAddress":
+                //                 obj.label = "Delivery Address"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "expDeliveryReceiver":
+                //                 obj.label = "Reciever"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "expDeliveryNumber":
+                //                 obj.label = "Delivery Number"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "expDeliveryMobileNo":
+                //                 obj.label = "Receiver Mobile Number"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "returnWayName":
+                //                 obj.label = "Return Way"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //             case "seniorManagers":
+                //                 obj.label = "Senior Manager"
+                //                 obj.value = this.convertMgrs(res.data[key])
+                //                 break;
+                //             case "expReturnNumber":
+                //                 obj.label = "Return Express Number"
+                //                 obj.value = res.data[key]
+                //                 break;
+                //         }
+                //         console.log(obj)
+                //         arr.push(obj)
+                //     })
+                //     console.log(arr)
+                                            //TESTING -- ANAND//
             })
     }
 
@@ -86,7 +173,7 @@ class LicenseApplicationDetail extends Component {
 
     validate() {
         let valid = false
-        if (this.state.currentStatus === "PENDINGLICENSEADMIN") {
+        if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || this.state.currentStatus === "PENDINGLICENSEADMIN") {
             if (this.state.taskDetails.documentTypeId === "ORIGINAL") {
                 if (this.state.deliverWay === "Express") {
                     if (this.state.expressNumber !== "") {
@@ -94,11 +181,12 @@ class LicenseApplicationDetail extends Component {
                     }
                     else {
                         valid = false
-                        Swal.fire({
-                            title: "No Express Number",
-                            html: "Please add express number !",
-                            type: "warning"
-                        })
+                        // Swal.fire({
+                        //     title: "No Express Number",
+                        //     html: "Please add express number !",
+                        //     type: "warning"
+                        // })
+                        this.setState({invalidExpress: true})
                     }
                 }
                 else if (this.state.deliverWay === "F2F") {
@@ -144,11 +232,12 @@ class LicenseApplicationDetail extends Component {
                     }
                     else {
                         valid = false
-                        Swal.fire({
-                            title: "No Express Number",
-                            html: "Please add express number !",
-                            type: "warning"
-                        })
+                        // Swal.fire({
+                        //     title: "No Express Number",
+                        //     html: "Please add express number !",
+                        //     type: "warning"
+                        // })
+                        this.setState({invalidExpress: true})
                     }
                 }
                 else if (this.state.deliverWay === "F2F") {
@@ -173,13 +262,16 @@ class LicenseApplicationDetail extends Component {
 
     updated(action) {
         console.log(action)
-        let valid = false
-        if (this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
-
-            if (action === "approve" || action === "requestorreturn") {
+        let valid = true
+        let deliverWay = this.state.deliverWay
+        if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
+            if(action === "licenseadminacklendout" || action === "requestorreturn"){
                 valid = this.validate()
             }
-            else {
+            else{
+                if(action === "reject" || action === "sendback"){
+                    deliverWay = ""
+                }
                 valid = true
             }
         }
@@ -189,7 +281,7 @@ class LicenseApplicationDetail extends Component {
         let postReq = new FormData();
         postReq.append("UserId", Authorize.getCookies().userId);
         postReq.append("Comments", this.state.comments);
-        postReq.append("ReturnWay", this.state.deliverWay);
+        postReq.append("ReturnWay", deliverWay);
         postReq.append("ExpressNumber", this.state.expressNumber);
         postReq.append("ExpressAddress", this.state.taskDetails.expDeliveryAddress);
         for (let i = 0; i < this.state.documents.length; i++) {
@@ -239,23 +331,6 @@ class LicenseApplicationDetail extends Component {
                         })
                 }
             })
-
-            // Axios.post(`${config.url}/licenses/${this.props.location.state.taskId}/${action}`, postReq, { headers: { 'Content-Type': 'multipart/form-data' } })
-            //     .then(res => {
-            //         Swal.fire({
-            //             title: res.data.message,
-            //             html: `The request has been ${res.data.message}`,
-            //             type: "success",
-            //             onClose: () => { this.goBack(true) }
-            //         })
-            //     })
-            //     .catch(error => {
-            //         Swal.fire({
-            //             title: "ERROR",
-            //             html: error.response.data.message,
-            //             type: "error"
-            //         })
-            //     })
         }
 
     }
@@ -269,7 +344,7 @@ class LicenseApplicationDetail extends Component {
 
     handleChange = name => event => {
         let value = event.target.value
-        this.setState({ [name]: value })
+        this.setState({ invalidExpress:false, [name]: value })
     }
 
     convertApprovedDate(dateValue) {
@@ -364,7 +439,7 @@ class LicenseApplicationDetail extends Component {
 
 
     render() {
-        const { taskDetails, loading, page, currentStatus, expressNumber, deliverWay, documents } = this.state
+        const { taskDetails, loading, page, currentStatus, expressNumber, deliverWay, documents, invalidExpress } = this.state
         return (
             <div>
                 {!loading ?
@@ -401,7 +476,7 @@ class LicenseApplicationDetail extends Component {
                                                     animated={stage.state === "CURRENT" ? true : false}
                                                     striped={true}
                                                     color={
-                                                        taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ?
+                                                        taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ?
                                                             stage.state === "CURRENT" ?
                                                                 "danger" :
                                                                 stage.state === "FINISHED" ?
@@ -436,7 +511,7 @@ class LicenseApplicationDetail extends Component {
                                         {/* <Col xs={12} sm={12} md={4} lg={2}>
                                             <img src={taskDetails.histories[0].approvedByAvatarUrl} className="img-avaa img-responsive center-block" alt="picture" />
                                         </Col> */}
-                                        <Col md><h5> {taskDetails.employeeName} </h5>
+                                        <Col md><h5> {taskDetails.requestorUser.displayName} </h5>
                                             <Row>
                                                 <Col md><h6> DFS/CN, MBAFC </h6></Col>
                                             </Row>
@@ -450,7 +525,7 @@ class LicenseApplicationDetail extends Component {
                                 </Col>
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col md><h5><i className="fa fa-tablet mr-2" />{taskDetails.telephoneNum} </h5></Col>
+                                        <Col md><h5><i className="fa fa-tablet mr-2" />{taskDetails.requestorUser.telephoneNum} </h5></Col>
                                     </Row>
                                     <Row>
                                         <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.email}</h5></Col>
@@ -460,10 +535,10 @@ class LicenseApplicationDetail extends Component {
                             <Col className="mb-4">
                                 <FormGroup row>
                                     <Col md lg>
-                                        <Label>Employee Number</Label>
+                                        <Label>Tel.</Label>
                                     </Col>
                                     <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="/" />
+                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.telephoneNum} name="text-input" placeholder="/" />
                                     </Col>
                                     <Col md lg>
                                         <Label>Department</Label>
@@ -732,7 +807,7 @@ class LicenseApplicationDetail extends Component {
                             </Col>
                             {page === "mypendingtask"
                                 ? <div>
-                                    {currentStatus === "PENDINGLICENSEADMIN"
+                                    {currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || currentStatus === "PENDINGLICENSEADMIN"
                                         ?
                                         <Row>
                                             <Col>
@@ -740,10 +815,12 @@ class LicenseApplicationDetail extends Component {
                                                     ?
                                                     <FormGroup onChange={this.handleRadio} >
                                                         <Label>Deliver Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
-                                                            <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面 Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express">
+                                                            <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
+                                                                <Label>Express Number</Label>
+                                                                <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                                <FormFeedback>Express Number is required.</FormFeedback>
                                                                 <Row> &nbsp; </Row>
                                                                 <div>Reciever: {taskDetails.expDeliveryReceiver}</div>
                                                                 <div>Address: {taskDetails.expDeliveryAddress}</div>
@@ -769,30 +846,30 @@ class LicenseApplicationDetail extends Component {
                                                 }
                                             </Col>
                                         </Row>
-                                        : currentStatus === "PENDINGREQUESTORRETURN"
-                                            ? <Row>
-                                                <Col>
-                                                    <FormGroup onChange={this.handleRadio} >
-                                                        <Label>Return Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
-                                                            <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
-                                                                <Row> &nbsp; </Row>
-                                                                {/* <div>Reciever: </div>
-                                                                <div>Address: </div>
-                                                                <div>Mobile No. :</div> */}
-                                                                {/* <div>Express Number: {expressNumber} </div> */}
+                                        : taskDetails.requestorUser.userId === localStorage.getItem('userId')
+                                            ?
+                                            currentStatus === "PENDINGREQUESTORRETURN"
+                                                ? <Row>
+                                                    <Col>
+                                                        <FormGroup onChange={this.handleRadio} >
+                                                            <Label>Return Way</Label>
+                                                            <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面 Face to face" />
+                                                            <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express">
+                                                                <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
+                                                                    <Label>Express Number</Label>
+                                                                    <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                                    <FormFeedback>You will not be able to see this</FormFeedback>
+                                                                    <Row> &nbsp; </Row>
+                                                                </Collapse>
+                                                            </CustomInput>
 
-                                                            </Collapse>
-                                                        </CustomInput>
+                                                        </FormGroup>
+                                                    </Col>
+                                                </Row>
+                                                : null
+                                            : null}
 
-                                                    </FormGroup>
-                                                </Col>
-                                            </Row>
-                                            : null
-                                    }
-                                    <Row>
+                                    < Row >
                                         <Col> <h4>Comments</h4></Col>
                                     </Row>
                                     <Row>
@@ -812,31 +889,29 @@ class LicenseApplicationDetail extends Component {
                                     </Row>
                                 </div>
 
-                                : page === "myapplication"
+                                : page === "mypendingtask"
                                     ? <div>
                                         {currentStatus === "PENDINGREQUESTORRETURN"
                                             ? <Row>
                                                 <Col>
                                                     <FormGroup onChange={this.handleRadio} >
                                                         <Label>Return Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
-                                                            <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面 Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express">
+                                                            <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
+                                                                <Label>Express Number</Label>
+                                                                <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                                <FormFeedback>You will not be able to see this</FormFeedback>
                                                                 <Row> &nbsp; </Row>
-                                                                {/* <div>Reciever: </div>
-                                                            <div>Address: </div>
-                                                            <div>Mobile No. :</div> */}
-                                                                <div>Express Number: {expressNumber} </div>
-
                                                             </Collapse>
                                                         </CustomInput>
 
                                                     </FormGroup>
                                                 </Col>
                                             </Row>
-                                            : null}
-                                        {currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
+                                            :
+                                             null}
+                                        {page ==="mypendingtask" && currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
                                             ?
                                             taskDetails.actions.map((action, index) =>
                                                 <Button
@@ -851,7 +926,8 @@ class LicenseApplicationDetail extends Component {
                                             : null}
 
                                     </div>
-                                    : null}
+                                    :
+                                     null}
                             {currentStatus === "COMPLETED"
                                 ?
                                 <Collapse isOpen={taskDetails.documents.length !== 0}>
