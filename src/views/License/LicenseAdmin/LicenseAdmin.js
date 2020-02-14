@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
     Card, CardHeader, CardBody, CardFooter, Button,
     Row, Col, FormGroup, Label, CustomInput, InputGroup, Form,
-    Collapse
+    Collapse, Input
 } from 'reactstrap'
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -25,7 +25,7 @@ class LicenseAdmin extends Component {
             exportToDateView: "",
             exportFromProfileDateView: "",
             exportToProfileDateView: "",
-            collapse: 3,
+            collapse: 1,
             exportDate: {
                 exportLogsFrom: "",
                 exportLogsTo: "",
@@ -33,9 +33,8 @@ class LicenseAdmin extends Component {
                 exportProfileTo: ""
             },
             csvFile: null,
-            newLicenseAdmins: [
-                {}
-            ],
+            newLicenseAdmins: [{}],
+            headers: [],
             updateAdmins: false
         }
         this.toggleAccordion = this.toggleAccordion.bind(this)
@@ -49,7 +48,8 @@ class LicenseAdmin extends Component {
     getLicenseCSV() {
         Axios.get(`${config.url}/licenses/licensemanagement`)
             .then(res => {
-                this.setState({ newLicenseAdmins: res.data })
+                console.log(res.data)
+                this.setState({ newLicenseAdmins: res.data.licenseManagementDisplayResponses, headers: res.data.headers })
             })
     }
     componentDidMount() {
@@ -171,8 +171,35 @@ class LicenseAdmin extends Component {
     render() {
 
         const { isAdmin, exportFromDateView, newLicenseAdmins, exportToDateView, exportFromProfileDateView, exportToProfileDateView, collapse } = this.state
-        if (!isAdmin)
+        if (!isAdmin){
             return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
+        }
+        
+        const getYear = date => {
+            return date.getFullYear()
+        }
+
+        const year = (new Date()).getFullYear();
+        const years = Array.from(new Array(2), (val, index) => index + year);
+        const months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
+        const getMonth = date => {
+            let month = date.getMonth()
+            return months[month]
+        }
+
         return (
             <div>
                 <h4>License Admin</h4>
@@ -181,7 +208,7 @@ class LicenseAdmin extends Component {
                     <CardBody>
                         <Row>
                             <Col>
-                                <Card className="mb-4">
+                                {/* <Card className="mb-4">
                                     <CardHeader>
                                         <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(3)}>
                                             <h5 className="m-0 p-0">Update Departments </h5>
@@ -212,7 +239,7 @@ class LicenseAdmin extends Component {
                                             </Row>
                                         </CardBody>
                                     </Collapse>
-                                </Card>
+                                </Card> */}
                                 <Card className="mb-4">
                                     <CardHeader>
                                         <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(1)}>
@@ -228,6 +255,46 @@ class LicenseAdmin extends Component {
                                                     <FormGroup>
                                                         <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                                                             className="form-control" required dateFormat="yyyy/MM/dd"
+                                                            renderCustomHeader={({
+                                                                date,
+                                                                changeYear,
+                                                                changeMonth,
+                                                                decreaseMonth,
+                                                                increaseMonth,
+                                                                prevMonthButtonDisabled,
+                                                                nextMonthButtonDisabled
+                                                            }) => (
+                                                                    <div
+                                                                        style={{
+                                                                            margin: 10,
+                                                                            display: "flex",
+                                                                            justifyContent: "center"
+                                                                        }}
+                                                                    >
+                                                                        <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                                        <Input
+                                                                            value={getYear(date)}
+                                                                            onChange={({ target: { value } }) => changeYear(value)}
+                                                                            type="select">
+                                                                            {years.map(option => (
+                                                                                <option key={option} value={option}>
+                                                                                    {option}
+                                                                                </option>
+                                                                            ))}
+                                                                        </Input>
+                                                                        <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                                            changeMonth(months.indexOf(value))
+                                                                        } type="select">
+                                                                            {months.map((option) => (
+                                                                                <option key={option} value={option}>
+                                                                                    {option}
+                                                                                </option>
+                                                                            ))}
+                                                                        </Input>
+                                                                        <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                                                                    </div>
+                                                                )}
                                                             selected={exportFromDateView}
                                                             onChange={this.dateChange("exportLogsFrom", "exportFromDateView")}
 
@@ -244,7 +311,46 @@ class LicenseAdmin extends Component {
                                             <FormGroup>
                                                         <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                                                             className="form-control" required dateFormat="yyyy/MM/dd"
+                                                            renderCustomHeader={({
+                                                                date,
+                                                                changeYear,
+                                                                changeMonth,
+                                                                decreaseMonth,
+                                                                increaseMonth,
+                                                                prevMonthButtonDisabled,
+                                                                nextMonthButtonDisabled
+                                                            }) => (
+                                                                    <div
+                                                                        style={{
+                                                                            margin: 10,
+                                                                            display: "flex",
+                                                                            justifyContent: "center"
+                                                                        }}
+                                                                    >
+                                                                        <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                                        <Input
+                                                                            value={getYear(date)}
+                                                                            onChange={({ target: { value } }) => changeYear(value)}
+                                                                            type="select">
+                                                                            {years.map(option => (
+                                                                                <option key={option} value={option}>
+                                                                                    {option}
+                                                                                </option>
+                                                                            ))}
+                                                                        </Input>
+                                                                        <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                                            changeMonth(months.indexOf(value))
+                                                                        } type="select">
+                                                                            {months.map((option) => (
+                                                                                <option key={option} value={option}>
+                                                                                    {option}
+                                                                                </option>
+                                                                            ))}
+                                                                        </Input>
+                                                                        <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
 
+                                                                    </div>
+                                                                )}
                                                             showMonthDropdown
                                                             showYearDropdown
                                                             selected={exportToDateView}
@@ -272,6 +378,46 @@ class LicenseAdmin extends Component {
                                             <FormGroup>
                                                                 <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                                                                     className="form-control" required dateFormat="yyyy/MM/dd"
+                                                                    renderCustomHeader={({
+                                                                        date,
+                                                                        changeYear,
+                                                                        changeMonth,
+                                                                        decreaseMonth,
+                                                                        increaseMonth,
+                                                                        prevMonthButtonDisabled,
+                                                                        nextMonthButtonDisabled
+                                                                    }) => (
+                                                                            <div
+                                                                                style={{
+                                                                                    margin: 10,
+                                                                                    display: "flex",
+                                                                                    justifyContent: "center"
+                                                                                }}
+                                                                            >
+                                                                                <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                                                <Input
+                                                                                    value={getYear(date)}
+                                                                                    onChange={({ target: { value } }) => changeYear(value)}
+                                                                                    type="select">
+                                                                                    {years.map(option => (
+                                                                                        <option key={option} value={option}>
+                                                                                            {option}
+                                                                                        </option>
+                                                                                    ))}
+                                                                                </Input>
+                                                                                <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                                                    changeMonth(months.indexOf(value))
+                                                                                } type="select">
+                                                                                    {months.map((option) => (
+                                                                                        <option key={option} value={option}>
+                                                                                            {option}
+                                                                                        </option>
+                                                                                    ))}
+                                                                                </Input>
+                                                                                <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                                                                            </div>
+                                                                        )}
                                                                     selected={exportFromProfileDateView}
                                                                     onChange={this.dateChange("exportProfileFrom", "exportFromProfileDateView")}
                                                                     showMonthDropdown
@@ -287,7 +433,46 @@ class LicenseAdmin extends Component {
                                             <FormGroup>
                                                                 <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                                                                     className="form-control" required dateFormat="yyyy/MM/dd"
+                                                                    renderCustomHeader={({
+                                                                        date,
+                                                                        changeYear,
+                                                                        changeMonth,
+                                                                        decreaseMonth,
+                                                                        increaseMonth,
+                                                                        prevMonthButtonDisabled,
+                                                                        nextMonthButtonDisabled
+                                                                    }) => (
+                                                                            <div
+                                                                                style={{
+                                                                                    margin: 10,
+                                                                                    display: "flex",
+                                                                                    justifyContent: "center"
+                                                                                }}
+                                                                            >
+                                                                                <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                                                <Input
+                                                                                    value={getYear(date)}
+                                                                                    onChange={({ target: { value } }) => changeYear(value)}
+                                                                                    type="select">
+                                                                                    {years.map(option => (
+                                                                                        <option key={option} value={option}>
+                                                                                            {option}
+                                                                                        </option>
+                                                                                    ))}
+                                                                                </Input>
+                                                                                <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                                                    changeMonth(months.indexOf(value))
+                                                                                } type="select">
+                                                                                    {months.map((option) => (
+                                                                                        <option key={option} value={option}>
+                                                                                            {option}
+                                                                                        </option>
+                                                                                    ))}
+                                                                                </Input>
+                                                                                <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
 
+                                                                            </div>
+                                                                        )}
                                                                     showMonthDropdown
                                                                     showYearDropdown
                                                                     selected={exportToProfileDateView}
@@ -335,7 +520,7 @@ class LicenseAdmin extends Component {
                                                                 className="-striped -highlight"
                                                                 columns={Object.keys(newLicenseAdmins[0]).map((key, index) => {
                                                                     return {
-                                                                        Header: key,
+                                                                        Header: this.state.headers[index],
                                                                         accessor: key,
                                                                         style: { textAlign: "left" },
                                                                         width: this.getColumnWidth(key, key)

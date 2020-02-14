@@ -8,6 +8,7 @@ import {
     FormFeedback,
     Button,
     FormGroup,
+    InputGroup,
     Label,
     Progress, Badge, Spinner,
     UncontrolledTooltip, CustomInput, Collapse
@@ -35,6 +36,7 @@ class LicenseApplicationDetail extends Component {
             expressNumber: "",
             invalidExpress: false,
             documents: [],
+            fields: []
         }
         this.goBack = this.goBack.bind(this)
         this.handleRadio = this.handleRadio.bind(this)
@@ -63,90 +65,126 @@ class LicenseApplicationDetail extends Component {
 
 
 
-                                                            /// TESTING - ANAND //
-                //     let obj = {}
-                //     let arr = []
-                //     let keys = ["telephoneNum", "departmentName", "licenseName", "purposeType", "documentTypeName"
-                //         , "needWatermark", "watermark", "deliveryWayName", "expDeliveryAddress", "expDeliveryReceiver"
-                //         , "expDeliveryNumber", "expDeliveryMobileNo", "returnWayName", "seniorManagers", "expReturnNumber"]
-                //     keys.map(key => {
-                //         switch (key) {
-                //             case "telephoneNum":
-                //                 obj.label = "Tel."
-                //                 obj.value = res.data[key]
-                //                 break;
-                //             case "departmentName":
-                //                 obj.label = "Department Name"
-                //                 obj.value = res.data[key]
-                //                 break;
-                //             case "licenseName":
-                //                 obj.label = "License Name"
-                //                 obj.value = res.data[key]
-                //                 break;
-                //             case "purposeType":
-                //                 obj.label = "Purpose"
-                //                 obj.value = res.data[key] === "PS" ? res.data.purposeComment : res.data.purposeTypeName
-                //                 break;
-                //             case "documentTypeName":
-                //                 obj.label = "Document Type"
-                //                 obj.value = res.data[key]
-                //                 break;
-                //             case "plannedReturnDate":
-                //                 if (res.data.documentTypeId === "ORIGINAL") {
-                //                     obj.label = "Planned Return Date"
-                //                     obj.value = this.convertDate(res.data[key])
-                //                 }
-                //                 break;
-                //             case "needWatermark":
-                //                 if (res.data.documentTypeId === "SCANCOPY") {
-                //                     obj.label = "Watermark"
-                //                     obj.value = res.data[key] === "Y" ? res.data.watermark : "No Watermark"
-                //                 }
-                //                 break;
-                //             case "watermark":
-                //                 if (res.data.documentTypeId === "SCANCOPY" && res.data.needWatermark === "N") {
-                //                     obj.label = "Reason for no watermark"
-                //                     obj.value = res.data[key]
-                //                 }
-                //                 break;
-                //             case "deliveryWayName":
-                //                 obj.label = "Deliver Ways"
-                //                 obj.value = res.data[key]
-                //                 break;
-                //             case "expDeliveryAddress":
-                //                 obj.label = "Delivery Address"
-                //                 obj.value = res.data[key]
-                //                 break;
-                //             case "expDeliveryReceiver":
-                //                 obj.label = "Reciever"
-                //                 obj.value = res.data[key]
-                //                 break;
-                //             case "expDeliveryNumber":
-                //                 obj.label = "Delivery Number"
-                //                 obj.value = res.data[key]
-                //                 break;
-                //             case "expDeliveryMobileNo":
-                //                 obj.label = "Receiver Mobile Number"
-                //                 obj.value = res.data[key]
-                //                 break;
-                //             case "returnWayName":
-                //                 obj.label = "Return Way"
-                //                 obj.value = res.data[key]
-                //                 break;
-                //             case "seniorManagers":
-                //                 obj.label = "Senior Manager"
-                //                 obj.value = this.convertMgrs(res.data[key])
-                //                 break;
-                //             case "expReturnNumber":
-                //                 obj.label = "Return Express Number"
-                //                 obj.value = res.data[key]
-                //                 break;
-                //         }
-                //         console.log(obj)
-                //         arr.push(obj)
-                //     })
-                //     console.log(arr)
-                                            //TESTING -- ANAND//
+                /// TESTING - ANAND //
+                // let obj = { label: "", value: "" }
+                let arr = []
+                let keys = ["telephoneNum", "departmentName", "licenseName", "purposeType", "documentTypeName"
+                    , "needWatermark", "watermark", "deliveryWayName", "expDeliveryAddress", "expDeliveryReceiver"
+                    , "expDeliveryNumber", "expDeliveryMobileNo", "returnWayName", "seniorManagers", "expReturnNumber"]
+                keys.map(key => {
+                    var obj = {}
+                    switch (key) {
+                        case "telephoneNum":
+                            obj.label = "Tel."
+                            obj.value = res.data[key]
+                            arr.push(obj)
+                            break;
+                        case "departmentName":
+                            obj.label = "Department"
+                            obj.value = res.data[key]
+                            arr.push(obj)
+                            break;
+                        case "licenseName":
+                            obj.label = "License Name"
+                            obj.value = res.data[key]
+                            arr.push(obj)
+                            break;
+                        case "purposeType":
+                            obj.label = "Purpose"
+                            obj.value = res.data[key] === "PS" ? res.data.purposeComment : res.data.purposeTypeName
+                            arr.push(obj)
+                            break;
+                        case "documentTypeName":
+                            obj.label = "Document Type"
+                            obj.value = res.data[key]
+                            arr.push(obj)
+                            break;
+                        case "plannedReturnDate":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                obj.label = "Planned Return Date"
+                                obj.value = this.convertDate(res.data[key])
+                            }
+                            arr.push(obj)
+                            break;
+                        case "needWatermark":
+                            if (res.data.documentTypeId === "SCANCOPY") {
+                                obj.label = "Watermark"
+                                obj.value = res.data[key] === "Y" ? res.data.watermark : "No Watermark"
+                                arr.push(obj)
+                            }
+                            break;
+                        case "watermark":
+                            if (res.data.documentTypeId === "SCANCOPY" && res.data.needWatermark === "N") {
+                                obj.label = "Reason for no watermark"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
+                        case "deliveryWayName":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                obj.label = "Deliver Ways"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
+                        case "expDeliveryAddress":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                // if (res.data.deliverWay === "Express") {
+                                obj.label = "Delivery Address"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                                // }
+                            }
+                            break;
+                        case "expDeliveryReceiver":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                // if (res.data.deliverWay === "Express") {
+                                obj.label = "Reciever"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                                // }
+                            }
+                            break;
+                        case "expDeliveryNumber":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                // if (res.data.deliverWay === "Express") {
+                                obj.label = "Delivery Express Number"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                                // }
+                            }
+                            break;
+                        case "expDeliveryMobileNo":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                obj.label = "Receiver Mobile Number"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
+                        case "returnWayName":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                obj.label = "Return Way"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
+                        case "seniorManagers":
+                            obj.label = "Senior Manager"
+                            obj.value = this.convertMgrs(res.data[key])
+                            arr.push(obj)
+                            break;
+                        case "expReturnNumber":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                obj.label = "Return Express Number"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
+                    }
+                })
+                this.setState({ fields: arr })
+                console.log(arr)
+                //TESTING -- ANAND//
             })
     }
 
@@ -186,7 +224,7 @@ class LicenseApplicationDetail extends Component {
                         //     html: "Please add express number !",
                         //     type: "warning"
                         // })
-                        this.setState({invalidExpress: true})
+                        this.setState({ invalidExpress: true })
                     }
                 }
                 else if (this.state.deliverWay === "F2F") {
@@ -237,7 +275,7 @@ class LicenseApplicationDetail extends Component {
                         //     html: "Please add express number !",
                         //     type: "warning"
                         // })
-                        this.setState({invalidExpress: true})
+                        this.setState({ invalidExpress: true })
                     }
                 }
                 else if (this.state.deliverWay === "F2F") {
@@ -265,11 +303,11 @@ class LicenseApplicationDetail extends Component {
         let valid = true
         let deliverWay = this.state.deliverWay
         if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
-            if(action === "licenseadminacklendout" || action === "requestorreturn"){
+            if (action === "licenseadminacklendout" || action === "requestorreturn" || action === "approve") {
                 valid = this.validate()
             }
-            else{
-                if(action === "reject" || action === "sendback"){
+            else {
+                if (action === "reject" || action === "sendback") {
                     deliverWay = ""
                 }
                 valid = true
@@ -344,7 +382,7 @@ class LicenseApplicationDetail extends Component {
 
     handleChange = name => event => {
         let value = event.target.value
-        this.setState({ invalidExpress:false, [name]: value })
+        this.setState({ invalidExpress: false, [name]: value })
     }
 
     convertApprovedDate(dateValue) {
@@ -532,279 +570,23 @@ class LicenseApplicationDetail extends Component {
                                     </Row>
                                 </Col>
                             </Row>
-                            <Col className="mb-4">
-                                <FormGroup row>
-                                    <Col md lg>
-                                        <Label>Tel.</Label>
+                            <Row>
+                                {this.state.fields.map((field, i) =>
+                                    <Col key={i} sm="6">
+                                        <Row style={{ marginBottom: "15px" }} >
+                                            <Col sm="6">
+                                                <Label>{field.label}</Label>
+                                            </Col>
+                                            <Col sm="6">
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={field.value} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </Row>
                                     </Col>
-                                    <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.telephoneNum} name="text-input" placeholder="/" />
-                                    </Col>
-                                    <Col md lg>
-                                        <Label>Department</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.departmentName} name="text-input" placeholder="/" />
-                                    </Col>
-                                </FormGroup>
-                                <FormGroup row>
-                                    <Col md lg>
-                                        <Label>License Name</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled type="text" name="text-input" value={taskDetails.licenseName} placeholder="/" />
-                                    </Col>
-                                    <Col md lg>
-                                        <Label>Purpose</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled value={taskDetails.purposeType === "PS" ? taskDetails.purposeComment : taskDetails.purposeTypeName} placeholder="/" />
-                                    </Col>
-                                </FormGroup>
-                                <FormGroup row>
-                                    <Col md lg>
-                                        <Label>Document Type</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.documentTypeName} name="text-input" placeholder="/" />
-                                    </Col>
-                                    {taskDetails.documentTypeId === "ORIGINAL"
-                                        ? <>
-                                            <Col md lg>
-                                                <Label>Planned Return Date</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertDate(taskDetails.plannedReturnDate)} name="text-input" placeholder="/" />
-                                            </Col>
-                                        </>
-                                        : <>
-                                            <Col md lg>
-                                                <Label> Watermark </Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.needWatermark === "Y" ? taskDetails.watermark : "No Watermark"} name="text-input" placeholder="/" />
-                                            </Col>
-                                            {
-                                            }
-                                        </>
-
-                                    }
-                                </FormGroup>
-                                <FormGroup row>
-                                    {taskDetails.documentTypeId !== "ORIGINAL"
-                                        ? taskDetails.needWatermark === "N"
-                                            ? <>
-                                                <Col md lg>
-                                                    <Label>Reason for no watermark</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="/" />
-                                                </Col>
-                                                < Col md lg>
-                                                    <Label>Deliver Ways</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                            : <>
-                                                < Col md lg>
-                                                    <Label>Deliver Ways</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Delivery Address</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                        : <>
-                                            < Col md lg>
-                                                <Label>Deliver Ways</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
-                                            </Col>
-                                            <Col md lg>
-                                                <Label>Delivery Address</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
-                                            </Col>
-                                        </>
-                                    }
-
-                                </FormGroup>
-                                <FormGroup row>
-                                    {taskDetails.documentTypeId !== "ORIGINAL"
-                                        ? taskDetails.needWatermark === "N"
-                                            ? <>
-                                                <Col md lg>
-                                                    <Label>Delivery Address</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Receiver</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                            : <>
-                                                <Col md lg>
-                                                    <Label>Receiver</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Deliver Express Number</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                        : <>
-                                            <Col md lg>
-                                                <Label>Receiver</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
-                                            </Col>
-                                            <Col md lg>
-                                                <Label>Deliver Express Number</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
-                                            </Col>
-                                        </>
-                                    }
+                                )}
+                            </Row>
 
 
 
-                                </FormGroup>
-                                <FormGroup row>
-                                    {taskDetails.documentTypeId !== "ORIGINAL"
-                                        ? taskDetails.needWatermark === "N"
-                                            ? <>
-                                                <Col md lg>
-                                                    <Label>Deliver Express Number</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Receiver Mobile Number</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                            : <>
-                                                <Col md lg>
-                                                    <Label>Receiver Mobile Number</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Return Way</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                        : <>
-                                            <Col md lg>
-                                                <Label>Receiver Mobile Number</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
-                                            </Col>
-                                            <Col md lg>
-                                                <Label>Return Way</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
-                                            </Col>
-                                        </>
-                                    }
-
-                                </FormGroup>
-                                <FormGroup row>
-                                    {taskDetails.documentTypeId !== "ORIGINAL"
-                                        ? taskDetails.needWatermark === "N"
-                                            ? <>
-                                                <Col md lg>
-                                                    <Label>Return Way</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Senior Manager or above of Requestor Department</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                            : <>
-                                                <Col md lg>
-                                                    <Label>Senior Manager or above of Requestor Department</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Return Express Number</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                        : <>
-                                            <Col md lg>
-                                                <Label>Senior Manager or above of Requestor Department</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
-                                            </Col>
-                                            <Col md lg>
-                                                <Label>Return Express Number</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
-                                            </Col>
-                                        </>
-                                    }
-                                </FormGroup>
-                                <FormGroup row>
-                                    {taskDetails.documentTypeId !== "ORIGINAL"
-                                        ? taskDetails.needWatermark === "N"
-                                            ? <>
-                                                <Col md lg>
-                                                    <Label>Return Express Number</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label></Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    {/* <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" /> */}
-                                                </Col>
-                                            </>
-                                            : null
-                                        : null
-                                    }
-                                </FormGroup>
-                            </Col>
                             {page === "mypendingtask"
                                 ? <div>
                                     {currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || currentStatus === "PENDINGLICENSEADMIN"
@@ -910,8 +692,8 @@ class LicenseApplicationDetail extends Component {
                                                 </Col>
                                             </Row>
                                             :
-                                             null}
-                                        {page ==="mypendingtask" && currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
+                                            null}
+                                        {page === "mypendingtask" && currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
                                             ?
                                             taskDetails.actions.map((action, index) =>
                                                 <Button
@@ -927,7 +709,7 @@ class LicenseApplicationDetail extends Component {
 
                                     </div>
                                     :
-                                     null}
+                                    null}
                             {currentStatus === "COMPLETED"
                                 ?
                                 <Collapse isOpen={taskDetails.documents.length !== 0}>

@@ -29,7 +29,8 @@ class Help extends Component {
             editable: false,
             dropdownOpen: false,
             existingCKLength: 0,
-            existingQALength: 0
+            existingQALength: 0,
+            loading: false
         };
         this.makeEditable = this.makeEditable.bind(this);
         this.toggleDropdown = this.toggleDropdown.bind(this);
@@ -183,7 +184,10 @@ class Help extends Component {
         if (this.state.editable) {
             let chopKeepers = this.state.chopKeepers.table
             let qa = this.state.QA
-            for (let i = 0; i < chopKeepers.length; i++) {
+            let i = 0
+            let p = 0
+            this.setState({ loading: true })
+            for (i = 0; i < chopKeepers.length; i++) {
                 let array = []
                 let chopTypes = chopKeepers[i].chopType.join(',')
                 let contactPersons = chopKeepers[i].contactPerson.join(',')
@@ -202,23 +206,28 @@ class Help extends Component {
                     // console.log("Chop keeper details added")
                 }
             }
-            for (let i = 0; i < qa.length; i++) {
+            for (p = 0; p < qa.length; p++) {
                 let array = []
-                array.push(qa[i].question)
-                array.push(qa[i].answer)
+                array.push(qa[p].question)
+                array.push(qa[p].answer)
                 let qaString = array.join(',')
                 // console.log(qaString)
-                if (i < this.state.existingQALength) {
+                if (p < this.state.existingQALength) {
                     // console.log("QA Updated")
-                    this.updateChopKeeperDetails(qaString, i, "question")
+                    this.updateChopKeeperDetails(qaString, p, "question")
                 }
                 else {
                     // console.log("New QA Added")
-                    this.addNewChopKeeperDetails(qaString, i, "question")
+                    this.addNewChopKeeperDetails(qaString, p, "question")
                 }
 
             }
-            window.location.reload()
+            console.log(i, p)
+            console.log(chopKeepers.length, qa.length)
+            if (i === chopKeepers.length && p === qa.length) {
+                this.setState({ loading: false })
+            }
+            // window.location.reload()
             //codes to update instructions to the database
         }
         this.setState(state => ({
@@ -359,40 +368,45 @@ class Help extends Component {
         const Edit = <img onClick={this.makeEditable} width="20px" src={editIcon} />
         const Apply = <Button color="success" onClick={this.makeEditable}>APPLY</Button>
         return (
-            <div className="animated fadeIn">
-                <h4 >Help</h4>
-                <Card>
-                    <CardBody>
-                        <div style={{ float: "left", marginTop: "5px", paddingRight: "10px" }} ><b>Chop Keeper Information</b></div>
-                        <div style={{ float: "left" }}>
-                            {this.state.editable ? (<Button onClick={this.addData}> Add New Data</Button>) : ""}
+            <div>
+                {this.state.loading
+                    ? ""
+                    : <div className="animated fadeIn">
+                        <h4 >Help</h4>
+                        <Card>
+                            <CardBody>
+                                <div style={{ float: "left", marginTop: "5px", paddingRight: "10px" }} ><b>Chop Keeper Information</b></div>
+                                <div style={{ float: "left" }}>
+                                    {this.state.editable ? (<Button onClick={this.addData}> Add New Data</Button>) : ""}
 
-                        </div>
+                                </div>
 
 
-                        {localStorage.getItem('viewAdminChop') === "true"
-                            ? <div style={{ float: "right" }}>
-                                {!this.state.editable ? Edit : Apply}
-                            </div>
-                            : null
-                        }
-                        <br /><br />
-                        <Table bordered >
-                            <thead>
-                                <tr>
-                                    {chopKeepersColumnHeaders}
-                                    {!this.state.editable ? null : <th></th>}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {!this.state.editable ? chopKeepers : chopKeepersEditable}
-                            </tbody>
-                        </Table>
-                        <br />
-                        {!this.state.editable ? QA : QaEditable}
-                    </CardBody>
-                </Card>
+                                {localStorage.getItem('viewAdminChop') === "true"
+                                    ? <div style={{ float: "right" }}>
+                                        {!this.state.editable ? Edit : Apply}
+                                    </div>
+                                    : null
+                                }
+                                <br /><br />
+                                <Table bordered >
+                                    <thead>
+                                        <tr>
+                                            {chopKeepersColumnHeaders}
+                                            {!this.state.editable ? null : <th></th>}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {!this.state.editable ? chopKeepers : chopKeepersEditable}
+                                    </tbody>
+                                </Table>
+                                <br />
+                                {!this.state.editable ? QA : QaEditable}
+                            </CardBody>
+                        </Card>
+                    </div>}
             </div>
+
         );
     }
 }
