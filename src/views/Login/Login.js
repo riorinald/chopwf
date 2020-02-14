@@ -55,7 +55,9 @@ class Login extends Component {
 
     componentDidMount(){
         const param = qs.parse(this.props.location.search)
-
+        if(cookies.get('userInfo', {path:'/'})){
+            this.props.history.push('/portal')
+        }
         if (param.code){
             console.log('code acquired!', param.code)
             this.props.history.push({
