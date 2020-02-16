@@ -35,7 +35,7 @@ class LicenseMyApplications extends Component {
                 requestNum: "",
                 licenseName: "",
                 documentType: "",
-                seniorManagerAbove: "",
+                seniorManagerName: "",
                 status: "",
                 plannedReturnDate: "",
                 createdDate: "",
@@ -123,7 +123,7 @@ class LicenseMyApplications extends Component {
         const { searchOption } = this.state
         console.log(searchOption)
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentname=${searchOption.departmentName}&page=${page}&pageSize=${pageSize}`,
+        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&seniorManagerName=${searchOption.seniorManagerName}&departmentname=${searchOption.departmentName}&page=${page}&pageSize=${pageSize}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 this.setState({ applications: res.data.licenses, totalPages: res.data.pageCount, loading: false })
@@ -400,25 +400,25 @@ class LicenseMyApplications extends Component {
                                 },
                                 {
                                     Header: "Senior Manager or above of Requestor Department",
-                                    accessor: `seniorManager`,
-                                    width: this.getColumnWidth('seniorManager', "Senior Manager or above of Requestor Department"),
+                                    accessor: `seniorManagerName`,
+                                    width: this.getColumnWidth('seniorManagerName', "Senior Manager or above of Requestor Department"),
                                     Cell: row => (
                                         <div> {this.converManagers(row.original.seniorManagers)} </div>
                                     ),
                                     style: { textAlign: "center" },
-                                    filterMethod: (filter, row) => {
-                                        return row[filter.id] === filter.value;
-                                    },
-                                    Filter: ({ filter, onChange }) => {
-                                        return (
-                                            <Input type="select" value={this.state.searchOption.seniorManagerAbove} onChange={this.handleSearch('seniorManagerAbove')} >
-                                                <option value="">Please Select a senior Manager</option>
-                                                {seniorManagers.map((mgr, index) =>
-                                                    <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
-                                                )}
-                                            </Input>
-                                        )
-                                    },
+                                    // filterMethod: (filter, row) => {
+                                    //     return row[filter.id] === filter.value;
+                                    // },
+                                    // Filter: ({ filter, onChange }) => {
+                                    //     return (
+                                    //         <Input type="select" value={this.state.searchOption.seniorManager} onChange={this.handleSearch('seniorManager')} >
+                                    //             <option value="">Please Select a senior Manager</option>
+                                    //             {seniorManagers.map((mgr, index) =>
+                                    //                 <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
+                                    //             )}
+                                    //         </Input>
+                                    //     )
+                                    // },
                                 },
                                 {
                                     Header: "Status",
@@ -456,16 +456,6 @@ class LicenseMyApplications extends Component {
                                     width: this.getColumnWidth('createdByName', "Created By"),
                                     filterMethod: (filter, row) => {
                                         return row[filter.id] === filter.value;
-                                    },
-                                    Filter: ({ filter, onChange }) => {
-                                        return (
-                                            <Input type="select" value={this.state.searchOption.createdByName} onChange={this.handleSearch('createdByName')} >
-                                                <option value="">Please Select a name</option>
-                                                {seniorManagers.map((mgr, index) =>
-                                                    <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
-                                                )}
-                                            </Input>
-                                        )
                                     },
                                     style: { textAlign: "center" }
                                 },
