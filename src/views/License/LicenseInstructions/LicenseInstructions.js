@@ -154,7 +154,7 @@ class LicenseInstruction extends Component {
             let file = this.state.userGuideFile
             var blobUrl = new Blob([file], { type: mime })
             if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-                window.navigator.msSaveOrOpenBlob(blobUrl, "User Guide")
+                window.navigator.msSaveOrOpenBlob(blobUrl, "User Guide.pdf")
                 return;
             }
             else {
