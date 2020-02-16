@@ -111,7 +111,7 @@ const CNIPS = (props) => {
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.remark} id="remark" name="remark" placeholder="/" />
                               </Col>
                               <Col lg={2} className="p-2">
-                                  <Label>Contract Signed By (First Person) :  </Label>
+                                  <Label>Contract Signed By (First Person)  </Label>
                               </Col>
                               <Col lg={4} className="p-2">
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.contractSignedByFirstPersonName} id="contractSignedByFirstPersonName" name="contractSignedByFirstPersonName" placeholder="/" />
@@ -125,7 +125,7 @@ const CNIPS = (props) => {
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.isConfirm} id="isConfirm" name="isConfirm" placeholder="/" />
                               </Col> */}
                               <Col lg={2} className="p-2">
-                                  <Label>Contract Signed By (Second Person) :  </Label>
+                                  <Label>Contract Signed By (Second Person)  </Label>
                               </Col>
                               <Col lg={4} className="p-2">
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.contractSignedBySecondPersonName} id="contractSignedBySecondPersonName" name="contractSignedBySecondPersonName" placeholder="/" />

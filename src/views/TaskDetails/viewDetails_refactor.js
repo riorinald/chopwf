@@ -29,8 +29,8 @@ const viewTemplateCNIPS = [
     {label:'Remark (e.g. tel.)', params: 'remark',data:'x'},
     {label:'Document Check By', params: 'documentCheckByName',data:'x'},
     {label:'Department Heads', params: 'departmentHeadsName',data:'x'},
-    {label:'Contract Signed By (First Person) :', params: 'contractSignedByFirstPersonName',data:'x'},
-    {label:'Contract Signed By (Second Person) :', params: 'contractSignedBySecondPersonName',data:'x'},
+    {label:'Contract Signed By (First Person)', params: 'contractSignedByFirstPersonName',data:'x'},
+    {label:'Contract Signed By (Second Person)', params: 'contractSignedBySecondPersonName',data:'x'},
 ]
 
 const viewTemplateLTI = [
