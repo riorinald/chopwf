@@ -70,6 +70,7 @@ class Help extends Component {
 
             qaArray.push(obj)
         }
+        console.log(qaArray)
         this.setState({ QA: qaArray, existingQALength: qaArray.length })
     }
 
@@ -101,6 +102,7 @@ class Help extends Component {
             chopKeepers.table = chopKeeperArray
             return chopKeepers
         })
+        console.log(chopKeeperArray)
     }
 
 
@@ -138,7 +140,7 @@ class Help extends Component {
 
     async getData() {
         await Axios.get(`${config.url}/helps/chop`).then(res => {
-            // console.log(res.data)
+            console.log(res.data)
         })
         // this.setState({ chopKeepers: response.data.chopKeepers, QA: response.data.QA })
     }
@@ -149,7 +151,7 @@ class Help extends Component {
         postData.append('sectionId', `${name}${index}`)
         await Axios.post(`${config.url}/helps/chop/${localStorage.getItem('userId')}`, postData)
             .then(result => {
-                // console.log(result.data)
+                console.log(`ADDED ${name}`)
             })
             .catch(error => {
                 // console.log(error)
@@ -161,7 +163,7 @@ class Help extends Component {
         postData.append('sectionData', details)
         await Axios.put(`${config.url}/helps/chop/${name}${index}/${localStorage.getItem('userId')}`, postData)
             .then(result => {
-                // console.log(result.data)
+                console.log(`UPDATED ${name}`)
             })
             .catch(error => {
                 // console.log(error)
@@ -169,12 +171,12 @@ class Help extends Component {
     }
 
     async deleteChopKeeper(index, name) {
-        await Axios.delete(`${config.url}/helps/chop/${name}${index}/${localStorage.getItem('userId')}`)
+        await Axios.delete(`${config.url}/helps/chop/${name}${index}`)
             .then(result => {
-                console.log(result.data)
+                console.log("DELETED SECTION")
             })
             .catch(error => {
-                console.log(error)
+                console.error(error)
             })
     }
 

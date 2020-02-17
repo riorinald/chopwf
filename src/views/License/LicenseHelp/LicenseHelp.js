@@ -137,7 +137,7 @@ class LicenseHelp extends Component {
 
     async getData() {
         await Axios.get(`${config.url}/helps/license`).then(res => {
-            // console.log(res.data)
+            console.log(res.data)
         })
         // this.setState({ chopKeepers: response.data.chopKeepers, QA: response.data.QA })
     }
@@ -168,7 +168,7 @@ class LicenseHelp extends Component {
     }
 
     async deleteChopKeeper(index, name) {
-        await Axios.delete(`${config.url}/helps/license/${name}${index}/${localStorage.getItem('userId')}`)
+        await Axios.delete(`${config.url}/helps/license/${name}${index}`)
             .then(result => {
                 console.log(result.data)
             })
