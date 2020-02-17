@@ -282,7 +282,7 @@ class LicenseApplicationDetail extends Component {
                 else {
                     valid = false
                     Swal.fire({
-                        title: "No Delivery Way Selected",
+                        title: "No Return Way Selected",
                         html: "Please select a way of delivery !",
                         type: "warning"
                     })
@@ -638,7 +638,7 @@ class LicenseApplicationDetail extends Component {
                                                                 <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
                                                                     <Label>Express Number</Label>
                                                                     <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
-                                                                    <FormFeedback>You will not be able to see this</FormFeedback>
+                                                                    <FormFeedback>Express Number field is required.</FormFeedback>
                                                                     <Row> &nbsp; </Row>
                                                                 </Collapse>
                                                             </CustomInput>
@@ -681,7 +681,7 @@ class LicenseApplicationDetail extends Component {
                                                             <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
                                                                 <Label>Express Number</Label>
                                                                 <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
-                                                                <FormFeedback>You will not be able to see this</FormFeedback>
+                                                                <FormFeedback>Express Number field is required.</FormFeedback>
                                                                 <Row> &nbsp; </Row>
                                                             </Collapse>
                                                         </CustomInput>
