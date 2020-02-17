@@ -343,7 +343,7 @@ class TaskDetails extends Component {
                         <CardHeader>
                             {/* <Button onClick={this.goBack} > Back &nbsp; </Button>  {taskDetails.requestNum} */}
                             <Row className="align-items-left">
-                                <Button className="ml-1 mr-1" color="primary" onClick={() => this.goBack(this.state.updated)}><i className="fa fa-angle-left" /> Back </Button>
+                                <Button className="mx-2" color="primary" onClick={() => this.goBack(this.state.updated)}><i className="fa fa-angle-left" /> Back </Button>
                                 {page === "myapps"
                                     ? taskDetails.actions.map(((action, index) =>
                                         <span key={index}>
@@ -438,9 +438,9 @@ class TaskDetails extends Component {
                             {/* <FormGroup> */}
                             <Col>
                                 <Row>
-                                    <Col className="ml-2">
+                                    <Col className="mx-2 mb-2">
                                         <FormGroup>
-                                            <Label className="row ml-1">Documents</Label>
+                                            <Label className="row mx-1">Documents</Label>
                                             <Button color="primary" onClick={this.toggleView}>View Documents</Button>
                                         </FormGroup>
 
@@ -560,18 +560,18 @@ class TaskDetails extends Component {
 
                             {taskDetails.histories.length !== 0
                                 ? <Row>
-                                    <Col className="mx-2 mt-2"> <h4>Approval Histories</h4></Col>
+                                    <Col className="mx-3 mt-2"> <h4>Approval Histories</h4></Col>
                                 </Row>
                                 : null}
 
                             {taskDetails.histories.map((history, index) =>
                                 <div key={index}>
                                     <hr></hr>
-                                    <Row className="pl-2 text-md-left text-center">
+                                    <Row className="text-md-left text-center">
                                         {/* <Col xs="12" sm="12" md="2" lg="1">
                                             <img src={history.approvedByAvatarUrl} className="img-avaa img-responsive" alt="Avatar" />
                                         </Col> */}
-                                        <Col sm md="10" lg>
+                                        <Col  className="mx-3" sm md="10" lg>
                                             <h5>{history.approvedByName}<span> <Badge color={history.stateIndicatorColor.toLowerCase()}> {history.stateIndicator} </Badge></span></h5>
                                             <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
                                             <Col className="p-0"> <p>{history.comments}</p> </Col>

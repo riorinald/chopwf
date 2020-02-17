@@ -736,6 +736,14 @@ class EditRequest extends Component {
                     return { taskDetails }
                 })
             }
+
+            if (this.state.taskDetails.applicationTypeId === "LTI"){
+                this.setState(state => {
+                    let taskDetails = state.taskDetails
+                    taskDetails.documents = []
+                    return taskDetails 
+                })
+            }
         }
         else if (name === "teamId") {
             // console.log(this.state.taskDetails.applicationTypeId)
@@ -750,6 +758,13 @@ class EditRequest extends Component {
                     return taskDetails
                 })
                 this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.chopTypeId, (callback) => { })
+            }
+            if (this.state.taskDetails.applicationTypeId === "LTI"){
+                this.setState(state => {
+                    let taskDetails = state.taskDetails
+                    taskDetails.documents = []
+                    return taskDetails 
+                })
             }
         }
         else if (name === "applicationTypeId") {
@@ -808,6 +823,13 @@ class EditRequest extends Component {
                     taskDetails.docCheckByOption = ""
                     selectedOption.documentCheckBy = null
                     return taskDetails
+                })
+            }
+            if (this.state.taskDetails.applicationTypeId === "LTI"){
+                this.setState(state => {
+                    let taskDetails = state.taskDetails
+                    taskDetails.documents = []
+                    return taskDetails 
                 })
             }
 
