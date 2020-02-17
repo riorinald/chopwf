@@ -422,9 +422,9 @@ class TaskDetails extends Component {
                             {/* <FormGroup> */}
                             <Col>
                                 <Row>
-                                    <Col>
+                                    <Col className="ml-2">
                                         <FormGroup>
-                                            <Label>Documents</Label><br></br>
+                                            <Label className="row ml-1">Documents</Label>
                                             <Button color="primary" onClick={this.toggleView}>View Documents</Button>
                                         </FormGroup>
 
