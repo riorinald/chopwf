@@ -708,38 +708,6 @@ class LicenseApplicationDetail extends Component {
                                     </div>
                                     :
                                     null}
-                            {currentStatus === "COMPLETED"
-                                ?
-                                <Collapse isOpen={taskDetails.documents.length !== 0}>
-                                    <Col className="mb-4">
-                                        <FormGroup>
-                                            <Label>Documents</Label>
-                                            <Table responsive hover bordered size="sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th className="smallTd">#</th>
-                                                        <th>Attached File</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {taskDetails.documents.map((doc, index) =>
-                                                        <tr key={index} >
-                                                            <td className="smallTd"> {index + 1} </td>
-                                                            <td>
-                                                                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${doc.documentFileType};base64,${doc.documentBase64String}`, doc.documentName))} > {doc.documentName} </div>
-                                                                {/* <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a> */}
-                                                            </td>
-                                                        </tr>
-                                                    )}
-
-                                                </tbody>
-                                            </Table>
-                                        </FormGroup>
-                                    </Col>
-                                </Collapse>
-                                // </Row>
-                                : ""
-                            }
                         </CardBody>
                         <CardFooter>
                             {taskDetails.histories.length !== 0

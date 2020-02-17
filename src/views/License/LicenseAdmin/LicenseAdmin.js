@@ -55,6 +55,7 @@ class LicenseAdmin extends Component {
     handleFiles = (event) => {
         // Check for the various File API support.
         let files = event.target.files[0];
+        // Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${}`)
         this.setState({ csvFile: files })
         if (window.FileReader) {
             // FileReader are supported.
@@ -75,7 +76,10 @@ class LicenseAdmin extends Component {
         var csv = event.target.result;
         var result = Papa.parse(csv, { header: true, skipEmptyLines: true, })
         console.log(result.data)
-        this.setState({ newLicenseAdmins: result.data, updateAdmins: true })
+        this.setState({
+            // newLicenseAdmins: result.data, 
+            updateAdmins: true
+        })
     }
 
     errorHandler(event) {
@@ -486,7 +490,7 @@ class LicenseAdmin extends Component {
                                 <Card className="mb-4">
                                     <CardHeader>
                                         <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(2)}>
-                                            <h5 className="m-0 p-0">Update License Admins </h5>
+                                            <h5 className="m-0 p-0">Registration for Long-term License Management in Dealership </h5>
                                         </Button>
                                     </CardHeader>
                                     <Collapse isOpen={collapse === 2}>
@@ -494,7 +498,7 @@ class LicenseAdmin extends Component {
                                             <Row>
                                                 <Col>
                                                     <FormGroup>
-                                                        <Label>License Admins</Label>
+                                                        {/* <Label>License Admins</Label> */}
                                                         <InputGroup>
                                                             <CustomInput id="uploadCSV" accept=".CSV" type="file" bsSize="lg" onChange={this.handleFiles} color="primary" />
                                                         </InputGroup>
