@@ -284,7 +284,7 @@ class LicenseApplicationDetail extends Component {
                 else {
                     valid = false
                     Swal.fire({
-                        title: "No Delivery Way Selected",
+                        title: "No Return Way Selected",
                         html: "Please select a way of delivery !",
                         type: "warning"
                     })
@@ -498,7 +498,17 @@ class LicenseApplicationDetail extends Component {
                                                 {action.actionName}
                                             </Button>
                                         )
-                                        : null
+                                        : taskDetails.actions.map((action, index) =>
+                                            action.action === "copy" ?
+                                                <Button key={index}
+                                                    className="mr-1"
+                                                    color="info"
+                                                    onClick={() => this.updated(action.action)}
+                                                >
+                                                    {action.actionName}
+                                                </Button>
+                                                : null
+                                        )
                                     : null}
                             </Row></CardHeader>
                         <CardBody>
@@ -640,7 +650,7 @@ class LicenseApplicationDetail extends Component {
                                                                 <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
                                                                     <Label>Express Number</Label>
                                                                     <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
-                                                                    <FormFeedback>You will not be able to see this</FormFeedback>
+                                                                    <FormFeedback>Express Number field is required.</FormFeedback>
                                                                     <Row> &nbsp; </Row>
                                                                 </Collapse>
                                                             </CustomInput>
@@ -665,7 +675,9 @@ class LicenseApplicationDetail extends Component {
                                     <Row>
                                         <Col>
                                             {taskDetails.actions.map((action, index) =>
-                                                <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
+                                                action.action !== "copy" ?
+                                                    <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
+                                                    : null
                                             )}
                                         </Col>
                                     </Row>
@@ -683,7 +695,7 @@ class LicenseApplicationDetail extends Component {
                                                             <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
                                                                 <Label>Express Number</Label>
                                                                 <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
-                                                                <FormFeedback>You will not be able to see this</FormFeedback>
+                                                                <FormFeedback>Express Number field is required.</FormFeedback>
                                                                 <Row> &nbsp; </Row>
                                                             </Collapse>
                                                         </CustomInput>
@@ -696,52 +708,22 @@ class LicenseApplicationDetail extends Component {
                                         {page === "mypendingtask" && currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
                                             ?
                                             taskDetails.actions.map((action, index) =>
-                                                <Button
-                                                    key={index}
-                                                    className="mr-1"
-                                                    color="success"
-                                                    onClick={() => this.updated(action.action)}
-                                                >
-                                                    {action.actionName}
-                                                </Button>
+                                                action.action !== "copy"
+                                                    ? <Button
+                                                        key={index}
+                                                        className="mr-1"
+                                                        color="success"
+                                                        onClick={() => this.updated(action.action)}
+                                                    >
+                                                        {action.actionName}
+                                                    </Button>
+                                                    : null
                                             )
                                             : null}
 
                                     </div>
                                     :
                                     null}
-                            {currentStatus === "COMPLETED"
-                                ?
-                                <Collapse isOpen={taskDetails.documents.length !== 0}>
-                                    <Col className="mb-4">
-                                        <FormGroup>
-                                            <Label>Documents</Label>
-                                            <Table responsive hover bordered size="sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th className="smallTd">#</th>
-                                                        <th>Attached File</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {taskDetails.documents.map((doc, index) =>
-                                                        <tr key={index} >
-                                                            <td className="smallTd"> {index + 1} </td>
-                                                            <td>
-                                                                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${doc.documentFileType};base64,${doc.documentBase64String}`, doc.documentName))} > {doc.documentName} </div>
-                                                                {/* <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a> */}
-                                                            </td>
-                                                        </tr>
-                                                    )}
-
-                                                </tbody>
-                                            </Table>
-                                        </FormGroup>
-                                    </Col>
-                                </Collapse>
-                                // </Row>
-                                : ""
-                            }
                         </CardBody>
                         <CardFooter>
                             {taskDetails.histories.length !== 0

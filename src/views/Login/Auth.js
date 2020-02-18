@@ -56,11 +56,11 @@ class Authenticated extends Component {
       }
       else if (param.workflow && param.companyid && param.userid){
         const userInfo = cookies.get('userInfo', {path:'/'})
-        const page = param.userrole === 'approver' ? 'mypendingtask' : 'myapps'
         
-        if(userInfo && userInfo.userId === param.userid){
-          	
+        if(userInfo && userInfo.userId === param.userid){          
           if(param.workflow === 'license'){
+          const page = param.userrole === 'approver' ? 'mypendingtask' : 'myapplication'
+
             localStorage.setItem('legalEntity', param.companyid.toUpperCase())
             localStorage.setItem('application', param.workflow.toUpperCase())
             this.props.history.push({
@@ -69,6 +69,8 @@ class Authenticated extends Component {
             })
           }
           else{
+            const page = param.userrole === 'approver' ? 'mypendingtask' : 'myapps'
+
             localStorage.setItem('legalEntity', param.companyid.toUpperCase())
             localStorage.setItem('application', param.workflow.toUpperCase())
             this.props.history.push({

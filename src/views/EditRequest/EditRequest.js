@@ -736,6 +736,14 @@ class EditRequest extends Component {
                     return { taskDetails }
                 })
             }
+
+            if (this.state.taskDetails.applicationTypeId === "LTI"){
+                this.setState(state => {
+                    let taskDetails = state.taskDetails
+                    taskDetails.documents = []
+                    return taskDetails 
+                })
+            }
         }
         else if (name === "teamId") {
             // console.log(this.state.taskDetails.applicationTypeId)
@@ -750,6 +758,13 @@ class EditRequest extends Component {
                     return taskDetails
                 })
                 this.getDocCheckBy(this.state.taskDetails.departmentId, event.target.value, this.state.taskDetails.chopTypeId, (callback) => { })
+            }
+            if (this.state.taskDetails.applicationTypeId === "LTI"){
+                this.setState(state => {
+                    let taskDetails = state.taskDetails
+                    taskDetails.documents = []
+                    return taskDetails 
+                })
             }
         }
         else if (name === "applicationTypeId") {
@@ -808,6 +823,13 @@ class EditRequest extends Component {
                     taskDetails.docCheckByOption = ""
                     selectedOption.documentCheckBy = null
                     return taskDetails
+                })
+            }
+            if (this.state.taskDetails.applicationTypeId === "LTI"){
+                this.setState(state => {
+                    let taskDetails = state.taskDetails
+                    taskDetails.documents = []
+                    return taskDetails 
                 })
             }
 
@@ -1083,11 +1105,41 @@ class EditRequest extends Component {
             for (let i = 0; i < doc.length; i++) {
                 console.log(doc[i].documentFileName, this.state.editRequestForm.docAttachedName)
                 if (doc[i].documentFileName === this.state.editRequestForm.docAttachedName) {
+                    Swal.fire({
+                        title: "Document Exists",
+                        html: 'The selected document already exists in the List',
+                        type: "warning"
+                    })
                     valid = false
                     break
                 }
                 else {
-                    valid = true
+                    if(this.state.isLTI){
+                        if (doc[i].cnName === this.state.cnName){
+                          Swal.fire({
+                            title: "Document name exists",
+                            html: 'Document name: <i>'+ this.state.cnName +'</i> already exists in the list',
+                            type: "warning"
+                          })
+                          valid = false
+                          break
+                        }
+                        if (doc[i].engName === this.state.engName){
+                          Swal.fire({
+                            title: "Document name exists",
+                            html: 'Document name: <i>'+ this.state.engName +'</i> already exists in the list',
+                            type: "warning"
+                          })
+                          valid = false
+                          break
+                        }
+                        else{
+                          valid = true
+                        }
+                    }
+                    else {
+                        valid = true
+                    }
                 }
             }
             if (valid) {
@@ -1138,15 +1190,7 @@ class EditRequest extends Component {
                     return editRequestForm
                 })
             }
-            else {
-                Swal.fire({
-                    title: "Document Exists",
-                    html: 'The selected document already exists in the List',
-                    type: "warning"
-                })
-            }
         }
-
     }
 
     addDocumentLTU() {
@@ -2372,7 +2416,7 @@ class EditRequest extends Component {
                                                                 toggleAll={this.toggleAll}
                                                                 isSelected={this.isSelected}
                                                                 getTrProps={this.rowFn}
-                                                                defaultPageSize={5}
+                                                                defaultPageSize={10}
                                                                 columns={[
                                                                     {
                                                                         Header: 'Document Name (English)',
