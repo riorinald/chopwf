@@ -39,6 +39,7 @@ class LicenseAdmin extends Component {
         }
         this.toggleAccordion = this.toggleAccordion.bind(this)
         this.saveAllData = this.saveAllData.bind(this)
+        this.getLicenseCSV = this.getLicenseCSV.bind(this)
     }
 
     componentDidMount() {
@@ -120,8 +121,17 @@ class LicenseAdmin extends Component {
     exportLogs(category) {
         let from = category === "licenseLogs" ? this.state.exportDate.exportLogsFrom : this.state.exportDate.exportProfileFrom
         let to = category === "licenseLogs" ? this.state.exportDate.exportLogsTo : this.state.exportDate.exportProfileTo
-        let url = `${config.url}/licenses?userId=${Authorize.getCookies().userId}&category=${category}&companyId=${localStorage.getItem('legalEntity')}&startDate=${from}&endDate=${to}`
-        window.open(url, "_blank")
+        if (from !== "" && to !== "") {
+            let url = `${config.url}/licenses?userId=${Authorize.getCookies().userId}&category=${category}&companyId=${localStorage.getItem('legalEntity')}&startDate=${from}&endDate=${to}`
+            window.open(url, "_blank")
+        }
+        else {
+            Swal.fire({
+                type: "info",
+                title: "Select from and to date",
+                text: "Please select from and to date."
+            })
+        }
     }
 
     toggleAccordion(tab) {
@@ -530,14 +540,6 @@ class LicenseAdmin extends Component {
                                                                         width: this.getColumnWidth(key, key)
                                                                     }
                                                                 })}
-
-                                                            // {[
-                                                            //     {
-                                                            //         Header: 'Demo',
-                                                            //         accessor: 'policyID',
-                                                            //         style: { textAlign: "left" }
-                                                            //     }
-                                                            // ]}
                                                             />
                                                         </FormGroup>
                                                     </Collapse>

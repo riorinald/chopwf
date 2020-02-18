@@ -280,7 +280,7 @@ class ChopApplication extends Component {
     let to = this.state.exportDate.exportTo
     console.log(from, to)
     if (from !== "" && to !== "") {
-      let url = `${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${Authorize.getCookies().userId}`
+      let url = `${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${Authorize.getCookies().userId}&companyid=${localStorage.getItem('legalEntity')}`
       window.open(url, "_blank")
       console.log(`Exporting Logs from ${from} to ${to}`)
       // await Axios.get(`${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${Authorize.getCookies().userId}`)
@@ -631,11 +631,11 @@ class ChopApplication extends Component {
           <ModalBody>
             <FormGroup>
               <Label>Select Date Range</Label>
-              <Row>
-                <Col>
+              <Row className="px-1">
+                <Col className="px-2">
                   <Label>From:</Label>
                   <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                    className="form-control" required dateFormat="yyyy/MM/dd"
+                    className="form-control mx-1" required dateFormat="yyyy/MM/dd"
                     renderCustomHeader={({
                       date,
                       changeYear,
@@ -686,10 +686,10 @@ class ChopApplication extends Component {
                     endDate={exportToDateView}
                   />
                 </Col>
-                <Col>
+                <Col className="px-2">
                   <Label>To:</Label>
                   <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                    className="form-control" required dateFormat="yyyy/MM/dd"
+                    className="form-control mx-1" required dateFormat="yyyy/MM/dd"
                     renderCustomHeader={({
                       date,
                       changeYear,
