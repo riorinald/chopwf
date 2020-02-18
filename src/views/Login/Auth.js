@@ -232,7 +232,8 @@ class Authenticated extends Component {
             })
     } catch (error) {
         if (error.response){
-        this.setState({ info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.", color:"danger" });
+          this.setState({ redirectTo:'/login', info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.", color:"danger" });
+          this.countDown()
         }
         else {
         this.setState({ info: "server unreachable", color: "danger",});
