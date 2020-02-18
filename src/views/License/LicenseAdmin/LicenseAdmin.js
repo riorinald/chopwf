@@ -115,8 +115,7 @@ class LicenseAdmin extends Component {
     }
 
     toggleAccordion(tab) {
-        let newTab = 0 
-        newTab = tab === this.state.collapse ? 0 : tab
+        let newTab = tab === this.state.collapse ? 0 : tab
         this.setState({ collapse: newTab })
     }
 
