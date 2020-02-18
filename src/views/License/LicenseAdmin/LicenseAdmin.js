@@ -489,7 +489,7 @@ class LicenseAdmin extends Component {
                                 </Card>
                                 <Card className="mb-4">
                                     <CardHeader>
-                                        <Button block color="link" className="text-left m-0 p-0" onClick={() => this.toggleAccordion(2)}>
+                                        <Button block color="link" className="text-left m-0 p-0" onClick={() => { this.toggleAccordion(2), this.getLicenseCSV() }}>
                                             <h5 className="m-0 p-0">Registration for Long-term License Management in Dealership </h5>
                                         </Button>
                                     </CardHeader>
