@@ -1112,7 +1112,7 @@ class EditRequest extends Component {
                     break
                 }
                 else {
-                    if(this.isLTI){
+                    if(this.state.isLTI){
                         if (doc[i].cnName === this.state.cnName){
                           Swal.fire({
                             title: "Document name exists",
