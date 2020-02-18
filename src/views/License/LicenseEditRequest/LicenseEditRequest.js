@@ -141,6 +141,7 @@ class LicenseEditRequest extends Component {
         return regEx
     }
 
+
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
         await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem('userId')}`,
