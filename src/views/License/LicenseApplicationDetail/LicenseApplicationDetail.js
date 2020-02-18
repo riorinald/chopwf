@@ -496,7 +496,17 @@ class LicenseApplicationDetail extends Component {
                                                 {action.actionName}
                                             </Button>
                                         )
-                                        : null
+                                        : taskDetails.actions.map((action, index) =>
+                                            action.action === "copy" ?
+                                                <Button key={index}
+                                                    className="mr-1"
+                                                    color="info"
+                                                    onClick={() => this.updated(action.action)}
+                                                >
+                                                    {action.actionName}
+                                                </Button>
+                                                : null
+                                        )
                                     : null}
                             </Row></CardHeader>
                         <CardBody>
@@ -663,7 +673,9 @@ class LicenseApplicationDetail extends Component {
                                     <Row>
                                         <Col>
                                             {taskDetails.actions.map((action, index) =>
-                                                <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
+                                                action.action !== "copy" ?
+                                                    <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
+                                                    : null
                                             )}
                                         </Col>
                                     </Row>
@@ -694,14 +706,16 @@ class LicenseApplicationDetail extends Component {
                                         {page === "mypendingtask" && currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
                                             ?
                                             taskDetails.actions.map((action, index) =>
-                                                <Button
-                                                    key={index}
-                                                    className="mr-1"
-                                                    color="success"
-                                                    onClick={() => this.updated(action.action)}
-                                                >
-                                                    {action.actionName}
-                                                </Button>
+                                                action.action !== "copy"
+                                                    ? <Button
+                                                        key={index}
+                                                        className="mr-1"
+                                                        color="success"
+                                                        onClick={() => this.updated(action.action)}
+                                                    >
+                                                        {action.actionName}
+                                                    </Button>
+                                                    : null
                                             )
                                             : null}
 
