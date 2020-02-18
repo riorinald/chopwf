@@ -1206,10 +1206,41 @@ class Create extends Component {
     else {
       for (let i = 0; i < doc.length; i++) {
         if (doc[i].docName === this.state.docAttachedName) {
+          Swal.fire({
+            title: "Document Exists",
+            html: 'The selected document: <i>'+ this.state.docAttachedName +'</i> already exists in the list',
+            type: "warning"
+          })
           valid = false
           break
-        } else {
-          valid = true
+        }
+        else {
+          if(this.isLTI){
+            if (doc[i].cnName === this.state.cnName){
+              Swal.fire({
+                title: "Document name exists",
+                html: 'Document name: <i>'+ this.state.cnName +'</i> already exists in the list',
+                type: "warning"
+              })
+              valid = false
+              break
+            }
+            if (doc[i].engName === this.state.engName){
+              Swal.fire({
+                title: "Document name exists",
+                html: 'Document name: <i>'+ this.state.engName +'</i> already exists in the list',
+                type: "warning"
+              })
+              valid = false
+              break
+            }
+            else{
+              valid = true
+            }
+          }
+          else{
+            valid = true
+          }
         }
       }
       if (valid) {
@@ -1238,13 +1269,6 @@ class Create extends Component {
         })
         document.getElementById("documentTableLTI").className = ""
         this.setState({ engName: "", cnName: "", docSelected: null, docAttachedName: "" })
-      }
-      else {
-        Swal.fire({
-          title: "Document Exists",
-          html: 'The selected document already exists in the List',
-          type: "warning"
-        })
       }
     }
   }
@@ -1914,7 +1938,7 @@ class Create extends Component {
               toggleAll={this.toggleAll}
               isSelected={this.isSelected}
               getTrProps={this.rowFn}
-              defaultPageSize={5}
+              defaultPageSize={10}
               columns={[
                 {
                   Header: 'Document Name (English)',
