@@ -29,7 +29,7 @@ class Authenticated extends Component {
       info: '',
       redirectTo: '/login',
       color:'',
-      timer: 5,
+      timer: 10,
       title: 'Authenticated as'
     };
   }
@@ -48,7 +48,7 @@ class Authenticated extends Component {
           info: "Your Session is expired. Please do relogin",
           color: "danger",
           isExpired:true,
-          timer: 10,
+          timer: 2,
           redirectTo: '/login'+this.props.location.search    
         })
         localStorage.clear()
@@ -86,6 +86,7 @@ class Authenticated extends Component {
               info: "Session user does not match with the redirect URL",
               isExpired: false,
               color: "danger",
+              timer:5,
               redirectTo: '/login' + this.props.location.search        
             })
             cookies.remove('userInfo',{path:'/'})
@@ -97,6 +98,7 @@ class Authenticated extends Component {
               title: 'You are not Authenticated',
               info: "Login required to see the apllication details",
               color: "danger",
+              timer:5,
               redirectTo: '/login' + this.props.location.search 
             })
             this.countDown()
@@ -109,6 +111,7 @@ class Authenticated extends Component {
           title: 'You are not Authenticated',
           info: "Login required",
           color: "danger",
+          timer:5,
           redirectTo: '/login'
         })
         this.countDown()
@@ -146,6 +149,7 @@ class Authenticated extends Component {
                 loading: false,
                 title: 'You are not Authenticated',
                 info:'error:' + err.response,
+                timer:5,
                 color: "danger",
               })
                 console.log(err.response)
@@ -155,6 +159,7 @@ class Authenticated extends Component {
                 loading: false,
                 title: 'You are not Authenticated',
                 info:"OAuth server unreachable",
+                timer:5,
                 color: "danger",
               })
                 console.log(err)
@@ -220,6 +225,7 @@ class Authenticated extends Component {
                     loading: false, 
                     info: info,
                     color: "success",
+                    timer:2,
                     redirectTo:'/portal'
                   })
 
@@ -230,10 +236,13 @@ class Authenticated extends Component {
             })
     } catch (error) {
         if (error.response){
-        this.setState({ info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.", color:"danger" });
+        this.setState({ 
+          info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.",
+          color:"danger",
+        });
         }
         else {
-        this.setState({ info: "server unreachable", color: "danger",});
+        this.setState({ info: "CLWFB API is unreachable", color: "danger",});
         }   
     }
 }
@@ -291,11 +300,9 @@ class Authenticated extends Component {
            : <> 
             <label className="display-5 mb-4 ">{this.state.title}</label>
             <Alert color={this.state.color} >{this.state.info}</Alert >
-            {this.state.isExpired ?
             <Button className="btn-openid btn-brand mb-2" onClick= {event =>  window.location.href = pathname} >
                 <i className="fa fa-openid"></i><span>Daimler OpenID Auth</span> </Button>
-            : null}
-            <p className="mt-3 mb-0"><span style={{color:'grey'}}>Redirect in {this.state.timer}</span></p>
+            {/* {this.state.timer === 0 ? <p className="mt-3 mb-0"><span style={{color:'grey'}}>Redirect in {this.state.timer}</span></p>:null} */}
             </>  
          }   
         </CardBody>
