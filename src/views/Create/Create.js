@@ -2038,7 +2038,7 @@ class Create extends Component {
                   <ol id="notes" className="font-weight-bold">
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
-                        <p> {info.chinese} </p>
+                        <p class="no-bottom-margin"> {info.chinese} </p>
                         <p> {info.english} </p>
                       </li>
                     ))}
@@ -2066,7 +2066,7 @@ class Create extends Component {
                   </FormGroup>
                   <FormGroup>
                     <Label>Dept.</Label>
-                    <Input value={this.state.deptSelected} id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} name="dept">
+                    <Input value={this.state.deptSelected} id="deptSelected" type="select" onWheel={event => { event.preventDefault(); }} onChange={this.handleChange("deptSelected")} name="dept">
                       <option disabled value="">Please select . . .</option>
                       {this.state.department.map((option, index) => (
                         <option value={option.deptId} label={option.dept} key={option.deptId}>
@@ -2089,6 +2089,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Application Type</Label>
                     <Input ref={this.appTypeSelected} type="select"
+                      onWheel={event => { event.preventDefault(); }}
                       onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" name="select"
                       defaultValue=""
                       onBlur={() => this.validator.showMessageFor('aplicationType')}>
@@ -2166,7 +2167,7 @@ class Create extends Component {
                     <FormGroup>
                       <Label>Entitled Team</Label>
                       <small className="ml-2">Please select your team's name from dropdown list, if your team is not included, please contact respective chop keeper. </small>
-                      <Input id="teamSelected" name="team" value={this.state.teamSelected} onChange={this.handleChange("teamSelected")} value={this.state.teamSelected} type="select">
+                      <Input id="teamSelected" name="team" value={this.state.teamSelected} onChange={this.handleChange("teamSelected")} value={this.state.teamSelected} type="select" onWheel={event => { event.preventDefault(); }}>
                         <option value="" disabled>Please select a team</option>
                         {this.state.teams.map((team, index) =>
                           <option key={index} value={team.teamId}>{team.teamName}</option>
@@ -2182,6 +2183,7 @@ class Create extends Component {
                     <Label>Chop Type</Label>
                     <Input ref={this.chopTypeSelected} value={this.state.chopTypeSelected} type="select" id="chopTypeSelected"
                       onClick={() => { this.getChopTypes(this.props.legalName, this.state.appTypeSelected) }}
+                      onWheel={event => { event.preventDefault(); }}
                       onChange={this.handleChange("chopTypeSelected")} name="chopType" >
                       <option disabled value="">Please select ..</option>
                       {this.state.chopTypes.map((option, id) => (
@@ -2195,7 +2197,7 @@ class Create extends Component {
                   {this.state.showBranches
                     ? <FormGroup>
                       <Label>Branch Company Chop</Label>
-                      <Input onChange={this.handleChange("branchSelected")} type="select" value={this.state.branchSelected}>
+                      <Input onChange={this.handleChange("branchSelected")} type="select" value={this.state.branchSelected} onWheel={event => { event.preventDefault(); }}>
                         <option value="" disabled>Please specify your Branch Company Chop</option>
                         {this.state.branches.map((branch, index) =>
                           <option value={branch.branchId} key={index}>{branch.branchName}</option>

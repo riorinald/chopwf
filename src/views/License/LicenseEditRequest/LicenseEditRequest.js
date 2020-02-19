@@ -701,7 +701,7 @@ class LicenseEditRequest extends Component {
                                 <FormGroup>
                                     <Label>Department </Label>
                                     <InputGroup>
-                                        <Input id="departmentId" onChange={this.handleChange("departmentId")} value={taskDetails.departmentId} type="select">
+                                        <Input id="departmentId" onWheel={event => { event.preventDefault(); }} onChange={this.handleChange("departmentId")} value={taskDetails.departmentId} type="select" onWheel={event => { event.preventDefault(); }}>
                                             <option value="">Please selet a department</option>
                                             {departments.map((dept, index) =>
                                                 <option key={index} value={dept.deptId} > {dept.deptName} </option>
@@ -713,7 +713,7 @@ class LicenseEditRequest extends Component {
                                 <FormGroup>
                                     <Label>License Name </Label>
                                     <InputGroup>
-                                        <Input id="licenseNameId" onChange={this.handleChange("licenseNameId")} value={taskDetails.licenseNameId} type="select">
+                                        <Input id="licenseNameId" onWheel={event => { event.preventDefault(); }} onChange={this.handleChange("licenseNameId")} value={taskDetails.licenseNameId} type="select" onWheel={event => { event.preventDefault(); }}>
                                             <option value="" >Please select a License Name</option>
                                             {licenseNames.map((license, index) =>
                                                 <option key={index} value={license.licenseNameId} > {license.name} </option>

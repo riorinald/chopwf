@@ -2274,7 +2274,7 @@ class EditRequest extends Component {
 
                                         <FormGroup>
                                             <Label>Dept.</Label>
-                                            <Input id="departmentId" type="select" value={taskDetails.departmentId} onChange={this.handleChange("departmentId")} name="dept">
+                                            <Input id="departmentId" type="select" value={taskDetails.departmentId} onWheel={event => { event.preventDefault(); }} onChange={this.handleChange("departmentId")} name="dept">
                                                 <option value="" >Please select </option>
                                                 {this.state.departments.map((option, index) => (
                                                     <option value={option.deptId} key={option.deptId}>
@@ -2291,7 +2291,7 @@ class EditRequest extends Component {
 
                                         <FormGroup>
                                             <Label>Application Type</Label>
-                                            <Input type="select" id="appTypeSelected" onChange={this.handleChange("applicationTypeId")} value={taskDetails.applicationTypeId} name="appType">
+                                            <Input type="select" id="appTypeSelected" onWheel={event => { event.preventDefault(); }} onChange={this.handleChange("applicationTypeId")} value={taskDetails.applicationTypeId} name="appType">
                                                 <option value="" disabled>Please select </option>
                                                 {appTypes.map((type, index) =>
                                                     <option key={index} value={type.appTypeId} > {type.appTypeName} </option>
@@ -2363,7 +2363,7 @@ class EditRequest extends Component {
                                             <FormGroup>
                                                 <Label>Entitled Team</Label>
                                                 <InputGroup>
-                                                    <Input id="teamId" onChange={this.handleChange("teamId")} value={taskDetails.teamId} type="select">
+                                                    <Input id="teamId" onChange={this.handleChange("teamId")} value={taskDetails.teamId} type="select" onWheel={event => { event.preventDefault(); }}>
                                                         <option value="" disabled>Please select </option>
                                                         {this.state.teams.map((team, index) =>
                                                             <option key={index} value={team.teamId}>{team.teamName}</option>
@@ -2381,6 +2381,7 @@ class EditRequest extends Component {
                                         <FormGroup>
                                             <Label>Chop Type</Label>
                                             <Input type="select" id="chopTypeId"
+                                                onWheel={event => { event.preventDefault(); }}
                                                 // onClick={() => { props.getChopTypes(props.legalName, props.taskDetails.appTypeSelected) }}
                                                 onChange={this.handleChange("chopTypeId")} value={taskDetails.chopTypeId} name="chopType" >
                                                 <option disabled value="" >Please select </option>
@@ -2397,7 +2398,7 @@ class EditRequest extends Component {
                                         {taskDetails.chopTypeId === "BCSCHOP" && this.state.branches !== []
                                             ? <FormGroup>
                                                 <Label>Branch Company Chop</Label>
-                                                <Input onChange={this.handleChange("branchId")} type="select" value={taskDetails.branchId}>
+                                                <Input onChange={this.handleChange("branchId")} type="select" value={taskDetails.branchId} onWheel={event => { event.preventDefault(); }}>
                                                     <option value="" disabled>Please specify your Branch Company Chop</option>
                                                     {this.state.branches.map((branch, index) =>
                                                         <option value={branch.branchId} key={index}>{branch.branchName}</option>
