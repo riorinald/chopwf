@@ -2263,7 +2263,53 @@ class Create extends Component {
                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                         selected={this.state.dateView2}
                         onChange={this.dateChange("returnDate", "dateView2")}
-                        minDate={new Date()} maxDate={addDays(new Date(), 30)} />
+                        minDate={new Date()} maxDate={addDays(new Date(), 30)}
+                        renderCustomHeader={({
+                          date,
+                          changeYear,
+                          changeMonth,
+                          decreaseMonth,
+                          increaseMonth,
+                          prevMonthButtonDisabled,
+                          nextMonthButtonDisabled
+                        }) => (
+                            <div
+                              style={{
+                                margin: 10,
+                                display: "flex",
+                                justifyContent: "center"
+                              }}
+                            >
+                              <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                              <Input
+                                autoComplete="off"
+                                value={getYear(date)}
+                                onChange={({ target: { value } }) => changeYear(value)}
+                                type="select">
+                                {years.map(option => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Input
+                              autoComplete="off"
+                              value={getMonth(date)} onChange={({ target: { value } }) =>
+                                changeMonth(months.indexOf(value))
+                              } type="select">
+                                {months.map((option) => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+                            </div>
+                          )}
+                        peekNextMonth
+                        showMonthDropdown
+                        showYearDropdown
+                        minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                       {!this.state.collapse
                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', this.state.returnDate, 'required')}</small>
                         : null}
