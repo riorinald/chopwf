@@ -877,12 +877,26 @@ class EditRequest extends Component {
     checkforChinese(event) {
         let value = event.target.value
         if (value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)) {
-            this.setState({ engName: this.state.engName, invalidEnglish: true })
+            this.setState(state => ({
+                editRequestForm:{ 
+                ...state.editRequestForm, 
+                engName: this.state.editRequestForm.engName
+                },
+                invalidEnglish: true 
+                })
+            )
             event.target.className = "form-control is-invalid"
         }
         else {
-            event.target.className = "form-control"
-            this.setState({ engName: value, invalidEnglish: false })
+            event.target.className = "isvalid form-control"
+            this.setState(state => ({
+                editRequestForm:{ 
+                ...state.editRequestForm, 
+                engName: value
+                },
+                invalidEnglish: true 
+                })
+            )
         }
     }
 
@@ -891,26 +905,28 @@ class EditRequest extends Component {
         //Handle engName
         if (name === "engName") {
             if (value.match(/[\u4E00-\u9FFF\u3400-\u4DFF\uF900-\uFAFF]+/g)) {
-                this.setState(state => {
-                    let { editRequestForm, invalidEnglish } = this.state
-                    editRequestForm[name] = this.state.editRequestForm[name]
-                    invalidEnglish = true
-                    return { editRequestForm, invalidEnglish };
-
-                })
-                // this.setState({ engName: this.state.engName, invalidEnglish: true })
+                this.setState(state => ({
+                    editRequestForm:{ 
+                    ...state.editRequestForm, 
+                    engName: this.state.editRequestForm.engName
+                    },
+                    invalidEnglish: true 
+                    })
+                )
                 event.target.className = "form-control is-invalid"
             }
             else {
-                // event.target.className = "form-control"
-                this.setState(state => {
-                    let { editRequestForm, invalidEnglish } = this.state
-                    editRequestForm[name] = value
-                    invalidEnglish = false
-                    return { editRequestForm, invalidEnglish };
 
-                })
-                // this.setState({ engName: value, invalidEnglish: false })
+                this.setState(state => ({
+                    editRequestForm:{ 
+                    ...state.editRequestForm, 
+                    engName: value
+                    },
+                    invalidEnglish: false 
+                    })
+                )
+                event.target.className = "d-block form-control is-valid"
+
             }
         }
 
@@ -1112,22 +1128,24 @@ class EditRequest extends Component {
                     break
                 }
                 else {
-                    if(this.state.isLTI){
-                        if (doc[i].cnName === this.state.editRequestForm.cnName){
+                    if(this.state.taskDetails.applicationTypeId === "LTI"){
+                        if (doc[i].documentNameChinese === this.state.editRequestForm.cnName){
                           Swal.fire({
                             title: "Document name exists",
                             html: 'Document name: <i>'+ this.state.editRequestForm.cnName +'</i> already exists in the list',
                             type: "warning"
                           })
+                          document.getElementById("cnName").className = "form-control is-invalid"
                           valid = false
                           break
                         }
-                        if (doc[i].engName === this.state.editRequestForm.engName){
+                        if (doc[i].documentNameEnglish === this.state.editRequestForm.engName){
                           Swal.fire({
                             title: "Document name exists",
                             html: 'Document name: <i>'+ this.state.editRequestForm.engName +'</i> already exists in the list',
                             type: "warning"
                           })
+                          document.getElementById("engName").className = "form-control is-invalid"
                           valid = false
                           break
                         }
@@ -1170,6 +1188,7 @@ class EditRequest extends Component {
                 this.setState(state => {
                     let { taskDetails, invalidChinese, invalidEnglish } = this.state
                     taskDetails.documents.push(obj)
+                    taskDetails.isConfirm = "N"
                     invalidChinese = false
                     invalidEnglish = false
                     return { taskDetails, invalidChinese, invalidEnglish }
@@ -1177,6 +1196,7 @@ class EditRequest extends Component {
 
                 document.getElementById("documents").className = ""
                 document.getElementById("cnName").className = "form-control"
+                document.getElementById("engName").className = "form-control"
 
 
                 this.setState(state => {
@@ -1943,11 +1963,12 @@ class EditRequest extends Component {
         if (this.state.taskDetails.applicationTypeId !== "") {
             await this.validate()
             if (this.validator.allValid()) {
-                this.setState(state => {
-                    let taskDetails = this.state.taskDetails
-                    if (checked) { taskDetails.isConfirm = "Y" }
-                    return { taskDetails }
-                })
+                this.setState(state => ({
+                    taskDetails:{
+                        ...state.taskDetails,
+                        isConfirm: checked ? "Y" : "N"
+                    }
+                }))
             } else {
                 this.validator.showMessages();
                 this.forceUpdate()
@@ -2516,7 +2537,7 @@ class EditRequest extends Component {
                                                         <Col md>
                                                             <FormGroup>
                                                                 {/* <Label>English Name</Label> */}
-                                                                <Input autoComplete="off" value={editRequestForm.engName} onBlur={this.checkforChinese} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="docName" maxLength="500" rows="3" placeholder="Please describe in English" />
+                                                                <Input autoComplete="off" value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="engName" maxLength="500" rows="3" placeholder="Please describe in English" />
                                                                 {this.state.invalidEnglish
                                                                     ? <small style={{ color: '#F86C6B' }}> Please input only English characters </small>
                                                                     : null
@@ -2842,7 +2863,7 @@ class EditRequest extends Component {
                                                         type="checkbox"
                                                         checked={taskDetails.isConfirm === "Y"}
                                                         onChange={this.handleAgreeTerm}
-                                                        onClick={this.isValid}
+                                                        // onClick={this.isValid}
                                                         id="confirm" value="option1">
                                                         <Label onClick={this.handleAgreeTerm} className="form-check-label" check >
                                                             By ticking the box, I confirm that I hereby acknowledge that I must comply the internal Policies and Guidelines
