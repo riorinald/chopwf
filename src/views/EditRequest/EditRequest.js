@@ -1105,7 +1105,7 @@ class EditRequest extends Component {
                 if (doc[i].documentFileName === this.state.editRequestForm.docAttachedName) {
                     Swal.fire({
                         title: "Document Exists",
-                        html: 'The selected document already exists in the List',
+                        html: 'The selected document: <i>'+ this.state.editRequestForm.docAttachedName +'</i> already exists in the list',
                         type: "warning"
                     })
                     valid = false
@@ -1113,19 +1113,19 @@ class EditRequest extends Component {
                 }
                 else {
                     if(this.state.isLTI){
-                        if (doc[i].cnName === this.state.cnName){
+                        if (doc[i].cnName === this.state.editRequestForm.cnName){
                           Swal.fire({
                             title: "Document name exists",
-                            html: 'Document name: <i>'+ this.state.cnName +'</i> already exists in the list',
+                            html: 'Document name: <i>'+ this.state.editRequestForm.cnName +'</i> already exists in the list',
                             type: "warning"
                           })
                           valid = false
                           break
                         }
-                        if (doc[i].engName === this.state.engName){
+                        if (doc[i].engName === this.state.editRequestForm.engName){
                           Swal.fire({
                             title: "Document name exists",
-                            html: 'Document name: <i>'+ this.state.engName +'</i> already exists in the list',
+                            html: 'Document name: <i>'+ this.state.editRequestForm.engName +'</i> already exists in the list',
                             type: "warning"
                           })
                           valid = false
