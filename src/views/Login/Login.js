@@ -40,7 +40,7 @@ class Login extends Component {
             info: "",
             second: 5,
             fade: false,
-            modal: true,
+            modal: false,
             redirectOuth: false,
             pathname: "",
             token:""
@@ -56,26 +56,30 @@ class Login extends Component {
 
     componentDidMount(){
         const param = qs.parse(this.props.location.search)
-        
         if (param.code){
             console.log('code acquired!', param.code)
-            this.setState({modal:false},
-                this.props.history.push({
-                    pathname:'/authenticated',
-                    code: param.code
-                })
-            )
+            this.props.history.push({
+                pathname:'/authenticated',
+                code: param.code
+            })
         }
         if(cookies.get('userInfo', {path:'/'})){
-            this.setState({modal:false},
             this.props.history.push('/portal')
-            )
+        }
+        else{
+            this.setState({
+               modal: true 
+            })
         }
         if (param.userid){
             this.setState({
                 username: param.userid
             })
         }
+    }
+
+    componentWillUnmount(){
+
     }
 
     windowsSSO() {

@@ -166,7 +166,7 @@ class Authenticated extends Component {
               this.setState({
                 loading: false,
                 title: 'You are not Authenticated',
-                info:'error:' + err.response,
+                info:'error:' + err.response.statusText,
                 timer:5,
                 color: "danger",
               })
