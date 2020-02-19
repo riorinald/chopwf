@@ -2674,11 +2674,56 @@ class EditRequest extends Component {
                                                 <Label>Return Date</Label>
                                                 <Row />
                                                 <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
-                                                    className="form-control" required dateFormat="yyyy/MM/dd" withPortal
-                                                    selected={this.state.dateView2}
-                                                    isClearable
-                                                    onChange={this.dateChange("returnDate", "dateView2")}
-                                                    minDate={new Date()} maxDate={addDays(new Date(), 30)} />
+                                                className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                                                selected={this.state.dateView2}
+                                                onChange={this.dateChange("returnDate", "dateView2")}
+                                                minDate={new Date()} maxDate={addDays(new Date(), 30)}
+                                                renderCustomHeader={({
+                                                  date,
+                                                  changeYear,
+                                                  changeMonth,
+                                                  decreaseMonth,
+                                                  increaseMonth,
+                                                  prevMonthButtonDisabled,
+                                                  nextMonthButtonDisabled
+                                                }) => (
+                                                    <div
+                                                      style={{
+                                                        margin: 10,
+                                                        display: "flex",
+                                                        justifyContent: "center"
+                                                      }}
+                                                    >
+                                                      <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                      <Input
+                                                        autoComplete="off"
+                                                        value={getYear(date)}
+                                                        onChange={({ target: { value } }) => changeYear(value)}
+                                                        type="select">
+                                                        {years.map(option => (
+                                                          <option key={option} value={option}>
+                                                            {option}
+                                                          </option>
+                                                        ))}
+                                                      </Input>
+                                                      <Input
+                                                      autoComplete="off"
+                                                      value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                        changeMonth(months.indexOf(value))
+                                                      } type="select">
+                                                        {months.map((option) => (
+                                                          <option key={option} value={option}>
+                                                            {option}
+                                                          </option>
+                                                        ))}
+                                                      </Input>
+                                                      <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+                                                    </div>
+                                                  )}
+                                                peekNextMonth
+                                                showMonthDropdown
+                                                showYearDropdown
+                                                minDate={new Date()} maxDate={addDays(new Date(), 365)} />
                                             </FormGroup>
                                             {!editRequestForm.collapseUIO
                                                 ? <InputGroup>
