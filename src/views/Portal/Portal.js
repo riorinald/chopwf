@@ -8,17 +8,13 @@ import {
   Alert
 } from 'reactstrap';
 import {
-  AppHeader,
+  AppHeader
 } from '@coreui/react';
 import LegalEntity from '../../context';
 import Axios from 'axios';
 import config from '../../config';
 import Authorize from '../../functions/Authorize'
 import ChopIcon from '../../assets/img/Chop.png'
-
-
-const DefaultFooter = React.lazy(() => import('../../containers/DefaultLayout/DefaultFooter'));
-
 
 class Portal extends Component {
   constructor(props) {
@@ -105,7 +101,7 @@ class Portal extends Component {
         <div className="app flex-row align-items-center">
           <Container>
             <Row className="justify-content-center">
-              <Col sm={6} md lg={3} className="text-center h-100">
+              <Col sm={5} md lg={3} className="text-center h-100">
                 <Card id="CWF" tag="a" style={{ cursor: "pointer" }} onClick={() => { this.redirectTo('CHOP') }} className="shadow-lg p-3 mb-5 bg-white rounded">
                   <CardBody>
                     <h5><b>CHOP WORKFLOW APPLICATION</b></h5>
@@ -115,7 +111,7 @@ class Portal extends Component {
                   </CardBody>
                 </Card>
               </Col>
-              <Col sm={6} md lg={3} className="text-center h-100">
+              <Col sm={5} md lg={3} className="text-center h-100">
                 <Card id="LWF" tag="a" style={{ cursor: "pointer" }} onClick={() => { this.redirectTo('LICENSE') }} className="shadow-lg p-3 mb-5 bg-white rounded">
                   <CardBody>
                     <h5><b>LICENSE WORKFLOW APPLICATION</b></h5>
@@ -128,7 +124,6 @@ class Portal extends Component {
             </Row>
           </Container>
         </div>
-        <DefaultFooter />
       </div>
     );
   }

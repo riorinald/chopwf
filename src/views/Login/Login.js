@@ -40,6 +40,7 @@ class Login extends Component {
             info: "",
             second: 5,
             fade: false,
+            modal: true,
             redirectOuth: false,
             pathname: "",
             token:""
@@ -55,15 +56,20 @@ class Login extends Component {
 
     componentDidMount(){
         const param = qs.parse(this.props.location.search)
-        if(cookies.get('userInfo', {path:'/'})){
-            this.props.history.push('/portal')
-        }
+        
         if (param.code){
             console.log('code acquired!', param.code)
-            this.props.history.push({
-                pathname:'/authenticated',
-                code: param.code
-            })
+            this.setState({modal:false},
+                this.props.history.push({
+                    pathname:'/authenticated',
+                    code: param.code
+                })
+            )
+        }
+        if(cookies.get('userInfo', {path:'/'})){
+            this.setState({modal:false},
+            this.props.history.push('/portal')
+            )
         }
         if (param.userid){
             this.setState({
@@ -264,7 +270,7 @@ class Login extends Component {
                     </Nav>
                 </Navbar>
 
-                <Modal size="md " centered isOpen={true}>
+                <Modal size="md " centered isOpen={this.state.modal}>
                     <ModalHeader cssModule={{'modal-title': 'w-100 text-center'}}> Login to Chop Workflow System </ModalHeader>
                     <ModalBody>
                         <Form>

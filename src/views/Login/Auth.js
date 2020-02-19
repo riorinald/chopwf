@@ -9,6 +9,9 @@ import JWT from 'jsonwebtoken';
 import Cookies from 'universal-cookie';
 import Authorize from '../../functions/Authorize'
 
+import {
+  AppHeader
+} from '@coreui/react';
 
 const scope ="openid"
 const client_id="812da7d2-b74a-484d-82a3-d30ff8ae6f9c"
@@ -48,11 +51,11 @@ class Authenticated extends Component {
           info: "Your Session is expired. Please do relogin",
           color: "danger",
           isExpired:true,
-          timer: 2,
-          redirectTo: '/login'+this.props.location.search    
+          // timer: 2,
+          // redirectTo: '/login'+this.props.location.search    
         })
         localStorage.clear()
-        this.countDown()
+        // this.countDown()
       }
       else if (param.workflow && param.companyid && param.userid){
         const userInfo = cookies.get('userInfo', {path:'/'})
@@ -108,15 +111,28 @@ class Authenticated extends Component {
         }
       }
       else {
-        this.setState({
-          loading:false,
-          title: 'You are not Authenticated',
-          info: "Login required",
-          color: "danger",
-          timer:5,
-          redirectTo: '/login'
-        })
-        this.countDown()
+        if(Authorize.getCookies()){
+          this.setState({
+            loading:false,
+            title: 'Authenticated with session',
+            info: "login as "+ Authorize.getCookies().userId,
+            color: "success",
+            timer:3,
+            redirectTo: '/portal'
+          })
+          this.countDown()
+        }
+        else{
+          this.setState({
+            loading:false,
+            title: 'You are not Authenticated',
+            info: "Login required",
+            color: "danger",
+            timer:5,
+            redirectTo: '/login'
+          })
+          this.countDown()
+        }
       }
     }
   }
@@ -228,6 +244,7 @@ class Authenticated extends Component {
                     info: info,
                     color: "success",
                     timer:2,
+                    isExpired:false,
                     redirectTo:'/portal'
                   })
 
@@ -240,6 +257,7 @@ class Authenticated extends Component {
         if (error.response){
         this.setState({ 
           info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.",
+          isExpired:true,
           color:"danger",
         });
         }
@@ -293,8 +311,12 @@ class Authenticated extends Component {
     if (this.state.timer === 0){
         return <Redirect to={this.state.redirectTo} />
     }
-    return(
-    <>
+    return (
+    <div>
+      <AppHeader fixed>
+          <span className="navbar-nav mr-5">{this.state.userDetails.displayName}</span>
+      </AppHeader>
+      <div>
       <Card className="centerd shadow-lg mt-5 p-3 rounded">
         <CardBody className="text-center">
           {this.state.loading
@@ -302,16 +324,19 @@ class Authenticated extends Component {
            : <> 
             <label className="display-5 mb-4 ">{this.state.title}</label>
             <Alert color={this.state.color} >{this.state.info}</Alert >
+            {this.state.isExpired ?
             <Button className="btn-openid btn-brand mb-2" onClick= {event =>  window.location.href = pathname} >
                 <i className="fa fa-openid"></i><span>Daimler OpenID Auth</span> </Button>
+            : null }
             {/* {this.state.timer === 0 ? <p className="mt-3 mb-0"><span style={{color:'grey'}}>Redirect in {this.state.timer}</span></p>:null} */}
-            </>  
-         }   
+            </>
+          }   
         </CardBody>
       </Card>
-    </>
-    )}
-  
+      </div>
+    </div>
+    );
   }
+}
   
   export default Authenticated;
