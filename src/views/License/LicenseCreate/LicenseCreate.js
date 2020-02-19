@@ -506,7 +506,7 @@ class LicenseCreate extends Component {
                             <FormGroup>
                                 <Label>Department </Label>
                                 <InputGroup>
-                                    <Input id="department" onChange={this.handleChange("department")} defaultValue="0" type="select">
+                                    <Input id="department" onChange={this.handleChange("department")} defaultValue="0" type="select" onWheel={event => { event.preventDefault(); }}>
                                         <option disabled value="0">Please selet a department</option>
                                         {departments.map((dept, index) =>
                                             <option key={index} value={dept.deptId} > {dept.deptName} </option>
@@ -518,7 +518,7 @@ class LicenseCreate extends Component {
                             <FormGroup>
                                 <Label>License Name </Label>
                                 <InputGroup>
-                                    <Input id="licenseName" onChange={this.handleChange("licenseName")} defaultValue="0" type="select">
+                                    <Input id="licenseName" onChange={this.handleChange("licenseName")} defaultValue="0" type="select" onWheel={event => { event.preventDefault(); }}>
                                         <option disabled value="0" >Please select a License Name</option>
                                         {licenseNames.map((license, index) =>
                                             <option key={index} value={license.licenseNameId} > {license.name} </option>
