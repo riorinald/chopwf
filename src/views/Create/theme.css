@@ -81,7 +81,9 @@
 .react-datepicker-wrapper {
   width: 100%;
 }
-
+.no-bottom-margin{
+  margin-bottom: 0px !important;
+}
   /* input:                    'react-autosuggest__input',
   inputOpen:                'react-autosuggest__input--open',
   inputFocused:             'react-autosuggest__input--focused',

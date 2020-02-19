@@ -2032,7 +2032,7 @@ class Create extends Component {
                   <ol id="notes" className="font-weight-bold">
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
-                        <p> {info.chinese} </p>
+                        <p class="no-bottom-margin"> {info.chinese} </p>
                         <p> {info.english} </p>
                       </li>
                     ))}
