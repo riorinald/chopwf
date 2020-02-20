@@ -2824,7 +2824,7 @@ class EditRequest extends Component {
 
                                         <Collapse isOpen={taskDetails.applicationTypeId === "CNIPS"}>
                                             <FormGroup>
-                                                <Label>Contract Signed By: <i className="fa fa-user" /></Label>
+                                                <Label>Contract Signed By <i className="fa fa-user" /></Label>
                                                 <small className="ml-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval.</small>
                                                 <Row>
                                                     <Col className="py-2" xs={12} md={6} lg={6}>
@@ -2839,7 +2839,7 @@ class EditRequest extends Component {
                                                         />
                                                         <InputGroup>
                                                             {taskDetails.applicationTypeId === "CNIPS"
-                                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Contract Signed By: ', taskDetails.contractSignedByFirstPerson, 'required')}</small>
+                                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Contract Signed By ', taskDetails.contractSignedByFirstPerson, 'required')}</small>
                                                                 : null}
                                                         </InputGroup>
                                                     </Col>
@@ -2855,7 +2855,7 @@ class EditRequest extends Component {
                                                         />
                                                         <InputGroup>
                                                             {taskDetails.applicationTypeId === "CNIPS"
-                                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Contract Signed By: ', taskDetails.contractSignedBySecondPerson, 'required')}</small>
+                                                                ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Contract Signed By ', taskDetails.contractSignedBySecondPerson, 'required')}</small>
                                                                 : null}
                                                         </InputGroup>
                                                     </Col>
