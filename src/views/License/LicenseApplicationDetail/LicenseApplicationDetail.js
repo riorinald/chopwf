@@ -178,6 +178,10 @@ class LicenseApplicationDetail extends Component {
                                 arr.push(obj)
                             }
                             break;
+                        default :
+                            obj.value = res.data[key]
+                            arr.push(obj)
+                            break;
                     }
                 })
                 this.setState({ fields: arr })
@@ -579,7 +583,8 @@ class LicenseApplicationDetail extends Component {
                                 </Col>
                             </Row>
                             <Row>
-                                {this.state.fields.map((field, i) =>
+                                {this.state.fields.map((field, i) => (
+                                    field.value !== "" ?
                                     <Col key={i} sm="6">
                                         <Row style={{ marginBottom: "15px" }} >
                                             <Col sm="6">
@@ -590,6 +595,8 @@ class LicenseApplicationDetail extends Component {
                                             </Col>
                                         </Row>
                                     </Col>
+                                    : null
+                                    )
                                 )}
                             </Row>
 
