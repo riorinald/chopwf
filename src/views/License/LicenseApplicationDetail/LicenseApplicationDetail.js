@@ -283,7 +283,7 @@ class LicenseApplicationDetail extends Component {
                     valid = false
                     Swal.fire({
                         title: "No Return Way Selected",
-                        html: "Please select a way of delivery !",
+                        html: "Please select a way of return !",
                         type: "warning"
                     })
                 }
