@@ -556,7 +556,7 @@ class LicenseCreate extends Component {
                                     <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked.)</small>
                                     <CustomInput type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes. Please specify watermark here:">
                                         <Collapse isOpen={formData.isWatermark === "Y"}>
-                                            <Input id="inputWatermark1" type="text" maxLength={50} value={formData.watermark} onChange={this.handleChange("watermark")} autoComplete="off" />
+                                            <Input id="inputWatermark1" type="text" maxLength={500} value={formData.watermark} onChange={this.handleChange("watermark")} autoComplete="off" />
                                             {formData.documentType === "SCANCOPY"
                                                 ? formData.isWatermark === "Y"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', formData.watermark, 'required')}</small>
@@ -567,7 +567,7 @@ class LicenseCreate extends Component {
                                     </CustomInput>
                                     <CustomInput type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No. Please specify the reason of not adding watermark:">
                                         <Collapse isOpen={formData.isWatermark === "N"}>
-                                            <Input id="inputWatermark2" type="text" maxLength={50} value={formData.watermark} onChange={this.handleChange("watermark")} autoComplete="off" />
+                                            <Input id="inputWatermark2" type="text" maxLength={500} value={formData.watermark} onChange={this.handleChange("watermark")} autoComplete="off" />
                                             {formData.documentType === "SCANCOPY"
                                                 ? formData.isWatermark === "N"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('', formData.watermark, 'required')}</small>
@@ -652,7 +652,7 @@ class LicenseCreate extends Component {
                                 <Collapse isOpen={formData.deliverWay === "Express"}>
                                     <FormGroup>
                                         <Label>Address</Label>
-                                        <Input maxLength="200" autoComplete="off" placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
+                                        <Input maxLength="500" autoComplete="off" placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
                                         {formData.documentType === "ORIGINAL"
                                             ? formData.deliverWay === "Express"
                                                 ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
@@ -672,7 +672,7 @@ class LicenseCreate extends Component {
                                             menuPortalTarget={document.body}
                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         /> */}
-                                        <Input maxLength="50" autoComplete="off" placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
+                                        <Input maxLength="500" autoComplete="off" placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
                                         {formData.documentType === "ORIGINAL"
                                             ? formData.deliverWay === "Express"
                                                 ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
@@ -683,7 +683,7 @@ class LicenseCreate extends Component {
 
                                     <FormGroup>
                                         <Label>Reciever Mobile Phone</Label>
-                                        <Input maxLength="15" autoComplete="off" placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
+                                        <Input maxLength="500" autoComplete="off" placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
                                         {formData.documentType === "ORIGINAL"
                                             ? formData.deliverWay === "Express" ?
                                                 <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, formData.recieverPhone, 'required')}</small>
