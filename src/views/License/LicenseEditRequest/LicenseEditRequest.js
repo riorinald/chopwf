@@ -751,7 +751,7 @@ class LicenseEditRequest extends Component {
                                         <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked.)</small>
                                         <CustomInput defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes. Please specify watermark here:">
                                             <Collapse isOpen={taskDetails.needWatermark === "Y"}>
-                                                <Input id="inputWatermark1" type="text" maxLength={50} value={taskDetails.watermark} onChange={this.handleChange("watermark")} autoComplete="off"/>
+                                                <Input id="inputWatermark1" type="text" maxLength={500} value={taskDetails.watermark} onChange={this.handleChange("watermark")} autoComplete="off"/>
                                                 {taskDetails.documentTypeId === "SCANCOPY"
                                                     ? taskDetails.needWatermark === "Y"
                                                         ? <small style={{ color: '#F86C6B' }} > {this.validator.message('Watermark', taskDetails.watermark, 'required')}</small>
@@ -762,7 +762,7 @@ class LicenseEditRequest extends Component {
                                         </CustomInput>
                                         <CustomInput defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No. Please specify the reason of not adding watermark:">
                                             <Collapse isOpen={taskDetails.needWatermark === "N"}>
-                                                <Input id="inputWatermark2" type="text" maxLength={50} value={taskDetails.watermark} onChange={this.handleChange("watermark")} autoComplete="off"/>
+                                                <Input id="inputWatermark2" type="text" maxLength={500} value={taskDetails.watermark} onChange={this.handleChange("watermark")} autoComplete="off"/>
                                                 {taskDetails.documentTypeId === "SCANCOPY"
                                                     ? taskDetails.needWatermark === "N"
                                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', taskDetails.watermark, 'required')}</small>
@@ -849,7 +849,7 @@ class LicenseEditRequest extends Component {
                                     <Collapse isOpen={taskDetails.deliverWayId === "EXPRESS"}>
                                         <FormGroup>
                                             <Label>Address</Label>
-                                            <Input maxLength="200" placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" autoComplete="off"/>
+                                            <Input maxLength="500" placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" autoComplete="off"/>
                                             {taskDetails.documentTypeId === "ORIGINAL"
                                                 ? taskDetails.deliverWayId === "EXPRESS"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.expDeliveryAddress, 'required')}</small>
@@ -861,7 +861,7 @@ class LicenseEditRequest extends Component {
 
                                         <FormGroup>
                                             <Label>Receiver</Label>
-                                            <Input maxLength="50" type="text" id="expDeliveryReceiver" onChange={this.handleChange("expDeliveryReceiver")} placeholder="Please specify receiver" value={taskDetails.expDeliveryReceiver} autoComplete="off" />
+                                            <Input maxLength="500" type="text" id="expDeliveryReceiver" onChange={this.handleChange("expDeliveryReceiver")} placeholder="Please specify receiver" value={taskDetails.expDeliveryReceiver} autoComplete="off" />
                                             {taskDetails.documentTypeId === "ORIGINAL"
                                                 ? taskDetails.deliverWayId === "EXPRESS"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', taskDetails.expDeliveryReceiver, 'required')}</small>
@@ -873,7 +873,7 @@ class LicenseEditRequest extends Component {
                                         <FormGroup>
                                             <Label>Reciever Mobile Phone</Label>
                                             {/* <input type="number" id="phoneNumber"></input> */}
-                                            <Input maxLength="15" placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="number" autoComplete="off"/>
+                                            <Input maxLength="500" placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="text" autoComplete="off"/>
                                             {taskDetails.documentTypeId === "ORIGINAL"
                                                 ? taskDetails.deliverWayId === "EXPRESS"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.expDeliveryMobileNo, 'required')}</small>

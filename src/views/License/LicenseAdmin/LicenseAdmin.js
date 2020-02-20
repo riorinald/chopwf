@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
     Card, CardHeader, CardBody, CardFooter, Button,
     Row, Col, FormGroup, Label, CustomInput, InputGroup, Form,
-    Collapse, Input
+    Collapse, Input, InputGroupAddon
 } from 'reactstrap'
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -159,27 +159,37 @@ class LicenseAdmin extends Component {
     saveAllData() {
         let { csvFile } = this.state
         let postData = new FormData()
-        postData.append('Documents[0].Attachment.File', csvFile)
-        postData.append('Documents[0].Attachment.Nam', csvFile.name)
-        Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${localStorage.getItem('userId')}`, postData)
-            .then(res => {
-                Swal.fire({
-                    title: "Updated",
-                    type: "success",
-                    timer: 1500,
-                    timerProgressBar: true
-                })
-                this.getLicenseCSV()
+        if ( csvFile === null){
+            Swal.fire({
+                title: "Please Attach CSV file",
+                type: "warning",
+                timer: 1500,
+                timerProgressBar: true
             })
-            .catch(err => {
-                Swal.fire({
-                    title: "Error",
-                    type: "error",
-                    timer: 1500,
-                    timerProgressBar: true
+        }
+        else {
+            postData.append('Documents[0].Attachment.File', csvFile)
+            postData.append('Documents[0].Attachment.Nam', csvFile.name)
+            Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${localStorage.getItem('userId')}`, postData)
+                .then(res => {
+                    Swal.fire({
+                        title: "Updated",
+                        type: "success",
+                        timer: 1500,
+                        timerProgressBar: true
+                    })
+                    this.getLicenseCSV()
                 })
-                console.log(err)
-            })
+                .catch(err => {
+                    Swal.fire({
+                        title: "Error",
+                        type: "error",
+                        timer: 1500,
+                        timerProgressBar: true
+                    })
+                    console.log(err)
+                })
+        }
     }
 
     render() {
@@ -389,7 +399,7 @@ class LicenseAdmin extends Component {
                                                     <Row>
                                                         <Col sm="3" >
                                                             <Label>From:</Label> &nbsp;
-                                            <FormGroup>
+                                                            <FormGroup>
                                                                 <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                                                                     className="form-control" required dateFormat="yyyy/MM/dd"
                                                                     renderCustomHeader={({
@@ -509,6 +519,7 @@ class LicenseAdmin extends Component {
                                         </CardBody>
                                     </Collapse>
                                 </Card>
+                                {localStorage.getItem("legalEntity") === "MBAFC" | "MBLC" ?
                                 <Card className="mb-4">
                                     <CardHeader>
                                         <Button block color="link" className="text-left m-0 p-0" onClick={() => { this.toggleAccordion(2); this.getLicenseCSV() }}>
@@ -522,7 +533,10 @@ class LicenseAdmin extends Component {
                                                     <FormGroup>
                                                         {/* <Label>License Admins</Label> */}
                                                         <InputGroup>
-                                                            <CustomInput id="uploadCSV" accept=".CSV" type="file" bsSize="lg" onChange={this.handleFiles} color="primary" />
+                                                            <CustomInput id="uploadCSV" accept=".CSV" type="file" bsSize="lg" onChange={this.handleFiles} color="primary"></CustomInput>
+                                                            <InputGroupAddon addonType="append">
+                                                            <   Button color="success" onClick={this.saveAllData} >Save</Button>
+                                                            </InputGroupAddon>
                                                         </InputGroup>
                                                     </FormGroup>
 
@@ -547,13 +561,13 @@ class LicenseAdmin extends Component {
                                             </Row>
                                         </CardBody>
                                     </Collapse>
-                                </Card>
-
+                                </Card> 
+                                : null
+                                }
                             </Col>
                         </Row>
                     </CardBody>
                     <CardFooter>
-                        <Button color="success" onClick={this.saveAllData} >Save</Button>
                     </CardFooter>
                 </Card>
 

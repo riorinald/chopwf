@@ -2402,7 +2402,7 @@ class Create extends Component {
 
                   {this.state.isCNIPS
                     ? <FormGroup>
-                      <Label>Contract Signed By: <i className="fa fa-user" /></Label>
+                      <Label>Contract Signed By <i className="fa fa-user" /></Label>
                       <small className="ml-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval.</small>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <Row>
