@@ -6,7 +6,6 @@ import {
 } from 'reactstrap'
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import theme from './theme.css'
 import Axios from 'axios';
 import config from '../../../config';
 import Papa from 'papaparse';
@@ -86,9 +85,10 @@ class LicenseAdmin extends Component {
     fileReadingFinished = (event) => {
         var csv = event.target.result;
         var result = Papa.parse(csv, { header: true, skipEmptyLines: true, })
-        console.log(result.data)
+        console.log(result)
+        console.log(result.meta.fields)
         this.setState({
-            // newLicenseAdmins: result.data, 
+            newLicenseAdmins: result.data, 
             updateAdmins: true
         })
     }
@@ -169,7 +169,7 @@ class LicenseAdmin extends Component {
         }
         else {
             postData.append('Documents[0].Attachment.File', csvFile)
-            postData.append('Documents[0].Attachment.Nam', csvFile.name)
+            // postData.append('Documents[0].Attachment.Name', csvFile.name)
             Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${localStorage.getItem('userId')}`, postData)
                 .then(res => {
                     Swal.fire({
@@ -519,7 +519,6 @@ class LicenseAdmin extends Component {
                                         </CardBody>
                                     </Collapse>
                                 </Card>
-                                {localStorage.getItem("legalEntity") === "MBAFC" | "MBLC" ?
                                 <Card className="mb-4">
                                     <CardHeader>
                                         <Button block color="link" className="text-left m-0 p-0" onClick={() => { this.toggleAccordion(2); this.getLicenseCSV() }}>
@@ -548,7 +547,12 @@ class LicenseAdmin extends Component {
                                                                 className="-striped -highlight"
                                                                 columns={Object.keys(newLicenseAdmins[0]).map((key, index) => {
                                                                     return {
-                                                                        Header: this.state.headers[index],
+                                                                        Header: () => (
+                                                                            <div
+                                                                              style={{
+                                                                                textAlign:"left"
+                                                                              }}
+                                                                            >{this.state.headers[index]}</div>),
                                                                         accessor: key,
                                                                         style: { textAlign: "left" },
                                                                         width: this.getColumnWidth(key, key)
@@ -562,8 +566,6 @@ class LicenseAdmin extends Component {
                                         </CardBody>
                                     </Collapse>
                                 </Card> 
-                                : null
-                                }
                             </Col>
                         </Row>
                     </CardBody>
