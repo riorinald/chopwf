@@ -1850,7 +1850,7 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 <Input invalid={this.state.invalidEnglish} autoComplete="off" value={this.state.engName}
-                  onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
+                  onChange={this.handleChange("engName")} type="text" maxLength="200" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
                 {this.state.invalidEnglish
                   ? <small style={{ color: '#F86C6B' }}> Please input only English characters </small>
                   : null}
@@ -1860,14 +1860,14 @@ class Create extends Component {
               <FormGroup>
                 {this.state.isLTI ?
                   <>
-                    <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnNameLTI")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3"
+                    <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnNameLTI")} type="text" maxLength="200" name="textarea-input" id="cnName" rows="3"
                       placeholder="Please describe in Chinese" />
                     {this.state.invalidChinese
                       ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
                       : null}
                   </>
                   :
-                  <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3"
+                  <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="200" name="textarea-input" id="cnName" rows="3"
                     placeholder="Please describe in Chinese (optional)" />
                 }
               </FormGroup>
