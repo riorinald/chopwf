@@ -66,9 +66,9 @@ class LicenseApplicationDetail extends Component {
                 /// TESTING - ANAND //
                 // let obj = { label: "", value: "" }
                 let arr = []
-                let keys = ["telephoneNum", "departmentName", "licenseName", "purposeType", "documentTypeName"
+                let keys = ["telephoneNum", "departmentName", "licenseName", "purposeType", "documentTypeName", "plannedReturnDate"
                     , "needWatermark", "watermark", "deliveryWayName", "expDeliveryAddress", "expDeliveryReceiver"
-                    , "expDeliveryNumber", "expDeliveryMobileNo", "returnWayName", "seniorManagers", "expReturnNumber"]
+                    , "expDeliveryMobileNo",  "seniorManagers","expDeliveryNumber", "returnWayName","expReturnNumber"]
                 keys.map(key => {
                     var obj = {}
                     switch (key) {
@@ -120,7 +120,7 @@ class LicenseApplicationDetail extends Component {
                             break;
                         case "deliveryWayName":
                             if (res.data.documentTypeId === "ORIGINAL") {
-                                obj.label = "Deliver Ways"
+                                obj.label = "Deliver Way"
                                 obj.value = res.data[key]
                                 arr.push(obj)
                             }
@@ -128,7 +128,7 @@ class LicenseApplicationDetail extends Component {
                         case "expDeliveryAddress":
                             if (res.data.documentTypeId === "ORIGINAL") {
                                 // if (res.data.deliverWay === "Express") {
-                                obj.label = "Delivery Address"
+                                obj.label = "Address"
                                 obj.value = res.data[key]
                                 arr.push(obj)
                                 // }
@@ -144,9 +144,9 @@ class LicenseApplicationDetail extends Component {
                             }
                             break;
                         case "expDeliveryNumber":
-                            if (res.data.documentTypeId === "ORIGINAL") {
+                            if (res.data.documentTypeId === "ORIGINAL" ) {
                                 // if (res.data.deliverWay === "Express") {
-                                obj.label = "Delivery Express Number"
+                                obj.label = "Deliver Express Number"
                                 obj.value = res.data[key]
                                 arr.push(obj)
                                 // }
@@ -154,7 +154,7 @@ class LicenseApplicationDetail extends Component {
                             break;
                         case "expDeliveryMobileNo":
                             if (res.data.documentTypeId === "ORIGINAL") {
-                                obj.label = "Receiver Mobile Number"
+                                obj.label = "Receiver Mobile Phone"
                                 obj.value = res.data[key]
                                 arr.push(obj)
                             }
@@ -167,13 +167,20 @@ class LicenseApplicationDetail extends Component {
                             }
                             break;
                         case "seniorManagers":
-                            obj.label = "Senior Manager"
+                            obj.label = "Senior Manager or above of requestor department"
                             obj.value = this.convertMgrs(res.data[key])
                             arr.push(obj)
                             break;
                         case "expReturnNumber":
                             if (res.data.documentTypeId === "ORIGINAL") {
                                 obj.label = "Return Express Number"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
+                        case "plannedReturnDate":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                obj.label = "Planned return date"
                                 obj.value = res.data[key]
                                 arr.push(obj)
                             }
