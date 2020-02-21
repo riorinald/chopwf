@@ -260,7 +260,7 @@ class LicenseAdmin extends Component {
                                     </CardHeader>
                                     <Collapse isOpen={collapse === 1}>
                                         <CardBody>
-                                            <Label>Export Logs</Label>
+                                            <h5><b>Export Logs</b></h5>
                                             <Row>
                                                 <Col sm="3" >
                                                     <Label>From:</Label>&nbsp;
@@ -383,7 +383,7 @@ class LicenseAdmin extends Component {
                                             <hr></hr>
                                             <Row>
                                                 <Col>
-                                                    <Label>Export Profile</Label>
+                                                    <h5><b>Export Profile</b></h5>
                                                     <Row>
                                                         <Col sm="3" >
                                                             <Label>From:</Label> &nbsp;
