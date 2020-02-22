@@ -2721,7 +2721,7 @@ class EditRequest extends Component {
                                                 peekNextMonth
                                                 showMonthDropdown
                                                 showYearDropdown
-                                                minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                                                />
                                             </FormGroup>
                                             {!editRequestForm.collapseUIO
                                                 ? <InputGroup>
