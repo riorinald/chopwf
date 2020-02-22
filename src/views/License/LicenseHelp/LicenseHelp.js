@@ -50,7 +50,7 @@ class LicenseHelp extends Component {
     }
 
     async getQA() {
-        let qaArray = []
+        /*let qaArray = []
         for (let i = 0; i < 50; i++) {
             let isError = false
             let obj = {}
@@ -69,22 +69,47 @@ class LicenseHelp extends Component {
 
             qaArray.push(obj)
         }
-        this.setState({ QA: qaArray, existingQALength: qaArray.length })
+        this.setState({ QA: qaArray, existingQALength: qaArray.length })*/
     }
 
     async getChopKeeper() {
+
         let chopKeeperArray = []
-        for (let i = 0; i < 50; i++) {
+        let qaArray = []
+        for (let i = 0; i < 1; i++) {
             let isError = false
             let obj = {}
-            await Axios.get(`${config.url}/helps/license/chopKeeper${i}`)
+            await Axios.get(`${config.url}/helps/license`)
                 .then(res => {
-                    let arr = res.data.sectionData.split(';')
+                    for (let i = 0; i < res.data.length; i++) {
+                        //alert(1)
+                        if (res.data[i]['sectionId'].includes("chopKeeper")) {
+                            let obj = {}
+                            let arr = res.data[i]['sectionData'].split(';')
+                            obj.chopType = arr[0].split(',')
+                            obj.chopKeeper = arr[1]
+                            obj.sectionId =  res.data[i]['sectionId']
+                            obj.contactPerson = arr[2].split(',')
+                            obj.location = arr[3]
+                            isError = false
+                            chopKeeperArray.push(obj)
+                        }
+                        if (res.data[i]['sectionId'].includes("question")) {
+                            let obj = {}
+                             isError = false
+                            let arr = res.data[i]['sectionData'].split(',')
+                            obj.sectionId =  res.data[i]['sectionId']
+                            obj.question = arr[0]
+                            obj.answer = arr[1]
+                            qaArray.push(obj)
+                        }
+                    }
+                    /*let arr = res.data.sectionData.split(';')
                     obj.chopType = arr[0].split(',')
                     obj.chopKeeper = arr[1]
                     obj.contactPerson = arr[2].split(',')
                     obj.location = arr[3]
-                    isError = false
+                    isError = false*/
                     // console.log(obj)
                 })
                 .catch(error => {
@@ -92,8 +117,9 @@ class LicenseHelp extends Component {
                 });
             if (isError)
                 break;
-            chopKeeperArray.push(obj)
+            //chopKeeperArray.push(obj)
         }
+        this.setState({ QA: qaArray, existingQALength: qaArray.length })
         this.setState({ existingCKLength: chopKeeperArray.length })
         this.setState(state => {
             let { chopKeepers } = this.state
@@ -158,7 +184,7 @@ class LicenseHelp extends Component {
     async updateChopKeeperDetails(details, index, name) {
         let postData = new FormData()
         postData.append('sectionData', details)
-        await Axios.put(`${config.url}/helps/license/${name}${index}/${localStorage.getItem('userId')}`, postData)
+        await Axios.put(`${config.url}/helps/license/${index}/${localStorage.getItem('userId')}`, postData)
             .then(result => {
                 console.log(result.data)
             })
@@ -168,7 +194,7 @@ class LicenseHelp extends Component {
     }
 
     async deleteChopKeeper(index, name) {
-        await Axios.delete(`${config.url}/helps/license/${name}${index}`)
+        await Axios.delete(`${config.url}/helps/license/${index}`)
             .then(result => {
                 console.log(result.data)
             })
@@ -191,12 +217,13 @@ class LicenseHelp extends Component {
                 array.push(chopKeepers[i].location)
                 let finalString = array.join(';')
                 console.log(finalString)
-                if (i < this.state.existingCKLength) {
-                    this.updateChopKeeperDetails(finalString, i, "chopKeeper")
+                if (chopKeepers[i].sectionId) {
+                //if (i < this.state.existingCKLength) {
+                    this.updateChopKeeperDetails(finalString, chopKeepers[i].sectionId, "chopKeeper")
                     // console.log("Chop keeper details updated")
                 }
                 else {
-                    this.addNewChopKeeperDetails(finalString, i, "chopKeeper")
+                    this.addNewChopKeeperDetails(finalString, i+Math.floor(Date.now() / 1000), "chopKeeper")
                     // console.log("Chop keeper details added")
                 }
             }
@@ -206,13 +233,13 @@ class LicenseHelp extends Component {
                 array.push(qa[i].answer)
                 let qaString = array.join(',')
                 // console.log(qaString)
-                if (i < this.state.existingQALength) {
+                if (qa[i].sectionId) {
                     // console.log("QA Updated")
-                    this.updateChopKeeperDetails(qaString, i, "question")
+                    this.updateChopKeeperDetails(qaString, qa[i].sectionId, "question")
                 }
                 else {
                     // console.log("New QA Added")
-                    this.addNewChopKeeperDetails(qaString, i, "question")
+                    this.addNewChopKeeperDetails(qaString, i+Math.floor(Date.now() / 1000), "question")
                 }
 
             }
@@ -243,11 +270,12 @@ class LicenseHelp extends Component {
 
     deleteData(index) {
         let chopKeepersCopy = JSON.parse(JSON.stringify(this.state.chopKeepers))
+        let sectionId = chopKeepersCopy.table[index].sectionId;
         chopKeepersCopy.table.splice(index, 1)
         this.setState({
             chopKeepers: chopKeepersCopy
         })
-        this.deleteChopKeeper(index, "chopKeeper")
+        this.deleteChopKeeper(sectionId, "chopKeeper")
     }
 
     addQA() {
@@ -264,11 +292,12 @@ class LicenseHelp extends Component {
         // console.log(index)
         // let QaCopy = JSON.parse(JSON.stringify(this.state.QA))
         const QaCopy = this.state.QA.slice()
+        let sectionId = QaCopy[index].sectionId;
         QaCopy.splice(index, 1)
         this.setState({
             QA: QaCopy
         })
-        this.deleteChopKeeper(index, "question")
+        this.deleteChopKeeper(sectionId, "question")
     }
 
     addChopType(index) {
@@ -328,7 +357,7 @@ class LicenseHelp extends Component {
                         <Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the chop type" defaultValue={type}></Input><Button onClick={() => this.deleteChopType(index, i)} color="danger">Delete</Button></Form><br />
                     </div>
                 )}
-                    <Button onClick={() => this.addChopType(index)} >Add New Chop Type</Button>
+                   
                 </td>
                 <td><Form><Input type="text" placeholder="Please enter the chop keeper" onChange={this.handleChange("chopKeeper", index)} defaultValue={table.chopKeeper}></Input></Form></td>
                 <td> {table.contactPerson.map((person, i) =>
