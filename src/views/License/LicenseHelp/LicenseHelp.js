@@ -81,7 +81,7 @@ class LicenseHelp extends Component {
         for (let i = 0; i < 1; i++) {
             let isError = false
             let obj = {}
-            await Axios.get(`${config.url}/helps/license`)
+            await Axios.get(`${config.url}/helps/license`, { headers: { Pragma: 'no-cache' } })
                 .then(res => {
                     for (let i = 0; i < res.data.length; i++) {
                         //alert(1)
