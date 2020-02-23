@@ -2315,7 +2315,7 @@ class Create extends Component {
                         peekNextMonth
                         showMonthDropdown
                         showYearDropdown
-                        minDate={new Date()} maxDate={addDays(new Date(), 365)} />
+                        />
                       {!this.state.collapse
                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', this.state.returnDate, 'required')}</small>
                         : null}
