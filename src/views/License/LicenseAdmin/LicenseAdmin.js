@@ -30,8 +30,10 @@ class LicenseAdmin extends Component {
                 exportProfileFrom: "",
                 exportProfileTo: ""
             },
+            inputLabel:"Choose File",
             csvFile: null,
             newLicenseAdmins: [{}],
+            updateLicenseAdmins: [],
             headers: [],
             updateAdmins: false
         }
@@ -73,14 +75,38 @@ class LicenseAdmin extends Component {
     }
 
     fileReadingFinished = (event) => {
-        var csv = event.target.result;
-        var result = Papa.parse(csv, { header: true, skipEmptyLines: true, })
-        console.log(result)
-        console.log(result.meta.fields)
-        this.setState({
-            newLicenseAdmins: result.data, 
-            updateAdmins: true
-        })
+        let csv = event.target.result;
+        let result = Papa.parse(csv, { skipEmptyLines: true, })
+        let header = result.data.shift()
+        let joined = this.state.newLicenseAdmins.concat(result.data)
+        let validCSV = false
+        // console.log(header)
+        header.forEach((value,index) => {
+            validCSV = value.toUpperCase() === this.state.headers[index].toUpperCase()
+            // console.log(value, index, value.toUpperCase() === this.state.headers[index].toUpperCase(), this.state.headers[index])
+        });
+        if(validCSV){
+            this.setState({
+                newLicenseAdmins: joined,
+                updateLicenseAdmins: result.data,
+                inputLabel: this.state.csvFile.name,
+                updateAdmins: true
+            })
+        }
+        else{
+            Swal.fire({
+                title: "CSV file is not valid",
+                text: "Please attach valid CSV file.",
+                type: "warning",
+                timer: 1500,
+                timerProgressBar: true
+            })
+            this.setState({
+                inputLabel: "Choose File",
+                updateAdmins: false,
+                csvFile: null
+            })
+        }
     }
 
     errorHandler(event) {
@@ -148,6 +174,7 @@ class LicenseAdmin extends Component {
 
     saveAllData() {
         let { csvFile } = this.state
+        let content = JSON.stringify(this.state.updateLicenseAdmins)
         let postData = new FormData()
         if ( csvFile === null){
             Swal.fire({
@@ -158,15 +185,21 @@ class LicenseAdmin extends Component {
             })
         }
         else {
-            postData.append('Documents[0].Attachment.File', csvFile)
+            postData.append('csvcontent', content )
             // postData.append('Documents[0].Attachment.Name', csvFile.name)
             Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${localStorage.getItem('userId')}`, postData)
                 .then(res => {
+                    console.log(res)
                     Swal.fire({
                         title: "Updated",
                         type: "success",
                         timer: 1500,
                         timerProgressBar: true
+                    })
+                    this.setState({
+                        inputLabel: "Choose File",
+                        updateAdmins: false,
+                        csvFile: null
                     })
                     this.getLicenseCSV()
                 })
@@ -184,7 +217,7 @@ class LicenseAdmin extends Component {
 
     render() {
 
-        const { exportFromDateView, newLicenseAdmins, exportToDateView, exportFromProfileDateView, exportToProfileDateView, collapse } = this.state
+        const { exportFromDateView, newLicenseAdmins, exportToDateView, exportFromProfileDateView, exportToProfileDateView, collapse, inputLabel } = this.state
 
 
         const getYear = date => {
@@ -520,7 +553,7 @@ class LicenseAdmin extends Component {
                                                     <FormGroup>
                                                         {/* <Label>License Admins</Label> */}
                                                         <InputGroup>
-                                                            <CustomInput id="uploadCSV" accept=".CSV" type="file" bsSize="lg" onChange={this.handleFiles} color="primary"></CustomInput>
+                                                            <CustomInput id="uploadCSV" accept=".CSV" type="file" label={inputLabel} bsSize="lg" onChange={this.handleFiles} color="primary"></CustomInput>
                                                             <InputGroupAddon addonType="append">
                                                             <   Button color="success" onClick={this.saveAllData} >Save</Button>
                                                             </InputGroupAddon>
