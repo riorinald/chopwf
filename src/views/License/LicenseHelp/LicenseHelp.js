@@ -174,7 +174,7 @@ class LicenseHelp extends Component {
         postData.append('sectionId', `${name}${index}`)
         await Axios.post(`${config.url}/helps/license/${localStorage.getItem('userId')}`, postData)
             .then(result => {
-                console.log(result.data)
+                // console.log(result.data)
             })
             .catch(error => {
                 console.log(error)
@@ -186,7 +186,7 @@ class LicenseHelp extends Component {
         postData.append('sectionData', details)
         await Axios.put(`${config.url}/helps/license/${index}/${localStorage.getItem('userId')}`, postData)
             .then(result => {
-                console.log(result.data)
+                // console.log(result.data)
             })
             .catch(error => {
                 console.log(error)
@@ -354,7 +354,9 @@ class LicenseHelp extends Component {
             <tr key={index}>
                 <td>{table.chopType.map((type, i) =>
                     <div key={i}>
-                        <Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the chop type" defaultValue={type}></Input><Button onClick={() => this.deleteChopType(index, i)} color="danger">Delete</Button></Form><br />
+                        <Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the chop type" defaultValue={type}></Input>
+                        {/* <Button onClick={() => this.deleteChopType(index, i)} color="danger">Delete</Button> */}
+                        </Form><br />
                     </div>
                 )}
                    
@@ -392,8 +394,6 @@ class LicenseHelp extends Component {
                     <CardBody>
                         <div style={{ float: "left", marginTop: "5px", paddingRight: "10px" }} ><b>License Admin Information</b></div>
                         <div style={{ float: "left" }}>
-                            {this.state.editable ? (<Button onClick={this.addData}> Add New Data</Button>) : ""}
-
                         </div>
 
 
@@ -415,6 +415,7 @@ class LicenseHelp extends Component {
                                 {!this.state.editable ? chopKeepers : chopKeepersEditable}
                             </tbody>
                         </Table>
+                        {this.state.editable ? (<Button className="mb-5" onClick={this.addData}> Add New Data</Button>) : ""}
                         <br />
                         {!this.state.editable ? QA : QaEditable}
                     </CardBody>
