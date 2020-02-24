@@ -100,10 +100,8 @@ class LicenseApplicationDetail extends Component {
                             arr.push(obj)
                             break;
                         case "plannedReturnDate":
-                            if (res.data.documentTypeId === "ORIGINAL") {
-                                obj.label = "Planned Return Date"
-                                obj.value = this.convertDate(res.data[key])
-                            }
+                            obj.label = "Planned Return Date"
+                            obj.value = res.data.plannedReturnDate !== "/" ? this.convertDate(res.data[key]) : ""
                             arr.push(obj)
                             break;
                         case "needWatermark":
@@ -180,13 +178,6 @@ class LicenseApplicationDetail extends Component {
                                 arr.push(obj)
                             }
                             break;
-                        case "plannedReturnDate":
-                            if (res.data.documentTypeId === "ORIGINAL") {
-                                obj.label = "Planned return date"
-                                obj.value = res.data[key]
-                                arr.push(obj)
-                            }
-                            break;
                         default :
                             obj.value = res.data[key]
                             arr.push(obj)
@@ -244,8 +235,8 @@ class LicenseApplicationDetail extends Component {
                 else {
                     valid = false
                     Swal.fire({
-                        title: "No Delivery Way Selected",
-                        html: "Please select a way of delivery !",
+                        title: "No Deliver Way Selected",
+                        html: "Please select a way of deliver. ",
                         type: "warning"
                     })
                 }
@@ -258,7 +249,7 @@ class LicenseApplicationDetail extends Component {
                     valid = false
                     Swal.fire({
                         title: "No Documents attached",
-                        html: "Please attach documents for approval !",
+                        html: "Please attach documents for approval.",
                         type: "warning"
                     })
                 }
@@ -296,7 +287,7 @@ class LicenseApplicationDetail extends Component {
                     valid = false
                     Swal.fire({
                         title: "No Return Way Selected",
-                        html: "Please select a way of return !",
+                        html: "Please select a way of return.",
                         type: "warning"
                     })
                 }
@@ -619,7 +610,7 @@ class LicenseApplicationDetail extends Component {
                                             </Col>
                                         </Row>
                                     </Col>
-                                    : null
+                                    : console.log( "excluded: ", field)
                                     )
                                 )}
                             </Row>

@@ -82,18 +82,18 @@ class LicenseAdmin extends Component {
 
     fileReadingFinished = (event) => {
         let csv = event.target.result;
-        let result = Papa.parse(csv, { skipEmptyLines: true, })
+        let result = Papa.parse(csv, { skipEmptyLines: 'greedy', })
         let header = result.data.shift()
-        let joined = this.state.newLicenseAdmins.concat(result.data)
+        // let joined = this.state.newLicenseAdmins.concat(result.data)
         let validCSV = false
-        // console.log(header)
+        console.log(result)
         header.forEach((value,index) => {
             validCSV = value.toUpperCase() === this.state.headers[index].toUpperCase()
             console.log(value, index, value.toUpperCase() === this.state.headers[index].toUpperCase(), this.state.headers[index])
         });
         if(validCSV){
             this.setState({
-                newLicenseAdmins: joined,
+                newLicenseAdmins: result.data,
                 updateLicenseAdmins: result.data,
                 inputLabel: this.state.csvFile.name,
                 updateAdmins: true

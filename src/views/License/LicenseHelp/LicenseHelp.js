@@ -176,7 +176,7 @@ class LicenseHelp extends Component {
         postData.append('sectionId', `${name}${index}`)
         await Axios.post(`${config.url}/helps/license/${Authorize.getCookies().userId}`, postData)
             .then(result => {
-                // console.log(result.data)
+               // console.log(result.data)
             })
             .catch(error => {
                 console.log(error)
@@ -188,7 +188,7 @@ class LicenseHelp extends Component {
         postData.append('sectionData', details)
         await Axios.put(`${config.url}/helps/license/${index}/${Authorize.getCookies().userId}`, postData)
             .then(result => {
-                // console.log(result.data)
+               // console.log(result.data)
             })
             .catch(error => {
                 console.log(error)
@@ -198,7 +198,7 @@ class LicenseHelp extends Component {
     async deleteChopKeeper(index, name) {
         await Axios.delete(`${config.url}/helps/license/${index}`)
             .then(result => {
-                console.log(result.data)
+                this.getChopKeeper();
             })
             .catch(error => {
                 console.log(error)
@@ -225,7 +225,7 @@ class LicenseHelp extends Component {
                     // console.log("Chop keeper details updated")
                 }
                 else {
-                    this.addNewChopKeeperDetails(finalString, i+Math.floor(Date.now() / 1000), "chopKeeper")
+                    this.addNewChopKeeperDetails(finalString, Math.floor(Date.now() / 1000)+i, "chopKeeper")
                     // console.log("Chop keeper details added")
                 }
             }
@@ -241,16 +241,27 @@ class LicenseHelp extends Component {
                 }
                 else {
                     // console.log("New QA Added")
-                    this.addNewChopKeeperDetails(qaString, i+Math.floor(Date.now() / 1000), "question")
+                    this.addNewChopKeeperDetails(qaString, Math.floor(Date.now() / 1000)+i, "question")
                 }
 
             }
             // window.location.reload()
             //codes to update instructions to the database
+            this.setState({
+                QA: []
+            })
+            this.setState({
+                chopKeepers: {
+                    columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
+                    table: []
+                }
+            })
+            this.getChopKeeper();
         }
         this.setState(state => ({
             editable: !state.editable,
         }))
+
     }
 
     toggleDropdown() {
@@ -275,7 +286,10 @@ class LicenseHelp extends Component {
         let sectionId = chopKeepersCopy.table[index].sectionId;
         chopKeepersCopy.table.splice(index, 1)
         this.setState({
-            chopKeepers: chopKeepersCopy
+            chopKeepers: {
+                columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
+                table: []
+            }
         })
         this.deleteChopKeeper(sectionId, "chopKeeper")
     }
@@ -291,13 +305,14 @@ class LicenseHelp extends Component {
     }
 
     deleteQA(index) {
+        //alert()
         // console.log(index)
         // let QaCopy = JSON.parse(JSON.stringify(this.state.QA))
         const QaCopy = this.state.QA.slice()
         let sectionId = QaCopy[index].sectionId;
         QaCopy.splice(index, 1)
         this.setState({
-            QA: QaCopy
+            QA: []
         })
         this.deleteChopKeeper(sectionId, "question")
     }
@@ -356,9 +371,7 @@ class LicenseHelp extends Component {
             <tr key={index}>
                 <td>{table.chopType.map((type, i) =>
                     <div key={i}>
-                        <Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the chop type" defaultValue={type}></Input>
-                        {/* <Button onClick={() => this.deleteChopType(index, i)} color="danger">Delete</Button> */}
-                        </Form><br />
+                        <Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the chop type" defaultValue={type}></Input></Form><br />
                     </div>
                 )}
                    
@@ -396,6 +409,8 @@ class LicenseHelp extends Component {
                     <CardBody>
                         <div style={{ float: "left", marginTop: "5px", paddingRight: "10px" }} ><b>License Admin Information</b></div>
                         <div style={{ float: "left" }}>
+                            {this.state.editable ? (<Button onClick={this.addData}> Add New Data</Button>) : ""}
+
                         </div>
 
 
@@ -417,7 +432,6 @@ class LicenseHelp extends Component {
                                 {!this.state.editable ? chopKeepers : chopKeepersEditable}
                             </tbody>
                         </Table>
-                        {this.state.editable ? (<Button className="mb-5" onClick={this.addData}> Add New Data</Button>) : ""}
                         <br />
                         {!this.state.editable ? QA : QaEditable}
                     </CardBody>

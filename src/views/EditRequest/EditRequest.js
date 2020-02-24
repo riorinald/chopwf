@@ -2566,7 +2566,7 @@ class EditRequest extends Component {
                                                             <FormGroup>
                                                                 {/* <Label>File Name</Label> */}
                                                                 <CustomInput
-                                                                    accept=".ipg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, docx, .pdf, .pdfx, .bmp"
+                                                                    accept=".jpg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp, .msg, .svg, .ppt, pptx, .ods, .odt, .xlr"
                                                                     id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" label={editRequestForm.docAttachedName} />
                                                                 <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
                                                             </FormGroup>

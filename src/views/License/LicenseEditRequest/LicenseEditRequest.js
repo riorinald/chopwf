@@ -196,16 +196,18 @@ class LicenseEditRequest extends Component {
 
     handleRadio = name => event => {
         let id = event.target.id
-
         let value = ""
+        let watermark = this.state.taskDetails.watermark
         if (name === "needWatermark") {
             document.getElementById("watermark1").className = "custom-control-input"
             document.getElementById("watermark2").className = "custom-control-input"
             if (event.target.id === "inputWatermark1" || event.target.id === "inputWatermark2") {
                 value = event.target.id === "inputWatermark1" ? "Y" : "N"
+                watermark = ""
             }
             else if (event.target.id === "watermark1" || event.target.id === "watermark2") {
                 value = event.target.id === "watermark1" ? "Y" : "N"
+                watermark = ""
             }
         }
         else if (name === "purposeType") {
@@ -218,6 +220,7 @@ class LicenseEditRequest extends Component {
         this.setState(state => {
             let taskDetails = this.state.taskDetails
             taskDetails[name] = value
+            taskDetails.watermark = watermark
             return taskDetails
         })
     }
@@ -747,9 +750,9 @@ class LicenseEditRequest extends Component {
 
 
                                 <Collapse isOpen={taskDetails.documentTypeId === "SCANCOPY"}>
-                                    <FormGroup onChange={this.handleRadio("needWatermark")}>
+                                    <FormGroup >
                                         <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked.)</small>
-                                        <CustomInput defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes. Please specify watermark here:">
+                                        <CustomInput onChange={this.handleRadio("needWatermark")} defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes. Please specify watermark here:">
                                             <Collapse isOpen={taskDetails.needWatermark === "Y"}>
                                                 <Input id="inputWatermark1" type="text" maxLength={500} value={taskDetails.watermark} onChange={this.handleChange("watermark")} autoComplete="off"/>
                                                 {taskDetails.documentTypeId === "SCANCOPY"
@@ -760,7 +763,7 @@ class LicenseEditRequest extends Component {
                                                 }
                                             </Collapse>
                                         </CustomInput>
-                                        <CustomInput defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No. Please specify the reason of not adding watermark:">
+                                        <CustomInput onChange={this.handleRadio("needWatermark")} defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No. Please specify the reason of not adding watermark:">
                                             <Collapse isOpen={taskDetails.needWatermark === "N"}>
                                                 <Input id="inputWatermark2" type="text" maxLength={500} value={taskDetails.watermark} onChange={this.handleChange("watermark")} autoComplete="off"/>
                                                 {taskDetails.documentTypeId === "SCANCOPY"
