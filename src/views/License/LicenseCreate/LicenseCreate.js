@@ -240,14 +240,17 @@ class LicenseCreate extends Component {
     handleRadio = name => event => {
         let id = event.target.id
         let value = ""
+        let watermark = this.state.formData.watermark
         if (name === "isWatermark") {
             document.getElementById("watermark1").className = "custom-control-input"
             document.getElementById("watermark2").className = "custom-control-input"
             if (event.target.id === "inputWatermark1" || event.target.id === "inputWatermark2") {
                 value = event.target.id === "inputWatermark1" ? "Y" : "N"
+                watermark = ""
             }
             else if (event.target.id === "watermark1" || event.target.id === "watermark2") {
                 value = event.target.id === "watermark1" ? "Y" : "N"
+                watermark = ""
             }
         }
         else if (name === "licensePurpose") {
@@ -260,6 +263,7 @@ class LicenseCreate extends Component {
         this.setState(state => {
             let formData = this.state.formData
             formData[name] = value
+            formData.watermark = watermark
             return formData
         })
     }
@@ -552,9 +556,9 @@ class LicenseCreate extends Component {
 
 
                             <Collapse isOpen={formData.documentType === "SCANCOPY"}>
-                                <FormGroup onChange={this.handleRadio("isWatermark")}>
-                                    <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked.)</small>
-                                    <CustomInput type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes. Please specify watermark here:">
+                                <FormGroup>
+                                    <Label> Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked.)</small>
+                                    <CustomInput onChange={this.handleRadio("isWatermark")} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes. Please specify watermark here:" >
                                         <Collapse isOpen={formData.isWatermark === "Y"}>
                                             <Input id="inputWatermark1" type="text" maxLength={500} value={formData.watermark} onChange={this.handleChange("watermark")} autoComplete="off" />
                                             {formData.documentType === "SCANCOPY"
@@ -565,7 +569,7 @@ class LicenseCreate extends Component {
                                             }
                                         </Collapse>
                                     </CustomInput>
-                                    <CustomInput type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No. Please specify the reason of not adding watermark:">
+                                    <CustomInput onChange={this.handleRadio("isWatermark")} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No. Please specify the reason of not adding watermark:">
                                         <Collapse isOpen={formData.isWatermark === "N"}>
                                             <Input id="inputWatermark2" type="text" maxLength={500} value={formData.watermark} onChange={this.handleChange("watermark")} autoComplete="off" />
                                             {formData.documentType === "SCANCOPY"
