@@ -43,10 +43,6 @@ class LicenseAdmin extends Component {
         this.getLicenseCSV = this.getLicenseCSV.bind(this)
     }
 
-    componentDidMount() {
-        this.getLicenseCSV()
-    }
-
     getLicenseCSV() {
         Axios.get(`${config.url}/licenses/licensemanagement`)
             .then(res => {
@@ -57,11 +53,11 @@ class LicenseAdmin extends Component {
     componentDidMount() {
         const legalEntity = this.props.legalName
         const adminEntity = Authorize.getCookies().licenseAdminCompanyIds
-
         const isAdmin = Authorize.check(legalEntity, adminEntity)
             if (isAdmin) {
                 this.setState({ isAdmin: isAdmin })
         }
+        this.getLicenseCSV()
     }
 
     handleFiles = (event) => {
@@ -93,7 +89,7 @@ class LicenseAdmin extends Component {
         // console.log(header)
         header.forEach((value,index) => {
             validCSV = value.toUpperCase() === this.state.headers[index].toUpperCase()
-            // console.log(value, index, value.toUpperCase() === this.state.headers[index].toUpperCase(), this.state.headers[index])
+            console.log(value, index, value.toUpperCase() === this.state.headers[index].toUpperCase(), this.state.headers[index])
         });
         if(validCSV){
             this.setState({
