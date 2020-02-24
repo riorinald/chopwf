@@ -229,7 +229,7 @@ class Help extends Component {
     async deleteChopKeeper(index, name) {
         await Axios.delete(`${config.url}/helps/chop/${index}`)
             .then(result => {
-                console.log("DELETED SECTION")
+               this.getChopKeeper();
             })
             .catch(error => {
                 console.error(error)
@@ -259,7 +259,7 @@ class Help extends Component {
                     // console.log("Chop keeper details updated")
                 }
                 else {
-                    this.addNewChopKeeperDetails(finalString, i+Math.floor(Date.now() / 1000), "chopKeeper")
+                    this.addNewChopKeeperDetails(finalString, Math.floor(Date.now() / 1000)+i, "chopKeeper")
                     // console.log("Chop keeper details added")
                 }
             }
@@ -276,7 +276,7 @@ class Help extends Component {
                 }
                 else {
                     // console.log("New QA Added")
-                    this.addNewChopKeeperDetails(qaString, i+Math.floor(Date.now() / 1000), "question")
+                    this.addNewChopKeeperDetails(qaString, Math.floor(Date.now() / 1000)+p, "question")
                 }
 
             }
@@ -287,6 +287,16 @@ class Help extends Component {
             }
             // window.location.reload()
             //codes to update instructions to the database
+            this.setState({
+                QA: []
+            })
+            this.setState({
+                chopKeepers: {
+                    columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
+                    table: []
+                }
+            })
+            this.getChopKeeper();
         }
         this.setState(state => ({
             editable: !state.editable,
@@ -311,11 +321,15 @@ class Help extends Component {
     }
 
     deleteData(index) {
+        //alert()
         let chopKeepersCopy = JSON.parse(JSON.stringify(this.state.chopKeepers))
         let sectionId = chopKeepersCopy.table[index].sectionId;
         chopKeepersCopy.table.splice(index, 1)
         this.setState({
-            chopKeepers: chopKeepersCopy
+            chopKeepers: {
+                columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
+                table: []
+            }
         })
         this.deleteChopKeeper(sectionId, "chopKeeper")
     }
@@ -337,7 +351,7 @@ class Help extends Component {
         let sectionId = QaCopy[index].sectionId;
         QaCopy.splice(index, 1)
         this.setState({
-            QA: QaCopy
+            QA: []
         })
         this.deleteChopKeeper(sectionId, "question")
     }
