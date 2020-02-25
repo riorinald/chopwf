@@ -79,7 +79,7 @@ class LicenseHelp extends Component {
         for (let i = 0; i < 1; i++) {
             let isError = false
             let obj = {}
-            await Axios.get(`${config.url}/helps/license`)
+            await Axios.get(`${config.url}/helps/license`, { headers: { Pragma: 'no-cache' } })
                 .then(res => {
                     for (let i = 0; i < res.data.length; i++) {
                         //alert(1)
@@ -162,7 +162,7 @@ class LicenseHelp extends Component {
     }
 
     async getData() {
-        await Axios.get(`${config.url}/helps/license`).then(res => {
+        await Axios.get(`${config.url}/helps/license`, { headers: { Pragma: 'no-cache' } }).then(res => {
             console.log(res.data)
         })
         // this.setState({ chopKeepers: response.data.chopKeepers, QA: response.data.QA })
