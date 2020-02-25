@@ -63,7 +63,7 @@ class Administration extends Component {
     }
 
     getData() {
-        Axios.get(`${config.url}/notes/0`)
+        Axios.get(`${config.url}/notes/0`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let tempNotes = res.data.noteContent.split('%')
                 for (let i = 0; i < tempNotes.length; i++) {

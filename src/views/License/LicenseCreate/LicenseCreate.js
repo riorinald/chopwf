@@ -85,7 +85,7 @@ class LicenseCreate extends Component {
     }
 
     async getData(name) {
-        let res = await axios.get(`${config.url}/${name}`)
+        let res = await axios.get(`${config.url}/${name}`, { headers: { Pragma: 'no-cache' } })
         this.setState({ [name]: res.data })
     }
 

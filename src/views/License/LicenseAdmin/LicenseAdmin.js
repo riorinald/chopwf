@@ -44,7 +44,7 @@ class LicenseAdmin extends Component {
     }
 
     getLicenseCSV() {
-        Axios.get(`${config.url}/licenses/licensemanagement`)
+        Axios.get(`${config.url}/licenses/licensemanagement`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 console.log(res.data)
                 this.setState({ newLicenseAdmins: res.data.licenseManagementDisplayResponses, headers: res.data.headers })

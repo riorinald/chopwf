@@ -70,7 +70,7 @@ class LicenseApplicationDetail extends Component {
                 let arr = []
                 let keys = ["telephoneNum", "departmentName", "licenseName", "purposeType", "documentTypeName", "plannedReturnDate"
                     , "needWatermark", "watermark", "deliveryWayName", "expDeliveryAddress", "expDeliveryReceiver"
-                    , "expDeliveryMobileNo",  "seniorManagers","expDeliveryNumber", "returnWayName","expReturnNumber"]
+                    , "expDeliveryMobileNo",  "seniorManagers","licenseAdminDeliverWay","expDeliveryNumber", "returnWayName","expReturnNumber"]
                 keys.map(key => {
                     var obj = {}
                     switch (key) {
@@ -178,6 +178,13 @@ class LicenseApplicationDetail extends Component {
                                 arr.push(obj)
                             }
                             break;
+                        case "licenseAdminDeliverWay":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                obj.label = "License Admin Deliver Way"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
                         default :
                             obj.value = res.data[key]
                             arr.push(obj)
@@ -216,7 +223,7 @@ class LicenseApplicationDetail extends Component {
         if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || this.state.currentStatus === "PENDINGLICENSEADMIN") {
             if (this.state.taskDetails.documentTypeId === "ORIGINAL") {
                 if (this.state.deliverWay === "Express") {
-                    if (this.state.expressNumber !== "" && this.state.taskDetails.expDeliveryAddress && this.state.taskDetails.expDeliveryReceiver && this.state.taskDetails.expDeliveryMobileNo) {
+                    if (this.state.expressNumber !== "") {
                         valid = true
                     }
                     else {
@@ -323,12 +330,7 @@ class LicenseApplicationDetail extends Component {
         postReq.append("Comments", this.state.comments);
         postReq.append("ReturnWay", deliverWay);
         postReq.append("ExpressNumber", this.state.expressNumber);
-
         postReq.append("ExpressAddress", this.state.taskDetails.expDeliveryAddress);
-        postReq.append("ExpDeliveryAddress", this.state.taskDetails.expDeliveryAddress);
-        postReq.append("ExpDeliveryReceiver", this.state.taskDetails.expDeliveryReceiver);
-        postReq.append("ExpDeliveryMobileNo", this.state.taskDetails.expDeliveryMobileNo);
-
         for (let i = 0; i < this.state.documents.length; i++) {
             postReq.append(`Documents[${i}].Attachment.File`, this.state.documents[i].file);
             postReq.append(`Documents[${i}].AttachmentName`, this.state.documents[i].fileName);
@@ -392,7 +394,7 @@ class LicenseApplicationDetail extends Component {
         this.setState({ invalidExpress: false, [name]: value })
     }
 
-    handleChangeExpress = name => event => {
+    /*handleChangeExpress = name => event => {
         let value = event.target.value
         let id = event.target.id
         this.setState(state => {
@@ -400,7 +402,7 @@ class LicenseApplicationDetail extends Component {
             taskDetails[name] = value
             return taskDetails
         })
-    }
+    }*/
 
     convertApprovedDate(dateValue) {
 
@@ -632,45 +634,8 @@ class LicenseApplicationDetail extends Component {
                                                             <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
                                                                 <Label>Express Number</Label>
                                                                 <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
-                                                                {expressNumber === ''
-                                                                        ? invalidExpress === true
-                                                                            ? <small style={{ color: '#F86C6B' }} >Express Number is required.</small>
-                                                                            : null
-                                                                        : null
-                                                                    }
+                                                                <FormFeedback>Express Number is required.</FormFeedback>
                                                                 <Row> &nbsp; </Row>
-                                                                <FormGroup>
-                                                                    <Label>Address</Label>
-                                                                    <Input maxLength="500" placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChangeExpress("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" autoComplete="off"/>
-                                                                    {taskDetails.expDeliveryAddress === ''
-                                                                        ? invalidExpress === true
-                                                                            ? <small style={{ color: '#F86C6B' }} >The address field is required.</small>
-                                                                            : null
-                                                                        : null
-                                                                    }
-                                                                </FormGroup>
-                                                                <FormGroup>
-                                                                    <Label>Receiver</Label>
-                                                                    <Input maxLength="500" type="text" id="expDeliveryReceiver" onChange={this.handleChangeExpress("expDeliveryReceiver")} placeholder="Please specify receiver" value={taskDetails.expDeliveryReceiver} autoComplete="off" />
-                                                                    {taskDetails.expDeliveryReceiver === ''
-                                                                        ? invalidExpress === true
-                                                                            ? <small style={{ color: '#F86C6B' }} >The reciever field is required.</small>
-                                                                            : null
-                                                                        : null
-                                                                    }
-                                                                </FormGroup>
-
-                                                                <FormGroup>
-                                                                    <Label>Reciever Mobile Phone</Label>
-                                                                    {/* <input type="number" id="phoneNumber"></input> */}
-                                                                    <Input maxLength="500" placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChangeExpress("expDeliveryMobileNo")} type="text" autoComplete="off"/>
-                                                                    {taskDetails.expDeliveryMobileNo === ''
-                                                                        ? invalidExpress === true
-                                                                            ? <small style={{ color: '#F86C6B' }} >The reciever's phone field is required.</small>
-                                                                            : null
-                                                                        : null
-                                                                    }
-                                                                </FormGroup>
                                                             </Collapse>
                                                         </CustomInput>
                                                     </FormGroup>
