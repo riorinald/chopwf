@@ -432,9 +432,9 @@ class LicenseMyPendingTasks extends Component {
                                     },
                                 },
                                 {
-                                    Header: "Deliver Ways",
+                                    Header: "Deliver Way",
                                     accessor: "deliveryWayName",
-                                    width: this.getColumnWidth('deliveryWayName', "Deliver Ways"),
+                                    width: this.getColumnWidth('deliveryWayName', "Deliver Way"),
                                     // Cell: this.renderEditable,
                                     filterable: false,
                                     style: { textAlign: "center" }
@@ -542,9 +542,9 @@ class LicenseMyPendingTasks extends Component {
                                     style: { textAlign: "center" }
                                 },
                                 {
-                                    Header: "Return Ways",
+                                    Header: "Return Way",
                                     accessor: "returnWayName",
-                                    width: this.getColumnWidth('returnWayName', "Return Ways"),
+                                    width: this.getColumnWidth('returnWayName', "Return Way"),
                                     filterable: false,
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" }

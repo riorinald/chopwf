@@ -124,7 +124,7 @@ const routesLicenseAdmin = [
   { path: '/help', exact: true, name: 'Help', component: Help },
   { path: '/login', name: 'Login', component: Login },
   { path: '/:page/editrequest', exact: true, name: 'EditRequest', component: EditRequest },
-  { path: '/license/admin-apps', exact: true, name: 'License Application', component: LicenseApplication },
+  { path: '/license/admin-apps', exact: true, name: 'License Applications', component: LicenseApplication },
   { path: '/404', name: 'page404', component: page404 },
   { path: '/license/create', exact: true, name: 'Create Request', component: LicenseCreate },
   { path: '/license/myapplication', exact: true, name: 'My Application', component: LicenseMyApplications },
