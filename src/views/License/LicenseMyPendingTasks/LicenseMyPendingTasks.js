@@ -434,14 +434,6 @@ class LicenseMyPendingTasks extends Component {
                                     },
                                 },
                                 {
-                                    Header: "Deliver Ways",
-                                    accessor: "deliveryWayName",
-                                    width: this.getColumnWidth('deliveryWayName', "Deliver Ways"),
-                                    // Cell: this.renderEditable,
-                                    filterable: false,
-                                    style: { textAlign: "center" }
-                                },
-                                {
                                     Header: "Created By",
                                     accessor: "createdByName",
                                     width: this.getColumnWidth('createdByName', "Created By"),
@@ -528,10 +520,33 @@ class LicenseMyPendingTasks extends Component {
 
                                 },
                                 {
-                                    Header: "Delivery Express Number",
+                                    Header: "Deliver Way",
+                                    accessor: "deliveryWayName",
+                                    width: this.getColumnWidth('deliveryWayName', "Deliver Way"),
+                                    // Cell: this.renderEditable,
+                                    filterable: false,
+                                    style: { textAlign: "center" }
+                                },
+                                {
+                                    Header: "License Admin Deliver Way",
+                                    accessor: "licenseAdminDeliverWay",
+                                    width: this.getColumnWidth('licenseAdminDeliverWay', "License Admin Deliver Way"),
+                                    filterable: false,
+                                    style: { textAlign: "center" }
+                                },
+                                {
+                                    Header: "Deliver Express Number",
                                     accessor: "expDeliveryNumber",
                                     filterable: false,
-                                    width: this.getColumnWidth('expDeliveryNumber', "Delivery Express Number"),
+                                    width: this.getColumnWidth('expDeliveryNumber', "Deliver Express Number"),
+                                    // Cell: this.renderEditable,
+                                    style: { textAlign: "center" }
+                                },
+                                {
+                                    Header: "Return Way",
+                                    accessor: "returnWayName",
+                                    width: this.getColumnWidth('returnWayName', "Return Way"),
+                                    filterable: false,
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" }
                                 },
@@ -540,14 +555,6 @@ class LicenseMyPendingTasks extends Component {
                                     accessor: "expReturnNumber",
                                     filterable: false,
                                     width: this.getColumnWidth('expReturnNumber', "Return Express Number"),
-                                    // Cell: this.renderEditable,
-                                    style: { textAlign: "center" }
-                                },
-                                {
-                                    Header: "Return Ways",
-                                    accessor: "returnWayName",
-                                    width: this.getColumnWidth('returnWayName', "Return Ways"),
-                                    filterable: false,
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" }
                                 }
