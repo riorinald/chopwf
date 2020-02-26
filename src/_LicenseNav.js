@@ -20,7 +20,7 @@ const admin = {
       icon: 'fa fa-clock-o'
     },
     {
-      name: 'License Application',
+      name: 'License Applications',
       url: '/license/admin-apps',
       icon: 'fa fa-cubes'
     },

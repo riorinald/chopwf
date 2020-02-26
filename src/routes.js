@@ -55,7 +55,7 @@ const routes = [
   { path: '/license/myapplication', exact: true, name: 'My Application', component: LicenseMyApplications },
   // { path: '/license/myapplication/details', exact:true, name: 'My Application', component: LicenseApplicationDetail },
   { path: '/license/mypendingtask', exact: true, name: 'My Pending Task', component: LicenseMyPendingTasks },
-  { path: '/license/admin-apps', exact: true, name: 'License Application', component: LicenseApplication },
+  { path: '/license/admin-apps', exact: true, name: 'License Applications', component: LicenseApplication },
   { path: '/license/admin', exact: true, name: 'License Admin', component: LicenseAdmin },
   { path: '/license/:page/details', exact: true, name: 'Task Details', component: LicenseTaskDetails },
   { path: '/license/:page/edit', exact: true, name: 'Edit Details', component: LicenseEditRequest },

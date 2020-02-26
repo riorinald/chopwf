@@ -291,6 +291,14 @@ class TaskDetails extends Component {
         }
     }
 
+
+    blobToFile(theBlob: Blob, fileName: string): File {
+       const b: any = theBlob;
+       b.lastModifiedDate = new Date();
+       b.name = fileName;
+       return b;
+    }
+   
     dataURLtoFile(dataurl, filename) {
 
         var arr = dataurl.split(','),
@@ -303,7 +311,13 @@ class TaskDetails extends Component {
             u8arr[n] = bstr.charCodeAt(n);
         }
 
-        return new File([u8arr], filename, { type: mime });
+        if (navigator.userAgent.indexOf('Edge') >= 0){
+           var file = new Blob([u8arr], { type: mime });
+           return this.blobToFile(file, filename);
+        } else {
+           return new File([u8arr], filename, { type: mime });
+        }
+        //return new File([u8arr], filename, { type: mime });
     }
 
     viewOrDownloadFile(b64, type, name) {

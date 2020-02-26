@@ -431,6 +431,14 @@ class LicenseApplication extends Component {
                                     },
                                 },
                                 {
+                                    Header: "Deliver Way",
+                                    accessor: "deliveryWayName",
+                                    width: this.getColumnWidth('deliveryWayName', "Deliver Way"),
+                                    // Cell: this.renderEditable,
+                                    filterable: false,
+                                    style: { textAlign: "center" }
+                                },
+                                {
                                     Header: "Created By",
                                     accessor: "createdByName",
                                     width: this.getColumnWidth('createdByName', "Created By"),
@@ -517,21 +525,6 @@ class LicenseApplication extends Component {
                                     style: { textAlign: "center" }
                                 },
                                 {
-                                    Header: "Deliver Way",
-                                    accessor: "deliveryWayName",
-                                    width: this.getColumnWidth('deliveryWayName', "Deliver Way"),
-                                    // Cell: this.renderEditable,
-                                    filterable: false,
-                                    style: { textAlign: "center" }
-                                },
-                                {
-                                    Header: "License Admin Deliver Way",
-                                    accessor: "licenseAdminDeliverWay",
-                                    width: this.getColumnWidth('licenseAdminDeliverWay', "License Admin Deliver Way"),
-                                    filterable: false,
-                                    style: { textAlign: "center" }
-                                },
-                                {
                                     Header: "Deliver Express Number",
                                     accessor: "expDeliveryNumber",
                                     filterable: false,
@@ -548,8 +541,9 @@ class LicenseApplication extends Component {
                                     style: { textAlign: "center" }
                                 },
                                 {
-                                    Header: "Return Express Number",
-                                    accessor: "expReturnNumber",
+                                    Header: "Return Way",
+                                    accessor: "returnWayName",
+                                    width: this.getColumnWidth('returnWayName', "Return Way"),
                                     filterable: false,
                                     width: this.getColumnWidth('expReturnNumber', "Return Express Number"),
                                     // Cell: this.renderEditable,
