@@ -72,14 +72,14 @@ class LicenseHelp extends Component {
         this.setState({ QA: qaArray, existingQALength: qaArray.length })*/
     }
 
-    async getChopKeeper() {
+    getChopKeeper() {
 
         let chopKeeperArray = []
         let qaArray = []
         for (let i = 0; i < 1; i++) {
             let isError = false
             let obj = {}
-            await Axios.get(`${config.url}/helps/license`, { headers: { Pragma: 'no-cache' } })
+            Axios.get(`${config.url}/helps/license`, { headers: { Pragma: 'no-cache' } })
                 .then(res => {
                     for (let i = 0; i < res.data.length; i++) {
                         //alert(1)
@@ -111,6 +111,13 @@ class LicenseHelp extends Component {
                     obj.location = arr[3]
                     isError = false*/
                     // console.log(obj)
+                    this.setState({ QA: qaArray, existingQALength: qaArray.length })
+                    this.setState({ existingCKLength: chopKeeperArray.length })
+                    this.setState(state => {
+                        let { chopKeepers } = this.state
+                        chopKeepers.table = chopKeeperArray
+                        return chopKeepers
+                    })
                 })
                 .catch(error => {
                     isError = true
@@ -119,13 +126,6 @@ class LicenseHelp extends Component {
                 break;
             //chopKeeperArray.push(obj)
         }
-        this.setState({ QA: qaArray, existingQALength: qaArray.length })
-        this.setState({ existingCKLength: chopKeeperArray.length })
-        this.setState(state => {
-            let { chopKeepers } = this.state
-            chopKeepers.table = chopKeeperArray
-            return chopKeepers
-        })
     }
 
 
