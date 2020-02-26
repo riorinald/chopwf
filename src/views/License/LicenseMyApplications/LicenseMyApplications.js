@@ -526,10 +526,10 @@ class LicenseMyApplications extends Component {
                                     style: { textAlign: "center" }
                                 },
                                 {
-                                    Header: "Delivery Express Number",
+                                    Header: "Deliver Express Number",
                                     accessor: "expDeliveryNumber",
                                     filterable: false,
-                                    width: this.getColumnWidth('expDeliveryNumber', "Delivery Express Number"),
+                                    width: this.getColumnWidth('expDeliveryNumber', "Deliver Express Number"),
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" }
                                 },
