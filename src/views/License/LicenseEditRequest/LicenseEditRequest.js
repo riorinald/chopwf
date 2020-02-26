@@ -166,6 +166,13 @@ class LicenseEditRequest extends Component {
         if (id === "deliverWay1" || id === "deliverWay2") {
             document.getElementById('deliverWay1').className = "custom-control-input"
             document.getElementById('deliverWay2').className = "custom-control-input"
+            this.setState(state => {
+                let taskDetails = state.taskDetails
+                taskDetails.expDeliveryAddress = ""
+                taskDetails.expDeliveryMobileNo = ""
+                taskDetails.expDeliveryReceiver = ""
+                taskDetails.expDeliveryReceiverId = ""
+                })
         }
         else if (id === "documentType1" || id === "documentType2") {
             document.getElementById('documentType1').className = "custom-control-input"
