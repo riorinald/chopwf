@@ -255,6 +255,12 @@ class LicenseCreate extends Component {
             if (event.target.id === "inputWatermark1" || event.target.id === "inputWatermark2") {
                 value = event.target.id === "inputWatermark1" ? "Y" : "N"
                 watermark = ""
+                this.setState(state => {
+                    let formData = state.formData
+                    formData.address = ""
+                    formData.reciever = ""
+                    formData.recieverPhone = ""
+                    })
             }
             else if (event.target.id === "watermark1" || event.target.id === "watermark2") {
                 value = event.target.id === "watermark1" ? "Y" : "N"
