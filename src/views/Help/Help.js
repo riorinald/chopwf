@@ -122,6 +122,7 @@ class Help extends Component {
                             let obj = {}
                             let arr = res.data[i]['sectionData'].split(';')
                             obj.chopType = arr[0].split(',')
+                            obj.chopTypeSort = arr[0]
                             obj.chopKeeper = arr[1]
                             obj.sectionId =  res.data[i]['sectionId']
                             obj.contactPerson = arr[2].split(',')
@@ -132,7 +133,7 @@ class Help extends Component {
                         if (res.data[i]['sectionId'].includes("question")) {
                             let obj = {}
                              isError = false
-                            let arr = res.data[i]['sectionData'].split(',')
+                            let arr = res.data[i]['sectionData'].split('@@@')
                             obj.sectionId =  res.data[i]['sectionId']
                             obj.question = arr[0]
                             obj.answer = arr[1]
@@ -146,6 +147,8 @@ class Help extends Component {
                     obj.location = arr[3]
                     isError = false*/
                     // console.log(obj)
+                    chopKeeperArray.sort(this.dynamicSort("chopTypeSort"));
+
                     this.setState({ QA: qaArray, existingQALength: qaArray.length })
                     this.setState({ existingCKLength: chopKeeperArray.length })
                     this.setState(state => {
@@ -163,7 +166,23 @@ class Help extends Component {
         }
     }
 
+    dynamicSort(property) {
+        var sortOrder = 1;
+        if(property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
 
+        return function (a,b) {
+            console.log(a,'9999999')
+
+            if(sortOrder == -1){
+                return b[property].localeCompare(a[property]);
+            }else{
+                return a[property].localeCompare(b[property]);
+            }
+        }
+    }
 
     handleQAChange = (name, mainIndex) => event => {
         let value = event.target.value
@@ -196,7 +215,7 @@ class Help extends Component {
 
     }
 
-    async getData() {
+    async getData(){
         await Axios.get(`${config.url}/helps/chop`, { headers: { Pragma: 'no-cache' } }).then(res => {
             console.log(res.data)
         })
@@ -249,6 +268,7 @@ class Help extends Component {
                 let array = []
                 let chopTypes = chopKeepers[i].chopType.join(',')
                 let contactPersons = chopKeepers[i].contactPerson.join(',')
+                chopKeepers[i].chopTypeSort = chopKeepers[i].chopType[0];
                 array.push(chopTypes)
                 array.push(chopKeepers[i].chopKeeper)
                 array.push(contactPersons)
@@ -261,7 +281,9 @@ class Help extends Component {
                     // console.log("Chop keeper details updated")
                 }
                 else {
-                    this.addNewChopKeeperDetails(finalString, Math.floor(Date.now() / 1000)+i, "chopKeeper")
+                    var secId = Math.floor(Date.now() / 1000)+i
+                    this.addNewChopKeeperDetails(finalString, secId, "chopKeeper")
+                    this.state.chopKeepers.table[i]['sectionId'] = 'chopKeeper'+secId;
                     // console.log("Chop keeper details added")
                 }
             }
@@ -269,7 +291,7 @@ class Help extends Component {
                 let array = []
                 array.push(qa[p].question)
                 array.push(qa[p].answer)
-                let qaString = array.join(',')
+                let qaString = array.join('@@@')
                 // console.log(qaString)
                 if (qa[p].sectionId) {
                 //if (p < this.state.existingQALength) {
@@ -278,7 +300,11 @@ class Help extends Component {
                 }
                 else {
                     // console.log("New QA Added")
-                    this.addNewChopKeeperDetails(qaString, Math.floor(Date.now() / 1000)+p, "question")
+                    var secId = Math.floor(Date.now() / 1000)+p
+                    this.addNewChopKeeperDetails(qaString, secId, "question")
+                    this.state.QA[p]['sectionId'] = 'question'+secId;
+
+                    //this.addNewChopKeeperDetails(qaString, secId, "question")
                 }
 
             }
@@ -289,16 +315,17 @@ class Help extends Component {
             }
             // window.location.reload()
             //codes to update instructions to the database
-            this.setState({
+            /*this.setState({
                 QA: []
-            })
+            })*/
+            chopKeepers.sort(this.dynamicSort("chopTypeSort"));
             this.setState({
                 chopKeepers: {
                     columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
-                    table: []
+                    table: chopKeepers
                 }
             })
-            this.getChopKeeper();
+            //this.getChopKeeper();
         }
         this.setState(state => ({
             editable: !state.editable,

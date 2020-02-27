@@ -1028,6 +1028,10 @@ class EditRequest extends Component {
             if (this.state.editRequestForm.docSelected === null) {
                 contractError.push("Please Select a valid Document.<br />")
             }
+                else if (this.state.editRequestForm.docSelected === 0) {
+                    contractError.push("Can not upload empty document.<br />")
+                    this.setState({ wrongDocError: "Document is empty." })
+                }
             if (this.state.editRequestForm.engName === "") {
                 contractError.push("Please input name in english.<br />")
             }
@@ -1078,6 +1082,11 @@ class EditRequest extends Component {
         if (this.state.editRequestForm.docSelected === null) {
             errorMessage.push("Please select a valid document.<br />")
         }
+            else if (this.state.editRequestForm.docSelected === 0) {
+                errorMessage.push("Can not upload empty document.<br />")
+                this.setState({ wrongDocError: "Document is empty." })
+                typeValid = false
+            }
         if (this.state.taskDetails.applicationTypeId === 'LTI') {
             if (this.state.editRequestForm.engName === "") {
                 errorMessage.push("Please input document name in English.<br />")
@@ -2248,8 +2257,11 @@ class EditRequest extends Component {
                                         <ol id="notes" className="font-weight-bold">
                                             {this.state.noteInfo.map((info, index) => (
                                                 <li key={index} >
-                                                    <p> {info.chinese} </p>
-                                                    <p> {info.english} </p>
+                                                    <p> 
+                                                        {info.chinese} 
+                                                        <br/> 
+                                                        {info.english}
+                                                    </p>
                                                 </li>
                                             ))}
                                         </ol>
@@ -2566,7 +2578,7 @@ class EditRequest extends Component {
                                                             <FormGroup>
                                                                 {/* <Label>File Name</Label> */}
                                                                 <CustomInput
-                                                                    accept=".jpg, .png, .xls, .xlsm, .xlsx, .msg, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp, .ppt, pptx"
+                                                                    accept=".jpg, .png, .xls, .xlsm, .xlsx, .msg, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp"
                                                                     id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" label={editRequestForm.docAttachedName} />
                                                                 <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
                                                             </FormGroup>
@@ -2591,7 +2603,8 @@ class EditRequest extends Component {
                                                                 <thead>
                                                                     <tr>
                                                                         <th className="smallTd" >No.</th>
-                                                                        {taskDetails.applicationTypeId === "CNIPS" ? <th>Contract Number</th> : null}
+                                                                        {taskDetails.applicationTypeId === "CNIPS" ? 
+                                                                        <th className="mediumTd">Contract Number</th> : null}
                                                                         <th>Document Name in English</th>
                                                                         <th>Document Name in Chinese</th>
                                                                         <th>Attached File</th>
@@ -2603,8 +2616,8 @@ class EditRequest extends Component {
                                                                         <tr key={index}>
                                                                             <td className="smallTd">{index + 1}</td>
                                                                             {taskDetails.applicationTypeId === "CNIPS"
-                                                                                ? <td> {document.contractNums.map((number, index) =>
-                                                                                    <div key={index} > {number} </div>
+                                                                                ? <td className="mediumTd"> {document.contractNums.map((number, index) =>
+                                                                                    <span className="mediumTd" key={index}> {number} </span>
                                                                                 )} </td>
                                                                                 : null}
                                                                             <td className="descTd">{document.documentNameEnglish}</td>

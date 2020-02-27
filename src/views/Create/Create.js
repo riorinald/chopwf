@@ -340,6 +340,15 @@ class Create extends Component {
 
     const userCookie = Authorize.getCookies()
 
+    if (this.state.appTypeSelected === "") {
+      Swal.fire({
+        title: 'Appliction Type Required',
+        type: 'info',
+        label: 'required',
+        text: 'Please select an Application Type to get started !'
+      })
+    }
+    else {
     console.log("SUBMIT")
     let useInOffice = "Y"
     let isConnectChop = "N"
@@ -437,7 +446,7 @@ class Create extends Component {
     // else if (this.state.valid && this.state.inOffice) {
     // this.postData(postReq, isSubmitted)
     // }
-
+    }
   }
 
   checkDepartment = () => {
@@ -1160,6 +1169,10 @@ class Create extends Component {
     if (this.state.docSelected === null) {
       errorMessage.push("Please select a valid document.<br />")
     }
+      else if (this.state.docSelected.size === 0) {
+        errorMessage.push("Can not upload empty document.<br />")
+        this.setState({ wrongDocError: "Document is empty." })
+      }
     if (this.state.isLTI) {
       if (this.state.engName === "") {
         errorMessage.push("Please input document name in English.<br />")
@@ -1290,6 +1303,10 @@ class Create extends Component {
       if (this.state.docSelected === null) {
         contractError.push("Please select a valid document.<br />")
       }
+        else if (this.state.docSelected.size === 0) {
+          contractError.push("Can not upload empty document.<br />")
+          this.setState({ wrongDocError: "Document is empty." })
+        }
       if (this.state.engName === "") {
         contractError.push("Please input name in english.<br />")
       }
@@ -1622,7 +1639,7 @@ class Create extends Component {
       while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
       }
-      console.log(mime)
+      console.log(mime, dataurl)
 
       return new File([u8arr], filename, { type: mime });
     }
@@ -1777,7 +1794,7 @@ class Create extends Component {
         <thead>
           <tr>
             <th className="smallTd" >No.</th>
-            <th>Contract Number</th>
+            <th className="mediumTd">Contract Number</th>
             <th>Contract Name in English</th>
             <th>Contract Name in Chinese</th>
             <th>Attached File</th>
@@ -1882,8 +1899,9 @@ class Create extends Component {
               <FormGroup>
                 {/* <Label>File Name</Label> */}
                 <CustomInput id="docFileName" onChange={this.uploadDocument}
-                  accept=".jpg, .png, .xls, .xlsm, .xlsx, .msg, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp, .ppt, pptx"
-                  type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
+                  accept=".jpg, .png, .xls, .xlsm, .xlsx, .msg, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp"
+                  type="file" bsSize="lg" color="primary" label={this.state.docAttachedName}>
+                </CustomInput>
                 <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
               </FormGroup>
             </Col>
@@ -2038,8 +2056,11 @@ class Create extends Component {
                   <ol id="notes" className="font-weight-bold">
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
-                        <p class="no-bottom-margin"> {info.chinese} </p>
-                        <p> {info.english} </p>
+                        <p> 
+                            {info.chinese} 
+                            <br/> 
+                            {info.english}
+                        </p>
                       </li>
                     ))}
                   </ol>

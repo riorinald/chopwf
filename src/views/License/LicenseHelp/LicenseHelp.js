@@ -89,6 +89,7 @@ class LicenseHelp extends Component {
                             let obj = {}
                             let arr = res.data[i]['sectionData'].split(';')
                             obj.chopType = arr[0].split(',')
+                            obj.chopTypeSort = arr[0]
                             obj.chopKeeper = arr[1]
                             obj.sectionId =  res.data[i]['sectionId']
                             obj.contactPerson = arr[2].split(',')
@@ -99,7 +100,7 @@ class LicenseHelp extends Component {
                         if (res.data[i]['sectionId'].includes("question")) {
                             let obj = {}
                              isError = false
-                            let arr = res.data[i]['sectionData'].split(',')
+                            let arr = res.data[i]['sectionData'].split('@@@')
                             obj.sectionId =  res.data[i]['sectionId']
                             obj.question = arr[0]
                             obj.answer = arr[1]
@@ -113,6 +114,8 @@ class LicenseHelp extends Component {
                     obj.location = arr[3]
                     isError = false*/
                     // console.log(obj)
+                    console.log('Updated on 27 Feb');
+                    chopKeeperArray.sort(this.dynamicSort("chopTypeSort"));
                     this.setState({ QA: qaArray, existingQALength: qaArray.length })
                     this.setState({ existingCKLength: chopKeeperArray.length })
                     this.setState(state => {
@@ -127,6 +130,25 @@ class LicenseHelp extends Component {
             if (isError)
                 break;
             //chopKeeperArray.push(obj)
+        }
+    }
+
+
+    dynamicSort(property) {
+        var sortOrder = 1;
+        if(property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+
+        return function (a,b) {
+            console.log(a,'9999999')
+
+            if(sortOrder == -1){
+                return b[property].localeCompare(a[property]);
+            }else{
+                return a[property].localeCompare(b[property]);
+            }
         }
     }
 
@@ -213,6 +235,7 @@ class LicenseHelp extends Component {
                 let array = []
                 let chopTypes = chopKeepers[i].chopType.join(',')
                 let contactPersons = chopKeepers[i].contactPerson.join(',')
+                chopKeepers[i].chopTypeSort = chopKeepers[i].chopType[0];
                 array.push(chopTypes)
                 array.push(chopKeepers[i].chopKeeper)
                 array.push(contactPersons)
@@ -220,34 +243,44 @@ class LicenseHelp extends Component {
                 let finalString = array.join(';')
                 console.log(finalString)
                 if (chopKeepers[i].sectionId) {
+
                 //if (i < this.state.existingCKLength) {
                     this.updateChopKeeperDetails(finalString, chopKeepers[i].sectionId, "chopKeeper")
                     // console.log("Chop keeper details updated")
                 }
                 else {
-                    this.addNewChopKeeperDetails(finalString, Math.floor(Date.now() / 1000)+i, "chopKeeper")
-                    // console.log("Chop keeper details added")
+                    var secId = Math.floor(Date.now() / 1000)+i
+                    this.addNewChopKeeperDetails(finalString, secId, "chopKeeper")
+                    this.state.chopKeepers.table[i]['sectionId'] = 'chopKeeper'+secId;
                 }
             }
             for (let i = 0; i < qa.length; i++) {
                 let array = []
                 array.push(qa[i].question)
                 array.push(qa[i].answer)
-                let qaString = array.join(',')
+                let qaString = array.join('@@@')
                 // console.log(qaString)
                 if (qa[i].sectionId) {
-                    // console.log("QA Updated")
                     this.updateChopKeeperDetails(qaString, qa[i].sectionId, "question")
                 }
                 else {
                     // console.log("New QA Added")
-                    this.addNewChopKeeperDetails(qaString, Math.floor(Date.now() / 1000)+i, "question")
+                    var secId = Math.floor(Date.now() / 1000)+i
+                    this.addNewChopKeeperDetails(qaString, secId, "question")
+                    this.state.QA[i]['sectionId'] = 'question'+secId;
                 }
 
             }
+            chopKeepers.sort(this.dynamicSort("chopTypeSort"));
+            this.setState({
+                chopKeepers: {
+                    columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
+                    table: chopKeepers
+                }
+            })
             // window.location.reload()
             //codes to update instructions to the database
-            this.setState({
+            /*this.setState({
                 QA: []
             })
             this.setState({
@@ -256,7 +289,7 @@ class LicenseHelp extends Component {
                     table: []
                 }
             })
-            this.getChopKeeper();
+            this.getChopKeeper();*/
         }
         this.setState(state => ({
             editable: !state.editable,
