@@ -47,7 +47,7 @@ class LicenseAdmin extends Component {
     }
 
     getLicenseCSV() {
-        Axios.get(`${config.url}/licenses/licensemanagement`, { headers: { Pragma: 'no-cache' } })
+        Axios.get(`${config.url}/licenses/licensemanagement?companyId=${localStorage.getItem('legalEntity')}`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 console.log(res.data)
                 this.setState({ newLicenseAdmins: res.data.licenseManagementDisplayResponses, headers: res.data.headers })
@@ -187,7 +187,7 @@ class LicenseAdmin extends Component {
         else {
             postData.append('csvcontent', content )
             // postData.append('Documents[0].Attachment.Name', csvFile.name)
-            Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${localStorage.getItem('userId')}`, postData)
+            Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${localStorage.getItem('userId')}&companyId=${localStorage.getItem('legalEntity')}`, postData)
                 .then(res => {
                     console.log(res)
                     Swal.fire({
