@@ -72,14 +72,14 @@ class LicenseHelp extends Component {
         this.setState({ QA: qaArray, existingQALength: qaArray.length })*/
     }
 
-    async getChopKeeper() {
+    getChopKeeper() {
 
         let chopKeeperArray = []
         let qaArray = []
         for (let i = 0; i < 1; i++) {
             let isError = false
             let obj = {}
-            await Axios.get(`${config.url}/helps/license`)
+            Axios.get(`${config.url}/helps/license`, { headers: { Pragma: 'no-cache' } })
                 .then(res => {
                     for (let i = 0; i < res.data.length; i++) {
                         //alert(1)
@@ -111,6 +111,13 @@ class LicenseHelp extends Component {
                     obj.location = arr[3]
                     isError = false*/
                     // console.log(obj)
+                    this.setState({ QA: qaArray, existingQALength: qaArray.length })
+                    this.setState({ existingCKLength: chopKeeperArray.length })
+                    this.setState(state => {
+                        let { chopKeepers } = this.state
+                        chopKeepers.table = chopKeeperArray
+                        return chopKeepers
+                    })
                 })
                 .catch(error => {
                     isError = true
@@ -119,13 +126,6 @@ class LicenseHelp extends Component {
                 break;
             //chopKeeperArray.push(obj)
         }
-        this.setState({ QA: qaArray, existingQALength: qaArray.length })
-        this.setState({ existingCKLength: chopKeeperArray.length })
-        this.setState(state => {
-            let { chopKeepers } = this.state
-            chopKeepers.table = chopKeeperArray
-            return chopKeepers
-        })
     }
 
 
@@ -162,17 +162,17 @@ class LicenseHelp extends Component {
     }
 
     async getData() {
-        await Axios.get(`${config.url}/helps/license`).then(res => {
+        await Axios.get(`${config.url}/helps/license`, { headers: { Pragma: 'no-cache' } }).then(res => {
             console.log(res.data)
         })
         // this.setState({ chopKeepers: response.data.chopKeepers, QA: response.data.QA })
     }
 
-    async addNewChopKeeperDetails(details, index, name) {
+    addNewChopKeeperDetails(details, index, name) {
         let postData = new FormData()
         postData.append('sectionData', details)
         postData.append('sectionId', `${name}${index}`)
-        await Axios.post(`${config.url}/helps/license/${localStorage.getItem('userId')}`, postData)
+        Axios.post(`${config.url}/helps/license/${localStorage.getItem('userId')}`, postData)
             .then(result => {
                // console.log(result.data)
             })
@@ -181,10 +181,10 @@ class LicenseHelp extends Component {
             })
     }
 
-    async updateChopKeeperDetails(details, index, name) {
+    updateChopKeeperDetails(details, index, name) {
         let postData = new FormData()
         postData.append('sectionData', details)
-        await Axios.put(`${config.url}/helps/license/${index}/${localStorage.getItem('userId')}`, postData)
+        Axios.put(`${config.url}/helps/license/${index}/${localStorage.getItem('userId')}`, postData)
             .then(result => {
                // console.log(result.data)
             })
@@ -369,16 +369,16 @@ class LicenseHelp extends Component {
             <tr key={index}>
                 <td>{table.chopType.map((type, i) =>
                     <div key={i}>
-                        <Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the chop type" defaultValue={type}></Input></Form><br />
+                        <Form style={{ display: "flex" }}><Input maxLength={1000} type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the chop type" defaultValue={type}></Input></Form><br />
                     </div>
                 )}
                    
                 </td>
-                <td><Form><Input type="text" placeholder="Please enter the chop keeper" onChange={this.handleChange("chopKeeper", index)} defaultValue={table.chopKeeper}></Input></Form></td>
+                <td><Form><Input type="text" maxLength={1000} placeholder="Please enter the chop keeper" onChange={this.handleChange("chopKeeper", index)} defaultValue={table.chopKeeper}></Input></Form></td>
                 <td> {table.contactPerson.map((person, i) =>
-                    <div key={i}><Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("contactPerson", i, index)} placeholder="Please enter the name of the contact person" defaultValue={person}></Input><Button onClick={() => this.deleteContactPerson(index, i)} color="danger">Delete</Button></Form><br /></div>)}
+                    <div key={i}><Form style={{ display: "flex" }}><Input type="text" maxLength={1000} onChange={this.handleChopKeeper("contactPerson", i, index)} placeholder="Please enter the name of the contact person" defaultValue={person}></Input><Button onClick={() => this.deleteContactPerson(index, i)} color="danger">Delete</Button></Form><br /></div>)}
                     <Button onClick={() => this.addContactPerson(index)} >Add New Contact Person</Button></td>
-                <td><Form><Input type="text" placeholder="Please add the location" onChange={this.handleChange("location", index)} defaultValue={table.location}></Input></Form></td>
+                <td><Form><Input type="text" maxLength={1000} placeholder="Please add the location" onChange={this.handleChange("location", index)} defaultValue={table.location}></Input></Form></td>
                 <td><Button onClick={() => this.deleteData(index)} color="danger">Delete</Button></td>
             </tr>)
         const QA = this.state.QA.map((qnsAns, index) =>
@@ -392,9 +392,9 @@ class LicenseHelp extends Component {
                 <Form>
                     <Label style={{ float: "left" }}><b>Question: {index + 1}</b></Label>
                     <img style={{ float: "right" }} onClick={() => this.deleteQA(index)} height="20px" width="20px" src={deleteIcon} />
-                    <Input type="textarea" onChange={this.handleQAChange("question", index)} placeholder="Please enter your question." defaultValue={qnsAns.question}></Input>
+                    <Input type="textarea" maxLength={1999} onChange={this.handleQAChange("question", index)} placeholder="Please enter your question." defaultValue={qnsAns.question}></Input>
                     <Label><b>Answer</b></Label>
-                    <Input type="textarea" onChange={this.handleQAChange("answer", index)} placeholder="Please enter your answer." defaultValue={qnsAns.answer}></Input>
+                    <Input type="textarea" maxLength={1999} onChange={this.handleQAChange("answer", index)} placeholder="Please enter your answer." defaultValue={qnsAns.answer}></Input>
                 </Form>
                 <br />
             </div>)}<Button onClick={this.addQA}>Add New Question and Answer</Button></div>

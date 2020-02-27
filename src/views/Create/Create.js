@@ -232,7 +232,7 @@ class Create extends Component {
   }
 
   getNotes() {
-    axios.get(`${config.url}/notes/0`)
+    axios.get(`${config.url}/notes/0`, { headers: { Pragma: 'no-cache' } })
       .then(res => {
         let tempNotes = res.data.noteContent.split('%')
         for (let i = 0; i < tempNotes.length; i++) {
