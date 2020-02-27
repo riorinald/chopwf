@@ -193,7 +193,7 @@ class LicenseAdmin extends Component {
         else {
             postData.append('csvcontent', content )
             // postData.append('Documents[0].Attachment.Name', csvFile.name)
-            Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${localStorage.getItem('userId')}&companyId=${localStorage.getItem('legalEntity')}`, postData)
+            Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${Authorize.getCookies().userId}&companyId=${localStorage.getItem('legalEntity')}`, postData)
                 .then(res => {
                     console.log(res)
                     Swal.fire({

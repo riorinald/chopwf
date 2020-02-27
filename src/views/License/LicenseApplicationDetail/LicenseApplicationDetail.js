@@ -655,7 +655,7 @@ class LicenseApplicationDetail extends Component {
                                                 }
                                             </Col>
                                         </Row>
-                                        : taskDetails.requestorUser.userId === localStorage.getItem('userId')
+                                        : taskDetails.requestorUser.userId === Authorize.getCookies().userId
                                             ?
                                             currentStatus === "PENDINGREQUESTORRETURN"
                                                 ? <Row>
