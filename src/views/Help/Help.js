@@ -259,7 +259,9 @@ class Help extends Component {
                     // console.log("Chop keeper details updated")
                 }
                 else {
-                    this.addNewChopKeeperDetails(finalString, Math.floor(Date.now() / 1000)+i, "chopKeeper")
+                    var secId = Math.floor(Date.now() / 1000)+i
+                    this.addNewChopKeeperDetails(finalString, secId, "chopKeeper")
+                    this.state.chopKeepers.table[i]['sectionId'] = 'chopKeeper'+secId;
                     // console.log("Chop keeper details added")
                 }
             }
@@ -276,7 +278,11 @@ class Help extends Component {
                 }
                 else {
                     // console.log("New QA Added")
-                    this.addNewChopKeeperDetails(qaString, Math.floor(Date.now() / 1000)+p, "question")
+                    var secId = Math.floor(Date.now() / 1000)+p
+                    this.addNewChopKeeperDetails(qaString, secId, "question")
+                    this.state.QA[p]['sectionId'] = 'question'+secId;
+
+                    //this.addNewChopKeeperDetails(qaString, secId, "question")
                 }
 
             }
@@ -287,7 +293,7 @@ class Help extends Component {
             }
             // window.location.reload()
             //codes to update instructions to the database
-            this.setState({
+           /* this.setState({
                 QA: []
             })
             this.setState({
@@ -296,7 +302,7 @@ class Help extends Component {
                     table: []
                 }
             })
-            this.getChopKeeper();
+            this.getChopKeeper();*/
         }
         this.setState(state => ({
             editable: !state.editable,
