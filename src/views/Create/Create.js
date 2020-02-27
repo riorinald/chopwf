@@ -1456,7 +1456,7 @@ class Create extends Component {
   };
 
   uploadDocument = event => {
-    let ext = [".jpg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp, .msg, .ppt, pptx, .xlr"]
+    let ext = config.allowedExtension
     let valid = false
     if (event.target.files[0]) {
       let last = event.target.files[0].name.split('.').length
@@ -1882,7 +1882,7 @@ class Create extends Component {
               <FormGroup>
                 {/* <Label>File Name</Label> */}
                 <CustomInput id="docFileName" onChange={this.uploadDocument}
-                  accept=".jpg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp, .msg, .ppt, pptx, .xlr"
+                  accept=".jpg, .png, .xls, .xlsm, .xlsx, .msg, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp, .ppt, pptx"
                   type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
                 <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
               </FormGroup>

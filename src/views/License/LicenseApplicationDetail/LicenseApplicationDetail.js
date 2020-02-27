@@ -411,7 +411,7 @@ class LicenseApplicationDetail extends Component {
     }
 
     uploadDocument(event) {
-        let ext = [".jpg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp, .msg, .ppt, pptx, .xlr"]
+        let ext = config.allowedExtension
         let extValid = false
         if (event.target.files.length !== 0) {
             let last = event.target.files[0].name.split('.').length
@@ -643,7 +643,7 @@ class LicenseApplicationDetail extends Component {
                                                     <FormGroup>
                                                         <Label>Attach Document</Label>
                                                         <CustomInput
-                                                            accept=".jpg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp, .msg, .ppt, pptx, .xlr"
+                                                            accept=".jpg, .png, .xls, .xlsm, .xlsx, .msg, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp, .ppt, pptx"
                                                             id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" />
                                                         &nbsp; <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
                                                         <Collapse isOpen={documents.length !== 0}>
