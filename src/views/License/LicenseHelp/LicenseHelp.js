@@ -218,13 +218,15 @@ class LicenseHelp extends Component {
                 let finalString = array.join(';')
                 console.log(finalString)
                 if (chopKeepers[i].sectionId) {
+
                 //if (i < this.state.existingCKLength) {
                     this.updateChopKeeperDetails(finalString, chopKeepers[i].sectionId, "chopKeeper")
                     // console.log("Chop keeper details updated")
                 }
                 else {
-                    this.addNewChopKeeperDetails(finalString, Math.floor(Date.now() / 1000)+i, "chopKeeper")
-                    // console.log("Chop keeper details added")
+                    var secId = Math.floor(Date.now() / 1000)+i
+                    this.addNewChopKeeperDetails(finalString, secId, "chopKeeper")
+                    this.state.chopKeepers.table[i]['sectionId'] = 'chopKeeper'+secId;
                 }
             }
             for (let i = 0; i < qa.length; i++) {
@@ -234,18 +236,19 @@ class LicenseHelp extends Component {
                 let qaString = array.join(',')
                 // console.log(qaString)
                 if (qa[i].sectionId) {
-                    // console.log("QA Updated")
                     this.updateChopKeeperDetails(qaString, qa[i].sectionId, "question")
                 }
                 else {
                     // console.log("New QA Added")
-                    this.addNewChopKeeperDetails(qaString, Math.floor(Date.now() / 1000)+i, "question")
+                    var secId = Math.floor(Date.now() / 1000)+i
+                    this.addNewChopKeeperDetails(qaString, secId, "question")
+                    this.state.QA[i]['sectionId'] = 'question'+secId;
                 }
 
             }
             // window.location.reload()
             //codes to update instructions to the database
-            this.setState({
+            /*this.setState({
                 QA: []
             })
             this.setState({
@@ -254,7 +257,7 @@ class LicenseHelp extends Component {
                     table: []
                 }
             })
-            this.getChopKeeper();
+            this.getChopKeeper();*/
         }
         this.setState(state => ({
             editable: !state.editable,
