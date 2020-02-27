@@ -641,7 +641,7 @@ class LicenseApplicationDetail extends Component {
                                                     <FormGroup>
                                                         <Label>Attach Document</Label>
                                                         <CustomInput
-                                                            accept=".jpg, .png, .xls, .xlsm, .xlsx, .msg, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp, .ppt, pptx"
+                                                            accept=".jpg, .png, .xls, .xlsm, .xlsx, .msg, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp"
                                                             id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" />
                                                         &nbsp; <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
                                                         <Collapse isOpen={documents.length !== 0}>
