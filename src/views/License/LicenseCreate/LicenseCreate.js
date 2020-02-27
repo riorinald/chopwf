@@ -247,6 +247,12 @@ class LicenseCreate extends Component {
             if (event.target.id === "inputWatermark1" || event.target.id === "inputWatermark2") {
                 value = event.target.id === "inputWatermark1" ? "Y" : "N"
                 watermark = ""
+                this.setState(state => {
+                    let formData = state.formData
+                    formData.address = ""
+                    formData.reciever = ""
+                    formData.recieverPhone = ""
+                    })
             }
             else if (event.target.id === "watermark1" || event.target.id === "watermark2") {
                 value = event.target.id === "watermark1" ? "Y" : "N"
@@ -656,7 +662,7 @@ class LicenseCreate extends Component {
                                 <Collapse isOpen={formData.deliverWay === "Express"}>
                                     <FormGroup>
                                         <Label>Address</Label>
-                                        <Input maxLength="500" autoComplete="off" placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
+                                        <Input maxLength="500" autoComplete="off" placeholder="Please specify Address" id="address" value={this.state.formData.address} onChange={this.handleChange("address")} type="text" />
                                         {formData.documentType === "ORIGINAL"
                                             ? formData.deliverWay === "Express"
                                                 ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
@@ -672,11 +678,11 @@ class LicenseCreate extends Component {
                                             id="reciever"
                                             loadOptions={loadReciever}
                                             isClearable
-                                            onChange={this.handleSelectReciever}
+                                            value={this.state.formData} onChange={this.handleSelectReciever}
                                             menuPortalTarget={document.body}
                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         /> */}
-                                        <Input maxLength="500" autoComplete="off" placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
+                                        <Input maxLength="500" autoComplete="off" placeholder="Please specify Reciever" id="reciever" value={this.state.formData.reciever} onChange={this.handleChange("reciever")} type="text" />
                                         {formData.documentType === "ORIGINAL"
                                             ? formData.deliverWay === "Express"
                                                 ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
@@ -687,7 +693,7 @@ class LicenseCreate extends Component {
 
                                     <FormGroup>
                                         <Label>Reciever Mobile Phone</Label>
-                                        <Input maxLength="500" autoComplete="off" placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
+                                        <Input maxLength="500" autoComplete="off" placeholder={`Please specify Reciever's phone`} id="recieverPhone" value={this.state.formData.recieverPhone} onChange={this.handleChange("recieverPhone")} type="text" />
                                         {formData.documentType === "ORIGINAL"
                                             ? formData.deliverWay === "Express" ?
                                                 <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, formData.recieverPhone, 'required')}</small>
