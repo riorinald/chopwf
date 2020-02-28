@@ -120,7 +120,12 @@ class Help extends Component {
                             let obj = {}
                             let arr = res.data[i]['sectionData'].split(';')
                             obj.chopType = arr[0].split(',')
-                            obj.chopTypeSort = arr[0].trim().toLowerCase()
+                            if (arr[0][0]) {
+                                obj.chopTypeSort = arr[0][0].trim().toLowerCase()
+                            }else{
+                                obj.chopTypeSort = ' ';
+                            }
+                            console.log(obj.chopTypeSort)
                             obj.chopKeeper = arr[1]
                             obj.sectionId =  res.data[i]['sectionId']
                             obj.contactPerson = arr[2].split(',')
@@ -269,7 +274,13 @@ class Help extends Component {
                 let array = []
                 let chopTypes = chopKeepers[i].chopType.join(',')
                 let contactPersons = chopKeepers[i].contactPerson.join(',')
-                chopKeepers[i].chopTypeSort = chopKeepers[i].chopType[0].trim().toLowerCase();
+                if (chopKeepers[i].chopType[0][0]) {
+                    chopKeepers[i].chopTypeSort = chopKeepers[i].chopType[0][0].trim().toLowerCase();
+                }
+                else{
+                    chopKeepers[i].chopTypeSort = '';
+                }
+                
                 array.push(chopTypes)
                 array.push(chopKeepers[i].chopKeeper)
                 array.push(contactPersons)
