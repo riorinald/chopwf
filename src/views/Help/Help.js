@@ -120,7 +120,7 @@ class Help extends Component {
                             let obj = {}
                             let arr = res.data[i]['sectionData'].split(';')
                             obj.chopType = arr[0].split(',')
-                            obj.chopTypeSort = arr[0].trim()
+                            obj.chopTypeSort = arr[0].trim().toLowerCase()
                             obj.chopKeeper = arr[1]
                             obj.sectionId =  res.data[i]['sectionId']
                             obj.contactPerson = arr[2].split(',')
@@ -146,8 +146,8 @@ class Help extends Component {
                     isError = false*/
                     // console.log(obj)
                     //chopKeeperArray.sort(this.dynamicSort("chopTypeSort"));
-                    chopKeeperArray.sort(function(a, b) {
-                        return a.chopTypeSort.localeCompare(b.chopTypeSort);
+                    chopKeeperArray.sort(function(a, b) { 
+                        return a.chopTypeSort > b.chopTypeSort || -(a.chopTypeSort < b.chopTypeSort);
                     });
 
                     this.setState({ QA: qaArray, existingQALength: qaArray.length })
@@ -269,7 +269,7 @@ class Help extends Component {
                 let array = []
                 let chopTypes = chopKeepers[i].chopType.join(',')
                 let contactPersons = chopKeepers[i].contactPerson.join(',')
-                chopKeepers[i].chopTypeSort = chopKeepers[i].chopType[0].trim();
+                chopKeepers[i].chopTypeSort = chopKeepers[i].chopType[0].trim().toLowerCase();
                 array.push(chopTypes)
                 array.push(chopKeepers[i].chopKeeper)
                 array.push(contactPersons)
@@ -320,8 +320,8 @@ class Help extends Component {
                 QA: []
             })*/
             //chopKeepers.sort(this.dynamicSort("chopTypeSort"));
-            chopKeepers.sort(function(a, b) {
-                return a.chopTypeSort.localeCompare(b.chopTypeSort);
+            chopKeepers.sort(function(a, b) { 
+                return a.chopTypeSort > b.chopTypeSort || -(a.chopTypeSort < b.chopTypeSort);
             });
             this.setState({
                 chopKeepers: {
