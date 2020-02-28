@@ -1084,7 +1084,7 @@ class EditRequest extends Component {
         if (this.state.editRequestForm.docSelected === null) {
             errorMessage.push("Please select a valid document.<br />")
         }
-            else if (this.state.editRequestForm.docSelected === 0) {
+            else if (this.state.editRequestForm.docSelected.size === 0) {
                 errorMessage.push("Can not upload empty document.<br />")
                 this.setState({ wrongDocError: "Document is empty." })
                 typeValid = false
