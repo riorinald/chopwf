@@ -941,7 +941,9 @@ class EditRequest extends Component {
                     return { editRequestForm }
                 })
                 this.setState({ invalidChinese: false })
-                event.target.className = "d-block is-valid form-control"
+                this.state.taskDetails.applicationTypeId === "LTI" ? 
+                event.target.className = "d-block is-valid form-control" :
+                event.target.className = "form-control"
             }
             else {
                 this.setState(state => {
@@ -950,7 +952,9 @@ class EditRequest extends Component {
                     return { editRequestForm }
                 })
                 this.setState({ invalidChinese: true })
-                event.target.className = "d-block form-control is-invalid"
+                this.state.taskDetails.applicationTypeId === "LTI" ? 
+                event.target.className = "d-block form-control is-invalid" :
+                event.target.className = "form-control" 
                 console.warn("chinese invalid")
             }
 
