@@ -123,7 +123,7 @@ class LicenseMyApplications extends Component {
         const { searchOption } = this.state
         console.log(searchOption)
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&seniorManagerName=${searchOption.seniorManagerName}&departmentname=${searchOption.departmentName}&page=${page}&pageSize=${pageSize}`,
+        await Axios.get(encodeURI(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&seniorManagerName=${searchOption.seniorManagerName}&departmentname=${searchOption.departmentName}&page=${page}&pageSize=${pageSize}`),
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 this.setState({ applications: res.data.licenses, totalPages: res.data.pageCount, loading: false })
