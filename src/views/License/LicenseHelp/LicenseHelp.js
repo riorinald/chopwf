@@ -88,7 +88,7 @@ class LicenseHelp extends Component {
                             let arr = res.data[i]['sectionData'].split(';')
                             obj.chopType = arr[0].split(',')
                             if (arr[0][0]) {
-                                obj.chopTypeSort = arr[0][0].trim().toLowerCase()
+                                obj.chopTypeSort = arr[0].trim().toLowerCase()
                             }else{
                                 obj.chopTypeSort = ' ';
                             }
@@ -243,7 +243,7 @@ class LicenseHelp extends Component {
                 let chopTypes = chopKeepers[i].chopType.join(',')
                 let contactPersons = chopKeepers[i].contactPerson.join(',')
                 if (chopKeepers[i].chopType[0][0]) {
-                    chopKeepers[i].chopTypeSort = chopKeepers[i].chopType[0][0].trim().toLowerCase();
+                    chopKeepers[i].chopTypeSort = chopKeepers[i].chopType[0].trim().toLowerCase();
                 }
                 else{
                     chopKeepers[i].chopTypeSort = '';
