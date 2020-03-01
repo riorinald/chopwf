@@ -1616,16 +1616,16 @@ class EditRequest extends Component {
                 value.push(newValue.value)
                 option = this.getDocCheckByOption(value)
             }
-            // console.log(option)
+            // console.log(value)
             // console.log(this.state.docCheckBy)
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
                 let selectedOption = this.state.selectedOption
-                taskDetails.documentCheckBy = value
+                taskDetails.documentCheckBy = newValue
                 taskDetails.docCheckByOption = option
                 selectedOption.documentCheckBy = newValue
                 return { taskDetails }
-            }, () => console.log(this.state.selectedOption.documentCheckBy))
+            }, () => console.log(this.state.selectedOption.documentCheckBy ))
         }
 
         else if (sname === "responsiblePerson" || sname === "pickUpBy" || sname === "contractSignedByFirstPerson" || sname === "contractSignedBySecondPerson") {
@@ -2034,7 +2034,6 @@ class EditRequest extends Component {
         // if (this.state.taskDetails.documentCheckBy.length === 0) {
         //     postReq.append(`DocumentCheckBy[0]`, "");
         // }
-
         if (this.state.taskDetails.applicationTypeId === "LTU") {
             postReq.append(`DocumentCheckBy[0]`, this.state.taskDetails.documentCheckBy.value);
         }
