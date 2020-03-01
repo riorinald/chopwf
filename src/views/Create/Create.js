@@ -710,7 +710,8 @@ class Create extends Component {
         departmentHeads: [],
         dateView1: null,
         dateView2: null,
-        documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: []
+        documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [], 
+        selection: [], selectedDocs:[]
       })
 
       this.setState(state => {
@@ -790,7 +791,8 @@ class Create extends Component {
     //CHOP TYPE
     else if (name === "chopTypeSelected") {
       console.log(event.target.value)
-      this.setState({ selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
+      this.setState({ selectedOption: { docCheckBySelected: null }, docCheckBySelected: "",
+       documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [], selection: [], selectedDocs:[] })
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
         this.getDocCheckBy(event.target.value, this.state.teamSelected)
         // this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
@@ -824,7 +826,7 @@ class Create extends Component {
     else if (name === "deptSelected") {
       if (this.state.isLTU) {
         this.setState({
-          selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", documentTableLTU: []
+          selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", documentTableLTU: [], selection: [], selectedDocs:[]
         })
         this.getDocCheckBy(this.state.chopTypeSelected, this.state.teamSelected)
       }
@@ -843,12 +845,14 @@ class Create extends Component {
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
-      this.setState({ selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
+      this.setState({ selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", 
+      documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: []
+    })
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
         this.getDocCheckBy(this.state.chopTypeSelected, event.target.value)
         this.handleSelectOption('docCheckBySelected')
       }
-      this.setState({ documentTableCNIPS: [], documentTableLTI: [] })
+      this.setState({ documentTableCNIPS: [], documentTableLTI: [], selection: [], selectedDocs:[] })
       // if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
       // this.getDocCheckBy(this.state.chopTypeSelected, event.target.value)
       // }

@@ -579,11 +579,12 @@ class LicenseAdmin extends Component {
                                                                         Header: () => (
                                                                             <div
                                                                               style={{
-                                                                                textAlign:"left"
+                                                                                textAlign:"left",
+                                                                                fontWeight: "bold"
                                                                               }}
                                                                             >{this.state.headers[index]}</div>),
                                                                         accessor: key,
-                                                                        style: { textAlign: "left" },
+                                                                        style: { textAlign: "left"},
                                                                         width: this.getColumnWidth(key, key)
                                                                     }
                                                                 })}
