@@ -88,6 +88,9 @@ class LicenseEditRequest extends Component {
     }
     async getLicenseNames() {
         const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
+        res.data.sort((a, b) => {
+            return a.name.localeCompare(b.name, [ "zh-CN-u-co-pinyin" ]); 
+        });
         this.setState({ licenseNames: res.data })
     }
 
