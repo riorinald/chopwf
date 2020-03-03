@@ -1163,7 +1163,9 @@ class Create extends Component {
     let typeValid = false
     let doc = this.state.documentTableLTI
     let errorMessage = []
-
+    if (this.state.appTypeSelected === "") {
+      errorMessage.push("Please select an Application Type.<br />")
+    }
     if (this.state.docSelected === null) {
       errorMessage.push("Please select a valid document.<br />")
     }
@@ -2536,8 +2538,9 @@ class Create extends Component {
                         ? <Button className="mr-2" id="submit" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
                         : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
                         >Submit</Button>}
-                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} target="submitTooltip">Please confirm the agree terms</Tooltip>
+                      {/* <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} target="submitTooltip">Please confirm the agree terms</Tooltip> */}
                       <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
+                      <UncontrolledTooltip placement="left" target="submitTooltip">Please confirm the ticking box</UncontrolledTooltip>
                       <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
                     </Col>
                   </Row>
