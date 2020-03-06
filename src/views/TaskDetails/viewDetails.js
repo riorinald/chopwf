@@ -215,7 +215,7 @@ const LTI = (props) => {
                               </Col>
                               <Col id="deptHead" lg={4} className="p-2">
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.departmentHeadsName} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
-                                  <UncontrolledTooltip placement="right" target="deptHead">{props.taskDetails.departmentHeadsName}</UncontrolledTooltip>
+                                  {/* <UncontrolledTooltip placement="right" target="deptHead">{props.taskDetails.departmentHeadsName}</UncontrolledTooltip> */}
                               </Col>
                               {/* <Col lg={2} className="p-2">
                                   <Label>Confirm</Label>
@@ -434,7 +434,7 @@ const LTI = (props) => {
                               </Col>
                               <Col id="deptHead" lg={4} className="p-2">
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.departmentHeadsName} id="departmentHeadsName" name="departmentHeadsName" placeholder="/" />
-                                  <UncontrolledTooltip placement="right" target="deptHead">{props.taskDetails.departmentHeadsName}</UncontrolledTooltip>
+                                  {/* <UncontrolledTooltip placement="right" target="deptHead">{props.taskDetails.departmentHeadsName}</UncontrolledTooltip> */}
                               </Col>
                           
                           {/* 
