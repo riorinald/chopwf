@@ -578,7 +578,7 @@ class LicenseApplicationDetail extends Component {
                                         </Col> */}
                                         <Col md><h5> {taskDetails.requestorUser.displayName} </h5>
                                             <Row>
-                                                <Col md><h6> DFS/CN, MBAFC </h6></Col>
+                                                <Col md><h6> {taskDetails.departmentAbbr},  {taskDetails.requestorUser.companyCode} </h6></Col>
                                             </Row>
                                             <Row>
                                                 <Col xs={12} sm={12} md={6} lg={6}>
