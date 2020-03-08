@@ -181,7 +181,7 @@ class EditRequest extends Component {
         this.toggleUIO = this.toggleUIO.bind(this);
         this.addDocumentLTI = this.addDocumentLTI.bind(this);
         this.addDocumentLTU = this.addDocumentLTU.bind(this);
-        this.getDocuments = this.getDocuments.bind(this);
+        this.getDocumentLTU = this.getDocumentLTU.bind(this);
         this.selectDocument = this.selectDocument.bind(this);
         this.handleAgreeTerm = this.handleAgreeTerm.bind(this);
         this.deleteTask = this.deleteTask.bind(this);
@@ -484,7 +484,7 @@ class EditRequest extends Component {
 
         if (temporary.applicationTypeId === "LTU") {
             if (temporary.departmentId !== "" && temporary.chopTypeId !== "" && temporary.teamId !== "") {
-                // this.getDocuments(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId, (callback) => {
+                // this.getDocumentLTU(this.props.legalName, temporary.departmentId, temporary.chopTypeId, temporary.teamId, (callback) => {
 
                 // })
             }
@@ -494,6 +494,22 @@ class EditRequest extends Component {
         this.setState({ selectedOption: { documentCheckBy: temporary.documentCheckBy }, taskDetails: temporary, tempDocument: temporary.documents, loading: false })
         console.log(temporary)
 
+        this.getDocuments(id)
+
+    }
+
+    async getDocuments(taskId) {
+        // this.setState({isLoading: true})
+        await Axios.get(`${config.url}/documents?category=normal&taskid=${taskId}`)
+        .then( res => {
+            this.setState( state => ({
+                // isLoading: false,
+                taskDetails:{
+                ...state.taskDetails,
+                documents: res.data
+            }
+            }))
+        })
     }
 
     getSelected(person) {
@@ -557,7 +573,7 @@ class EditRequest extends Component {
     }
 
 
-    async getDocuments(companyId, deptId, chopTypeId, teamId, callback) {
+    async getDocumentLTU(companyId, deptId, chopTypeId, teamId, callback) {
 
         //change to 2nd URL -  1st URL for dev
         // let url = `${config.url}/documents?companyid=mbafc&departmentid=itafc&choptypeid=comchop&teamid=mbafcit`
@@ -1730,7 +1746,7 @@ class EditRequest extends Component {
                     Swal.hideLoading()
                 }
                 else {
-                    this.getDocuments(this.props.legalName, taskDetails.departmentId, taskDetails.chopTypeId, taskDetails.teamId, (numberOfDocuments) => {
+                    this.getDocumentLTU(this.props.legalName, taskDetails.departmentId, taskDetails.chopTypeId, taskDetails.teamId, (numberOfDocuments) => {
                         if (numberOfDocuments === 0) {
                             Swal.update({
                                 title: "No Documents",
