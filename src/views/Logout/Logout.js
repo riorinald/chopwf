@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { fakeAuth } from '../../App';
-import {Card, CardBody, Row, Alert } from 'reactstrap';
+import {Card, CardBody, Row, Alert, Button } from 'reactstrap';
 import Cookies from 'universal-cookie';
+import config from '../../config';
 
 // let timer = 5
 
@@ -34,7 +35,12 @@ const Logout = (props) => {
 				<Row className="centerd">
 					<Card className="shadow-lg p-3 rounded">
 						<CardBody>
-							<Alert color="danger">Successfully Logged out the application.</Alert >
+							<Alert center color="danger">You have been successfully logged out.</Alert >
+							<div center>
+								<Button className="btn-openid btn-brand" onClick= {event =>  window.location.href = config.openid} >
+										<i className="fa fa-openid"></i><span>Click here to login with Daimler OpenID</span>
+								</Button>
+							</div>
 							{/* <p className="mb-0"><center>Redirect in {timer}</center></p>  */}
 						</CardBody>
 					</Card>
