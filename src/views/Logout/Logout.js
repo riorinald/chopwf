@@ -26,7 +26,7 @@ const Logout = (props) => {
 	cookies.remove('userInfo',{path:'/'})
 
 	fakeAuth.signOut(() => {logout()})
-	console.log(redirect)
+	// console.log(redirect)
 		return (<div style={{ backgroundColor: "#2F353A" }}>
 		{/* {redirect === 0
 		? <Redirect to='/login'/>

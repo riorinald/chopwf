@@ -83,7 +83,7 @@ class Instruction extends Component {
             this.setState({ loading: true })
             //codes to update instructions to the database
             this.updateInstructions("USERINSTRUCTIONS", this.state.b64String, (cb) => {
-                console.log(cb)
+                // console.log(cb)
                 this.setState({ loading: false })
                 window.location.reload()
             })

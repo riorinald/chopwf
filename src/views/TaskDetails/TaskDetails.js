@@ -62,13 +62,13 @@ class TaskDetails extends Component {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
 
             if(res.data.actions.length === 0){
-                console.log('expired')
+                //console.log('expired')
                 this.setState({isExpired: true})
             }
 
             this.setState({ taskDetails: res.data, appType: res.data.applicationTypeId, loading: false })
             this.convertTaskDetails()
-            console.log(res.data)
+            //console.log(res.data)
         })
         // this.getUserDetails()
 
@@ -92,7 +92,7 @@ class TaskDetails extends Component {
         this.setState({ loading: true })
         await Axios.get(`${config.url}/users/${this.state.taskDetails.histories[0].approvedBy}`, { headers: { Pragma: 'no-cache' } }).then(res => {
             this.setState({ userDetails: res.data, loading: false })
-            console.log(res.data)
+            //console.log(res.data)
         })
     }
 
@@ -101,7 +101,7 @@ class TaskDetails extends Component {
     }
 
     setArray(data) {
-        console.log(Array.isArray(data))
+        //console.log(Array.isArray(data))
         if(Array.isArray(data)){
             return data.join("; ")
         } else {
@@ -167,7 +167,7 @@ class TaskDetails extends Component {
             onOpen: () => {
                 Axios.post(`${config.url}/tasks/${this.state.taskDetails.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
                     .then(res => {
-                        console.log(res.data)
+                        //console.log(res.data)
 
                         Swal.update({
                             title: res.data.message,
@@ -254,7 +254,7 @@ class TaskDetails extends Component {
 
 
     convertTaskDetails(){
-        console.log(this.setArray(this.state.taskDetails.departmentHeadsName))
+        //console.log(this.setArray(this.state.taskDetails.departmentHeadsName))
         this.setState(prevState  =>({
             taskDetails:{
             ...prevState.taskDetails,

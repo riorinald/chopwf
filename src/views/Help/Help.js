@@ -126,7 +126,7 @@ class Help extends Component {
                             }else{
                                 obj.chopTypeSort = ' ';
                             }
-                            console.log(obj.chopTypeSort)
+                            // console.log(obj.chopTypeSort)
                             obj.chopKeeper = arr[1]
                             obj.sectionId =  res.data[i]['sectionId']
                             obj.contactPerson = arr[2].split(',')
@@ -181,7 +181,7 @@ class Help extends Component {
         }
 
         return function (a,b) {
-            console.log(a,'9999999')
+            // console.log(a,'9999999')
 
             if(sortOrder == -1){
                 return b[property].localeCompare(a[property]);
@@ -224,7 +224,7 @@ class Help extends Component {
 
     async getData(){
         await Axios.get(`${config.url}/helps/chop`, { headers: { Pragma: 'no-cache' } }).then(res => {
-            console.log(res.data)
+            // console.log(res.data)
         })
         // this.setState({ chopKeepers: response.data.chopKeepers, QA: response.data.QA })
     }
@@ -235,10 +235,10 @@ class Help extends Component {
         postData.append('sectionId', `${name}${index}`)
         Axios.post(`${config.url}/helps/chop/${Authorize.getCookies().userId}`, postData)
             .then(result => {
-                console.log(`ADDED ${name}`)
+                // console.log(`ADDED ${name}`)
             })
             .catch(error => {
-                // console.log(error)
+                console.log(error)
             })
     }
 
@@ -250,7 +250,7 @@ class Help extends Component {
                 console.log(`UPDATED ${name}`)
             })
             .catch(error => {
-                // console.log(error)
+                console.log(error)
             })
     }
 
@@ -321,8 +321,8 @@ class Help extends Component {
                 }
 
             }
-            console.log(i, p)
-            console.log(chopKeepers.length, qa.length)
+            // console.log(i, p)
+            // console.log(chopKeepers.length, qa.length)
             if (i === chopKeepers.length && p === qa.length) {
                 this.setState({ loading: false })
             }

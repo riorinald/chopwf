@@ -128,7 +128,7 @@ class LicenseMyApplications extends Component {
 
     async getMyApplications(page, pageSize) {
         const { searchOption } = this.state
-        console.log(searchOption)
+        // console.log(searchOption)
         this.setState({ loading: true })
         await Axios.get(encodeURI(`${config.url}/licenses?userId=${Authorize.getCookies().userId}&companyid=${this.props.legalName}&category=requestor&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&seniorManagerName=${searchOption.seniorManagerName}&departmentname=${searchOption.departmentName}&page=${page}&pageSize=${pageSize}`),
             { headers: { Pragma: 'no-cache' } })
@@ -174,7 +174,7 @@ class LicenseMyApplications extends Component {
         }
 
         this.setState({ filtered: filtered });
-        console.log(this.state.searchOption)
+        //console.log(this.state.searchOption)
     };
     converManagers(data) {
         let temp = ""
@@ -215,7 +215,7 @@ class LicenseMyApplications extends Component {
                 searchOption
             }
         })
-        console.log(this.state.searchOption)
+        //console.log(this.state.searchOption)
         // this.search()
     }
 

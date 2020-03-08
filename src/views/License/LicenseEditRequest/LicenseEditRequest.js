@@ -160,7 +160,7 @@ class LicenseEditRequest extends Component {
                     temp.needWatermark = ""
                 }
                 temp.plannedReturnDate = temp.plannedReturnDate === "/" ? null : temp.plannedReturnDate
-                console.log(temp)
+                // console.log(temp)
                 this.setState({ taskDetails: temp, loading: false, returnDateView: this.convertDateView(res.data.plannedReturnDate) })
             })
     }
@@ -259,7 +259,6 @@ class LicenseEditRequest extends Component {
     handleSelectOption(event) {
         // console.log(event)
         let value = event ? event : []
-        console.log(value)
         var element = document.getElementById("seniorManagers")
         if (value.length !== 0) {
             element.className = "css-2b097c-container"
@@ -319,7 +318,7 @@ class LicenseEditRequest extends Component {
             keys = keys.filter(key => key !== "watermark1" || key !== "watermark2")
         }
         keys.map(key => {
-            console.log(key)
+            // console.log(key)
             var element = document.getElementById(key)
             if (key === "deliverWay1" || key === "deliverWay2") {
                 if (!data.deliverWayId) {

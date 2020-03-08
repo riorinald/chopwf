@@ -18,7 +18,7 @@ const setCookies = (data) => {
 		let minutes = 720 //set Expired in minutes
 		let expiredIn = new Date()
 		expiredIn.setTime(expiredIn.getTime() + (minutes*60*1000));
-		console.log('SET COOKIE EXP', expiredIn)
+		// console.log('SET COOKIE EXP', expiredIn)
 		cookies.set('userInfo', data, { path:'/', expires: expiredIn });
 	}
 const check = (legalEntity, adminEntity) => {

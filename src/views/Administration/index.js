@@ -110,7 +110,6 @@ class Administration extends Component {
     }
     deleteNotes(index) {
         let notes = this.state.notes.filter((key, i) => i !== index)
-        console.log(notes)
         this.setState({ notes: notes })
     }
 
@@ -125,7 +124,7 @@ class Administration extends Component {
         postData.append('noteContent', notes)
         Axios.put(`${config.url}/notes/0`, postData)
             .then((res) => {
-                console.log(res)
+                // console.log(res)
                 swal.fire({
                     title: "Updated",
                     timer: 1500,
@@ -134,7 +133,7 @@ class Administration extends Component {
                 })
             })
             .catch((err) => {
-                console.log(err)
+                // console.log(err)
             })
 
         this.setState({ editable: !this.state.editable })
@@ -145,12 +144,11 @@ class Administration extends Component {
         let inData = { branchList: JSON.stringify(this.state.newBranch) }
         let data = qs.stringify(inData)
         // encodeURIComponent(JSON.stringify(inData))
-
-        console.log(inData, data)
+        // console.log(inData, data)
 
         xhr.addEventListener("readystatechange", function () {
             if (this.readyState === 4) {
-                console.log(this.responseText);
+                // console.log(this.responseText);
             }
         });
 
@@ -197,7 +195,7 @@ class Administration extends Component {
     fileReadingFinished = (event) => {
         var csv = event.target.result;
         var result = Papa.parse(csv, { header: true, skipEmptyLines: true, })
-        console.log(result.data)
+        // console.log(result.data)
         this.setState({ newBranch: result.data, updateBranch: true })
     }
 

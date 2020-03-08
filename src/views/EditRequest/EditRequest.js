@@ -247,7 +247,7 @@ class EditRequest extends Component {
     }
 
     async getDocCheckBy(deptId, teamId, chopTypeId, callback) {
-        console.log("getting lvl4 users")
+        // console.log("getting lvl4 users")
         await Axios.get(`${config.url}/users?category=lvlfour&departmentid=${deptId}&teamid=${teamId}&choptypeid=${chopTypeId}&companyid=${this.props.legalName}&userid=${Authorize.getCookies().userId}`,
             { headers: { Pragma: 'no-cache' } }).then(res => {
                 let arr = []
@@ -301,7 +301,7 @@ class EditRequest extends Component {
     }
 
     changeSelect = () => {
-        console.log("poyi")
+
         this.setState({
             modal: !this.state.modal,
         });
@@ -368,13 +368,13 @@ class EditRequest extends Component {
     }
 
     convertDate(dateValue, view) {
-        console.log(dateValue)
+        //console.log(dateValue)
         let regEx = ""
         let dateView = null
         if (dateValue !== "00010101" && dateValue !== "" && dateValue !== "/") {
             regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
             dateView = new Date(regEx)
-            console.log(dateView)
+            //console.log(dateView)
         }
 
         this.setState({ [view]: dateView })
@@ -492,7 +492,7 @@ class EditRequest extends Component {
         temporary.departmentId = temporary.departmentId.toLowerCase()
         // console.log(temporary.requestorUser)
         this.setState({ selectedOption: { documentCheckBy: temporary.documentCheckBy }, taskDetails: temporary, tempDocument: temporary.documents, loading: false })
-        console.log(temporary)
+        // console.log(temporary)
 
         this.getDocuments(id)
 
@@ -665,7 +665,7 @@ class EditRequest extends Component {
                 }
             }
         })
-        console.log(this.state.selectedDocCheckBy)
+        //console.log(this.state.selectedDocCheckBy)
     }
 
     toggle = name => event => {
@@ -738,7 +738,7 @@ class EditRequest extends Component {
 
             //     return taskDetails
             // })
-            console.log(this.state.taskDetails.applicationTypeId)
+            //console.log(this.state.taskDetails.applicationTypeId)
             if (this.state.taskDetails.applicationTypeId === "LTU") {
                 this.setState({ docCheckBy: [] })
                 this.setState(state => {
@@ -826,7 +826,7 @@ class EditRequest extends Component {
             // if (this.state.taskDetails.teamId !== "" && this.state.taskDetails.applicationTypeId === "LTI") {
             //     this.getDocCheckBy(this.state.taskDetails.departmentId, this.state.taskDetails.teamId, event.target.value, (callback) => { })
             // }
-            console.log(this.state.taskDetails.applicationTypeId)
+            //console.log(this.state.taskDetails.applicationTypeId)
             if (event.target.value === "CONCHOP") {
                 this.toggleModal();
             }
@@ -1149,7 +1149,7 @@ class EditRequest extends Component {
         }
         else {
             for (let i = 0; i < doc.length; i++) {
-                console.log(doc[i].documentFileName, this.state.editRequestForm.docAttachedName)
+                //console.log(doc[i].documentFileName, this.state.editRequestForm.docAttachedName)
                 if (doc[i].documentFileName === this.state.editRequestForm.docAttachedName) {
                     Swal.fire({
                         title: "Document Exists",
@@ -1215,7 +1215,7 @@ class EditRequest extends Component {
                     obj.documentBase64String = result
                 })
 
-                console.log(obj)
+                //console.log(obj)
 
                 this.setState(state => {
                     let { taskDetails, invalidChinese, invalidEnglish } = this.state
@@ -1426,7 +1426,7 @@ class EditRequest extends Component {
             for (let i = 7; i < 11; i++) {
                 isDigit = digit.test(value[i])
                 if (isThird && !isDigit) {
-                    console.log("error", value[i], i)
+                    //console.log("error", value[i], i)
                     let message = "Please input 4 digits of year"
                     this.setState({ contractValid: false, contractError: message })
                     break;
@@ -1438,7 +1438,7 @@ class EditRequest extends Component {
                     for (let i = 12; i < 16; i++) {
                         isDigit = digit.test(value[i])
                         if (!isDigit) {
-                            console.log("error", value[i], i)
+                            //console.log("error", value[i], i)
                             let message = "Please input last 4 digits"
                             this.setState({ contractValid: false, contractError: message })
                             break;
@@ -1453,7 +1453,7 @@ class EditRequest extends Component {
                     for (let i = 12; i < 15; i++) {
                         isDigit = digit.test(value[i])
                         if (!isDigit) {
-                            console.log("error", value[i], i)
+                            //console.log("error", value[i], i)
                             let message = "Please input last 4 digits"
                             this.setState({ contractValid: false, contractError: message })
                             break;
@@ -1466,7 +1466,7 @@ class EditRequest extends Component {
                 }
             }
             if (isThird && isdigit1 && value.length < 15) {
-                console.log('last digit should be 4')
+                //console.log('last digit should be 4')
                 let message = "Please input last 4 digits"
                 this.setState({ contractValid: false, contractError: message })
             }
@@ -1487,7 +1487,7 @@ class EditRequest extends Component {
             for (let i = 6; i <= 9; i++) {
                 isDigit = digit.test(value[i])
                 if (isThird && !isDigit) {
-                    console.log("error", value[i], i, value, value.length)
+                    //console.log("error", value[i], i, value, value.length)
                     let message = "Please input 4 digits of year"
                     this.setState({ contractValid: false, contractError: message })
                     break;
@@ -1502,7 +1502,7 @@ class EditRequest extends Component {
                 for (let i = 12; i < 14; i++) {
                     isDigit = digit.test(value[i])
                     if (!isDigit) {
-                        console.log("error", value[i], i)
+                        //console.log("error", value[i], i)
                         let message = "Please input last 4 digits"
                         this.setState({ contractValid: false, contractError: message })
                         break;
@@ -1517,7 +1517,7 @@ class EditRequest extends Component {
                 for (let i = 12; i < 13; i++) {
                     isDigit = digit.test(value[i])
                     if (!isDigit) {
-                        console.log("error", value[i], i)
+                        //console.log("error", value[i], i)
                         let message = "Please input last 4 digits"
                         this.setState({ contractValid: false, contractError: message })
                         break;
@@ -1529,7 +1529,7 @@ class EditRequest extends Component {
                 }
             }
             if (isThird && isdigit1 && value.length < 14) {
-                console.log('last digit should be 4')
+                //console.log('last digit should be 4')
                 let message = "Please input last 4 digits"
                 this.setState({ contractValid: false, contractError: message })
             }
@@ -1540,7 +1540,7 @@ class EditRequest extends Component {
             this.setState({ contractValid: false, contractError: message })
         }
         if (isSecond && value[2] === 'I' && value[3] !== 'A' && value[3] !== undefined) {
-            console.log('please input IA')
+            //console.log('please input IA')
             let message = "Please input IA instead of I" + value[3]
             this.setState({ contractValid: false, contractError: message })
         } else if (isSecond && value[2] === 'I' && value[3] !== 'A') {
@@ -1680,7 +1680,9 @@ class EditRequest extends Component {
                     })
                     taskDetails[sname] = newValue.value
                     return { taskDetails }
-                }, console.log(this.state.taskDetails.contractSignedByFirstPerson))
+                }
+                // , console.log(this.state.taskDetails.contractSignedByFirstPerson)
+                )
             }
             else {
                 this.setState(state => {
@@ -1699,7 +1701,7 @@ class EditRequest extends Component {
             let tempDate = format(date, "yyyy-MM-dd").split('T')[0];//right
             dates = tempDate.replace(/-/g, "")
         }
-        console.log(dates)
+        //console.log(dates)
         this.setState({
             [view]: date
         });
@@ -1736,7 +1738,7 @@ class EditRequest extends Component {
                 if (taskDetails.teamId === "") {
                     errorMessage.push("Please select Team.<br />")
                 }
-                console.log(errorMessage)
+                //console.log(errorMessage)
                 if (errorMessage.length !== 0) {
                     Swal.update({
                         title: "Field Required",
@@ -1827,7 +1829,7 @@ class EditRequest extends Component {
 
         return {
             onClick: (e) => {
-                // console.log("It was in this row:", rowInfo);
+                console.log("this row:", rowInfo);
             },
             style: {
                 background:
@@ -1956,7 +1958,7 @@ class EditRequest extends Component {
         // console.log(details)
         let tempCheck = 0
         for (let i = 0; i < details.length; i++) {
-            console.log(details[i])
+            // console.log(details[i])
             var element = document.getElementById(details[i])
             let states = details[i]
             if (this.state.taskDetails[details[i]] === "" || this.state.taskDetails[details[i]].length === 0) {
@@ -2066,7 +2068,7 @@ class EditRequest extends Component {
 
         if (this.state.taskDetails.applicationTypeId === "LTU") {
             let documents = this.state.taskDetails.documents
-            console.log(documents)
+            // console.log(documents)
             // if (documents === this.state.tempDocument) {
             // documents = []
             // }
@@ -2132,7 +2134,7 @@ class EditRequest extends Component {
     }
 
     dataURLtoFile(dataurl, filename) {
-        console.log(dataurl.split(','))
+        // console.log(dataurl.split(','))
         var arr = dataurl.split(','),
             mime = arr[0].match(/:(.*?);/)[1],
             bstr = atob(arr[1]),

@@ -300,7 +300,7 @@ class Create extends Component {
         element.classList.contains("form-control")
           ? element.className = "is-invalid form-control"
           : element.className = "notValid"
-        console.log(`${validateForm[i]} is INVALID`)
+        // console.log(`${validateForm[i]} is INVALID`)
       }
 
     }
@@ -425,7 +425,7 @@ class Create extends Component {
 
     //console for dev
     for (var pair of postReq.entries()) {
-      console.log(pair[0] + ', ' + pair[1]);
+      // console.log(pair[0] + ', ' + pair[1]);
     }
 
 
@@ -517,7 +517,7 @@ class Create extends Component {
     try {
       await axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ documents: res.data })
-        console.log(res.data.length)
+        // console.log(res.data.length)
         callback(res.data.length)
       })
     } catch (error) {
@@ -634,7 +634,7 @@ class Create extends Component {
   }
 
   async getDocCheckBy(chopType, teamId) {
-    console.log("Get document check by users")
+
     await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&choptypeid=${chopType}&displayname=&userid=${this.state.userId}`,
       { headers: { Pragma: 'no-cache' } })
       .then(res => {
@@ -790,7 +790,7 @@ class Create extends Component {
 
     //CHOP TYPE
     else if (name === "chopTypeSelected") {
-      console.log(event.target.value)
+      // console.log(event.target.value)
       this.setState({ selectedOption: { docCheckBySelected: null }, docCheckBySelected: "",
        documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [], selection: [], selectedDocs:[] })
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
@@ -976,7 +976,7 @@ class Create extends Component {
       for (let i = 7; i < 11; i++) {
         isDigit = digit.test(value[i])
         if (isThird && !isDigit) {
-          console.log("error", value[i], i)
+          // console.log("error", value[i], i)
           let message = "Please input 4 digits of year"
           this.setState({ contractValid: false, contractError: message })
           break;
@@ -992,7 +992,7 @@ class Create extends Component {
           for (let i = 12; i < 16; i++) {
             isDigit = digit.test(value[i])
             if (!isDigit) {
-              console.log("error", value[i], i)
+              // console.log("error", value[i], i)
               let message = "Please input last 4 digits"
               this.setState({ contractValid: false, contractError: message })
               break;
@@ -1007,7 +1007,7 @@ class Create extends Component {
           for (let i = 12; i < 15; i++) {
             isDigit = digit.test(value[i])
             if (!isDigit) {
-              console.log("error", value[i], i)
+              // console.log("error", value[i], i)
               let message = "Please input last 4 digits"
               this.setState({ contractValid: false, contractError: message })
               break;
@@ -1020,7 +1020,7 @@ class Create extends Component {
         }
       }
       if (isThird && isdigit1 && value.length < 15) {
-        console.log('last digit should be 4')
+        // console.log('last digit should be 4')
         let message = "Please input last 4 digits"
         this.setState({ contractValid: false, contractError: message })
       }
@@ -1041,13 +1041,13 @@ class Create extends Component {
       for (let i = 6; i <= 9; i++) {
         isDigit = digit.test(value[i])
         if (isThird && !isDigit) {
-          console.log("error", value[i], i, value, value.length)
+          // console.log("error", value[i], i, value, value.length)
           let message = "Please input 4 digits of year"
           this.setState({ contractValid: false, contractError: message })
           break;
         }
         if (i === 9 && value[10] === '-') {
-          console.log(i, value[i])
+          //console.log(i, value[i])
           isdigit1 = true
         }
         else {
@@ -1061,7 +1061,7 @@ class Create extends Component {
         for (let i = 12; i < 14; i++) {
           isDigit = digit.test(value[i])
           if (!isDigit) {
-            console.log("error", value[i], i)
+            //console.log("error", value[i], i)
             let message = "Please input last 4 digits"
             this.setState({ contractValid: false, contractError: message })
             break;
@@ -1076,7 +1076,7 @@ class Create extends Component {
         for (let i = 12; i < 13; i++) {
           isDigit = digit.test(value[i])
           if (!isDigit) {
-            console.log("error", value[i], i)
+            //console.log("error", value[i], i)
             let message = "Please input last 4 digits"
             this.setState({ contractValid: false, contractError: message })
             break;
@@ -1088,7 +1088,7 @@ class Create extends Component {
         }
       }
       if (isThird && isdigit1 && value.length < 14) {
-        console.log('last digit should be 4')
+        //console.log('last digit should be 4')
         let message = "Please input last 4 digits"
         this.setState({ contractValid: false, contractError: message })
       }
@@ -1099,7 +1099,7 @@ class Create extends Component {
       this.setState({ contractValid: false, contractError: message })
     }
     if (isSecond && value[2] === 'I' && value[3] !== 'A' && value[3] !== undefined) {
-      console.log('please input IA')
+      //console.log('please input IA')
       let message = "Please input IA instead of I" + value[3]
       this.setState({ contractValid: false, contractError: message })
     } else if (isSecond && value[2] === 'I' && value[3] !== 'A') {
@@ -1214,7 +1214,7 @@ class Create extends Component {
       }
     }
     if (errorMessage.length !== 0) {
-      console.log(errorMessage)
+      //console.log(errorMessage)
       Swal.fire({
         title: "Invalid",
         html: errorMessage.join('\n\n'),
@@ -1276,7 +1276,7 @@ class Create extends Component {
         //   obj.documentBase64String = result
         // })
 
-        console.log(obj.docURL)
+        //console.log(obj.docURL)
         this.setState({
           invalidEnglish: false, invalidChinese: false
         })
@@ -1295,7 +1295,7 @@ class Create extends Component {
   getBase64(file, callback) {
     let reader = new FileReader();
     reader.onload = function () {
-      console.log(reader.result)
+      // console.log(reader.result)
       callback(reader.result.replace(/^data:.+;base64,/, ''))
     };
     reader.readAsDataURL(file)
@@ -1453,7 +1453,9 @@ class Create extends Component {
         selectedDocs.push(item._original)
       });
     }
-    this.setState({ selectAll, selection, selectedDocs }, console.log(this.state.selectedDocs));
+    this.setState({ selectAll, selection, selectedDocs }
+      // , console.log(this.state.selectedDocs)
+    );
   };
 
   /**
@@ -1468,7 +1470,7 @@ class Create extends Component {
 
     return {
       onClick: (e) => {
-        console.log("It was in this row:", rowInfo);
+        console.log("this row:", rowInfo);
       },
       style: {
         background:
@@ -1484,7 +1486,7 @@ class Create extends Component {
     if (event.target.files[0]) {
       let last = event.target.files[0].name.split('.').length
       let extension = event.target.files[0].name.split('.')[last - 1]
-      console.log(extension)
+      // console.log(extension)
       for (let i = 0; i < ext.length; i++) {
         if (ext[i] === extension || ext[i].toUpperCase() === extension) {
           valid = true
@@ -1509,7 +1511,7 @@ class Create extends Component {
   }
 
   handleSelectOption = sname => newValue => {
-    console.log(sname, newValue)
+    // console.log(sname, newValue)
 
     if (newValue) {
       if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
@@ -1573,7 +1575,7 @@ class Create extends Component {
         if (teamSelected === "") {
           errorMessage.push("Please select Team.<br />")
         }
-        console.log(errorMessage)
+        // console.log(errorMessage)
         if (errorMessage.length !== 0) {
           Swal.update({
             title: "Field Required",
@@ -1645,7 +1647,7 @@ class Create extends Component {
       while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
       }
-      console.log(mime, dataurl)
+      // console.log(mime, dataurl)
 
       return new File([u8arr], filename, { type: mime });
     }

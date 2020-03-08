@@ -60,7 +60,7 @@ class LicenseApplicationDetail extends Component {
         this.setState({ loading: true })
         await Axios.get(`${config.url}/licenses/${taskId}?userId=${Authorize.getCookies().userId}`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
-                console.log(res.data)
+                //console.log(res.data)
                 this.setState({ taskDetails: res.data, currentStatus: res.data.currentStatusId, loading: false, })
 
 
@@ -192,13 +192,13 @@ class LicenseApplicationDetail extends Component {
                     }
                 })
                 this.setState({ fields: arr })
-                console.log(arr)
+                //console.log(arr)
                 //TESTING -- ANAND//
             })
     }
 
     goBack() {
-        console.log(`/license/${this.props.match.params.page}`)
+        //console.log(`/license/${this.props.match.params.page}`)
         this.props.history.push({
             pathname: `/license/${this.props.match.params.page}`
         })
@@ -308,7 +308,7 @@ class LicenseApplicationDetail extends Component {
     }
 
     updated(action) {
-        console.log(action)
+        //console.log(action)
         let valid = true
         let deliverWay = this.state.deliverWay
         if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
@@ -479,7 +479,7 @@ class LicenseApplicationDetail extends Component {
 
 
     dataURLtoFile(dataurl, filename) {
-        console.log(dataurl.split(','))
+        //console.log(dataurl.split(','))
         var arr = dataurl.split(','),
             mime = arr[0].match(/:(.*?);/)[1],
             bstr = atob(arr[1]),

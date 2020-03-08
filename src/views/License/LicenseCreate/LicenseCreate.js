@@ -296,7 +296,7 @@ class LicenseCreate extends Component {
         if (date) {
             dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${tempDate.toLocaleString().length === 1 ? 0 : ""}${tempDate}`
         }
-        console.log(dates)
+        //console.log(dates)
         this.setState({ [view]: date });
         this.setState(state => {
             let formData = this.state.formData
@@ -307,7 +307,7 @@ class LicenseCreate extends Component {
 
     handleSelectReciever(event) {
         let value = event ? event.value : ""
-        console.log(value)
+        //console.log(value)
         var element = document.getElementById("reciever")
         if (value !== "") {
             element.className = "css-2b097c-container"

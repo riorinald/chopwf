@@ -119,7 +119,7 @@ class LicenseHelp extends Component {
                     obj.location = arr[3]
                     isError = false*/
                     // console.log(obj)
-                    console.log('Updated on 28 Feb');
+                    // console.log('Updated on 28 Feb');
                     //chopKeeperArray.sort(this.dynamicSort("chopTypeSort"));
                     chopKeeperArray.sort(function(a, b) { 
                         return a.chopTypeSort > b.chopTypeSort || -(a.chopTypeSort < b.chopTypeSort);
@@ -151,7 +151,7 @@ class LicenseHelp extends Component {
         }
 
         return function (a,b) {
-            console.log(a,'9999999')
+            //console.log(a,'9999999')
 
             if(sortOrder == -1){
                 return b[property].localeCompare(a[property]);
@@ -196,7 +196,7 @@ class LicenseHelp extends Component {
 
     async getData() {
         await Axios.get(`${config.url}/helps/license`, { headers: { Pragma: 'no-cache' } }).then(res => {
-            console.log(res.data)
+            //console.log(res.data)
         })
         // this.setState({ chopKeepers: response.data.chopKeepers, QA: response.data.QA })
     }
@@ -255,7 +255,7 @@ class LicenseHelp extends Component {
                 array.push(contactPersons)
                 array.push(chopKeepers[i].location)
                 let finalString = array.join(';')
-                console.log(finalString)
+                // console.log(finalString)
                 if (chopKeepers[i].sectionId) {
 
                 //if (i < this.state.existingCKLength) {

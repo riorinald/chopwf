@@ -46,7 +46,7 @@ class LicenseAdmin extends Component {
     getLicenseCSV() {
         Axios.get(`${config.url}/licenses/licensemanagement?companyId=${localStorage.getItem('legalEntity')}`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
-                console.log(res.data)
+                //console.log(res.data)
                 this.setState({ newLicenseAdmins: res.data.licenseManagementDisplayResponses, headers: res.data.headers })
             })
     }
@@ -86,10 +86,10 @@ class LicenseAdmin extends Component {
         let header = result.data.shift()
         // let joined = this.state.newLicenseAdmins.concat(result.data)
         let validCSV = false
-        console.log(result)
+        //console.log(result)
         header.forEach((value,index) => {
             validCSV = value.toUpperCase() === this.state.headers[index].toUpperCase()
-            console.log(value, index, value.toUpperCase() === this.state.headers[index].toUpperCase(), this.state.headers[index])
+            //console.log(value, index, value.toUpperCase() === this.state.headers[index].toUpperCase(), this.state.headers[index])
         });
         if(validCSV){
             this.setState({
@@ -129,7 +129,7 @@ class LicenseAdmin extends Component {
         if (date) {
             dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
         }
-        console.log(name, dates)
+        //console.log(name, dates)
         this.setState({ [view]: date, validDate: true });
         this.setState(state => {
             let exportDate = this.state.exportDate
@@ -195,7 +195,7 @@ class LicenseAdmin extends Component {
             // postData.append('Documents[0].Attachment.Name', csvFile.name)
             Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${Authorize.getCookies().userId}&companyId=${localStorage.getItem('legalEntity')}`, postData)
                 .then(res => {
-                    console.log(res)
+                    //console.log(res)
                     Swal.fire({
                         title: "Updated",
                         type: "success",

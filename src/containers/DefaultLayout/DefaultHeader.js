@@ -33,7 +33,7 @@ class DefaultHeader extends Component {
   }
 
   logout() {
-    console.log("logout")
+    // console.log("logout")
     fakeAuth.signOut()
   }
 

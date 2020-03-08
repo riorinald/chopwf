@@ -101,7 +101,7 @@ class ChopApplication extends Component {
     await Axios.get(`${config.url}/tasks?category=all&userid=${Authorize.getCookies().userId}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentname=${this.state.searchOption.departmentName}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ applications: res.data.tasks, loading: !this.state.loading, totalPages: res.data.pageCount === 0 ? 1 : res.data.pageCount })
-        console.log(res.data)
+        // console.log(res.data)
       })
   }
 
@@ -203,7 +203,9 @@ class ChopApplication extends Component {
       return {
         searchOption
       }
-    }, console.log(this.state.searchOption))
+    }
+    // ,console.log(this.state.searchOption)
+    )
   }
 
   toggleModal() {
@@ -278,7 +280,7 @@ class ChopApplication extends Component {
   async exportLogs() {
     let from = this.state.exportDate.exportFrom
     let to = this.state.exportDate.exportTo
-    console.log(from, to)
+    // console.log(from, to)
     if (from !== "" && to !== "") {
       let url = `${config.url}/tasks?category=export&startdate=${from}&enddate=${to}&userid=${Authorize.getCookies().userId}&companyid=${localStorage.getItem('legalEntity')}`
       window.open(url, "_blank")
@@ -299,7 +301,7 @@ class ChopApplication extends Component {
   }
 
   goToDetails(id, url) {
-    console.log(id, url)
+    
     this.props.history.push({
       pathname: url,
       state: { taskId: id }

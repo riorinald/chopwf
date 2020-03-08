@@ -73,7 +73,7 @@ class LicenseInstruction extends Component {
     async getUserInstructions(sectionId, name) {
         this.setState({ loading: true })
         await Axios.get(`${config.url}/userinstructions/license/${sectionId}`, { headers: { Pragma: 'no-cache' } }).then(res => {
-            console.log(res.data)
+            //console.log(res.data)
             this.setState({ [name]: res.data.sectionData, userGuideFile: this.dataURLtoFile(`data:application/pdf;base64,${res.data.sectionData}`), loading: false })
         })
         // console.log(res.data)
@@ -85,7 +85,7 @@ class LicenseInstruction extends Component {
             this.setState({ loading: true })
             //codes to update instructions to the database
             this.updateInstructions("USERINSTRUCTIONS", this.state.b64String, (cb) => {
-                console.log(cb)
+                //console.log(cb)
                 this.setState({ loading: false })
                 window.location.reload()
             })
@@ -132,7 +132,7 @@ class LicenseInstruction extends Component {
     }
 
     async updateInstructions(sectionId, b64, cb) {
-        console.log(b64)
+        //console.log(b64)
         let newFormData = new FormData()
         newFormData.append("sectionData", b64)
         newFormData.append("documentFileName", this.state.documentName)
@@ -147,7 +147,7 @@ class LicenseInstruction extends Component {
     }
 
     viewOrDownloadFile() {
-        console.log(this.state.b64String)
+        //console.log(this.state.b64String)
 
         if (this.state.userGuideFile) {
             var mime = "data:application/pdf;"

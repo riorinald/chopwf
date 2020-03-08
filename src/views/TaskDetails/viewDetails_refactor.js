@@ -100,7 +100,7 @@ function CheckDetail(taskDetails){
 const CNIPS = (props) => {
 
     let renderView = CheckDetail(props.taskDetails)       
-    console.log(renderView, viewTemplateCNIPS)
+    // console.log(renderView, viewTemplateCNIPS)
     return (<> 
             <FormGroup row className="px-4 py-0">
             {renderView.map((views, index) => (
