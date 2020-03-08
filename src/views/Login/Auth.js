@@ -9,6 +9,7 @@ import JWT from 'jsonwebtoken';
 import Cookies from 'universal-cookie';
 import Authorize from '../../functions/Authorize'
 
+
 import {
   AppHeader
 } from '@coreui/react';
@@ -135,21 +136,21 @@ class Authenticated extends Component {
     const requestBody = {
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: "https://docms.es.corpintra.net/clwf/login?authhandler=Daimler_OpenID"
+      redirect_uri: `${config.api}/clwf/login?authhandler=Daimler_OpenID`
     }
 
-    const config = {
+    const axiosConfig = {
       // withCredentials: false,
       headers: {
-        "Authorization": "Basic ODEyZGE3ZDItYjc0YS00ODRkLTgyYTMtZDMwZmY4YWU2ZjljOjVkZDA4NGY2LWQ5ZGEtNDUyYS04NmVlLTQ1YTZkMzAxNDM5Zg==",
+        "Authorization": `Basic ${config.clientBase64}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }
 
-    axios.post(`https://sso-int.daimler.com/as/token.oauth2`, qs.stringify(requestBody), config)
+    axios.post(`${config.OAdomain}/as/token.oauth2`, qs.stringify(requestBody), axiosConfig)
 
         .then((result) => {
-            console.log(result)
+            //console.log(result)
             this.setState({token:result.data})
             localStorage.setItem('accessToken',result.data.access_token)
             localStorage.setItem('idToken',result.data.id_token)
@@ -165,7 +166,8 @@ class Authenticated extends Component {
                 color: "danger",
               })
                 console.log(err.response)
-                console.log(err.response.statusText)}
+                // console.log(err.response.statusText)
+              }
             else {
               this.setState({
                 loading: false,
@@ -190,7 +192,7 @@ class Authenticated extends Component {
     }
     let credentials= {username: '', password: ''}
 
-       await axios.get(`https://sso-int.daimler.com/idp/userinfo.openid`, config)
+       await axios.get(`${config.OAdomain}/idp/userinfo.openid`, config)
           .then(res => {
 
             this.setState({ 
@@ -230,7 +232,7 @@ class Authenticated extends Component {
                 localStorage.setItem('licenseAdminCompanyIds', res.data.licenseAdminCompanyIds)
                 localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
 
-                console.log(res.data)
+                // console.log(res.data)
 
                 if (res.data.status === "success") {
                   this.setState({
