@@ -13,7 +13,7 @@ const sortingString = (a, b, lang=["zh-CN"], _order) => {
     let aVal = (a == null ? dflt : a).toString();
     let bVal = (b == null ? dflt : b).toString();
     return _order == "asc" ? 
-    aVal.localeCompare(bVal, lang, {numeric: true}) : bVal.localeCompare(aVal, lang, {numeric: true});
+    aVal.localeCompare(bVal, undefined, {numeric: true}) : bVal.localeCompare(aVal, undefined, {numeric: true});
 
 }
 

@@ -87,11 +87,13 @@ class LicenseMyApplications extends Component {
     async getLicenseNames() {
 
         const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
-        res.data.sort((a, b) => {
-            // return a.name.localeCompare(b.name, [ "zh-CN" ]);
-            return CommonFn.sortingString(a, b, ["zh-CN"]) 
-        });
-        this.setState({ licenseNames: res.data })
+        .then( res => {
+            res.data.sort((a, b) => {
+            // return CommonFn.sortingString(a, b, ["zh-CN"])
+            return a.name.localeCompare(b.name, [ "zh-CN-u-co-pinyin" ], {numeric: true}); 
+            })
+            this.setState({ licenseNames: res.data })
+        })
     }
 
     async getData(name) {

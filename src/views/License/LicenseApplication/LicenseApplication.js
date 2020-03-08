@@ -78,30 +78,16 @@ class LicenseApplication extends Component {
             }
    }
 
-   sortingString(a, b, _order) {
-    var order = "asc"
-    // Replace internal parameters if not used
-    if (_order == null) _order = order;
-
-    // If values are null, place them at the end
-    var dflt = (_order == "asc" ? Number.MAX_VALUE : -Number.MAX_VALUE);
-    
-    //String values
-    var aVal = (a == null ? dflt : a).toString();
-    var bVal = (b == null ? dflt : b).toString();
-    return _order == "asc" ? aVal.localeCompare(bVal, ["zh-CN"], {numeric: true}) : bVal.localeCompare(aVal, ["zh-CN"], {numeric: true});
-}
-
-
     async getLicenseNames() {
 
         const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
-        res.data.sort((a, b) => {
-            return CommonFn.sortingString(a, b, ["zh-CN"])
-            // return this.sortingString(a, b)
-            // return a.name.localeCompare(b.name, [ "zh-CN-u-co-pinyin" ]); 
-        });
-        this.setState({ licenseNames: res.data })
+        .then( res => {
+            res.data.sort((a, b) => {
+            // return CommonFn.sortingString(a, b, ["zh-CN"])
+            return a.name.localeCompare(b.name, [ "zh-CN-u-co-pinyin" ], {numeric: true}); 
+            })
+            this.setState({ licenseNames: res.data })
+        })   
     }
 
     async getData(name) {
