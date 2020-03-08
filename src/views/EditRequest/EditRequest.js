@@ -741,6 +741,7 @@ class EditRequest extends Component {
                 this.setState(state => {
                     let taskDetails = state.taskDetails
                     taskDetails.documents = []
+                    taskDetails.teamId = ""
                     return taskDetails 
                 })
             }

@@ -35,7 +35,8 @@ class TaskDetails extends Component {
             loading: true,
             page: "",
             appType: "",
-            isExpired: false
+            isExpired: false,
+            isLoading: false,
         }
 
         this.goBack = this.goBack.bind(this)
@@ -64,12 +65,27 @@ class TaskDetails extends Component {
                 console.log('expired')
                 this.setState({isExpired: true})
             }
+
             this.setState({ taskDetails: res.data, appType: res.data.applicationTypeId, loading: false })
             this.convertTaskDetails()
             console.log(res.data)
         })
         // this.getUserDetails()
 
+    }
+
+    async getDocuments(taskId) {
+        this.setState({isLoading: true})
+        await Axios.get(`${config.url}/documents?category=normal&taskid=${taskId}`)
+        .then( res => {
+            this.setState( state => ({
+                isLoading: false,
+                taskDetails:{
+                ...state.taskDetails,
+                documents: res.data
+            }
+            }))
+        })
     }
 
     async getUserDetails() {
@@ -216,6 +232,7 @@ class TaskDetails extends Component {
 
     toggleView() {
         this.setState({ showModal: !this.state.showModal })
+        this.getDocuments(this.props.location.state.taskId)
     }
 
 
@@ -339,7 +356,7 @@ class TaskDetails extends Component {
 
     render() {
 
-        const { taskDetails, loading, showModal, page, appType, isExpired } = this.state
+        const { taskDetails, loading, showModal, page, appType, isExpired, isLoading } = this.state
 
         if (page === 'mypendingtask' && isExpired){
             return <>
@@ -428,7 +445,7 @@ class TaskDetails extends Component {
                                         </Col> */}
                                         <Col md><h5> {taskDetails.requestorUser.displayName} </h5>
                                             <Row>
-                                                <Col md><h6> DFS/CN, {taskDetails.requestorUser.companyCode} </h6></Col>
+                                                <Col md><h6> {taskDetails.requestorUser.departmentAbbr}, {taskDetails.requestorUser.companyId} </h6></Col>
                                             </Row>
                                             <Row>
                                                 <Col xs={12} sm={12} md={6} lg={6}>
@@ -464,6 +481,7 @@ class TaskDetails extends Component {
                                                 <ReactTable
                                                     data={taskDetails.documents}
                                                     sortable
+                                                    loading={isLoading}
                                                     columns={[
                                                         {
                                                             Header: "#",
