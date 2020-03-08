@@ -13,12 +13,6 @@ import {
   AppHeader
 } from '@coreui/react';
 
-const scope ="openid"
-const client_id="812da7d2-b74a-484d-82a3-d30ff8ae6f9c"
-const client_secret="5dd084f6-d9da-452a-86ee-45a6d301439f"
-const redirect_uri="https%3A%2F%2Fdocms.es.corpintra.net%2Fclwf%2Flogin%3Fauthhandler%3DDaimler_OpenID"
-const pathname=`https://sso-int.daimler.com/as/authorization.oauth2?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}`
-
 const cookies = new Cookies();
 
 class Authenticated extends Component { 
@@ -325,7 +319,7 @@ class Authenticated extends Component {
             <label className="display-5 mb-4 ">{this.state.title}</label>
             <Alert color={this.state.color} >{this.state.info}</Alert >
             {this.state.isExpired ?
-            <Button className="btn-openid btn-brand mb-2" onClick= {event =>  window.location.href = pathname} >
+            <Button className="btn-openid btn-brand mb-2" onClick= {event =>  window.location.href = config.openid} >
                 <i className="fa fa-openid"></i><span>Daimler OpenID Auth</span> </Button>
             : null }
             {/* {this.state.timer === 0 ? <p className="mt-3 mb-0"><span style={{color:'grey'}}>Redirect in {this.state.timer}</span></p>:null} */}

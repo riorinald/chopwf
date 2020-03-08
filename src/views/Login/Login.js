@@ -304,8 +304,8 @@ class Login extends Component {
                                 </Button>
                             </Col> */}
                             <Col className="text-center">
-                                <Button className="btn-openid btn-brand" onClick= {event =>  window.location.href = pathname} >
-                                    <i className="fa fa-openid"></i><span>Daimler OpenID Auth</span>
+                                <Button className="btn-openid btn-brand" onClick= {event =>  window.location.href = config.openid} >
+                                    <i className="fa fa-openid"></i><span>Login with Daimler OpenID</span>
                                 </Button>
                             </Col>
                         </Row>
