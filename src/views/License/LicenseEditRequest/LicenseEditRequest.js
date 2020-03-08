@@ -37,7 +37,7 @@ import config from '../../../config'
 import axios from 'axios'
 import makeAnimated from 'react-select/animated';
 import Swal from 'sweetalert2';
-import Authorize from '../../../functions/Authorize'
+import {Authorize, CommonFn} from '../../../functions/'
 
 
 
@@ -89,7 +89,8 @@ class LicenseEditRequest extends Component {
     async getLicenseNames() {
         const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
         res.data.sort((a, b) => {
-            return a.name.localeCompare(b.name, [ "zh-CN-u-co-pinyin" ]); 
+            // return a.name.localeCompare(b.name, [ "zh-CN" ]);
+            return CommonFn.sortingString(a, b, ["zh-CN"]) 
         });
         this.setState({ licenseNames: res.data })
     }

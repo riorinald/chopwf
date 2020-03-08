@@ -16,7 +16,7 @@ import Select from 'react-select'
 import Swal from 'sweetalert2';
 import AsyncSelect from 'react-select/async';
 import makeAnimated from 'react-select/animated';
-import Authorize from '../../../functions/Authorize'
+import {Authorize, CommonFn} from '../../../functions/'
 
 
 
@@ -82,10 +82,11 @@ class LicenseCreate extends Component {
     async getLicenseNames() {
         const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
         res.data.sort((a, b) => {
-            return a.name.localeCompare(b.name, [ "zh-CN-u-co-pinyin" ]); 
+            return CommonFn.sortingString(a, b, ["zh-CN"])
+            // return a.name.localeCompare(b.name, [ "zh-CN" ]); 
         });
         this.setState({ licenseNames: res.data })
-    }
+    }   
 
     async getData(name) {
         let res = await axios.get(`${config.url}/${name}`, { headers: { Pragma: 'no-cache' } })

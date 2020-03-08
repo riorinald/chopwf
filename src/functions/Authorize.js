@@ -21,7 +21,6 @@ const setCookies = (data) => {
 		console.log('SET COOKIE EXP', expiredIn)
 		cookies.set('userInfo', data, { path:'/', expires: expiredIn });
 	}
-
 const check = (legalEntity, adminEntity) => {
 		let isAdmin = false
 		// for (let i = 0; i < adminEntity.length; i++) {
