@@ -253,7 +253,6 @@ class Authenticated extends Component {
         if (error.response){
         this.setState({ 
           info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.",
-          isExpired:true,
           color:"danger",
         });
         }
