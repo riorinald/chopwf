@@ -12,9 +12,9 @@ const scope ="openid"
 const domainName = "https://sso.daimler.com"
 const client_id= "e986adf8-e9c3-496f-a2d1-bc3e25044449"
 const client_secret= "da1c2da8-3d13-405b-b085-5a125a868e68"
-const clientBase64= "OWViNjlhMjEtNjViMC00MTgyLWJjMWUtMDY5NmYwZWZjMjk0OmQ0Y2EzZmQyLWNkODgtNDgwYy1iNDdkLTIwM2Y1ZTgwYzY0MQ=="
-const redirect_uri="https%3A%2F%2Fndocms.es.corpintra.net%2Fclwf%2Flogin%3Fauthhandler%3DDaimler_OpenID"
-const pathname=`${domainName}/as/authorization.oauth2?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}`
+const clientBase64= "ZTk4NmFkZjgtZTljMy00OTZmLWEyZDEtYmMzZTI1MDQ0NDQ5OmRhMWMyZGE4LTNkMTMtNDA1Yi1iMDg1LTVhMTI1YTg2OGU2OA=="
+const redirectURI="https%3A%2F%2Fndocms.es.corpintra.net%2Fclwf%2Flogin%3Fauthhandler%3DDaimler_OpenID"
+const pathname=`${domainName}/as/authorization.oauth2?response_type=code&client_id=${client_id}&redirect_uri=${redirectURI}&scope=${scope}`
 
 export default {
     //LOCAL-DEV API
@@ -27,6 +27,7 @@ export default {
     url: "https://ndocms.es.corpintra.net/clwfb/api/v1",
 
     OAdomain: domainName,
+    redirectURI: redirectURI,
     clientBase64: clientBase64, 
     openid: pathname,
     allowedExtension: ["jpg", "png", "xls", "xlsm", "xlsx", "msg", "jpeg", "txt", "rtf", "tiff", "tif", "doc", "docx", "pdf", "pdfx", "bmp"]
