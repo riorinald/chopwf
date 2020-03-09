@@ -136,7 +136,7 @@ class Authenticated extends Component {
     const requestBody = {
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: `${config.api}/clwf/login?authhandler=Daimler_OpenID`
+      redirect_uri: `${config.url}/clwf/login?authhandler=Daimler_OpenID`
     }
 
     const axiosConfig = {
@@ -161,7 +161,7 @@ class Authenticated extends Component {
               this.setState({
                 loading: false,
                 title: 'You are not Authenticated',
-                info:'error:' + err.response.statusText,
+                info:'error: can not retrieve token | ' + err.response.statusText,
                 timer:5,
                 color: "danger",
               })
@@ -184,7 +184,7 @@ class Authenticated extends Component {
   }
 
   async getOpenId(token) {
-    const config = {
+    const axiosConfig = {
       headers: {
         "Authorization": "Bearer "+ token,
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -192,7 +192,7 @@ class Authenticated extends Component {
     }
     let credentials= {username: '', password: ''}
 
-       await axios.get(`${config.OAdomain}/idp/userinfo.openid`, config)
+       await axios.get(`${config.OAdomain}/idp/userinfo.openid`, axiosConfig)
           .then(res => {
 
             this.setState({ 

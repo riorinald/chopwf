@@ -18,13 +18,13 @@ const pathname=`${domainName}/as/authorization.oauth2?response_type=code&client_
 
 export default {
     //LOCAL-DEV API
-    // url: "http://192.168.1.47/echopx/api/v1", 
+    url: "http://192.168.1.47/echopx/api/v1", 
     
     //DAIMLER STAGING API
     // url: "https://docms.es.corpintra.net/clwfb/api/v1",
     
     //DAIMLER PROD API
-    url: "https://ndocms.es.corpintra.net/clwfb/api/v1",
+    // url: "https://ndocms.es.corpintra.net/clwfb/api/v1",
 
     OAdomain: domainName,
     clientBase64: clientBase64, 
