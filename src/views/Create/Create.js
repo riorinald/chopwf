@@ -22,7 +22,7 @@ import selectTableHOC from "react-table/lib/hoc/selectTable";
 import PropTypes from "prop-types";
 import LegalEntity from '../../context';
 
-import Authorize from '../../functions/Authorize'
+import {Authorize, CommonFn} from '../../functions/'
 // import Skeleton from 'react-loading-skeleton';
 
 
@@ -809,6 +809,7 @@ class Create extends Component {
       if (event.target.value === "BCSCHOP") {
         this.setState({ showBranches: true })
         this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
+        CommonFn.sortingArrayStr(this.state.branches, "branchName", "zh-CN-u-co-pinyi", true)
       }
 
       else {

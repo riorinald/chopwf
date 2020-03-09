@@ -17,6 +17,13 @@ const sortingString = (a, b, lang=["zh-CN"], _order) => {
 
 }
 
-const CommonFn = ({sortingString})
+const sortingArrayStr = (data = [], param = "", lang="zh-CN-u-co-pinyin", isNumeric=true) => {
+    data.sort((a, b) => {
+
+        return a[param].localeCompare(b[param], [ lang ], {numeric: isNumeric}); 
+        })
+}
+
+const CommonFn = ({sortingString, sortingArrayStr})
 
 export default CommonFn;

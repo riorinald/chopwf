@@ -40,7 +40,8 @@ import PropTypes from "prop-types";
 import SimpleReactValidator from 'simple-react-validator';
 import LegalEntity from '../../context';
 import TextareaAutosize from 'react-autosize-textarea';
-import Authorize from '../../functions/Authorize'
+import {Authorize, CommonFn} from '../../functions/'
+
 
 
 
@@ -480,6 +481,8 @@ class EditRequest extends Component {
         if (temporary.chopTypeId === "BCSCHOP") {
             await this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
             await this.getDocCheckBy(response.data.departmentId, response.data.teamId, response.data.chopTypeId, (callback) => { })
+            CommonFn.sortingArrayStr(this.state.branches, "branchName", "zh-CN-u-co-pinyi", true)
+
         }
 
         if (temporary.applicationTypeId === "LTU") {
@@ -852,6 +855,7 @@ class EditRequest extends Component {
 
             if (event.target.value === "BCSCHOP") {
                 this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
+                CommonFn.sortingArrayStr(this.state.branches, "branchName", "zh-CN-u-co-pinyi", true)
             }
         }
         else if (name === "numOfPages") {
