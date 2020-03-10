@@ -481,8 +481,6 @@ class EditRequest extends Component {
         if (temporary.chopTypeId === "BCSCHOP") {
             await this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
             await this.getDocCheckBy(response.data.departmentId, response.data.teamId, response.data.chopTypeId, (callback) => { })
-            CommonFn.sortingArrayStr(this.state.branches, "branchName", "zh-CN-u-co-pinyi", true)
-
         }
 
         if (temporary.applicationTypeId === "LTU") {
@@ -855,7 +853,6 @@ class EditRequest extends Component {
 
             if (event.target.value === "BCSCHOP") {
                 this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
-                CommonFn.sortingArrayStr(this.state.branches, "branchName", "zh-CN-u-co-pinyi", true)
             }
         }
         else if (name === "numOfPages") {
@@ -2436,7 +2433,8 @@ class EditRequest extends Component {
                                         {taskDetails.chopTypeId === "BCSCHOP" && this.state.branches !== []
                                             ? <FormGroup>
                                                 <Label>Branch Company Chop</Label>
-                                                <Input onChange={this.handleChange("branchId")} type="select" value={taskDetails.branchId} onWheel={event => { event.preventDefault(); }}>
+                                                <Input onChange={this.handleChange("branchId")} type="select" value={taskDetails.branchId} onWheel={event => { event.preventDefault(); }}
+                                                onClick={CommonFn.sortingArrayStr(this.state.branches, "branchName", "zh-CN-u-co-pinyin", true)}>
                                                     <option value="" disabled>Please specify your Branch Company Chop</option>
                                                     {this.state.branches.map((branch, index) =>
                                                         <option value={branch.branchId} key={index}>{branch.branchName}</option>

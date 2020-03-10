@@ -809,7 +809,6 @@ class Create extends Component {
       if (event.target.value === "BCSCHOP") {
         this.setState({ showBranches: true })
         this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
-        CommonFn.sortingArrayStr(this.state.branches, "branchName", "zh-CN-u-co-pinyi", true)
       }
 
       else {
@@ -2227,7 +2226,8 @@ class Create extends Component {
                   {this.state.showBranches
                     ? <FormGroup>
                       <Label>Branch Company Chop</Label>
-                      <Input onChange={this.handleChange("branchSelected")} type="select" value={this.state.branchSelected} onWheel={event => { event.preventDefault(); }}>
+                      <Input onChange={this.handleChange("branchSelected")} type="select" value={this.state.branchSelected} onWheel={event => { event.preventDefault(); }}
+                      onClick={CommonFn.sortingArrayStr(this.state.branches, "branchName", "zh-CN-u-co-pinyin", true)}>
                         <option value="" disabled>Please specify your Branch Company Chop</option>
                         {this.state.branches.map((branch, index) =>
                           <option value={branch.branchId} key={index}>{branch.branchName}</option>
