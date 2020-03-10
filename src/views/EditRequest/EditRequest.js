@@ -501,7 +501,7 @@ class EditRequest extends Component {
 
     async getDocuments(taskId) {
         // this.setState({isLoading: true})
-        await Axios.get(`${config.url}/documents?category=normal&taskid=${taskId}`)
+        await Axios.get(`${config.url}/documents?category=normal&taskid=${taskId}`, { headers: { Pragma: 'no-cache' } })
         .then( res => {
             this.setState( state => ({
                 // isLoading: false,
