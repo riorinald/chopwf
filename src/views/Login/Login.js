@@ -55,7 +55,7 @@ class Login extends Component {
     }
 
     componentDidMount(){
-        const param = qs.parse(this.props.location.search)
+        const param = qs.parse(this.props.location.search.slice(1))
         if (param.code){
             console.log('code acquired!', param.code)
             this.props.history.push({
@@ -63,13 +63,24 @@ class Login extends Component {
                 code: param.code
             })
         }
-        if(cookies.get('userInfo', {path:'/'})){
-            this.props.history.push('/portal')
+        if (param.auth === "manual"){
+            console.log(param.auth)
+            this.setState({
+                modal: true 
+             })
         }
         else{
-            this.setState({
-               modal: true 
-            })
+            if(cookies.get('userInfo', {path:'/'})){
+                this.props.history.push('/portal')
+            }
+            else{
+                this.props.history.push({
+                    pathname:'/oauth'
+                })
+                // this.setState({
+                //     modal: true 
+                //  })
+            }
         }
         if (param.userid){
             this.setState({
