@@ -38,7 +38,7 @@ const Logout = (props) => {
 							<Alert center color="danger">You have been successfully logged out.</Alert >
 							<div center>
 								<Button className="btn-openid btn-brand" onClick= {event =>  window.location.href = config.openid} >
-										<i className="fa fa-openid"></i><span>Click here to login with Daimler OpenID</span>
+										<i className="fa fa-openid"></i><span>Click here to login again.</span>
 								</Button>
 							</div>
 							{/* <p className="mb-0"><center>Redirect in {timer}</center></p>  */}
