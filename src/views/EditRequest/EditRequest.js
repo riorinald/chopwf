@@ -172,7 +172,8 @@ class EditRequest extends Component {
             contractNumNotes: "",
             contractError: "",
             checkDetails: { deptTempSelected: "null", chopTypeTempSelected: "null", teamTempSelected: "null" },
-            wrongDocError: ""
+            wrongDocError: "",
+            isLoading:false
         }
         this.getTaskDetails = this.getTaskDetails.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -500,11 +501,11 @@ class EditRequest extends Component {
     }
 
     async getDocuments(taskId) {
-        // this.setState({isLoading: true})
+        this.setState({isLoading: true})
         await Axios.get(`${config.url}/documents?category=normal&taskid=${taskId}`, { headers: { Pragma: 'no-cache' } })
         .then( res => {
             this.setState( state => ({
-                // isLoading: false,
+                isLoading: false,
                 taskDetails:{
                 ...state.taskDetails,
                 documents: res.data
@@ -2621,6 +2622,13 @@ class EditRequest extends Component {
                                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Documents', taskDetails.documents, 'required')}</small>
                                                             : null}
                                                     </InputGroup>
+                                                    {this.state.isLoading ? 
+                                                    <div>
+                                                        <center> Loading Docuemnts  
+                                                            <Spinner className="ml-2" size="sm" type="grow"/><Spinner size="sm" type="grow"/><Spinner size="sm" type="grow"/> 
+                                                        </center>
+                                                    </div>
+                                                    :
                                                     <Collapse isOpen={taskDetails.documents.length !== 0}>
                                                         <div className="tableWrap">
                                                             <Table hover bordered responsive size="sm">
@@ -2657,7 +2665,9 @@ class EditRequest extends Component {
                                                             </Table>
                                                         </div>
                                                     </Collapse>
-                                                </div>}
+                                                    }
+                                                </div>
+                                                }
                                         </FormGroup>
 
                                         <FormGroup>
