@@ -1176,7 +1176,7 @@ class Create extends Component {
       errorMessage.push("Please select a valid document.<br />")
     }
       else if (this.state.docSelected.size === 0) {
-        errorMessage.push("Can not upload empty document.<br />")
+        errorMessage.push("Document you tried adding has no content.<br />")
         this.setState({ wrongDocError: "Document is empty." })
       }
     if (this.state.isLTI) {
@@ -1310,7 +1310,7 @@ class Create extends Component {
         contractError.push("Please select a valid document.<br />")
       }
         else if (this.state.docSelected.size === 0) {
-          contractError.push("Can not upload empty document.<br />")
+          contractError.push("Document you tried adding has no content.<br />")
           this.setState({ wrongDocError: "Document is empty." })
         }
       if (this.state.engName === "") {
