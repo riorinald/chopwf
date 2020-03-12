@@ -36,11 +36,11 @@ const Logout = (props) => {
 					<Card className="shadow-lg p-3 rounded">
 						<CardBody>
 							<Alert center color="danger">You have been successfully logged out.</Alert >
-							<div center>
+							<center>
 								<Button className="btn-openid btn-brand" onClick= {event =>  window.location.href = config.openid} >
 										<i className="fa fa-openid"></i><span>Click here to login again.</span>
 								</Button>
-							</div>
+							</center>
 							{/* <p className="mb-0"><center>Redirect in {timer}</center></p>  */}
 						</CardBody>
 					</Card>
