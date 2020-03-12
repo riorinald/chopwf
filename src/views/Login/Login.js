@@ -73,7 +73,7 @@ class Login extends Component {
             if(cookies.get('userInfo', {path:'/'})){
                 this.props.history.push('/portal')
             }
-            else{
+            else if(this.props.location.search === ""){
                 this.props.history.push({
                     pathname:'/oauth'
                 })
