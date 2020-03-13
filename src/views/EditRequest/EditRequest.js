@@ -388,6 +388,7 @@ class EditRequest extends Component {
             this.state.docCheckBy.map((head, index) => {
                 if (head.value === person[0]) {
                     i = index
+                    console.log(head.value)
                     this.setState({ selectedDocCheckBy: head.value })
                 }
             })
@@ -411,6 +412,7 @@ class EditRequest extends Component {
         else {
             i = null
         }
+        console.log(i)
         return i
     }
 
@@ -442,28 +444,30 @@ class EditRequest extends Component {
         if (temporary.returnDate !== '') {
             this.convertDate(temporary.returnDate, 'dateView2')
         }
-        temporary.responsiblePersonOption = this.getOptionAllUsers(temporary.responsiblePerson)
-        temporary.pickUpByOption = this.getOptionAllUsers(temporary.pickUpBy)
+        // temporary.responsiblePersonOption = this.getOptionAllUsers(temporary.responsiblePerson)
+        temporary.responsiblePersonOption = {value:temporary.responsiblePerson, label:temporary.responsiblePersonName}
+        temporary.pickUpByOption = {value:temporary.pickUpBy, label:temporary.pickUpByName}
 
         //CNIPS
         if (temporary.applicationTypeId === "CNIPS") {
-            temporary.contractSignedByFirstPersonOption = this.getOptionAllUsers(temporary.contractSignedByFirstPerson)
-            temporary.contractSignedBySecondPersonOption = this.getOptionAllUsers(temporary.contractSignedBySecondPerson)
+            temporary.contractSignedByFirstPersonOption = {value:temporary.contractSignedByFirstPerson, label:temporary.contractSignedByFirstPersonName}
+            temporary.contractSignedBySecondPersonOption = {value:temporary.contractSignedBySecondPerson, label:temporary.contractSignedBySecondPersonName}
         }
-
         //LTU
         else if (temporary.applicationTypeId === "LTU") {
             if (temporary.teamId !== "" && temporary.departmentId !== "") {
+                this.getSelected(temporary.documentCheckBy, temporary.documentCheckByName)
                 this.getDocCheckBy(temporary.departmentId, temporary.teamId, temporary.chopTypeId, (callback) => {
-                    temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
-                    temporary.documentCheckBy = temporary.documentCheckBy.length !== 0 ? this.getSelected(temporary.documentCheckBy) : null
+                //     temporary.docCheckByOption = temporary.documentCheckBy.length !== 0 ? this.getDocCheckByOption(temporary.documentCheckBy) : null
+                //     temporary.documentCheckBy = temporary.documentCheckBy.length !== 0 ? this.getSelected(temporary.documentCheckBy) : null
                 })
             }
         }
 
         else if (temporary.applicationTypeId === "LTI") {
 
-            this.setSelectedDocCheckBy(temporary.documentCheckBy)
+            // this.setSelectedDocCheckBy(temporary.documentCheckBy)
+            this.setSelectedDeptHead(temporary.documentCheckBy, temporary.documentCheckBy, "selectedDocCheckBy")
             if (temporary.effectivePeriod !== "") {
                 this.convertDate(temporary.effectivePeriod, 'dateView1')
             }
@@ -473,7 +477,7 @@ class EditRequest extends Component {
             let editRequestForm = this.state.editRequestForm
             editRequestForm.collapseUIO = temporary.isUseInOffice === "Y" ? true : false
         })
-        this.setSelectedDeptHead(temporary.departmentHeads)
+        this.setSelectedDeptHead(temporary.departmentHeads, temporary.departmentHeadsName, "selectedDeptHeads")
 
 
         await this.getData("departments", `${config.url}/departments`)
@@ -481,7 +485,9 @@ class EditRequest extends Component {
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}&apptypeid=${temporary.applicationTypeId}`);
         if (temporary.chopTypeId === "BCSCHOP") {
             await this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
-            await this.getDocCheckBy(response.data.departmentId, response.data.teamId, response.data.chopTypeId, (callback) => { })
+            // await this.getDocCheckBy(response.data.departmentId, response.data.teamId, response.data.chopTypeId, (callback) => { })
+            this.setSelectedDeptHead(temporary.documentCheckBy, temporary.documentCheckBy, "selectedDocCheckBy")
+
         }
 
         if (temporary.applicationTypeId === "LTU") {
@@ -493,7 +499,8 @@ class EditRequest extends Component {
         }
         temporary.departmentId = temporary.departmentId.toLowerCase()
         // console.log(temporary.requestorUser)
-        this.setState({ selectedOption: { documentCheckBy: temporary.documentCheckBy }, taskDetails: temporary, tempDocument: temporary.documents, loading: false })
+        // this.setState({ selectedOption: { documentCheckBy: temporary.documentCheckBy }, taskDetails: temporary, tempDocument: temporary.documents, loading: false })
+        this.setState({ taskDetails: temporary, tempDocument: temporary.documents, loading: false })
         // console.log(temporary)
 
         this.getDocuments(id)
@@ -514,21 +521,31 @@ class EditRequest extends Component {
         })
     }
 
-    getSelected(person) {
-        let obj = {}
-        if (person.length === 1) {
-            this.state.docCheckBy.map((head, index) => {
-                if (head.value === person[0]) {
-                    obj = head
-                    this.setState({ selectedDocCheckBy: head.value })
-                }
-            })
-        }
-        else {
+    getSelected(value, label) {
+        let combined = {}
+        value.map((value, index) => 
+            combined = {value:value, label:label[index]}
+        )  
+        console.log(combined)
+        this.setState({
+            selectedOption:{
+                documentCheckBy: combined
+            }
+        })
+        // let obj = {}
+        // if (person.length === 1) {
+        //     this.state.docCheckBy.map((head, index) => {
+        //         if (head.value === person[0]) {
+        //             obj = head
+        //             this.setState({ selectedDocCheckBy: head.value })
+        //         }
+        //     })
+        // }
+        // else {
 
-            obj = null
-        }
-        return obj
+        //     obj = null
+        // }
+        // return obj
     }
 
     setValidForm() {
@@ -678,23 +695,31 @@ class EditRequest extends Component {
     }
 
 
-    setSelectedDeptHead(deptHeads) {
-        let selected = deptHeads
-        selected.map(select => {
-            let temp = ""
-            for (let i = 0; i < this.state.deptHeads.length; i++) {
-                if (select === this.state.deptHeads[i].value) {
-                    temp = this.state.deptHeads[i]
-                    this.setState(state => {
-                        const selectedDeptHeads = this.state.selectedDeptHeads.concat(temp)
-                        return {
-                            selectedDeptHeads
-                        }
-                    })
-                    break;
-                }
-            }
+    setSelectedDeptHead(value, label, state) {
+        let combined = []
+        value.map((value, index) => 
+            combined.push({value:value, label:label[index]})
+        )  
+
+        this.setState({
+            [state]: combined
         })
+
+        //     let temp = ""
+        //     for (let i = 0; i < this.state.deptHeads.length; i++) {
+        //         if (select === this.state.deptHeads[i].value) {
+        //             temp = this.state.deptHeads[i]
+        //             this.setState(state => {
+        //                 const selectedDeptHeads = this.state.selectedDeptHeads.concat(temp)
+        //                 console.log(selectedDeptHeads)
+        //                 return {
+        //                     selectedDeptHeads
+        //                 }
+        //             })
+        //             break;
+        //         }
+        //     }
+        // })
     }
 
     toggleModal() {
@@ -1637,7 +1662,7 @@ class EditRequest extends Component {
                 value.push(newValue.value)
                 option = this.getDocCheckByOption(value)
             }
-            // console.log(value)
+            console.log(value)
             // console.log(this.state.docCheckBy)
             this.setState(state => {
                 let taskDetails = this.state.taskDetails
