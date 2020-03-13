@@ -136,7 +136,7 @@ class Authenticated extends Component {
     const requestBody = {
       grant_type: 'authorization_code',
       code: code, 
-      redirect_uri: "https://docms.es.corpintra.net/clwf/login?authhandler=Daimler_OpenID"
+      redirect_uri: "https://ndocms.es.corpintra.net/clwf/login?authhandler=Daimler_OpenID"
     }
 
     const axiosConfig = {
