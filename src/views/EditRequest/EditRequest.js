@@ -467,7 +467,7 @@ class EditRequest extends Component {
         else if (temporary.applicationTypeId === "LTI") {
 
             // this.setSelectedDocCheckBy(temporary.documentCheckBy)
-            this.setSelectedDeptHead(temporary.documentCheckBy, temporary.documentCheckBy, "selectedDocCheckBy")
+            this.setSelectedDeptHead(temporary.documentCheckBy, temporary.documentCheckByName, "selectedDocCheckBy")
             if (temporary.effectivePeriod !== "") {
                 this.convertDate(temporary.effectivePeriod, 'dateView1')
             }
@@ -486,7 +486,7 @@ class EditRequest extends Component {
         if (temporary.chopTypeId === "BCSCHOP") {
             await this.getData("branches", `${config.url}/branches?companyid=${this.props.legalName}`)
             // await this.getDocCheckBy(response.data.departmentId, response.data.teamId, response.data.chopTypeId, (callback) => { })
-            this.setSelectedDeptHead(temporary.documentCheckBy, temporary.documentCheckBy, "selectedDocCheckBy")
+            this.setSelectedDeptHead(temporary.documentCheckBy, temporary.documentCheckByName, "selectedDocCheckBy")
 
         }
 
