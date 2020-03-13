@@ -972,65 +972,65 @@ class Create extends Component {
         let message = "Third value should be O / P / S"
         this.setState({ contractValid: false, contractError: message })
       }
-
-      for (let i = 7; i < 11; i++) {
-        isDigit = digit.test(value[i])
-        if (isThird && !isDigit) {
-          // console.log("error", value[i], i)
-          let message = "Please input 4 digits of year"
-          this.setState({ contractValid: false, contractError: message })
-          break;
-        }
-        if (i === 10 && value[11] === '-') {
-          isdigit1 = true
-        }
-        else {
-          let message = "Please add ( - ) after 4 digits of year"
-          this.setState({ contractValid: false, contractError: message })
-        }
-        if (isdigit1 && value.length === 16) {
-          for (let i = 12; i < 16; i++) {
-            isDigit = digit.test(value[i])
-            if (!isDigit) {
-              // console.log("error", value[i], i)
-              let message = "Please input last 4 digits"
-              this.setState({ contractValid: false, contractError: message })
-              break;
+      if(isThird){
+        for (let i = 7; i < 11; i++) {
+          isDigit = digit.test(value[i])
+          if (!isDigit) {
+            // console.log("error", value[i], i)
+            let message = "Please input 4 digits of year"
+            this.setState({ contractValid: false, contractError: message })
+            break;
+          }
+          if (i === 10 && value[11] === '-') {
+            isdigit1 = true
+          }
+          else {
+            let message = "Please add ( - ) after 4 digits of year"
+            this.setState({ contractValid: false, contractError: message })
+          }
+          if (isdigit1 && value.length === 16) {
+            for (let i = 12; i < 16; i++) {
+              isDigit = digit.test(value[i])
+              if (!isDigit) {
+                // console.log("error", value[i], i)
+                let message = "Please input last 4 digits"
+                this.setState({ contractValid: false, contractError: message })
+                break;
+              }
+              else {
+                valid = true
+                this.setState({ contractValid: true, contractError: "" })
+              }
             }
-            else {
-              valid = true
-              this.setState({ contractValid: true, contractError: "" })
+          }
+          if (isdigit1 && value.length === 15) {
+            for (let i = 12; i < 15; i++) {
+              isDigit = digit.test(value[i])
+              if (!isDigit) {
+                // console.log("error", value[i], i)
+                let message = "Please input last 4 digits"
+                this.setState({ contractValid: false, contractError: message })
+                break;
+              }
+              else {
+                valid = true
+                this.setState({ contractValid: true, contractError: "" })
+              }
             }
           }
         }
-        if (isdigit1 && value.length === 15) {
-          for (let i = 12; i < 15; i++) {
-            isDigit = digit.test(value[i])
-            if (!isDigit) {
-              // console.log("error", value[i], i)
-              let message = "Please input last 4 digits"
-              this.setState({ contractValid: false, contractError: message })
-              break;
-            }
-            else {
-              valid = true
-              this.setState({ contractValid: true, contractError: "" })
-            }
-          }
+        if (isThird && isdigit1 && value.length < 15) {
+          // console.log('last digit should be 4')
+          let message = "Please input last 4 digits"
+          this.setState({ contractValid: false, contractError: message })
         }
-      }
-      if (isThird && isdigit1 && value.length < 15) {
-        // console.log('last digit should be 4')
-        let message = "Please input last 4 digits"
-        this.setState({ contractValid: false, contractError: message })
-      }
-      if (isThird && isdigit1 && value.length > 16) {
-        valid = false
-        let message = "Invalid contract format"
-        this.setState({ contractValid: false, contractError: message })
+        if (isThird && isdigit1 && value.length > 16) {
+          valid = false
+          let message = "Invalid contract format"
+          this.setState({ contractValid: false, contractError: message })
+        }
       }
     }
-
     if (isSecond && value[2] !== 'I') {
       if (third.test(value[4])) {
         isThird = true
@@ -1038,59 +1038,61 @@ class Create extends Component {
         let message = "Third value should be O / P / S"
         this.setState({ contractValid: false, contractError: message })
       }
-      for (let i = 6; i <= 9; i++) {
-        isDigit = digit.test(value[i])
-        if (isThird && !isDigit) {
-          // console.log("error", value[i], i, value, value.length)
-          let message = "Please input 4 digits of year"
-          this.setState({ contractValid: false, contractError: message })
-          break;
-        }
-        if (i === 9 && value[10] === '-') {
-          //console.log(i, value[i])
-          isdigit1 = true
-        }
-        else {
-          let message = "Please add ( - ) after 4 digits of year"
-          this.setState({ contractValid: false, contractError: message })
-        }
-      }
-
-      if (isdigit1 && value.length === 15) {
-
-        for (let i = 12; i < 14; i++) {
+        if(isThird){
+        for (let i = 6; i <= 9; i++) {
           isDigit = digit.test(value[i])
           if (!isDigit) {
-            //console.log("error", value[i], i)
-            let message = "Please input last 4 digits"
+            // console.log("error", value[i], i, value, value.length)
+            let message = "Please input 4 digits of year"
             this.setState({ contractValid: false, contractError: message })
             break;
           }
-          else {
-            valid = true
-            this.setState({ contractValid: true, contractError: "" })
+          if (i === 9 && value[10] === '-') {
+            //console.log(i, value[i])
+            isdigit1 = true
           }
-        }
-      }
-      if (isdigit1 && value.length === 14) {
-        for (let i = 12; i < 13; i++) {
-          isDigit = digit.test(value[i])
-          if (!isDigit) {
-            //console.log("error", value[i], i)
-            let message = "Please input last 4 digits"
+          else {
+            let message = "Please add ( - ) after 4 digits of year"
             this.setState({ contractValid: false, contractError: message })
-            break;
-          }
-          else {
-            valid = true
-            this.setState({ contractValid: true, contractError: "" })
           }
         }
-      }
-      if (isThird && isdigit1 && value.length < 14) {
-        //console.log('last digit should be 4')
-        let message = "Please input last 4 digits"
-        this.setState({ contractValid: false, contractError: message })
+
+        if (isdigit1 && value.length === 15) {
+
+          for (let i = 12; i < 14; i++) {
+            isDigit = digit.test(value[i])
+            if (!isDigit) {
+              //console.log("error", value[i], i)
+              let message = "Please input last 4 digits"
+              this.setState({ contractValid: false, contractError: message })
+              break;
+            }
+            else {
+              valid = true
+              this.setState({ contractValid: true, contractError: "" })
+            }
+          }
+        }
+        if (isdigit1 && value.length === 14) {
+          for (let i = 12; i < 13; i++) {
+            isDigit = digit.test(value[i])
+            if (!isDigit) {
+              //console.log("error", value[i], i)
+              let message = "Please input last 4 digits"
+              this.setState({ contractValid: false, contractError: message })
+              break;
+            }
+            else {
+              valid = true
+              this.setState({ contractValid: true, contractError: "" })
+            }
+          }
+        }
+        if (isThird && isdigit1 && value.length < 14) {
+          //console.log('last digit should be 4')
+          let message = "Please input last 4 digits"
+          this.setState({ contractValid: false, contractError: message })
+        }
       }
     }
     if (isThird && isdigit1 && value.length > 16) {
