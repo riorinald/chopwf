@@ -1,9 +1,9 @@
 {
   "name": "chop-workflow",
   "version": "0.0.0",
-  "description": "Workflow system for request chop",
+  "description": "Chop & License Workflow",
   "author": "",
-  "homepage": "http://192.168.1.47/CLWF",
+  "homepage": "https://ndocms.es.corpintra.net/CLWF",
   "copyright": "",
   "license": "",
   "private": true,
