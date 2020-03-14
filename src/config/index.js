@@ -22,9 +22,11 @@ export default {
     
     //DAIMLER STAGING API
     // url: "https://docms.es.corpintra.net/clwfb/api/v1",
+    // domain: "https://docms.es.corpintra.net",
     
     //DAIMLER PROD API
     url: "https://ndocms.es.corpintra.net/clwfb/api/v1",
+    domain: "https://ndocms.es.corpintra.net",
 
     OAdomain: domainName,
     redirectURI: redirectURI,

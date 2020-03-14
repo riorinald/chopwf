@@ -55,6 +55,7 @@ class Login extends Component {
     }
 
     componentDidMount(){
+        console.log(cookies.get('redirectInfo', {path:'/'}))
         const param = qs.parse(this.props.location.search.slice(1))
         if (param.code){
             console.log('code acquired!', param.code)

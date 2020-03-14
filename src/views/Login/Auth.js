@@ -54,7 +54,6 @@ class Authenticated extends Component {
       }
       else if (param.workflow && param.companyid && param.userid){
         const userInfo = cookies.get('userInfo', {path:'/'})
-        
         if(userInfo && userInfo.userId === param.userid){          
           if(param.workflow === 'license'){
           const page = param.userrole === 'approver' ? 'mypendingtask' : 'myapplication'
@@ -86,20 +85,25 @@ class Authenticated extends Component {
               info: "Session user does not match with the redirect URL",
               isExpired: false,
               color: "danger",
-              timer:5,
-              redirectTo: '/login' + this.props.location.search        
+              // timer:5,
+              // redirectTo: '/login' + this.props.location.search        
             })
-            cookies.remove('userInfo',{path:'/'})
-            this.countDown()
+            // cookies.remove('userInfo',{path:'/'})
+            // this.countDown()
           }
           else {
+            console.log(param)
+            let minutes = 3 //set Expired in minutes
+            let expiredIn = new Date()
+            expiredIn.setTime(expiredIn.getTime() + (minutes*60*1000));
+            cookies.set('redirectInfo', param, { path:'/'});
             this.setState({
               loading:false,
               title: 'You are not Authenticated',
               info: "Login required to see the apllication details",
               color: "danger",
               timer:5,
-              redirectTo: '/login' + this.props.location.search 
+              redirectTo: '/oauth'
             })
             this.countDown()
             }
@@ -136,7 +140,7 @@ class Authenticated extends Component {
     const requestBody = {
       grant_type: 'authorization_code',
       code: code, 
-      redirect_uri: "https://ndocms.es.corpintra.net/clwf/login?authhandler=Daimler_OpenID"
+      redirect_uri: `${config.domain}/clwf/login?authhandler=Daimler_OpenID`
     }
 
     const axiosConfig = {
@@ -220,7 +224,6 @@ class Authenticated extends Component {
         await axios.post(`${config.url}/login`, credentials
             , { headers: { 'Content-Type': '  application/json' } })
             .then(res => {
-                let info = "User " + res.data.userId + " is authorized in the system."
                 localStorage.setItem('authenticate', true)
                 localStorage.setItem('legalEntity', 'MBAFC')
                 localStorage.setItem('ticket', res.data.ticket)
@@ -235,18 +238,48 @@ class Authenticated extends Component {
                 // console.log(res.data)
 
                 if (res.data.status === "success") {
-                  this.setState({
-                    loading: false, 
-                    info: info,
-                    color: "success",
-                    timer:2,
+                  const redirectInfo = cookies.get('redirectInfo', {path:'/'})
+                  Authorize.setCookies(res.data)
+                  if(redirectInfo){
+                    if(redirectInfo.userid === res.data.userId){
+                      if(redirectInfo.workflow === 'license'){
+                        const page = redirectInfo.userrole === 'approver' ? 'mypendingtask' : 'myapplication'
+              
+                          localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
+                          localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
+                          this.redirect()
+                          this.props.history.push({
+                            pathname:`${redirectInfo.workflow}/${page}/details/`,
+                            state:{redirected:true, taskId:redirectInfo.licenseid}
+                          }, cookies.remove('redirectInfo', {path:'/'}))
+                        }
+                        else{
+                          const page = redirectInfo.userrole === 'approver' ? 'mypendingtask' : 'myapps'
+              
+                          localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
+                          localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
+                          this.redirect()
+                          this.props.history.push({
+                            pathname:`/${page}/details/`,
+                            state:{redirected:true, taskId:redirectInfo.taskid}
+                          }, cookies.remove('redirectInfo', {path:'/'}))
+                        }
+                    }
+                  } 
+                  else {
+                  let info = "User " + res.data.userId + " is authorized in the system."
+                    this.setState({
+                      loading: false, 
+                      info: info,
+                      color: "success",
+                      timer:2,
                     isExpired:false,
                     redirectTo:'/portal'
-                  })
-
-                  Authorize.setCookies(res.data)
-                  this.countDown()
-                  this.redirect()
+                    })
+                    // Authorize.setCookies(res.data)
+                    this.countDown()
+                    this.redirect() 
+                  } 
                 }
             })
     } catch (error) {
