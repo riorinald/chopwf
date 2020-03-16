@@ -100,7 +100,7 @@ class Authenticated extends Component {
             this.setState({
               loading:false,
               title: 'You are not Authenticated',
-              info: "Login required to see the apllication details",
+              info: "Opening the login page, please wait ...",
               color: "danger",
               timer:5,
               redirectTo: '/oauth'
