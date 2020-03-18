@@ -2681,10 +2681,10 @@ class EditRequest extends Component {
                                                                                 : null}
                                                                             <td className="descTd">{document.documentNameEnglish}</td>
                                                                             <td className="descTd">{document.documentNameChinese}</td>
-                                                                            <td id="viewDoc">
-                                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div>
+                                                                            <td className="viewDoc blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)}>{document.documentFileName} </td>
+                                                                                {/* <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div> */}
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a> */}
-                                                                            </td>
+                                                                            {/* </td> */}
                                                                             <td className="smallTd"><img width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} src={deleteBin} /></td>
                                                                         </tr>
                                                                     )}

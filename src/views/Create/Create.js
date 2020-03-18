@@ -1819,9 +1819,9 @@ class Create extends Component {
               <td className="mediumTd">{document.conNum}</td>
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
-              <td id="viewDoc">
-                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
-              </td>
+              <td className="viewDoc blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)}>{document.docName} </td>
+                {/* <span className="blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </span>
+              </td> */}
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableCNIPS", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
           )}
@@ -2032,9 +2032,9 @@ class Create extends Component {
                     <td>{document.documentNameEnglish}</td>
                     <td>{document.documentNameChinese}</td>
                     <td id="viewDoc">
-                      <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
+                      <span className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
                         {this.convertExpDate(document.expiryDate)}
-                      </div>
+                      </span>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                     </td>
                     <td id="viewDoc">
