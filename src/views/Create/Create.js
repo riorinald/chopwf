@@ -1787,8 +1787,8 @@ class Create extends Component {
           {this.state.documentTableLTI.map((document, index) =>
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
-              <td className="descTd">{document.engName}</td>
-              <td className="descTd">{document.cnName}</td>
+              <td className="">{document.engName}</td>
+              <td className="">{document.cnName}</td>
               <td id="viewDoc">
                 <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
               </td>
@@ -2038,9 +2038,9 @@ class Create extends Component {
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                     </td>
                     <td id="viewDoc">
-                      <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
+                      <span className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
                         {this.changeDeptHeads(document.departmentHeads)}
-                      </div>
+                      </span>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
                     </td>
                     <td><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>

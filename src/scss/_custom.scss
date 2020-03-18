@@ -121,22 +121,26 @@ table {
 
 .smallTd{
     width: 1px;
-    text-align: center; 
+    text-align: left; 
     vertical-align: middle;
 }
 
 .mediumTd{
-    min-width: 58px;
-    max-width: 60px;
-    text-align: center; 
-    vertical-align: middle;
+    min-width: 65px;
+    max-width: 85px;
+    text-align: left; 
 }
 
 .descTd{
     min-width: 50px;
-    max-width: 350px;
-    vertical-align: middle;
-    word-wrap: break-word;
+    max-width: 270px;
+    vertical-align: left;
+}
+
+.descTd{
+    min-width: 50px;
+    max-width: 200px;
+    vertical-align: left;
 }
 
 .blobLink{
