@@ -1787,11 +1787,11 @@ class Create extends Component {
           {this.state.documentTableLTI.map((document, index) =>
             <tr key={index}>
               <td className="smallTd">{index + 1}</td>
-              <td className="">{document.engName}</td>
-              <td className="">{document.cnName}</td>
-              <td id="viewDoc">
-                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
-              </td>
+              <td className="descTd">{document.engName}</td>
+              <td className="descTd">{document.cnName}</td>
+              <td className="viewDoc blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)}> {document.docName} </td>
+                {/* <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div> */}
+              {/* </td> */}
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
           )}
