@@ -441,6 +441,9 @@ class EditRequest extends Component {
         }
         // if (temporary.returnDate !== "") {
         // }
+        if (temporary.connectChop === ''){
+            temporary.connectChop = "N"
+        }
         if (temporary.returnDate !== '') {
             this.convertDate(temporary.returnDate, 'dateView2')
         }

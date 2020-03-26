@@ -75,12 +75,12 @@ class Login extends Component {
                 this.props.history.push('/portal')
             }
             else if(this.props.location.search === ""){
-                this.props.history.push({
-                    pathname:'/oauth'
-                })
-                // this.setState({
-                //     modal: true 
-                //  })
+                // this.props.history.push({
+                //     pathname:'/oauth'
+                // })
+                this.setState({
+                    modal: true 
+                 })
             }
         }
         if (param.userid){
