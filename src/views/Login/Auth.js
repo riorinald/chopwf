@@ -78,20 +78,24 @@ class Authenticated extends Component {
             })
           }
         }
-        else if(userInfo && this.checkCCuser(CCuser,userInfo.userId)){
+        else if(userInfo && this.checkCCuser(CCuser, userInfo.userId)){
           if(param.workflow === 'license'){
+            const page = Authorize.check(param.companyid, userInfo.licenseAdminCompanyIds) ? 'details' : ''
+
             localStorage.setItem('legalEntity', param.companyid.toUpperCase())
             localStorage.setItem('application', param.workflow.toUpperCase())
             this.props.history.push({
-              pathname:`${param.workflow}/admin-apps/details`,
+              pathname:`${param.workflow}/admin-apps/${page}`,
               state:{redirected:true, taskId:param.licenseid}
             })
           }
           else{
+            const page = Authorize.check(param.companyid, userInfo.chopKeeperCompanyIds) ? 'details' : ''
+
             localStorage.setItem('legalEntity', param.companyid.toUpperCase())
             localStorage.setItem('application', param.workflow.toUpperCase())
             this.props.history.push({
-              pathname:`/chopapps/details`,
+              pathname:`/chopapps/${page}`,
               state:{redirected:true, taskId:param.taskid}
             })
           }
@@ -261,9 +265,9 @@ class Authenticated extends Component {
 
                 if (res.data.status === "success") {
                   const redirectInfo = cookies.get('redirectInfo', {path:'/'})
-                  const CCuser = redirectInfo.ccUserIds.split(',')
                   Authorize.setCookies(res.data)
                   if(redirectInfo){
+                    const CCuser = redirectInfo.ccUserIds.split(',')
                     if(redirectInfo.userid === res.data.userId){
                       if(redirectInfo.workflow === 'license'){
                         const page = redirectInfo.userrole === 'approver' ? 'mypendingtask' : 'myapplication'
@@ -290,18 +294,22 @@ class Authenticated extends Component {
                     }
                     else if(this.checkCCuser(CCuser, res.data.userId)){
                       if(redirectInfo.workflow === 'license'){
+                        const page = Authorize.check(redirectInfo.companyid, res.data.licenseAdminCompanyIds) ? 'details' : ''
+
                         localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
                         localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
                         this.props.history.push({
-                          pathname:`${redirectInfo.workflow}/admin-apps/details`,
+                          pathname:`${redirectInfo.workflow}/admin-apps/${page}`,
                           state:{redirected:true, taskId:redirectInfo.licenseid}
                         })
                       }
                       else{
+                        const page = Authorize.check(redirectInfo.companyid, res.data.chopKeeperCompanyIds) ? 'details' : ''
+
                         localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
                         localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
                         this.props.history.push({
-                          pathname:`/chopapps/details`,
+                          pathname:`/chopapps/${page}`,
                           state:{redirected:true, taskId:redirectInfo.taskid}
                         })
                       }
@@ -320,21 +328,21 @@ class Authenticated extends Component {
                         // cookies.remove('userInfo',{path:'/'})
                         // this.countDown()
                       }
-                      else {
-                      let info = "User " + res.data.userId + " is authorized in the system."
-                        this.setState({
-                          loading: false, 
-                          info: info,
-                          color: "success",
-                          timer:2,
-                        isExpired:false,
-                        redirectTo:'/portal'
-                        })
-                        // Authorize.setCookies(res.data)
-                        this.countDown()
-                        this.redirect() 
-                      }
                     } 
+                  }
+                  else {
+                    let info = "User " + res.data.userId + " is authorized in the system."
+                      this.setState({
+                        loading: false, 
+                        info: info,
+                        color: "success",
+                        timer:2,
+                      isExpired:false,
+                      redirectTo:'/portal'
+                      })
+                      // Authorize.setCookies(res.data)
+                      this.countDown()
+                      this.redirect() 
                   } 
                 }
               }
