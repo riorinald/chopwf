@@ -498,7 +498,6 @@ class Create extends Component {
     document.getElementById("chopTypeSelected").value = "0"
   }
 
-  Axios
   async getData(state, url) {
     try {
       const response = await axios.get(url, { headers: { Pragma: 'no-cache' } });
@@ -1638,25 +1637,93 @@ class Create extends Component {
     }
   }
 
+  blobToFile(theBlob: Blob, fileName: string): File {
+    const b: any = theBlob;
+    b.lastModifiedDate = new Date();
+    b.name = fileName;
+    return b;
+ }
+
   dataURLtoFile(dataurl, filename) {
-    if (dataurl !== "") {
-      var arr = dataurl.split(','),
+    // console.log(dataurl.split(','))
+
+    var arr = dataurl.split(','),
         mime = arr[0].match(/:(.*?);/)[1],
         bstr = atob(arr[1]),
         n = bstr.length,
         u8arr = new Uint8Array(n);
 
-      while (n--) {
+    while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
-      }
-      // console.log(mime, dataurl)
+    }
+    if (navigator.userAgent.indexOf('Edge') >= 0){
+       var file = new Blob([u8arr], { type: mime });
+       return this.blobToFile(file, filename);
+    } else {
+       return new File([u8arr], filename, { type: mime });
+    }
+}
 
-      return new File([u8arr], filename, { type: mime });
-    }
-    else {
-      alert("BASE64 String is empty :(")
-      return null
-    }
+  getDocumentById(documentId) {
+    let {b64, type, name} = ""
+        Swal.fire({
+            title: `Downloading the file ... `,
+            type: "info",
+            text: 'Please wait ...',
+            footer: '',
+            allowOutsideClick: false,
+            // onClose: () => { this.goBack(true) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                axios.get(`${config.url}/documents/${documentId}`, { headers: { Pragma: 'no-cache' } })
+                    .then(res => {
+                        b64 = res.data.documentBase64String
+                        type = res.data.documentFileType
+                        name = res.data.documentFileName
+
+                        let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+                        var blobUrl = new Blob([file], { type: type })
+
+                        Swal.close()
+                            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                                window.navigator.msSaveOrOpenBlob(blobUrl, name)
+                                return;
+                            }
+                            else {
+                                window.open(URL.createObjectURL(file), "_blank")
+                            }
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
+            }
+        })
+    // if (dataurl !== "") {
+    //   var arr = dataurl.split(','),
+    //     mime = arr[0].match(/:(.*?);/)[1],
+    //     bstr = atob(arr[1]),
+    //     n = bstr.length,
+    //     u8arr = new Uint8Array(n);
+
+    //   while (n--) {
+    //     u8arr[n] = bstr.charCodeAt(n);
+    //   }
+    //   // console.log(mime, dataurl)
+
+    //   return new File([u8arr], filename, { type: mime });
+    // }
+    // else {
+    //   alert("BASE64 String is empty :(")
+    //   return null
+    // }
   }
 
   render() {
@@ -1982,7 +2049,7 @@ class Create extends Component {
                   Header: 'Expiry Date',
                   accessor: 'expiryDate',
                   Cell: row => (
-                    <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} >
+                    <div className="blobLink" onClick={() => this.getDocumentById(row.original.documentId)} >
                       {this.convertExpDate(row.original.expiryDate)}
                     </div>
                   ),
@@ -1992,7 +2059,7 @@ class Create extends Component {
                   Header: 'DH Approved',
                   accessor: 'departmentHeads',
                   Cell: row => (
-                    <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} >
+                    <div className="blobLink" onClick={() => this.getDocumentById(row.original.documentId)} >
                       {this.changeDeptHeads(row.original.departmentHeads)}
                     </div>
 
@@ -2032,13 +2099,13 @@ class Create extends Component {
                     <td>{document.documentNameEnglish}</td>
                     <td>{document.documentNameChinese}</td>
                     <td id="viewDoc">
-                      <span className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
+                      <span className="blobLink" onClick={() => this.getDocumentById(document.documentId)} >
                         {this.convertExpDate(document.expiryDate)}
                       </span>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                     </td>
                     <td id="viewDoc">
-                      <span className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
+                      <span className="blobLink" onClick={() => this.getDocumentById(document.documentId)} >
                         {this.changeDeptHeads(document.departmentHeads)}
                       </span>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}

@@ -336,21 +336,82 @@ class TaskDetails extends Component {
         //return new File([u8arr], filename, { type: mime });
     }
 
-    viewOrDownloadFile(b64, type, name) {
+    viewOrDownloadFile(documentId) {
         // if (b64 !== "") {
-        let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
-        var blobUrl = new Blob([file], { type: type })
-        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-            window.navigator.msSaveOrOpenBlob(blobUrl, name)
-            return;
-        }
-        else {
-            window.open(URL.createObjectURL(file), "_blank")
-        }
-        // }
-        // else {
-        //     alert("BASE 64 String is empty !!!")
-        // }
+        let {b64, type, name} = ""
+        Swal.fire({
+            title: `Downloading the file ... `,
+            type: "info",
+            text: 'Please wait ...',
+            footer: '',
+            allowOutsideClick: false,
+            // onClose: () => { this.goBack(true) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                Axios.get(`${config.url}/documents/${documentId}`, { headers: { Pragma: 'no-cache' } })
+                    .then(res => {
+                        b64 = res.data.documentBase64String
+                        type = res.data.documentFileType
+                        name = res.data.documentFileName
+                        
+                        let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+                        var blobUrl = new Blob([file], { type: type })
+                        // Swal.update({
+                        //     title: res.data.message,
+                        //     text: `File Downloaded.`,
+                        //     type: "success",
+                        // })
+                        Swal.close()
+                        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                            window.navigator.msSaveOrOpenBlob(blobUrl, name)
+                            return;
+                        }
+                        else {
+                            window.open(URL.createObjectURL(file), "_blank")
+                        }
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
+            }
+        })
+        // Axios.get(`${config.url}/documents/${documentId}`, { headers: { Pragma: 'no-cache' } })
+        // .then(res => {
+        //     b64 = res.data.documentBase64String
+        //     type = res.data.documentFileType
+        //     name = res.data.documentFileName
+
+        //     let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+        //     var blobUrl = new Blob([file], { type: type })
+        //     if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+        //         window.navigator.msSaveOrOpenBlob(blobUrl, name)
+        //         return;
+        //     }
+        //     else {
+        //         window.open(URL.createObjectURL(file), "_blank")
+        //     }
+        //     // }
+        //     // else {
+        //     //     alert("BASE 64 String is empty !!!")
+        //     // }
+        // })
+        // .catch(error => {
+        //     if (error.response) {
+        //         Swal.fire({
+        //             title: "ERROR",
+        //             html: error.response.data.message,
+        //             type: "error"
+        //         })
+        //     }
+        // })
     }
 
     render() {
@@ -520,7 +581,7 @@ class TaskDetails extends Component {
                                                             accessor: "expiryDate",
                                                             width: 250,
                                                             Cell: row => (
-                                                                <div onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} style={{ color: "blue", cursor: "pointer" }} >
+                                                                <div onClick={() => this.viewOrDownloadFile(row.original.documentId)} style={{ color: "blue", cursor: "pointer" }} >
                                                                     {this.convertExpDate(row.original.expiryDate)}
                                                                 </div>
                                                             ),
@@ -531,7 +592,7 @@ class TaskDetails extends Component {
                                                             accessor: "documentNameChinese",
                                                             width: 250,
                                                             Cell: row => (
-                                                                <div onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} style={{ color: "blue", cursor: "pointer" }} >
+                                                                <div onClick={() => this.viewOrDownloadFile(row.original.documentId)} style={{ color: "blue", cursor: "pointer" }} >
                                                                     {this.changeDeptHeads(row.original.departmentHeads)}
                                                                 </div>
 
@@ -544,7 +605,7 @@ class TaskDetails extends Component {
                                                             Header: "Attached Document",
                                                             accessor: "documentName",
                                                             Cell: row => (
-                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} >{row.original.documentFileName}</div>
+                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentId)} >{row.original.documentFileName}</div>
                                                             ),
                                                             show: appType !== "LTU"
                                                             // style: {textAlign: "center" },

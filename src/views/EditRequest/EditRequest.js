@@ -2165,8 +2165,16 @@ class EditRequest extends Component {
         this.setState({ showDoc: false })
     }
 
+    blobToFile(theBlob: Blob, fileName: string): File {
+        const b: any = theBlob;
+        b.lastModifiedDate = new Date();
+        b.name = fileName;
+        return b;
+     }
+
     dataURLtoFile(dataurl, filename) {
         // console.log(dataurl.split(','))
+
         var arr = dataurl.split(','),
             mime = arr[0].match(/:(.*?);/)[1],
             bstr = atob(arr[1]),
@@ -2176,21 +2184,61 @@ class EditRequest extends Component {
         while (n--) {
             u8arr[n] = bstr.charCodeAt(n);
         }
-
-        return new File([u8arr], filename, { type: mime });
+        if (navigator.userAgent.indexOf('Edge') >= 0){
+           var file = new Blob([u8arr], { type: mime });
+           return this.blobToFile(file, filename);
+        } else {
+           return new File([u8arr], filename, { type: mime });
+        }
     }
 
-    viewOrDownloadFile(b64, type, name, url) {
-        // if (b64 !== "") {
-        let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
-        var blobUrl = new Blob([file], { type: type })
-        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-            window.navigator.msSaveOrOpenBlob(blobUrl, name)
-            return;
-        }
-        else {
-            window.open(url, "_blank")
-        }
+    viewOrDownloadFile(documentId) {
+        let {b64, type, name} = ""
+        Swal.fire({
+            title: `Downloading the file ... `,
+            type: "info",
+            text: 'Please wait ...',
+            footer: '',
+            allowOutsideClick: false,
+            // onClose: () => { this.goBack(true) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                Axios.get(`${config.url}/documents/${documentId}`, { headers: { Pragma: 'no-cache' } })
+                    .then(res => {
+                        b64 = res.data.documentBase64String
+                        type = res.data.documentFileType
+                        name = res.data.documentFileName
+
+                        let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+                        var blobUrl = new Blob([file], { type: type })
+
+                        // Swal.update({
+                        //     title: res.data.message,
+                        //     text: `File Downloaded.`,
+                        //     type: "success",
+                        // })
+                        Swal.close()
+                            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                                window.navigator.msSaveOrOpenBlob(blobUrl, name)
+                                return;
+                            }
+                            else {
+                                window.open(URL.createObjectURL(file), "_blank")
+                            }
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
+            }
+        })
         // }
         // else {
         // alert("BASE 64 String is empty !!!")
@@ -2521,7 +2569,7 @@ class EditRequest extends Component {
                                                                         Header: 'Expiry Date',
                                                                         accessor: 'expiryDate',
                                                                         Cell: row => (
-                                                                            <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} >
+                                                                            <div className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentId)} >
                                                                                 {this.convertExpDate(row.original.expiryDate)}
                                                                             </div>
                                                                         ),
@@ -2531,7 +2579,7 @@ class EditRequest extends Component {
                                                                         Header: 'DH Approved',
                                                                         accessor: 'departmentHeads',
                                                                         Cell: row => (
-                                                                            <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} >
+                                                                            <div className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentId)} >
                                                                                 {this.changeDeptHeads(row.original.departmentHeads)}
                                                                             </div>
 
@@ -2571,11 +2619,11 @@ class EditRequest extends Component {
                                                                             <td>{document.documentNameEnglish}</td>
                                                                             <td>{document.documentNameChinese}</td>
                                                                             <td id="viewDoc">
-                                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.convertExpDate(document.expiryDate)} </div>
+                                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentId)} > {this.convertExpDate(document.expiryDate)} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                                                                             </td>
                                                                             <td id="viewDoc">
-                                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {this.changeDeptHeads(document.departmentHeads)} </div>
+                                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentId)} > {this.changeDeptHeads(document.departmentHeads)} </div>
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
                                                                             </td>
                                                                             <td className="smallTd" ><img width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} src={deleteBin} /></td>
@@ -2684,7 +2732,7 @@ class EditRequest extends Component {
                                                                                 : null}
                                                                             <td className="descTd">{document.documentNameEnglish}</td>
                                                                             <td className="descTd">{document.documentNameChinese}</td>
-                                                                            <td className="viewDoc blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)}>{document.documentFileName} </td>
+                                                                            <td className="viewDoc blobLink" onClick={() => this.viewOrDownloadFile(document.documentId)}>{document.documentFileName} </td>
                                                                                 {/* <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.documentBase64String, document.documentFileType, document.documentFileName, document.documentUrl)} > {document.documentFileName} </div> */}
                                                                                 {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{document.documentFileName}</a> */}
                                                                             {/* </td> */}
