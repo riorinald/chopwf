@@ -54,7 +54,7 @@ class Authenticated extends Component {
       }
       else if (param.workflow && param.companyid && param.userid){
         const userInfo = cookies.get('userInfo', {path:'/'})
-        const CCuser = param.ccUserIds.split(',')
+        const CCuser = param.ccUserIds ? param.ccUserIds.split(',') : ""
 
         if(userInfo && userInfo.userId === param.userid){          
           if(param.workflow === 'license'){
@@ -267,7 +267,7 @@ class Authenticated extends Component {
                   const redirectInfo = cookies.get('redirectInfo', {path:'/'})
                   Authorize.setCookies(res.data)
                   if(redirectInfo){
-                    const CCuser = redirectInfo.ccUserIds.split(',')
+                    const CCuser = redirectInfo.ccUserIds ? redirectInfo.ccUserIds.split(',') : ""
                     if(redirectInfo.userid === res.data.userId){
                       if(redirectInfo.workflow === 'license'){
                         const page = redirectInfo.userrole === 'approver' ? 'mypendingtask' : 'myapplication'
