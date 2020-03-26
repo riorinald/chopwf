@@ -75,7 +75,7 @@ class TaskDetails extends Component {
     }
 
     async getDocuments(taskId) {
-        this.setState({isLoading: true})
+        this.setState({isLoading: true, showModal: true})
         await Axios.get(`${config.url}/documents?category=normal&taskid=${taskId}`, { headers: { Pragma: 'no-cache' } })
         .then( res => {
             this.setState( state => ({
@@ -232,7 +232,6 @@ class TaskDetails extends Component {
 
     toggleView() {
         this.setState({ showModal: !this.state.showModal })
-        this.getDocuments(this.props.location.state.taskId)
     }
 
 
@@ -472,7 +471,7 @@ class TaskDetails extends Component {
                                     <Col className="mx-2 mb-2">
                                         <FormGroup>
                                             <Label className="row mx-1">Documents</Label>
-                                            <Button color="primary" onClick={this.toggleView}>View Documents</Button>
+                                            <Button color="primary" onClick={() => this.getDocuments(this.props.location.state.taskId)}>View Documents</Button>
                                         </FormGroup>
 
                                         <Modal color="info" size="xl" toggle={this.toggleView} isOpen={showModal} >
