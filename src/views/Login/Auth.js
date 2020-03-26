@@ -54,6 +54,8 @@ class Authenticated extends Component {
       }
       else if (param.workflow && param.companyid && param.userid){
         const userInfo = cookies.get('userInfo', {path:'/'})
+        const CCuser = param.ccUserIds.split(',')
+
         if(userInfo && userInfo.userId === param.userid){          
           if(param.workflow === 'license'){
           const page = param.userrole === 'approver' ? 'mypendingtask' : 'myapplication'
@@ -75,7 +77,24 @@ class Authenticated extends Component {
               state:{redirected:true, taskId:param.taskid}
             })
           }
-
+        }
+        else if(userInfo && this.checkCCuser(CCuser,userInfo.userId)){
+          if(param.workflow === 'license'){
+            localStorage.setItem('legalEntity', param.companyid.toUpperCase())
+            localStorage.setItem('application', param.workflow.toUpperCase())
+            this.props.history.push({
+              pathname:`${param.workflow}/admin-apps/details`,
+              state:{redirected:true, taskId:param.licenseid}
+            })
+          }
+          else{
+            localStorage.setItem('legalEntity', param.companyid.toUpperCase())
+            localStorage.setItem('application', param.workflow.toUpperCase())
+            this.props.history.push({
+              pathname:`/chopapps/details`,
+              state:{redirected:true, taskId:param.taskid}
+            })
+          }
         }
         else{
           if(param.workflow && userInfo){
@@ -93,16 +112,13 @@ class Authenticated extends Component {
           }
           else {
             console.log(param)
-            let minutes = 3 //set Expired in minutes
-            let expiredIn = new Date()
-            expiredIn.setTime(expiredIn.getTime() + (minutes*60*1000));
             cookies.set('redirectInfo', param, { path:'/'});
             this.setState({
               loading:false,
               title: 'You are not Authenticated',
               info: "Opening the login page, please wait ...",
               color: "danger",
-              timer:5,
+              timer:3,
               redirectTo: '/oauth'
             })
             this.countDown()
@@ -134,6 +150,12 @@ class Authenticated extends Component {
         }
       }
     }
+  }
+
+  checkCCuser(CCusers, LoginUser){
+    let result = CCusers.indexOf(LoginUser) > -1 ? true : false
+    console.log(result)
+    return result
   }
   
   exchangeToken(code){
@@ -224,21 +246,22 @@ class Authenticated extends Component {
         await axios.post(`${config.url}/login`, credentials
             , { headers: { 'Content-Type': '  application/json' } })
             .then(res => {
-                localStorage.setItem('authenticate', true)
+                localStorage.setItem('application', 'CHOP')
                 localStorage.setItem('legalEntity', 'MBAFC')
-                localStorage.setItem('ticket', res.data.ticket)
-                localStorage.setItem('userId', res.data.userId)
-                localStorage.setItem('roleId', res.data.roleId)
-                localStorage.setItem('token', res.data.token)
-                localStorage.setItem('isLicenseAdmin', res.data.isLicenseAdmin)
-                localStorage.setItem('chopKeeperCompanyIds', res.data.chopKeeperCompanyIds)
-                localStorage.setItem('licenseAdminCompanyIds', res.data.licenseAdminCompanyIds)
-                localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
+                // localStorage.setItem('ticket', res.data.ticket)
+                // localStorage.setItem('userId', res.data.userId)
+                // localStorage.setItem('roleId', res.data.roleId)
+                // localStorage.setItem('token', res.data.token)
+                // localStorage.setItem('isLicenseAdmin', res.data.isLicenseAdmin)
+                // localStorage.setItem('chopKeeperCompanyIds', res.data.chopKeeperCompanyIds)
+                // localStorage.setItem('licenseAdminCompanyIds', res.data.licenseAdminCompanyIds)
+                // localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
 
                 // console.log(res.data)
 
                 if (res.data.status === "success") {
                   const redirectInfo = cookies.get('redirectInfo', {path:'/'})
+                  const CCuser = redirectInfo.ccUserIds.split(',')
                   Authorize.setCookies(res.data)
                   if(redirectInfo){
                     if(redirectInfo.userid === res.data.userId){
@@ -265,23 +288,57 @@ class Authenticated extends Component {
                           }, cookies.remove('redirectInfo', {path:'/'}))
                         }
                     }
-                  } 
-                  else {
-                  let info = "User " + res.data.userId + " is authorized in the system."
-                    this.setState({
-                      loading: false, 
-                      info: info,
-                      color: "success",
-                      timer:2,
-                    isExpired:false,
-                    redirectTo:'/portal'
-                    })
-                    // Authorize.setCookies(res.data)
-                    this.countDown()
-                    this.redirect() 
+                    else if(this.checkCCuser(CCuser, res.data.userId)){
+                      if(redirectInfo.workflow === 'license'){
+                        localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
+                        localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
+                        this.props.history.push({
+                          pathname:`${redirectInfo.workflow}/admin-apps/details`,
+                          state:{redirected:true, taskId:redirectInfo.licenseid}
+                        })
+                      }
+                      else{
+                        localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
+                        localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
+                        this.props.history.push({
+                          pathname:`/chopapps/details`,
+                          state:{redirected:true, taskId:redirectInfo.taskid}
+                        })
+                      }
+                    }
+                    else{
+                      if(redirectInfo.workflow && res.data.userId){
+                        this.setState({
+                          loading:false,
+                          title: 'You are not Authorized',
+                          info: "Session user does not match with the redirect URL",
+                          isExpired: false,
+                          color: "danger",
+                          // timer:5,
+                          // redirectTo: '/login' + this.props.location.search        
+                        })
+                        // cookies.remove('userInfo',{path:'/'})
+                        // this.countDown()
+                      }
+                      else {
+                      let info = "User " + res.data.userId + " is authorized in the system."
+                        this.setState({
+                          loading: false, 
+                          info: info,
+                          color: "success",
+                          timer:2,
+                        isExpired:false,
+                        redirectTo:'/portal'
+                        })
+                        // Authorize.setCookies(res.data)
+                        this.countDown()
+                        this.redirect() 
+                      }
+                    } 
                   } 
                 }
-            })
+              }
+            )
     } catch (error) {
         if (error.response){
         this.setState({ 
