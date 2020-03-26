@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { UncontrolledDropdown, DropdownItem, DropdownMenu, DropdownToggle, Nav, Dropdown } from 'reactstrap';
+import { UncontrolledDropdown, DropdownItem, DropdownMenu, DropdownToggle, Nav, Dropdown, Spinner } from 'reactstrap';
 import PropTypes from 'prop-types';
 import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
 import { fakeAuth } from '../../App';
@@ -28,7 +28,8 @@ class DefaultHeader extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      userDetails: ''
+      userDetails: '',
+      displayName:''
     };
   }
 
@@ -44,16 +45,15 @@ class DefaultHeader extends Component {
   async getUserDetails() {
     this.setState({ loading: true })
     await Axios.get(`${config.url}/users/${Authorize.getCookies().userId}`,{ headers: { Pragma: 'no-cache' } }).then(res => {
-      this.setState({ userDetails: res.data, loading: false })
+      let name = res.data.displayName
+      this.setState({ userDetails: res.data, displayName: name, loading: false })
     })
   }
 
   render() {
-
-
     const { state } = this.props;
-    const { userDetails } = this.state;
-
+    const { userDetails, displayName } = this.state;
+    
     return (
       <React.Fragment>
         <AppSidebarToggler className="d-lg-none" display="sm" mobile />
@@ -108,7 +108,7 @@ class DefaultHeader extends Component {
           </Dropdown>
           <UncontrolledDropdown nav direction="down" className="mr-4" >
             <DropdownToggle nav className="mr-2">
-              {userDetails.displayName}
+              {displayName !== '' ? displayName : <Spinner size="sm"/>}
             </DropdownToggle>
             <DropdownMenu right className="mt-3">
               <AuthButton />
