@@ -80,7 +80,7 @@ class LicenseApplication extends Component {
 
     async getLicenseNames() {
 
-        const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
+        const res = await Axios.get(`${config.url}/licensenames/all?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
         .then( res => {
             res.data.sort((a, b) => {
             // return CommonFn.sortingString(a, b, ["zh-CN"])
