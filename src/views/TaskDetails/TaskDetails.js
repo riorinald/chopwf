@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-    Card, CardBody, CardHeader, CardFooter, Table, Col, Row,
+    Card, CardBody, CardHeader, Col, Row,
     Input,
     Button,
     FormGroup,
@@ -215,7 +215,7 @@ class TaskDetails extends Component {
     changeDeptHeads(heads) {
         let dh = ""
         heads.map(head => {
-            dh = dh + head.displayName + "; "
+            return dh = dh + head.displayName + "; " ;
         })
         return dh
     }
@@ -261,7 +261,8 @@ class TaskDetails extends Component {
                 effectivePeriod: this.convertDate(this.state.taskDetails.effectivePeriod),
                 isUseInOffice: this.convertBool(this.state.taskDetails.isUseInOffice),
                 connectChop: this.convertBool(this.state.taskDetails.connectChop),
-                departmentHeadsName: this.setArray(this.state.taskDetails.departmentHeadsName)
+                departmentHeadsName: this.setArray(this.state.taskDetails.departmentHeadsName), 
+                documentCheckByName: this.setArray(this.state.taskDetails.documentCheckByName)
             }
         }))
     }
@@ -270,38 +271,38 @@ class TaskDetails extends Component {
         if (this.state.taskDetails.branchId !== '') {
             switch (appType) {
                 case 'STU':
-                    return <BSTU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <BSTU taskDetails={this.state.taskDetails} />
                         ;
                 case 'LTU':
-                    return <BLTU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <BLTU taskDetails={this.state.taskDetails} />
                         ;
                 case 'LTI':
-                    return <BLTI setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <BLTI taskDetails={this.state.taskDetails} />
                         ;
                 case 'CNIPS':
-                    return <BCNIPS setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <BCNIPS taskDetails={this.state.taskDetails} />
                         ;
                 default:
-                    return <BSTU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <BSTU taskDetails={this.state.taskDetails} />
                         ;
             }
         }
         else {
             switch (appType) {
                 case 'STU':
-                    return <STU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <STU taskDetails={this.state.taskDetails} />
                         ;
                 case 'LTU':
-                    return <LTU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <LTU taskDetails={this.state.taskDetails} />
                         ;
                 case 'LTI':
-                    return <LTI setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <LTI taskDetails={this.state.taskDetails} />
                         ;
                 case 'CNIPS':
-                    return <CNIPS setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <CNIPS taskDetails={this.state.taskDetails} />
                         ;
                 default:
-                    return <STU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <STU taskDetails={this.state.taskDetails} />
                         ;
             }
         }
@@ -550,7 +551,7 @@ class TaskDetails extends Component {
                                                                 <div>{row.index + 1}</div>
                                                             ),
                                                             width: 40,
-                                                            // style: { textAlign: "center" }
+                                                            style: { textAlign: "center" }
                                                         },
                                                         {
                                                             Header: "Contract Number",
@@ -558,7 +559,7 @@ class TaskDetails extends Component {
                                                             Cell: row => (
                                                                 <div> {this.convertContractNums(row.original.contractNums)} </div>
                                                             ),
-                                                            style: { textAlign: "center", 'whiteSpace': 'unset' },
+                                                            // style: { textAlign: "center", 'whiteSpace': 'unset' },
                                                             width: 135,
                                                             show: appType === "CNIPS"
                                                         },
@@ -581,7 +582,7 @@ class TaskDetails extends Component {
                                                             accessor: "expiryDate",
                                                             width: 250,
                                                             Cell: row => (
-                                                                <div onClick={() => this.viewOrDownloadFile(row.original.documentId)} style={{ color: "blue", cursor: "pointer" }} >
+                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentId)} >
                                                                     {this.convertExpDate(row.original.expiryDate)}
                                                                 </div>
                                                             ),
@@ -590,15 +591,13 @@ class TaskDetails extends Component {
                                                         {
                                                             Header: "DH Approved",
                                                             accessor: "documentNameChinese",
-                                                            width: 250,
                                                             Cell: row => (
-                                                                <div onClick={() => this.viewOrDownloadFile(row.original.documentId)} style={{ color: "blue", cursor: "pointer" }} >
+                                                                <span className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentId)} >
                                                                     {this.changeDeptHeads(row.original.departmentHeads)}
-                                                                </div>
+                                                                </span>
 
                                                             ),
                                                             show: appType === "LTU"
-                                                            // style: {textAlign: "center" },
                                                         },
 
                                                         {
