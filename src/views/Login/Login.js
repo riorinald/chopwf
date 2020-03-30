@@ -66,10 +66,10 @@ class Login extends Component {
         }
         // Enable /login?auth=manual
         if (param.auth === "manual"){
-            console.log(param.auth)
-            this.setState({
-                modal: true 
-             })
+            // console.log(param.auth)
+            // this.setState({
+            //     modal: true 
+            //  })
         }
         else{
             if(cookies.get('userInfo', {path:'/'})){
