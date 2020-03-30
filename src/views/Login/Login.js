@@ -64,6 +64,7 @@ class Login extends Component {
                 code: param.code
             })
         }
+        // Enable /login?auth=manual
         if (param.auth === "manual"){
             console.log(param.auth)
             this.setState({
@@ -74,13 +75,18 @@ class Login extends Component {
             if(cookies.get('userInfo', {path:'/'})){
                 this.props.history.push('/portal')
             }
+            
+            //set Defult losgin /oauth or manual login
             else if(this.props.location.search === ""){
-                // this.props.history.push({
-                //     pathname:'/oauth'
-                // })
-                this.setState({
-                    modal: true 
-                 })
+                
+                this.props.history.push({ //oAuth
+                    pathname:'/oauth'
+                })
+
+                // this.setState({
+                //     modal: true             //Manual
+                //  })
+
             }
         }
         if (param.userid){
@@ -144,16 +150,16 @@ class Login extends Component {
                 , { headers: { 'Content-Type': '  application/json' } })
                 .then(res => {
                     let info = "LOGIN " + res.data.status.toUpperCase()
-                    localStorage.setItem('authenticate', true)
+                    localStorage.setItem('application', 'CHOP')
                     localStorage.setItem('legalEntity', 'MBAFC')
-                    localStorage.setItem('ticket', res.data.ticket)
-                    localStorage.setItem('userId', res.data.userId)
-                    localStorage.setItem('roleId', res.data.roleId)
-                    localStorage.setItem('token', res.data.token)
-                    localStorage.setItem('isLicenseAdmin', res.data.isLicenseAdmin)
-                    localStorage.setItem('chopKeeperCompanyIds', res.data.chopKeeperCompanyIds)
-                    localStorage.setItem('licenseAdminCompanyIds', res.data.licenseAdminCompanyIds)
-                    localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
+                    // localStorage.setItem('ticket', res.data.ticket)
+                    // localStorage.setItem('userId', res.data.userId)
+                    // localStorage.setItem('roleId', res.data.roleId)
+                    // localStorage.setItem('token', res.data.token)
+                    // localStorage.setItem('isLicenseAdmin', res.data.isLicenseAdmin)
+                    // localStorage.setItem('chopKeeperCompanyIds', res.data.chopKeeperCompanyIds)
+                    // localStorage.setItem('licenseAdminCompanyIds', res.data.licenseAdminCompanyIds)
+                    // localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
 
                     Authorize.setCookies(res.data)
 
