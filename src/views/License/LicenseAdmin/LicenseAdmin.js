@@ -13,8 +13,7 @@ import "react-table/react-table.css"
 import ReactTable from "react-table";
 import Authorize from '../../../functions/Authorize' 
 import Swal from 'sweetalert2';
-
-
+import XLSX from 'xlsx'
 
 class LicenseAdmin extends Component {
     constructor(props) {
@@ -50,6 +49,7 @@ class LicenseAdmin extends Component {
                 this.setState({ newLicenseAdmins: res.data.licenseManagementDisplayResponses, headers: res.data.headers })
             })
     }
+
     componentDidMount() {
         const legalEntity = this.props.legalName
         const adminEntity = Authorize.getCookies().licenseAdminCompanyIds
@@ -61,23 +61,117 @@ class LicenseAdmin extends Component {
     }
 
     handleFiles = (event) => {
+        
         // Check for the various File API support.
         let files = event.target.files[0];
-        // Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${}`)
-        this.setState({ csvFile: files })
-        if (window.FileReader) {
-            // FileReader are supported.
-            this.getAsText(files);
+        
+        if (files !== undefined){ // avoid error when no document selected
+            let extension = files.name.split('.').pop()
+            this.setState({ csvFile: files })
+            // Axios.post(`${config.url}/licenses/licensemanagement?createdBy=${}`)
+        
+            if (window.FileReader) { // FileReader are supported.
+            
+                if (extension === "xlsx" | "xls" ){
+                    this.getAsArrayBuffer(files)
+                }
+                else if (extension === "csv"){
+                    this.getAsText(files);
+                }
+                else {
+                    Swal.fire({
+                        title: "Error reading file",
+                        text: "Please attach valid file format.",
+                        type: "warning",
+                        timer: 3500,
+                        timerProgressBar: true
+                    })
+                }
+            }
+            else{
+                console.log("FileReader API not exist in browser")
+            }
         }
     }
 
     getAsText(fileToRead) {
         var reader = new FileReader();
+
         // Read file into memory as UTF-8      
         reader.readAsText(fileToRead);
+
         // Handle errors load
         reader.onload = this.fileReadingFinished;
         reader.onerror = this.errorHandler;
+    }
+
+    getAsArrayBuffer(fileToRead){
+        var reader = new FileReader();
+
+        reader.readAsArrayBuffer(fileToRead);
+        reader.onload = this.getXLSXtoCSV;
+        reader.onerror = this.errorHandler;
+    }
+
+
+    getXLSXtoCSV = (file) => {
+        if (file) {
+
+            let arraybuffer = file.target.result;
+            // console.log(file.currentTarget.result)
+            let data = new Uint8Array(arraybuffer);
+
+            let arr = []
+            for(let i = 0; i !== data.length; ++i) arr[i] = String.fromCharCode(data[i]);
+            let bstr = arr.join("");
+
+            /* Call XLSX */
+            let workbook = XLSX.read(bstr, {type:"binary"});
+
+            /* DO SOMETHING WITH workbook HERE */
+            let first_sheet_name = workbook.SheetNames[0];
+            console.log(first_sheet_name)
+
+            /* Get worksheet as JSON */
+            let worksheet = workbook.Sheets[first_sheet_name];
+            let CSV = XLSX.utils.sheet_to_csv(worksheet,{raw:true})
+            // console.log(XLSX.utils.sheet_to_json(worksheet,{skipHeader:true}));
+
+            let result = Papa.parse(CSV, { skipEmptyLines: 'greedy', })
+            let header = result.data.shift()
+            let validCSV = false
+            
+            header.forEach((value,index) => {
+                let defaultHeader = this.state.headers[index] !== undefined ? this.state.headers[index].toUpperCase() : console.log("error no default header")
+                validCSV = value.toUpperCase() === defaultHeader
+            });
+            
+            if(validCSV){
+                this.setState({
+                    newLicenseAdmins: result.data,
+                    updateLicenseAdmins: result.data,
+                    inputLabel: this.state.csvFile.name,
+                    updateAdmins: true
+                })
+            }
+            else{
+                Swal.fire({
+                    title: "Excel file is not valid",
+                    text: "Please attach valid excel file.",
+                    type: "warning",
+                    timer: 1500,
+                    timerProgressBar: true
+                })
+                this.setState({
+                    inputLabel: "Choose File",
+                    updateAdmins: false,
+                    csvFile: null
+                })
+            }
+          }
+          else {
+            alert("No File detected! :( ")
+          }
     }
 
     fileReadingFinished = (event) => {
@@ -88,8 +182,8 @@ class LicenseAdmin extends Component {
         let validCSV = false
         //console.log(result)
         header.forEach((value,index) => {
-            validCSV = value.toUpperCase() === this.state.headers[index].toUpperCase()
-            //console.log(value, index, value.toUpperCase() === this.state.headers[index].toUpperCase(), this.state.headers[index])
+            let defaultHeader = this.state.headers[index] !== undefined ? this.state.headers[index].toUpperCase() : console.log("error no default header")
+                validCSV = value.toUpperCase() === defaultHeader
         });
         if(validCSV){
             this.setState({
@@ -184,7 +278,7 @@ class LicenseAdmin extends Component {
         let postData = new FormData()
         if ( csvFile === null){
             Swal.fire({
-                title: "Please Attach CSV file",
+                title: "Please Attach a file",
                 type: "warning",
                 timer: 1500,
                 timerProgressBar: true
@@ -212,9 +306,7 @@ class LicenseAdmin extends Component {
                 .catch(err => {
                     Swal.fire({
                         title: "Error",
-                        type: "error",
-                        timer: 1500,
-                        timerProgressBar: true
+                        type: "error : "+ err,
                     })
                     console.log(err)
                 })
@@ -561,7 +653,7 @@ class LicenseAdmin extends Component {
                                                     <FormGroup>
                                                         {/* <Label>License Admins</Label> */}
                                                         <InputGroup>
-                                                            <CustomInput id="uploadCSV" accept=".CSV" type="file" label={inputLabel} bsSize="lg" onChange={this.handleFiles} color="primary"></CustomInput>
+                                                            <CustomInput id="uploadCSV" accept=".xls, .xlsx" type="file" label={inputLabel} bsSize="lg" onChange={this.handleFiles} color="primary"></CustomInput>
                                                             <InputGroupAddon addonType="append">
                                                             <   Button color="success" onClick={this.saveAllData} >Save</Button>
                                                             </InputGroupAddon>
