@@ -1872,8 +1872,8 @@ class EditRequest extends Component {
     };
 
     async postData(formData, isSubmitted) {
-        let url = `${config.url}/tasks/${this.props.location.state.id}`
 
+        let url = `${config.url}/tasks/${this.props.location.state.id}`
         Swal.fire({
             title: `Creating your Request ... `,
             type: "info",
@@ -1894,7 +1894,8 @@ class EditRequest extends Component {
                             text: 'Request Number : ' + res.data.requestNum,
                             footer: isSubmitted === "Y" ? 'Your request is being processed and is waiting for the approval' : 'Your request is saved as draft.',
                             type: isSubmitted === "Y" ? "success" : "info",
-
+                            showConfirmButton: true,
+                            focusConfirm: true
                         })
                         Swal.hideLoading()
                     })
@@ -3053,17 +3054,17 @@ class EditRequest extends Component {
                                         <Row>
                                             <Col className="d-flex justify-content-start">
                                                 {taskDetails.isConfirm === "Y"
-                                                    ? <Button type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
-                                                    : <Button type="submit" color="success"
+                                                    ? <Button id="submitReq" type="submit" color="success" onClick={(e) => this.submitRequest('Y') + e.currentTarget.blur()}>Submit</Button>
+                                                    : <Button id="disabledSubmit" type="submit" color="success"
                                                         // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })}
-                                                        id="disabledSubmit" disabled >Submit</Button>}
+                                                        disabled >Submit</Button>}
                                                 {/* <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit"> */}
                                                 {/* please confirm the agree terms </Tooltip> */}
                                                 <span>&nbsp;</span>
-                                                <Button type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
+                                                <Button id="submitReq" type="submit" color="primary" onClick={(e) => this.submitRequest('N') + e.currentTarget.blur()}>Save</Button>
                                             </Col>
                                             <Col className="d-flex justify-content-end">
-                                                <Button onClick={this.deleteTask} color="danger" >Delete</Button>
+                                                <Button onClick={(e) => this.deleteTask + e.currentTarget.blur()} color="danger" >Delete</Button>
                                             </Col>
                                         </Row>
                                         {taskDetails.histories.length !== 0 ? <hr></hr> : null}

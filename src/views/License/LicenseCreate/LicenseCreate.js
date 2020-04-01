@@ -744,10 +744,10 @@ class LicenseCreate extends Component {
                                 <Col className="mr-2" >
                                     {/* {formData.isConfirm === "Y" */}
                                     {/* ?  */}
-                                    <Button className="mr-2" type="submit" onClick={() => this.handleAgreeTerms()} color="success">Submit</Button>
+                                    <Button className="mr-2" type="submit" onClick={(e) => this.handleAgreeTerms() + e.currentTarget.blur()} color="success">Submit</Button>
                                     {/* : <Button className="mr-2" type="submit" disabled color="secondary">Submit</Button> */}
                                     {/* } */}
-                                    <Button type="submit" onClick={() => this.submitRequest("N")} color="primary" > Save </Button>
+                                    <Button type="submit" onClick={(e) => this.submitRequest("N") + e.currentTarget.blur()} color="primary" > Save </Button>
 
                                 </Col>
                             </Row>

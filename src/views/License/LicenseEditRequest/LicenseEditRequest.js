@@ -921,17 +921,17 @@ class LicenseEditRequest extends Component {
                                     <Col className="d-flex justify-content-start">
                                         {/* {taskDetails.isConfirm === "Y"
                                             ?  */}
-                                        <Button type="submit" color="success" onClick={() => { this.handleAgreeTerms() }}>Submit</Button>
+                                        <Button type="submit" color="success" onClick={(e) => this.handleAgreeTerms() + e.currentTarget.blur()}>Submit</Button>
                                         {/* : <Button type="submit" color="success" */}
                                         {/* // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} */}
                                         {/* id="disabledSubmit" disabled >Submit</Button>} */}
                                         {/* <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit"> */}
                                         {/* please confirm the agree terms </Tooltip> */}
                                         <span>&nbsp;</span>
-                                        <Button type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
+                                        <Button type="submit" color="primary" onClick={(e) => this.submitRequest('N') + e.currentTarget.blur()}>Save</Button>
                                     </Col>
                                     <Col className="d-flex justify-content-end">
-                                        <Button onClick={this.deleteTask} color="danger" >Delete</Button>
+                                        <Button onClick={(e) => this.deleteTask() + e.currentTarget.blur()} color="danger" >Delete</Button>
                                     </Col>
                                 </Row>
                                 {taskDetails.histories ? <hr></hr> : null}
