@@ -2161,6 +2161,7 @@ class Create extends Component {
                     <InputGroup>
                       <Input autoComplete="off" maxLength={20} ref={this.telNumber} value={this.state.telNumber} onChange={this.handleChange("telNumber")} id="appendedInput" size="16" type="text" />
                     </InputGroup>
+                    <small style={{ color: '#F86C6B' }} >{this.validator.message('Telephone Number', this.state.telNumber, 'required')}</small>
                   </FormGroup>
                   <FormGroup>
                     <Label>Dept.</Label>
