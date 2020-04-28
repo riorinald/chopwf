@@ -2388,7 +2388,7 @@ class EditRequest extends Component {
                                         <FormGroup>
                                             <Label>Tel. </Label>
                                                 <Input autoComplete="off" maxLength={20} onChange={this.handleChange("telephoneNum")} name="telephoneNum" value={taskDetails.telephoneNum} id="telephoneNum" size="16" type="text" />
-                                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Telephone Number', taskDetails.requestorUser.telephoneNum, 'required')}</small>
+                                                <small style={{ color: '#F86C6B' }} >{this.validator.message('Telephone Number', taskDetails.telephoneNum, 'required')}</small>
                                         </FormGroup>
 
                                         <FormGroup>
@@ -2660,7 +2660,7 @@ class EditRequest extends Component {
                                                         <Col md>
                                                             <FormGroup>
                                                                 {/* <Label>English Name</Label> */}
-                                                                <Input autoComplete="off" value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="engName" maxLength="200" rows="3" placeholder="Please describe in English" />
+                                                                <Input autoComplete="off" value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="engName" maxLength="500" rows="3" placeholder="Please describe in English" />
                                                                 {this.state.invalidEnglish
                                                                     ? <small style={{ color: '#F86C6B' }}> Please input only English characters </small>
                                                                     : null
@@ -2671,14 +2671,14 @@ class EditRequest extends Component {
                                                             <FormGroup>
                                                                 {taskDetails.applicationTypeId === "LTI"
                                                                     ? <>
-                                                                        <Input autoComplete="off" value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="200" placeholder="Please describe in Chinese" />
+                                                                        <Input autoComplete="off" value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="500" placeholder="Please describe in Chinese" />
                                                                         {this.state.invalidChinese
                                                                             ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
                                                                             : null
                                                                         }
                                                                     </>
                                                                     :
-                                                                    <Input autoComplete="off" value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="200" placeholder="Please describe in Chinese (Optional)" />
+                                                                    <Input autoComplete="off" value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="500" placeholder="Please describe in Chinese (Optional)" />
                                                                 }
                                                             </FormGroup>
                                                         </Col>
@@ -2756,7 +2756,7 @@ class EditRequest extends Component {
                                         <FormGroup>
                                             <Label>Purpose of Use</Label>
                                             <InputGroup>
-                                                <TextareaAutosize maxLength={500} onChange={this.handleChange("purposeOfUse")} value={taskDetails.purposeOfUse} placeholder="Enter the Purpose of Use" className="form-control" name="textarea-input" id="purposeOfUse" />
+                                                <TextareaAutosize maxLength={2000} onChange={this.handleChange("purposeOfUse")} value={taskDetails.purposeOfUse} placeholder="Enter the Purpose of Use" className="form-control" name="textarea-input" id="purposeOfUse" />
                                                 {/* <FormFeedback>Please input the purpose of use</FormFeedback> */}
                                             </InputGroup>
                                             <InputGroup>
@@ -2881,7 +2881,7 @@ class EditRequest extends Component {
                                         <FormGroup>
                                             <Label>Address to</Label>
                                             <InputGroup>
-                                                <Input autoComplete="off" maxLength={200} onChange={this.handleChange("addressTo")} value={taskDetails.addressTo} type="textarea" name="textarea-input" id="addressTo" rows="3" placeholder="Documents will be addressed to" />
+                                                <Input autoComplete="off" maxLength={500} onChange={this.handleChange("addressTo")} value={taskDetails.addressTo} type="textarea" name="textarea-input" id="addressTo" rows="3" placeholder="Documents will be addressed to" />
                                                 {/* <FormFeedback>Invalid person to address to</FormFeedback> */}
                                             </InputGroup>
                                             <InputGroup>

@@ -1950,7 +1950,7 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 <Input invalid={this.state.invalidEnglish} autoComplete="off" value={this.state.engName}
-                  onChange={this.handleChange("engName")} type="text" maxLength="200" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
+                  onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
                 {this.state.invalidEnglish
                   ? <small style={{ color: '#F86C6B' }}> Please input only English characters </small>
                   : null}
@@ -1960,14 +1960,14 @@ class Create extends Component {
               <FormGroup>
                 {this.state.isLTI ?
                   <>
-                    <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnNameLTI")} type="text" maxLength="200" name="textarea-input" id="cnName" rows="3"
+                    <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnNameLTI")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3"
                       placeholder="Please describe in Chinese" />
                     {this.state.invalidChinese
                       ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
                       : null}
                   </>
                   :
-                  <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="200" name="textarea-input" id="cnName" rows="3"
+                  <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3"
                     placeholder="Please describe in Chinese (optional)" />
                 }
               </FormGroup>
@@ -2320,7 +2320,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Purpose of Use</Label>
                     <InputGroup>
-                      <Input autoComplete="off" value={this.state.purposeOfUse} maxLength={500} spellCheck="true" ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                      <Input autoComplete="off" value={this.state.purposeOfUse} maxLength={2000} spellCheck="true" ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of Use', this.state.purposeOfUse, 'required')}</small>
                   </FormGroup>
@@ -2443,7 +2443,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Address to</Label>
                     <InputGroup>
-                      <Input autoComplete="off" value={this.state.addressTo} maxLength={200} ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
+                      <Input autoComplete="off" value={this.state.addressTo} maxLength={500} ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Address To', this.state.addressTo, 'required')}</small>
                   </FormGroup>
