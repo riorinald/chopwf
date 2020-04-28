@@ -80,12 +80,12 @@ class Authenticated extends Component {
         }
         else if(userInfo && this.checkCCuser(CCuser, userInfo.userId)){
           if(param.workflow === 'license'){
-            const page = Authorize.check(param.companyid, userInfo.licenseAdminCompanyIds) ? 'details' : ''
+            const page = Authorize.check(param.companyid, userInfo.licenseAdminCompanyIds) ? 'admin-apps/details' : 'mypendingtask/details'
 
             localStorage.setItem('legalEntity', param.companyid.toUpperCase())
             localStorage.setItem('application', param.workflow.toUpperCase())
             this.props.history.push({
-              pathname:`${param.workflow}/admin-apps/${page}`,
+              pathname:`${param.workflow}/${page}`,
               state:{redirected:true, taskId:param.licenseid}
             })
           }
@@ -116,7 +116,9 @@ class Authenticated extends Component {
           }
           else {
             console.log(param)
-            cookies.set('redirectInfo', param, { path:'/'});
+            let expiredIn = new Date()
+		        expiredIn.setTime(expiredIn.getTime() + (5*60*1000));
+            cookies.set('redirectInfo', param, { path:'/', expires: expiredIn});
             this.setState({
               loading:false,
               title: 'You are not Authenticated',
@@ -274,7 +276,7 @@ class Authenticated extends Component {
               
                           localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
                           localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
-                          this.redirect()
+                          this.authenticate()
                           this.props.history.push({
                             pathname:`${redirectInfo.workflow}/${page}/details/`,
                             state:{redirected:true, taskId:redirectInfo.licenseid}
@@ -285,7 +287,7 @@ class Authenticated extends Component {
               
                           localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
                           localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
-                          this.redirect()
+                          this.authenticate()
                           this.props.history.push({
                             pathname:`/${page}/details/`,
                             state:{redirected:true, taskId:redirectInfo.taskid}
@@ -294,24 +296,25 @@ class Authenticated extends Component {
                     }
                     else if(this.checkCCuser(CCuser, res.data.userId)){
                       if(redirectInfo.workflow === 'license'){
-                        const page = Authorize.check(redirectInfo.companyid, res.data.licenseAdminCompanyIds) ? 'details' : ''
-
+                        const page = Authorize.check(redirectInfo.companyid, res.data.licenseAdminCompanyIds) ? 'admin-apps/details' : 'mypendingtask/details'
                         localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
                         localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
+                        this.authenticate()
                         this.props.history.push({
-                          pathname:`${redirectInfo.workflow}/admin-apps/${page}`,
+                          pathname:`${redirectInfo.workflow}/${page}`,
                           state:{redirected:true, taskId:redirectInfo.licenseid}
-                        })
+                        }, cookies.remove('redirectInfo', {path:'/'}))
                       }
                       else{
                         const page = Authorize.check(redirectInfo.companyid, res.data.chopKeeperCompanyIds) ? 'details' : ''
 
                         localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
                         localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
+                        this.authenticate()
                         this.props.history.push({
                           pathname:`/chopapps/${page}`,
                           state:{redirected:true, taskId:redirectInfo.taskid}
-                        })
+                        }, cookies.remove('redirectInfo', {path:'/'}))
                       }
                     }
                     else{
@@ -331,6 +334,7 @@ class Authenticated extends Component {
                     } 
                   }
                   else {
+                    console.log('no redirect cookie')
                     let info = "User " + res.data.userId + " is authorized in the system."
                       this.setState({
                         loading: false, 
@@ -342,7 +346,7 @@ class Authenticated extends Component {
                       })
                       // Authorize.setCookies(res.data)
                       this.countDown()
-                      this.redirect() 
+                      this.authenticate() 
                   } 
                 }
               }
@@ -382,7 +386,7 @@ class Authenticated extends Component {
   //   return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
   // }
 
-  redirect = () =>{
+  authenticate = () =>{
     fakeAuth.authenticate(() => {});
   }
 

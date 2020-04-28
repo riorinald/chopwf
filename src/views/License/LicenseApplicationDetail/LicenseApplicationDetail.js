@@ -36,7 +36,8 @@ class LicenseApplicationDetail extends Component {
             expressNumber: "",
             invalidExpress: false,
             documents: [],
-            fields: []
+            fields: [],
+            isExpired: false,
         }
         this.goBack = this.goBack.bind(this)
         this.handleRadio = this.handleRadio.bind(this)
@@ -60,6 +61,12 @@ class LicenseApplicationDetail extends Component {
         this.setState({ loading: true })
         await Axios.get(`${config.url}/licenses/${taskId}?userId=${Authorize.getCookies().userId}`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
+                
+                if(res.data.actions.length === 0){
+                    //console.log('expired')
+                    this.setState({isExpired: true})
+                }
+
                 //console.log(res.data)
                 this.setState({ taskDetails: res.data, currentStatus: res.data.currentStatusId, loading: false, })
 
@@ -496,14 +503,23 @@ class LicenseApplicationDetail extends Component {
 
 
     render() {
-        const { taskDetails, loading, page, currentStatus, expressNumber, deliverWay, documents, invalidExpress } = this.state
+        const { taskDetails, loading, page, currentStatus, expressNumber, deliverWay, documents, invalidExpress, isExpired } = this.state
+        if (page === 'mypendingtask' && isExpired){
+            return <>
+                <Card className="animated fadeIn">
+                    <CardBody>
+                        <h5>Task is no longer in the pending list.</h5>
+                    </CardBody>
+                </Card>
+                </>
+        }
         return (
             <div>
                 {!loading ?
                     <Card className="animated fadeIn">
                         <CardHeader>
                             <Row className="align-items-left">
-                                <Button className="mr-1" color="primary" onClick={() => this.goBack()}><i className="fa fa-angle-left" /> Back </Button>
+                                <Button className="mx-2" color="primary" onClick={() => this.goBack()}><i className="fa fa-angle-left" /> Back </Button>
                                 {page === "myapplication" ?
                                     currentStatus !== "PENDINGREQUESTORACK" && currentStatus !== "PENDINGREQUESTORRETURN"
                                         ? taskDetails.actions.map((action, index) =>
