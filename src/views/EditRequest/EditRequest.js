@@ -2892,7 +2892,7 @@ class EditRequest extends Component {
                                         <Collapse isOpen={taskDetails.applicationTypeId !== "LTI"}>
                                             <FormGroup>
                                                 <Label>Pick Up By <i className="fa fa-user" /> </Label>
-                                                <AsyncSelect
+                                                {/* <AsyncSelect
                                                     id="pickUpBy"
                                                     loadOptions={this.loadAllUsers}
                                                     isClearable
@@ -2900,7 +2900,10 @@ class EditRequest extends Component {
                                                     onChange={this.handleSelectOption("pickUpBy")}
                                                     menuPortalTarget={document.body}
                                                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                                />
+                                                /> */}
+                                                <InputGroup>
+                                                    <TextareaAutosize maxLength={500} onChange={this.handleChange("pickUpBy")} value={taskDetails.pickUpBy} id="pickUpBy" size="16" className="form-control" placeholder="Please enter the pick up by" />
+                                                </InputGroup>
                                                 <InputGroup>
                                                     {taskDetails.applicationTypeId !== "LTI"
                                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Pick Up By', taskDetails.pickUpBy, 'required')}</small>

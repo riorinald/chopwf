@@ -2451,8 +2451,8 @@ class Create extends Component {
                   <Collapse isOpen={!this.state.isLTI} >
                     < FormGroup >
                       <Label>Pick Up By <i className="fa fa-user" /> </Label>
-                      <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
-                      <AsyncSelect
+                      {/* <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge> */}
+                      {/* <AsyncSelect
                         id="pickUpBy"
                         isClearable
                         loadOptions={loadUsers}
@@ -2462,7 +2462,10 @@ class Create extends Component {
                         onChange={this.handleSelectOption("pickUpBy")}
                         menuPortalTarget={document.body}
                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                      />
+                      /> */}
+                      <InputGroup>
+                        <Input value={this.state.pickUpBy} autoComplete="off" maxLength={500} ref={this.pickUpBy} onChange={this.handleChange("pickUpBy")} id="pickUpBy" size="16" type="textbox" placeholder="Please enter the pick up by" />
+                      </InputGroup>
                       <InputGroup>
                         {!this.state.isLTI
                           ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Pick Up By', this.state.pickUpBy, 'required')}</small>
