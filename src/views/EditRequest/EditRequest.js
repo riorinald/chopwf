@@ -2653,17 +2653,17 @@ class EditRequest extends Component {
 
 
                                             <FormGroup>
-                                                <Label>Number of Pages to Be Chopped</Label>
+                                                <Label>Total Pages of Documents</Label>
                                                 <InputGroup>
                                                     <Input autoComplete="off" onChange={this.handleChange("numOfPages")} value={taskDetails.numOfPages} id="numOfPages" size="16" type="number" min="0" />
                                                 </InputGroup>
                                                 <InputGroup>
                                                     {this.state.invalidNumberOfPages
-                                                        ? <small style={{ color: '#F86C6B' }} >Number of pages cannot be more than 9</small>
+                                                        ? <small style={{ color: '#F86C6B' }} >Total pages cannot be more than 9</small>
                                                         : null
                                                     }
                                                     {taskDetails.applicationTypeId !== "LTI"
-                                                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages to be Chopped', taskDetails.numOfPages, 'required')}</small>
+                                                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Total Pages of Documents', taskDetails.numOfPages, 'required')}</small>
                                                         : null}
                                                 </InputGroup>
                                             </FormGroup>

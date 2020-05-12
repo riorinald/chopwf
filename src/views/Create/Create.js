@@ -2247,16 +2247,16 @@ class Create extends Component {
                   </FormGroup>
                   <Collapse isOpen={!this.state.isLTI}>
                     <FormGroup>
-                      <Label>Number of Pages to Be Chopped</Label>
+                      <Label>Total Pages of Documents</Label>
                       <InputGroup>
                         <Input autoComplete="off" ref={this.numOfPages} value={this.state.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
                       </InputGroup>
                       {this.state.invalidNumberOfPages
-                        ? <small style={{ color: '#F86C6B' }} >Number of pages cannot be more than 9</small>
+                        ? <small style={{ color: '#F86C6B' }} >Total pages cannot be more than 9</small>
                         : null
                       }
                       {!this.state.isLTI
-                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Number of Pages to Be Chopped', this.state.numOfPages, 'required')}</small>
+                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Total Pages of Documents', this.state.numOfPages, 'required')}</small>
                         : null}
                     </FormGroup>
                     <FormGroup>
