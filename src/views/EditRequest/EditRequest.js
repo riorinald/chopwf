@@ -2669,7 +2669,7 @@ class EditRequest extends Component {
                                             </FormGroup>
 
                                             <FormGroup>
-                                                <Label>Connecting Chop (骑缝章) </Label>
+                                                <Label>Connecting Chop (骑缝章) <small className="ml-2"> Please switch to yes if your documents need connecting chop.</small></Label>
                                                 <Row />
                                                 <AppSwitch id="connectChop" dataOn={'yes'} onChange={this.toggleConnection} checked={taskDetails.connectChop === "Y"} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
 
