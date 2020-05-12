@@ -2339,7 +2339,7 @@ class Create extends Component {
                         : null}
                     </FormGroup>
                     <FormGroup>
-                      <Label>Connecting Chop (骑缝章) </Label>
+                      <Label>Connecting Chop (骑缝章) <small className="ml-2"> Please switch to yes if your documents need connecting chop.</small></Label>
                       <Row />
                       <AppSwitch dataOn={'yes'} onChange={this.toggleConnection} checked={this.state.connectingChop} dataOff={'no'} className={'mx-1'} variant={'3d'} color={'primary'} outline={'alt'} label></AppSwitch>
                     </FormGroup>
