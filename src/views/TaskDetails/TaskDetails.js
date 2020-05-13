@@ -638,8 +638,8 @@ class TaskDetails extends Component {
                                                 {taskDetails.actions.map((action, index) =>
                                                     <React.Fragment key={index}>
                                                         {action.action !== "copy" && action.action !== "recall" && action.action !== "remind"
-                                                            ? <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.approve(action.action)} > {action.actionName}</Button>
-                                                            : null}
+                                                            ? <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.approve(action.action)} > { taskDetails.allStages[0].state == "CURRENT" & taskDetails.allStages[0].statusId == "PENDINGDEPTHEAD" & action.action == "approve" ? "Reviewed" : action.actionName } </Button>
+                                                            : null }
                                                     </React.Fragment>
                                                 )}
                                             </Col>
