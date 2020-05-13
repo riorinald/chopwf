@@ -709,7 +709,7 @@ class LicenseApplicationDetail extends Component {
                                         <Col>
                                             {taskDetails.actions.map((action, index) =>
                                                 action.action !== "copy" ?
-                                                    <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
+                                                    <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > { taskDetails.allStages[0].state == "CURRENT" & taskDetails.allStages[0].statusId == "PENDINGSENIORMANAGER" & action.action == "approve" ? "Review" : action.actionName } </Button>
                                                     : null
                                             )}
                                         </Col>
