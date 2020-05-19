@@ -567,14 +567,22 @@ class TaskDetails extends Component {
                                                             Header: "Document Name (English)",
                                                             accessor: "documentNameEnglish",
                                                             width: 250,
-                                                            style: { 'whiteSpace': 'normal' }
+                                                            style: { 
+                                                                'display': 'block', 
+                                                                'word-wrap': 'break-word',
+                                                                'whiteSpace': 'normal' 
+                                                            }
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
                                                             Header: "Document Name (Chinese)",
                                                             accessor: "documentNameChinese",
                                                             width: 250,
-                                                            style: { 'whiteSpace': 'normal' }
+                                                            style: { 
+                                                                'display': 'block', 
+                                                                'word-wrap': 'break-word',
+                                                                'whiteSpace': 'normal' 
+                                                            }
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
