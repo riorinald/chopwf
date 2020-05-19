@@ -2660,7 +2660,7 @@ class EditRequest extends Component {
                                                         <Col md>
                                                             <FormGroup>
                                                                 {/* <Label>English Name</Label> */}
-                                                                <Input autoComplete="off" value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="engName" maxLength="500" rows="3" placeholder="Please describe in English" />
+                                                                <Input autoComplete="off" value={editRequestForm.engName} onChange={this.handleDocumentChange("engName")} type="text" name="textarea-input" id="engName" maxLength="200" rows="3" placeholder="Please describe in English" />
                                                                 {this.state.invalidEnglish
                                                                     ? <small style={{ color: '#F86C6B' }}> Please input only English characters </small>
                                                                     : null
@@ -2671,14 +2671,14 @@ class EditRequest extends Component {
                                                             <FormGroup>
                                                                 {taskDetails.applicationTypeId === "LTI"
                                                                     ? <>
-                                                                        <Input autoComplete="off" value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="500" placeholder="Please describe in Chinese" />
+                                                                        <Input autoComplete="off" value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="200" placeholder="Please describe in Chinese" />
                                                                         {this.state.invalidChinese
                                                                             ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
                                                                             : null
                                                                         }
                                                                     </>
                                                                     :
-                                                                    <Input autoComplete="off" value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="500" placeholder="Please describe in Chinese (Optional)" />
+                                                                    <Input autoComplete="off" value={editRequestForm.cnName} onChange={this.handleDocumentChange("cnName")} type="text" name="textarea-input" id="cnName" rows="3" maxLength="200" placeholder="Please describe in Chinese (Optional)" />
                                                                 }
                                                             </FormGroup>
                                                         </Col>
