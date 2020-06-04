@@ -70,7 +70,7 @@ render() {
             <Route exact path="/portal" name="Portal" render={props => <Portal {...props} />} />
             <Route path='/login' name="login" render={props=> <Login {...props} />} /> 
             <Route path='/Logout' name="logout" render={props=> <Logout {...props} />} />  
-            <Route path="/echoplogexport" name="echopexportlog" render={props=> <EchopLogExport {...props} />}/>
+            <Route path="/echoplogexport" name="echoplogexport" render={props=> <EchopLogExport {...props} />}/>
             {/* {fakeAuth.isAuthenticated
               ? <Route path="/" name="Home" render={props => <DefaultLayout {...props} />} />
               : <Redirect to='/login' />
