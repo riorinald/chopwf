@@ -40,6 +40,8 @@ const Portal = React.lazy(() => import('./views/Portal/Portal'))
 const AuthPage = React.lazy(() => import('./views/Login/Auth'))
 const Oauth = React.lazy(()=> import('./views/Login/oauth'))
 
+const EchopLogExport = React.lazy(() => import('./views/EchopLogExport/EchopLogExport'))
+
 const PrivateRoute = ({component: Component, ...rest}) => (
   <Route {...rest} render={props => (
     fakeAuth.isAuthenticated === true && cookies.get('userInfo', {path:'/'})
@@ -68,11 +70,12 @@ render() {
             <Route exact path="/portal" name="Portal" render={props => <Portal {...props} />} />
             <Route path='/login' name="login" render={props=> <Login {...props} />} /> 
             <Route path='/Logout' name="logout" render={props=> <Logout {...props} />} />  
+            <Route path="/echoplogexport" name="echopexportlog" render={props=> <EchopLogExport {...props} />}/>
             {/* {fakeAuth.isAuthenticated
               ? <Route path="/" name="Home" render={props => <DefaultLayout {...props} />} />
               : <Redirect to='/login' />
             } */}
-            <PrivateRoute path='/' component={DefaultLayout}/>
+            <PrivateRoute path='/' component={DefaultLayout}/>            
           </Switch>
         </React.Suspense>
       </Router>
