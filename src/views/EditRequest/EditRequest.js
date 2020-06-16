@@ -3071,7 +3071,7 @@ class EditRequest extends Component {
                                                 <Button id="submitReq" type="submit" color="primary" onClick={(e) => this.submitRequest('N') + e.currentTarget.blur()}>Save</Button>
                                             </Col>
                                             <Col className="d-flex justify-content-end">
-                                                <Button onClick={(e) => this.deleteTask + e.currentTarget.blur()} color="danger" >Delete</Button>
+                                                <Button onClick={(e) => this.deleteTask() + e.currentTarget.blur()} color="danger" >Delete</Button>
                                             </Col>
                                         </Row>
                                         {taskDetails.histories.length !== 0 ? <hr></hr> : null}
