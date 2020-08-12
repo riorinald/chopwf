@@ -49,7 +49,7 @@ const CNIPS = (props) => {
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
                               </Col>
                               <Col lg={2} className="p-2">
-                                  <Label>No. of Pages to Be Chopped </Label>
+                                  <Label>Total Pages of Documents</Label>
                               </Col>
                               <Col lg={4} className="p-2">
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.numOfPages} id="numOfPages" name="numOfPages" placeholder="/" />
@@ -276,7 +276,7 @@ const LTI = (props) => {
                           
                           
                               <Col lg={2} className="p-2">
-                                  <Label>No. of Pages to Be Chopped </Label>
+                                  <Label>Total Pages of Documents</Label>
                               </Col>
                               <Col lg={4} className="p-2">
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.numOfPages} id="numOfPages" name="numOfPages" placeholder="/" />
@@ -368,7 +368,7 @@ const LTI = (props) => {
                                 <TextareaAutosize className="form-control" disabled value={props.taskDetails.purposeOfUse} id="purposeOfUse" name="purposeOfUse" placeholder="/" />
                               </Col>
                               <Col lg={2} className="p-2">
-                                  <Label>No. of Pages to Be Chopped </Label>
+                                  <Label>Total Pages of Documents</Label>
                               </Col>
                               <Col lg={4} className="p-2">
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.numOfPages} id="numOfPages" name="numOfPages" placeholder="/" />
