@@ -395,7 +395,7 @@ const BLTU = (props) => {
                           
                           
                               <Col lg={2} className="p-2">
-                                  <Label>No. of Pages to Be Chopped </Label>
+                                  <Label>Total Pages of Documents</Label>
                               </Col>
                               <Col lg={4} className="p-2">
                                   <TextareaAutosize className="form-control" disabled value={props.taskDetails.numOfPages} id="numOfPages" name="numOfPages" placeholder="/" />
