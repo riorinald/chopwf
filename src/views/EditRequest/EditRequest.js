@@ -472,7 +472,11 @@ class EditRequest extends Component {
             // this.setSelectedDocCheckBy(temporary.documentCheckBy)
             this.setSelectedDeptHead(temporary.documentCheckBy, temporary.documentCheckByName, "selectedDocCheckBy")
             if (temporary.effectivePeriod !== "") {
-                this.convertDate(temporary.effectivePeriod, 'dateView1')
+                if ( temporary.effectivePeriod >= new Date().toISOString().slice(0,10).replace(/-/g,"") ){
+                    this.convertDate(temporary.effectivePeriod, 'dateView1')
+                } else {
+                    temporary.effectivePeriod = ""
+                }
             }
         }
 
@@ -501,6 +505,7 @@ class EditRequest extends Component {
             }
         }
         temporary.departmentId = temporary.departmentId.toLowerCase()
+        temporary.isConfirm = "N"
         // console.log(temporary.requestorUser)
         // this.setState({ selectedOption: { documentCheckBy: temporary.documentCheckBy }, taskDetails: temporary, tempDocument: temporary.documents, loading: false })
         this.setState({ taskDetails: temporary, tempDocument: temporary.documents, loading: false })
