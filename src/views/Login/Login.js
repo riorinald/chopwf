@@ -78,14 +78,16 @@ class Login extends Component {
             
             //set Defult losgin /oauth or manual login
             else if(this.props.location.search === ""){
-                
-                // this.props.history.push({ //oAuth
-                //     pathname:'/oauth'
-                // })
-
-                this.setState({
-                    modal: true             //Manual
-                 })
+                config.ManualLogin ? 
+                    //Manual
+                    this.setState({
+                        modal: true             
+                    })
+                :
+                    //oAuth
+                    this.props.history.push({ 
+                        pathname:'/oauth'
+                    })
 
             }
         }
