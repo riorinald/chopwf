@@ -598,12 +598,13 @@ class TaskDetails extends Component {
                                                         },
                                                         {
                                                             Header: "DH Approved",
-                                                            accessor: "documentNameChinese",
+                                                            accessor: "departmentHeads",
                                                             Cell: row => (
-                                                                <span className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentId)} >
-                                                                    {this.changeDeptHeads(row.original.departmentHeads)}
-                                                                </span>
-
+                                                                <div>
+                                                                    <span title={this.changeDeptHeads(row.original.departmentHeads)} className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentId)} >
+                                                                        {this.changeDeptHeads(row.original.departmentHeads)}
+                                                                    </span>
+                                                                </div>
                                                             ),
                                                             show: appType === "LTU"
                                                         },
