@@ -30,7 +30,7 @@ import {
 } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import SimpleReactValidator from 'simple-react-validator';
 import AsyncSelect from 'react-select/async';
 import config from '../../../config'
@@ -240,13 +240,10 @@ class LicenseEditRequest extends Component {
 
     //convert Date
     dateChange = (name, view) => date => {
-        let month = ""
-        let tempDate = ""
         let dates = ""
         if (date) {
-            month = date.getMonth()
-            tempDate = date.getDate()
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${tempDate.toLocaleString().length === 1 ? 0 : ""}${tempDate}`
+            let tempDate = format(date, "yyyy-MM-dd").split('T')[0];//right
+            dates = tempDate.replace(/-/g, "")
         }
         this.setState({ [view]: date });
         this.setState(state => {
@@ -254,6 +251,20 @@ class LicenseEditRequest extends Component {
             taskDetails[name] = dates
             return taskDetails
         })
+        // let month = ""
+        // let tempDate = ""
+        // let dates = ""
+        // if (date) {
+        //     month = date.getMonth()
+        //     tempDate = date.getDate()
+        //     dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${tempDate.toLocaleString().length === 1 ? 0 : ""}${tempDate}`
+        // }
+        // this.setState({ [view]: date });
+        // this.setState(state => {
+        //     let taskDetails = this.state.taskDetails
+        //     taskDetails[name] = dates
+        //     return taskDetails
+        // })
     };
 
     handleSelectOption(event) {

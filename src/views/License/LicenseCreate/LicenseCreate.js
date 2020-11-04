@@ -8,7 +8,7 @@ import {
 } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import axios from 'axios';
 import config from '../../../config';
 import SimpleReactValidator from 'simple-react-validator';
@@ -290,19 +290,30 @@ class LicenseCreate extends Component {
 
     //convert Date
     dateChange = (name, view) => date => {
-        let month = date.getMonth()
-        let tempDate = date.getDate()
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${tempDate.toLocaleString().length === 1 ? 0 : ""}${tempDate}`
-        }
-        //console.log(dates)
-        this.setState({ [view]: date });
+            let tempDate = format(date, "yyyy-MM-dd").split('T')[0];//right
+            dates = tempDate.replace(/-/g, "")
+            }
+        this.setState({ [view]: date})
         this.setState(state => {
             let formData = this.state.formData
             formData[name] = dates
             return formData
-        })
+        });
+        
+        // let month = date.getMonth()
+        // let tempDate = date.getDate()
+        // let dates = ""
+        // if (date) {
+        //     dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${tempDate.toLocaleString().length === 1 ? 0 : ""}${tempDate}`
+        // }
+        // this.setState({ [view]: date });
+        // this.setState(state => {
+        //     let formData = this.state.formData
+        //     formData[name] = dates
+        //     return formData
+        // })
     };
 
     handleSelectReciever(event) {

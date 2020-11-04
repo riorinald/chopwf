@@ -9,6 +9,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import Axios from 'axios';
 import config from '../../../config';
 import Papa from 'papaparse';
+import { format } from 'date-fns';
 import "react-table/react-table.css"
 import ReactTable from "react-table";
 import Authorize from '../../../functions/Authorize' 
@@ -216,12 +217,10 @@ class LicenseAdmin extends Component {
     }
 
     dateChange = (name, view) => date => {
-
-        let month = date.getMonth()
-
         let dates = ""
         if (date) {
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+            let tempDate = format(date, "yyyy-MM-dd").split('T')[0];//right
+            dates = tempDate.replace(/-/g, "")
         }
         //console.log(name, dates)
         this.setState({ [view]: date, validDate: true });
