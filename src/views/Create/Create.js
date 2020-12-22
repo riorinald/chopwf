@@ -2484,7 +2484,7 @@ class Create extends Component {
 
                   {this.state.isLTI
                     ? <FormGroup>
-                      <Label>Document Check By <i className="fa fa-user" /> PB7 or above </Label>
+                      <Label>Document Check By <i className="fa fa-user" /> L4 or above </Label>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect
                         id="docCheckByLTI"
