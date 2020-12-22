@@ -154,6 +154,7 @@ class Login extends Component {
                     let info = "LOGIN " + res.data.status.toUpperCase()
                     localStorage.setItem('application', 'CHOP')
                     localStorage.setItem('legalEntity', 'MBAFC')
+                    localStorage.setItem('version', config.version)
                     // localStorage.setItem('ticket', res.data.ticket)
                     // localStorage.setItem('userId', res.data.userId)
                     // localStorage.setItem('roleId', res.data.roleId)
