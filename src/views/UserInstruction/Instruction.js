@@ -170,6 +170,7 @@ class Instruction extends Component {
         const Edit = <img onClick={this.makeEditable} width="20px" src={editIcon} />
         const Apply = <Button color="primary" onClick={this.makeEditable}>APPLY</Button>
         let { loading } = this.state
+
         return (
             <div className="animated fadeIn">
                 <h4>User Guide</h4>
@@ -177,7 +178,7 @@ class Instruction extends Component {
                     <CardHeader><div style={{ float: "left" }}>{this.state.workflow}</div>
                         {localStorage.getItem('viewAdminChop') === "true"
                             ? <div style={{ float: "right" }}>
-                                {!this.state.editable ? Edit : Apply}
+                                { loading ? null : !this.state.editable ? Edit : Apply }
                             </div>
                             : null}
                     </CardHeader>
