@@ -56,7 +56,6 @@ import {
   Tooltip,
   UncontrolledTooltip,
 } from 'reactstrap';
-import { userInfo } from '../../context/UserInfo';
 
 
 const SelectTable = selectTableHOC(ReactTable);

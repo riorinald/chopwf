@@ -33,6 +33,7 @@ class LicenseMyApplications extends Component {
             approvalHistories: [],
             selectedRow: [],
             searchOption: {
+                page: "licenseMyApplication",
                 requestNum: "",
                 licenseName: "",
                 documentType: "",
@@ -70,18 +71,33 @@ class LicenseMyApplications extends Component {
                 "Pending Requestor Return"
             ]
         }
-        this.search = this.search.bind(this)
         this.onFilteredChangeCustom = this.onFilteredChangeCustom.bind(this)
         this.getMyApplications = this.getMyApplications.bind(this)
     }
 
     componentDidMount() {
-        this.getMyApplications(this.state.page, this.state.limit)
+        const searchOption = Authorize.getCookie('searchOption')
+        if(searchOption && searchOption.page === "licenseMyApplication"){
+            this.setState({
+                searchOption: searchOption,
+                returnDateView: CommonFn.convertDate(searchOption.plannedReturnDate),
+                createdDateView: CommonFn.convertDate(searchOption.createdDate)
+            }, () => {this.getMyApplications(1, this.state.limit)
+            })
+        }
+        else{
+            this.getMyApplications(this.state.page, this.state.limit)
+        }
+        
         this.getLicenseNames();
         this.getData('seniorManagers');
         // this.getSeniorManagers();
         this.getData('departments');
         this.getStatusList()
+    }
+
+    componentWillMount() {
+        Authorize.delCookie('searchOption')
     }
 
     async getLicenseNames() {
@@ -105,7 +121,6 @@ class LicenseMyApplications extends Component {
             res = await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${Authorize.getCookies().userId}`,
                 { headers: { Pragma: 'no-cache' } })
         }
-
         this.setState({ [name]: res.data })
     }
 
@@ -113,13 +128,13 @@ class LicenseMyApplications extends Component {
         if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACKED") {
             this.props.history.push({
                 pathname: `myapplication/edit`,
-                state: { redirected: true, taskId: taskId }
+                state: { redirected: true, taskId: taskId, searchOption: this.state.searchOption}
             })
         }
         else {
             this.props.history.push({
                 pathname: `myapplication/details`,
-                state: { redirected: true, taskId: taskId }
+                state: { redirected: true, taskId: taskId, searchOption: this.state.searchOption }
             })
 
         }
@@ -219,8 +234,28 @@ class LicenseMyApplications extends Component {
         // this.search()
     }
 
-    search() {
+    search = () => {
         this.getMyApplications(1, this.state.limit)
+    }
+
+    clearSearch = () => {
+        Authorize.delCookie('searchOption')
+        this.setState({
+            page: 1,
+            searchOption: {
+                page: "licenseMyApplication",
+                requestNum: "",
+                licenseName: "",
+                documentType: "",
+                seniorManagerName: "",
+                status: "",
+                plannedReturnDate: "",
+                createdDate: "",
+                createdByName: "",
+                departmentName: ""
+            }
+        }, () => {this.getMyApplications(1, this.state.limit)} 
+        )
     }
 
     dateChange = (name, view) => date => {
@@ -269,7 +304,10 @@ class LicenseMyApplications extends Component {
             <div className="animated fadeIn" >
                 <h4>My Applications</h4>
                 <Card onKeyDown={this.handleKeyDown} >
-                    <CardHeader>My Applicaitons <Button className="float-right" onClick={this.search} >Search</Button> </CardHeader>
+                    <CardHeader>My Applicaitons
+                        <Button className="float-right" onClick={this.clearSearch} > Reset <i className="icon-reload"></i></Button>
+                        <Button className="float-right mr-2" onClick={this.search} > Search <i className="icon-magnifier ml-1"></i> </Button>
+                    </CardHeader>
                     <CardBody>
                         <ReactTable
                             data={applications}
@@ -278,6 +316,24 @@ class LicenseMyApplications extends Component {
                                 this.setState({ filtered: filtered })
                                 this.onFilteredChangeCustom(value, column.id || column.accessor);
                             }}
+                            defaultFiltered={[
+                                {
+                                    id: 'requestNum',
+                                    value: this.state.searchOption.requestNum,
+                                },
+                                {
+                                    id: 'licenseName',
+                                    value: this.state.searchOption.licenseName,
+                                },
+                                {
+                                    id: 'seniorManagerName',
+                                    value: this.state.searchOption.seniorManagerName,
+                                },
+                                {
+                                    id: 'createdByName',
+                                    value: this.state.searchOption.createdByName,
+                                },
+                              ]}
                             getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
                             defaultFilterMethod={(filter, row, column) => {
                                 const id = filter.pivotId || filter.id;
@@ -289,7 +345,7 @@ class LicenseMyApplications extends Component {
                                     accessor: "requestNum",
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" },
-                                    width: this.getColumnWidth('requestNum', "Request Number")
+                                    width: this.getColumnWidth('requestNum', "Request Number"),
                                 },
                                 {
                                     Header: "License Name",

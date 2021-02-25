@@ -33,6 +33,7 @@ class LicenseApplication extends Component {
             approvalHistories: [],
             selectedRow: [],
             searchOption: {
+                page:"licenseApplication",
                 requestNum: "",
                 licenseName: "",
                 documentType: "",
@@ -64,12 +65,21 @@ class LicenseApplication extends Component {
     componentDidMount() {
         const legalEntity = this.props.legalName
         const adminEntity = Authorize.getCookies().licenseAdminCompanyIds
-
         const isAdmin = Authorize.check(legalEntity, adminEntity)
-        
+        const searchOption = Authorize.getCookie('searchOption')
             if (isAdmin) {
+                if(searchOption && searchOption.page === "licenseApplication"){
+                    this.setState({
+                        searchOption: searchOption,
+                        returnDateView: CommonFn.convertDate(searchOption.plannedReturnDate),
+                        createdDateView: CommonFn.convertDate(searchOption.createdDate)
+                    }, () => {this.getLicenseApplications(1, this.state.limit)
+                    })
+                }
+                else{
+                    this.getLicenseApplications(this.state.page, this.state.limit)
+                }
                 this.setState({ isAdmin: isAdmin })
-                this.getLicenseApplications(this.state.page, this.state.limit)
                 this.getLicenseNames();
                 this.getData('seniorManagers');
                 this.getData('departments');
@@ -77,6 +87,10 @@ class LicenseApplication extends Component {
                 // this.getSeniorManagers();
             }
    }
+
+   componentWillMount() {
+    Authorize.delCookie('searchOption')
+    }
 
     async getLicenseNames() {
 
@@ -112,7 +126,7 @@ class LicenseApplication extends Component {
         // else {
         this.props.history.push({
             pathname: `admin-apps/details`,
-            state: { redirected: true, taskId: taskId }
+            state: { redirected: true, taskId: taskId, searchOption: this.state.searchOption}
         })
         // }
 
@@ -206,6 +220,30 @@ class LicenseApplication extends Component {
         // this.search()
     }
 
+    search = () => {
+        this.getLicenseApplications(1, this.state.limit)
+    }
+
+    clearSearch = () => {
+        Authorize.delCookie('searchOption')
+        this.setState({
+            page: 1,
+            searchOption: {
+                page: "licenseApplication",
+                requestNum: "",
+                licenseName: "",
+                documentType: "",
+                seniorManagerName: "",
+                status: "",
+                plannedReturnDate: "",
+                createdDate: "",
+                createdByName: "",
+                departmentName: ""
+            }
+        }, () => {this.getLicenseApplications(1, this.state.limit)} 
+        )
+    }
+
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
             this.getLicenseApplications(1, this.state.limit)
@@ -261,7 +299,10 @@ class LicenseApplication extends Component {
                 <h4>License Applications</h4>
                 <Card onKeyDown={this.handleKeyDown}>
 
-                    <CardHeader>License Applications <Button className="float-right" onClick={() => this.getLicenseApplications(1, this.state.limit)} >Search</Button></CardHeader>
+                    <CardHeader>License Applications 
+                        <Button className="float-right" onClick={this.clearSearch} > Reset <i className="icon-reload"></i></Button>
+                        <Button className="float-right mr-2" onClick={this.search} > Search <i className="icon-magnifier ml-1"></i> </Button>
+                        </CardHeader>
                     <CardBody>
                         <ReactTable
                             data={licenseApplication}
@@ -275,6 +316,24 @@ class LicenseApplication extends Component {
                                 const id = filter.pivotId || filter.id;
                                 return row[id]
                             }}
+                            defaultFiltered={[
+                                {
+                                    id: 'requestNum',
+                                    value: this.state.searchOption.requestNum,
+                                },
+                                {
+                                    id: 'licenseName',
+                                    value: this.state.searchOption.licenseName,
+                                },
+                                {
+                                    id: 'seniorManagerName',
+                                    value: this.state.searchOption.seniorManagerName,
+                                },
+                                {
+                                    id: 'createdByName',
+                                    value: this.state.searchOption.createdByName,
+                                },
+                              ]}
                             columns={[
                                 {
                                     Header: "Request Number",

@@ -33,6 +33,7 @@ class LicenseMyPendingTasks extends Component {
             approvalHistories: [],
             selectedRow: [],
             searchOption: {
+                page:"licenseMyPendingTask",
                 requestNum: "",
                 licenseName: "",
                 documentType: "",
@@ -75,12 +76,27 @@ class LicenseMyPendingTasks extends Component {
     }
 
     componentDidMount() {
-        this.getPendingTasks(this.state.page, this.state.limit)
+        const searchOption = Authorize.getCookie('searchOption')
+        if(searchOption && searchOption.page === "licenseMyPendingTask"){
+            this.setState({
+                searchOption: searchOption,
+                returnDateView: CommonFn.convertDate(searchOption.plannedReturnDate),
+                createdDateView: CommonFn.convertDate(searchOption.createdDate)
+            }, () => {this.getPendingTasks(1, this.state.limit)
+            })
+        }
+        else{
+            this.getPendingTasks(this.state.page, this.state.limit)
+        }
         this.getLicenseNames();
         this.getData('seniorManagers');
         // this.getSeniorManagers();
         this.getData('departments');
         this.getStatusList();
+    }
+
+    componentWillMount() {
+        Authorize.delCookie('searchOption')
     }
 
     async getLicenseNames() {
@@ -112,13 +128,13 @@ class LicenseMyPendingTasks extends Component {
         if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACKED") {
             this.props.history.push({
                 pathname: `mypendingtask/edit`,
-                state: { redirected: true, taskId: taskId }
+                state: { redirected: true, taskId: taskId, searchOption: this.state.searchOption}
             })
         }
         else {
             this.props.history.push({
                 pathname: `mypendingtask/details`,
-                state: { redirected: true, taskId: taskId }
+                state: { redirected: true, taskId: taskId, searchOption: this.state.searchOption }
             })
         }
 
@@ -212,6 +228,30 @@ class LicenseMyPendingTasks extends Component {
         // this.search()
     }
 
+    search = () => {
+        this.getPendingTasks(1, this.state.limit)
+    }
+
+    clearSearch = () => {
+        Authorize.delCookie('searchOption')
+        this.setState({
+            page: 1,
+            searchOption: {
+                page: "licenseMyPendingTask",
+                requestNum: "",
+                licenseName: "",
+                documentType: "",
+                seniorManagerName: "",
+                status: "",
+                plannedReturnDate: "",
+                createdDate: "",
+                createdByName: "",
+                departmentName: ""
+            }
+        }, () => {this.getPendingTasks(1, this.state.limit)} 
+        )
+    }
+
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
             this.getPendingTasks(1, this.state.limit)
@@ -262,7 +302,10 @@ class LicenseMyPendingTasks extends Component {
             <div className="animated fadeIn">
                 <h4>My Pending Tasks</h4>
                 <Card onKeyDown={this.handleKeyDown}>
-                    <CardHeader>My Pending Tasks <Button className="float-right" onClick={() => this.getPendingTasks(1, this.state.limit)} >Search</Button></CardHeader>
+                    <CardHeader>My Pending Tasks 
+                        <Button className="float-right" onClick={this.clearSearch} > Reset <i className="icon-reload"></i></Button>
+                        <Button className="float-right mr-2" onClick={this.search} > Search <i className="icon-magnifier ml-1"></i> </Button>
+                    </CardHeader>
                     <CardBody>
                         <ReactTable
                             data={pendingTasks}
@@ -271,6 +314,24 @@ class LicenseMyPendingTasks extends Component {
                                 this.setState({ filtered: filtered })
                                 this.onFilteredChangeCustom(value, column.id || column.accessor);
                             }}
+                            defaultFiltered={[
+                                {
+                                    id: 'requestNum',
+                                    value: this.state.searchOption.requestNum,
+                                },
+                                {
+                                    id: 'licenseName',
+                                    value: this.state.searchOption.licenseName,
+                                },
+                                {
+                                    id: 'seniorManagerName',
+                                    value: this.state.searchOption.seniorManagerName,
+                                },
+                                {
+                                    id: 'createdByName',
+                                    value: this.state.searchOption.createdByName,
+                                },
+                              ]}
                             getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
                             defaultFilterMethod={(filter, row, column) => {
                                 const id = filter.pivotId || filter.id;

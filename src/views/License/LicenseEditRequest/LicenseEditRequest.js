@@ -80,12 +80,16 @@ class LicenseEditRequest extends Component {
             this.getLicenseNames();
             this.getSeniorManagers();
             this.getData('departments');
+            this.getTaskDetails(this.props.location.state.taskId)
         }
-
-
-        this.getTaskDetails(this.props.location.state.taskId)
-
     }
+
+    componentWillUnmount(){
+        if(this.props.location.state !== undefined){
+            Authorize.setCookie('searchOption', this.props.location.state.searchOption, 5)
+        }
+    }
+
     async getLicenseNames() {
         const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
         .then( res => {

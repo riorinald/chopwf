@@ -212,6 +212,12 @@ class EditRequest extends Component {
         this.setContractNotes()
     }
 
+    componentWillUnmount(){
+        if(this.props.location.state !== undefined){
+            Authorize.setCookie('searchOption', this.props.location.state.searchOption, 5)
+        }
+    }
+
 
     getNotes() {
         Axios.get(`${config.url}/notes/0`, { headers: { Pragma: 'no-cache' } })
@@ -1624,7 +1630,7 @@ class EditRequest extends Component {
             return taskDetails
         })
         if (sname === "documentCheckBy1") {
-            let element = document.getElementById("documentCheckBy")
+            let element = document.getElementById("documentCheckBy1")
             if (element) {
                 element.classList.contains("form-control")
                     ? element.className = "is-valid form-control"

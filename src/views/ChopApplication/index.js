@@ -23,7 +23,7 @@ import config from '../../config';
 import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import Authorize from '../../functions/Authorize'
+import {Authorize, CommonFn} from '../../functions/'
 
 class ChopApplication extends Component {
   constructor(props) {
@@ -57,8 +57,10 @@ class ChopApplication extends Component {
 
       applications: [],
       selectedId: null,
+      createdDateView:"",
 
       searchOption: {
+        page:"chopApplications",
         requestNum: "",
         applicationTypeName: "",
         chopTypeName: "",
@@ -85,15 +87,29 @@ class ChopApplication extends Component {
     const legalEntity = this.props.legalName
     const adminEntity = Authorize.getCookies().chopKeeperCompanyIds
     const isAdmin = Authorize.check(legalEntity, adminEntity)
+    const searchOption = Authorize.getCookie('searchOption')
     
       if (isAdmin) {
         this.setState({ isAdmin: isAdmin })
-        this.getApplications(1, this.state.limit);
+        if(searchOption && searchOption.page === "chopApplications"){
+          this.setState({
+              searchOption: searchOption,
+              createdDateView: CommonFn.convertDate(searchOption.createdDate)
+          }, () => {this.getApplications(1, this.state.limit)
+          })
+      }
+      else{
+          this.getApplications(this.state.page, this.state.limit)
+      }
         this.getData("applicationTypes", `${config.url}/apptypes`);
         this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
         this.getData("departments", `${config.url}/departments`);
         this.getStatusList();
       }
+  }
+
+  componentWillMount() {
+    Authorize.delCookie('searchOption')
   }
 
   async getApplications(pageNumber, pageSize) {
@@ -154,6 +170,27 @@ class ChopApplication extends Component {
 
   search = () => {
     this.getApplications(1, this.state.limit)
+  }
+
+  clearSearch = () => {
+    Authorize.delCookie('searchOption')
+    this.setState({
+        page: 1,
+        searchOption: {
+            page:"chopApplications",
+            requestNum: "",
+            applicationTypeName: "",
+            chopTypeName: "",
+            departmentHeadName: "",
+            teamName: "",
+            documentCheckByName: "",
+            statusName: "",
+            createdDate: "",
+            createdByName: "",
+            departmentName: ""
+        }
+    }, () => {this.getApplications(1, this.state.limit)} 
+    )
   }
 
   convertDate(dateValue) {
@@ -301,10 +338,9 @@ class ChopApplication extends Component {
   }
 
   goToDetails(id, url) {
-    
     this.props.history.push({
       pathname: url,
-      state: { taskId: id }
+      state: { taskId: id, searchOption: this.state.searchOption}
     })
   }
 
@@ -336,18 +372,22 @@ class ChopApplication extends Component {
       return months[month]
     }
     if (!isAdmin){
-      return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
+      return(
+        <Card>
+          <CardBody>
+            <h4>Not Authorized</h4>
+          </CardBody>
+        </Card>)
     }
     return (
-
       <div>
         <h3>Chop Applications</h3>
         <Card onKeyDown={this.handleKeyDown}>
           <CardHeader>
             Chop Applications
-              <Button className="float-right" onClick={this.search} >Search</Button>
-            <div className="float-right">&nbsp;&nbsp;&nbsp;</div>
-            <Button color="primary" className="float-right" onClick={this.toggleModal} >Export Logs</Button>
+              <Button color="primary" className="float-right" onClick={this.toggleModal} > Export Logs <i class="fa fa-file-text ml-1"></i></Button>
+              <Button className="float-right mr-2" onClick={this.clearSearch} > Reset <i className="icon-reload"></i></Button>
+              <Button className="float-right mr-2" onClick={this.search} > Search <i className="icon-magnifier ml-1"></i> </Button>
           </CardHeader>
           <CardBody>
             <ReactTable
@@ -549,10 +589,10 @@ class ChopApplication extends Component {
                         peekNextMonth
                         showMonthDropdown
                         showYearDropdown
-                        selected={this.state.dateView1}
+                        selected={this.state.createdDateView}
                         isClearable
                         getTheadFilterThProps
-                        onChange={this.searchDateChange("createdDate", "dateView1")}
+                        onChange={this.searchDateChange("createdDate", "createdDateView")}
                       />
                     )
                   },

@@ -12,8 +12,7 @@ import config from '../../config';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from 'date-fns';
-import InputMask from "react-input-mask";
-import Authorize from '../../functions/Authorize'
+import {Authorize, CommonFn} from '../../functions/'
 
 
 
@@ -37,12 +36,13 @@ class MyPendingTasks extends Component {
             totalPages: 1,
             page: 1,
             limit: 10,
-            dateView1: "",
-
+            
             show: true,
             dateView: null,
+            createdDateView: "",
 
             searchOption: {
+                page:"chopMyPendingTask",
                 requestNum: "",
                 applicationTypeName: "",
                 chopTypeName: "",
@@ -76,19 +76,33 @@ class MyPendingTasks extends Component {
     }
 
     async componentDidMount() {
+        const searchOption = Authorize.getCookie('searchOption')
+        if(searchOption && searchOption.page === "chopMyPendingTask"){
+            this.setState({
+                searchOption: searchOption,
+                createdDateView: CommonFn.convertDate(searchOption.createdDate)
+            }, () => {this.getPendingTasks(1, this.state.limit)
+            })
+        }
+        else{
+            this.getPendingTasks(this.state.page, this.state.limit)
+        }
         await this.getData("applicationTypes", `${config.url}/apptypes`);
         await this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
         await this.getData("departments", `${config.url}/departments`);
         await this.getStatusList();
         // console.log(mounted)
         // if (mounted === 0) {
-        await this.getPendingTasks(1, this.state.limit);
         // }
         // else {
         //     this.setState({ loading: !this.state.loading })
         //     this.setState({ pendingTasks: array, loading: !this.state.loading })
         // }
         // mounted = mounted + 1
+    }
+
+    componentWillMount() {
+        Authorize.delCookie('searchOption')
     }
 
     async getStatusList() {
@@ -125,7 +139,8 @@ class MyPendingTasks extends Component {
     goToDetails(id, url) {
         this.props.history.push({
             pathname: url,
-            state: { taskId: id }
+            state: { taskId: id, searchOption: this.state.searchOption}
+            // state: { taskId: id }
         })
     }
 
@@ -254,8 +269,29 @@ class MyPendingTasks extends Component {
         return Math.min(maxWidth, Math.max(max, headerText.length) * magicSpacing);
     }
 
-    search() {
+    search = () => {
         this.getPendingTasks(1, this.state.limit)
+    }
+
+    clearSearch = () => {
+        Authorize.delCookie('searchOption')
+        this.setState({
+            page: 1,
+            searchOption: {
+                page:"chopMyPendingTask",
+                requestNum: "",
+                applicationTypeName: "",
+                chopTypeName: "",
+                departmentHeadName: "",
+                teamName: "",
+                documentCheckByName: "",
+                statusName: "",
+                createdDate: "",
+                createdByName: "",
+                departmentName: ""
+            }
+        }, () => {this.getPendingTasks(1, this.state.limit)} 
+        )
     }
 
     handleKeyDown = (e) => {
@@ -317,8 +353,9 @@ class MyPendingTasks extends Component {
 
                 {/* {this.state.show? */}
                 <Card onKeyDown={this.handleKeyDown} >
-                    <CardHeader >
-                        My Pending Tasks <Button className="float-right" onClick={this.search} >Search</Button>
+                    <CardHeader > My Pending Tasks
+                        <Button className="float-right" onClick={this.clearSearch} > Reset <i className="icon-reload"></i></Button>
+                        <Button className="float-right mr-2" onClick={this.search} > Search <i className="icon-magnifier ml-1"></i> </Button>
                     </CardHeader>
                     <CardBody >
                         <ReactTable
@@ -334,6 +371,32 @@ class MyPendingTasks extends Component {
                                 const id = filter.pivotId || filter.id;
                                 return row[id]
                             }}
+                            defaultFiltered={[
+                                {
+                                    id: 'requestNum',
+                                    value: this.state.searchOption.requestNum,
+                                },
+                                {
+                                    id: 'departmentName',
+                                    value: this.state.searchOption.departmentName,
+                                },
+                                {
+                                    id: 'departmentHeadName',
+                                    value: this.state.searchOption.departmentHeadName,
+                                },
+                                {
+                                    id: 'teamName',
+                                    value: this.state.searchOption.teamName,
+                                },
+                                {
+                                    id: 'documentCheckByName',
+                                    value: this.state.searchOption.documentCheckByName,
+                                },
+                                {
+                                    id: 'createdByName',
+                                    value: this.state.searchOption.createdByName,
+                                },
+                              ]}
                             getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
                             defaultPageSize={this.state.limit}
                             manual
@@ -537,10 +600,10 @@ class MyPendingTasks extends Component {
                                                 peekNextMonth
                                                 showMonthDropdown
                                                 showYearDropdown
-                                                selected={this.state.dateView1}
+                                                selected={this.state.createdDateView}
                                                 isClearable
                                                 getTheadFilterThProps
-                                                onChange={this.dateChange("createdDate", "dateView1")}
+                                                onChange={this.dateChange("createdDate", "createdDateView")}
                                             />
                                         )
                                     },

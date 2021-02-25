@@ -18,7 +18,7 @@ import { Redirect } from 'react-router-dom';
 import theme from '../theme.css'
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import Authorize from '../../functions/Authorize'
+import {Authorize, CommonFn} from '../../functions/'
 
 
 class Myapps extends Component {
@@ -47,8 +47,10 @@ class Myapps extends Component {
       applicationTypes: [],
       chopTypes: [],
       filtered: [],
+      createdDateView: "",
 
       searchOption: {
+        page:"chopMyApplication",
         requestNum: "",
         applicationTypeName: "",
         chopTypeName: "",
@@ -70,13 +72,26 @@ class Myapps extends Component {
   }
 
   componentDidMount() {
-    this.getApplications(1, this.state.limit);
-    // resetMounted.setMounted();
+    const searchOption = Authorize.getCookie('searchOption')
+        if(searchOption && searchOption.page === "chopMyApplication"){
+            this.setState({
+                searchOption: searchOption,
+                createdDateView: CommonFn.convertDate(searchOption.createdDate)
+            }, () => {this.getApplications(1, this.state.limit)
+            })
+        }
+        else{
+            this.getApplications(this.state.page, this.state.limit)
+        }
 
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
     this.getData("departments", `${config.url}/departments`);
     this.getStatusList();
+  }
+
+  componentWillMount() {
+    Authorize.delCookie('searchOption')
   }
 
   async getStatusList() {
@@ -106,12 +121,33 @@ class Myapps extends Component {
   goToDetails(id, url) {
     this.props.history.push({
       pathname: url,
-      state: { taskId: id }
+      state: { taskId: id, searchOption: this.state.searchOption}
     })
   }
 
   search = () => {
     this.getApplications(1, this.state.limit)
+  }
+
+  clearSearch = () => {
+    Authorize.delCookie('searchOption')
+    this.setState({
+        page: 1,
+        searchOption: {
+            page:"chopMyApplication",
+            requestNum: "",
+            applicationTypeName: "",
+            chopTypeName: "",
+            departmentHeadName: "",
+            teamName: "",
+            documentCheckByName: "",
+            statusName: "",
+            createdDate: "",
+            createdByName: "",
+            departmentName: ""
+        }
+    }, () => {this.getApplications(1, this.state.limit)} 
+    )
   }
 
   onKeyPressed = (e) => {
@@ -263,7 +299,9 @@ class Myapps extends Component {
       <div className="animated fadeIn">
         <h4>My Applications</h4>
         <Card>
-          <CardHeader>My Applications <Button className="float-right" onClick={this.search} >Search</Button>
+          <CardHeader>My Applications 
+              <Button className="float-right" onClick={this.clearSearch} > Reset <i className="icon-reload"></i></Button>
+              <Button className="float-right mr-2" onClick={this.search} > Search <i className="icon-magnifier ml-1"></i> </Button>
           </CardHeader>
           <CardBody onKeyDown={this.onKeyPressed}>
             <ReactTable
@@ -273,6 +311,32 @@ class Myapps extends Component {
                 this.setState({ filtered: filtered })
                 this.onFilteredChangeCustom(value, column.id || column.accessor);
               }}
+              defaultFiltered={[
+                {
+                    id: 'requestNum',
+                    value: this.state.searchOption.requestNum,
+                },
+                {
+                    id: 'departmentName',
+                    value: this.state.searchOption.departmentName,
+                },
+                {
+                    id: 'departmentHeadName',
+                    value: this.state.searchOption.departmentHeadName,
+                },
+                {
+                    id: 'teamName',
+                    value: this.state.searchOption.teamName,
+                },
+                {
+                    id: 'documentCheckByName',
+                    value: this.state.searchOption.documentCheckByName,
+                },
+                {
+                    id: 'createdByName',
+                    value: this.state.searchOption.createdByName,
+                },
+              ]}
               getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
               defaultFilterMethod={(filter, row, column) => {
                 const id = filter.pivotId || filter.id;
@@ -469,10 +533,10 @@ class Myapps extends Component {
                         peekNextMonth
                         showMonthDropdown
                         showYearDropdown
-                        selected={this.state.dateView1}
+                        selected={this.state.createdDateView}
                         isClearable
                         getTheadFilterThProps
-                        onChange={this.dateChange("createdDate", "dateView1")}
+                        onChange={this.dateChange("createdDate", "createdDateView")}
                       />
                     )
                   },

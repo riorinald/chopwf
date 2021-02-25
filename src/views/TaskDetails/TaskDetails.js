@@ -55,6 +55,12 @@ class TaskDetails extends Component {
         }
     }
 
+    componentWillUnmount(){
+        if(this.props.location.state !== undefined){
+            Authorize.setCookie('searchOption', this.props.location.state.searchOption, 5)
+        }
+    }
+
     async getTaskDetails(id) {
         this.setState({ loading: true })
         let userId = Authorize.getCookies().userId

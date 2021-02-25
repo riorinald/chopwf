@@ -55,6 +55,13 @@ class LicenseApplicationDetail extends Component {
         }
     }
 
+    componentWillUnmount(){
+        if(this.props.location.state !== undefined){
+            Authorize.setCookie('searchOption', this.props.location.state.searchOption, 5)
+        }
+    }
+            
+
 
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
@@ -194,6 +201,11 @@ class LicenseApplicationDetail extends Component {
                 this.setState({ fields: arr })
                 //console.log(arr)
                 //TESTING -- ANAND//
+            })
+            .catch(
+                err => {
+                this.setState({ loading: false })
+                console.log(err)
             })
     }
 
@@ -763,7 +775,7 @@ class LicenseApplicationDetail extends Component {
                             )}
                         </CardFooter>
                     </Card>
-                    : <div style={{ textAlign: "center" }} ><Spinner size="md" style={{ width: '3rem', height: '3rem' }} ></Spinner></div>
+                    : <div style={{ textAlign: "center" }} ><Spinner size="sm" style={{ width: '3rem', height: '3rem' }} ></Spinner></div>
                 }
             </div>)
     }

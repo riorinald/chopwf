@@ -21,6 +21,21 @@ const setCookies = (data) => {
 		// console.log('SET COOKIE EXP', expiredIn)
 		cookies.set('userInfo', data, { path:'/', expires: expiredIn });
 	}
+
+const setCookie = (name, data, minutes) => {
+	let expiredIn = new Date()
+	expiredIn.setTime(expiredIn.getTime() + (minutes*60*1000));
+	cookies.set(name, data, { path:'/', expires: expiredIn });
+}
+
+const getCookie = (name) => {
+	return cookies.get(name, {path:'/'})
+}
+
+const delCookie = (name) => {
+	cookies.remove(name,{path:'/'})
+}
+	
 const check = (legalEntity, adminEntity) => {
 		let isAdmin = false
 		// for (let i = 0; i < adminEntity.length; i++) {
@@ -37,6 +52,6 @@ const check = (legalEntity, adminEntity) => {
 		return isAdmin
 	}
 
-const Authorize = ({getCookies, setCookies, check})
+const Authorize = ({getCookies, setCookies, check, setCookie, getCookie, delCookie})
 
 export default Authorize;

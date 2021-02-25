@@ -24,6 +24,15 @@ const sortingArrayStr = (data = [], param = "", lang="zh-CN-u-co-pinyin", isNume
         })
 }
 
-const CommonFn = ({sortingString, sortingArrayStr})
+const convertDate = (dateValue) => {
+    let converted = null
+    if (dateValue !== "" && dateValue !== undefined) {
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
+        converted = new Date(regEx)
+    }
+    return converted
+}
+
+const CommonFn = ({sortingString, sortingArrayStr, convertDate})
 
 export default CommonFn;
