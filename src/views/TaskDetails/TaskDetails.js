@@ -329,12 +329,14 @@ class TaskDetails extends Component {
         }
 
         if (navigator.userAgent.indexOf('Edge') >= 0){
-           var file = new Blob([u8arr], { type: mime });
-           return this.blobToFile(file, filename);
-        } else {
-           return new File([u8arr], filename, { type: mime });
+            var file = new Blob([u8arr], { type: mime });
+            console.log("dataURLtoFile; Not Using Legacy Edge")
+            return this.blobToFile(file, filename);           
         }
-        //return new File([u8arr], filename, { type: mime });
+        else {
+            console.log("dataURLtoFile; Using Legacy Edge")
+            return new File([u8arr], filename, { type: mime });
+        }
     }
 
     viewOrDownloadFile(documentId) {
@@ -356,6 +358,8 @@ class TaskDetails extends Component {
                         b64 = res.data.documentBase64String
                         type = res.data.documentFileType
                         name = res.data.documentFileName
+                        console.log("viewOrDownloadFile; type: " + type)
+                        console.log("viewOrDownloadFile; name: " + name)
                         
                         let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
                         var blobUrl = new Blob([file], { type: type })
@@ -365,12 +369,26 @@ class TaskDetails extends Component {
                         //     type: "success",
                         // })
                         Swal.close()
-                        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                        if (window.navigator && window.navigator.msSaveOrOpenBlob) { // For IE
                             window.navigator.msSaveOrOpenBlob(blobUrl, name)
+                            console.log("viewOrDownloadFile; For IE.")
                             return;
                         }
-                        else {
-                            window.open(URL.createObjectURL(file), "_blank")
+                        else { 
+                            // For Non-IE (Chrome, Firefox, etc)
+                            console.log("viewOrDownloadFile; For Non-IE.")
+                            // Use trick used by FileSaver.js to download file.
+                            var fileLink = document.createElement("a")
+                            document.body.appendChild(fileLink)
+                            fileLink.style = "display:none"
+                                                        
+                            var url = URL.createObjectURL(file)
+                            fileLink.href = url;
+                            fileLink.download = name;
+                            fileLink.click();
+                            console.log("viewOrDownloadFile; Download from TaskDetails.js file.")
+
+                            URL.revokeObjectURL(url)
                         }
                     })
                     .catch(error => {

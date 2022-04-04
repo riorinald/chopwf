@@ -1629,7 +1629,20 @@ class Create extends Component {
         return;
       }
       else {
-        window.open(URL.createObjectURL(file), "_blank")
+        // For Non-IE (Chrome, Firefox, etc)
+        console.log("viewOrDownloadFile; For Non-IE.")
+        // Use trick used by FileSaver.js to download file.
+        var fileLink = document.createElement("a")
+        document.body.appendChild(fileLink)
+        fileLink.style = "display:none"
+        
+        var url = URL.createObjectURL(file)
+        fileLink.href = url;
+        fileLink.download = file.name;
+        fileLink.click();
+        console.log("viewOrDownloadFile; Download from Create.js file.")
+
+        URL.revokeObjectURL(url)
       }
     }
     else {

@@ -59,7 +59,7 @@ class App extends Component {
 
 render() {
     return (
-      <Router basename='/CLWF/'>
+      <Router basename='/clwf/'>
         <React.Suspense fallback={loading()}>
           <Switch>
             <Route exact path="/oauth" name="oauth" render={props => <Oauth {...props} />} />
