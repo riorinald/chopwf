@@ -4,6 +4,7 @@ import { Redirect,NavLink } from 'react-router-dom';
 import { fakeAuth } from '../../App';
 import config from '../../config';
 import qs from 'querystring';
+import Cookies from 'universal-cookie';
 
 import {
     Form,
@@ -14,6 +15,7 @@ import {
     Navbar, NavbarBrand, Nav, NavItem,
     Modal, ModalHeader, ModalBody, ModalFooter
 } from 'reactstrap';
+import Authorize from '../../functions/Authorize'
 
 // const scope="email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly";
 // const client_id="414328176448-a8id4cjtkim0f3ag4nli28hjbcqte4su.apps.googleusercontent.com";
@@ -26,6 +28,7 @@ const client_secret="5dd084f6-d9da-452a-86ee-45a6d301439f"
 const redirect_uri="https%3A%2F%2Fdocms.es.corpintra.net%2Fclwf%2Flogin%3Fauthhandler%3DDaimler_OpenID"
 const pathname=`https://sso-int.daimler.com/as/authorization.oauth2?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}`
 
+const cookies = new Cookies();
 
 class Login extends Component {
     constructor(props) {
@@ -37,6 +40,7 @@ class Login extends Component {
             info: "",
             second: 5,
             fade: false,
+            modal: false,
             redirectOuth: false,
             pathname: "",
             token:""
@@ -51,8 +55,8 @@ class Login extends Component {
     }
 
     componentDidMount(){
-        const param = qs.parse(this.props.location.search)
-
+        console.log(cookies.get('redirectInfo', {path:'/'}))
+        const param = qs.parse(this.props.location.search.slice(1))
         if (param.code){
             console.log('code acquired!', param.code)
             this.props.history.push({
@@ -60,11 +64,40 @@ class Login extends Component {
                 code: param.code
             })
         }
+        // Enable /login?auth=manual
+        if (param.auth === "manual"){
+
+            this.setState({
+                modal: true 
+             })
+        }
+        else{
+            if(cookies.get('userInfo', {path:'/'})){
+                this.props.history.push('/portal')
+            }
+            
+            //set Defult losgin /oauth or manual login
+            else if(this.props.location.search === ""){
+                
+                this.props.history.push({ //oAuth
+                    pathname:'/oauth'
+                })
+
+                // this.setState({
+                //     modal: true             //Manual
+                //  })
+
+            }
+        }
         if (param.userid){
             this.setState({
                 username: param.userid
             })
         }
+    }
+
+    componentWillUnmount(){
+
     }
 
     windowsSSO() {
@@ -117,35 +150,46 @@ class Login extends Component {
                 , { headers: { 'Content-Type': '  application/json' } })
                 .then(res => {
                     let info = "LOGIN " + res.data.status.toUpperCase()
-                    localStorage.setItem('authenticate', true)
+                    localStorage.setItem('application', 'CHOP')
                     localStorage.setItem('legalEntity', 'MBAFC')
-                    localStorage.setItem('ticket', res.data.ticket)
-                    localStorage.setItem('userId', res.data.userId)
-                    localStorage.setItem('roleId', res.data.roleId)
-                    localStorage.setItem('token', res.data.token)
-                    localStorage.setItem('isLicenseAdmin', res.data.isLicenseAdmin)
-                    localStorage.setItem('chopKeeperCompanyIds', res.data.chopKeeperCompanyIds)
-                    localStorage.setItem('licenseAdminCompanyIds', res.data.licenseAdminCompanyIds)
-                    localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
+                    // localStorage.setItem('ticket', res.data.ticket)
+                    // localStorage.setItem('userId', res.data.userId)
+                    // localStorage.setItem('roleId', res.data.roleId)
+                    // localStorage.setItem('token', res.data.token)
+                    // localStorage.setItem('isLicenseAdmin', res.data.isLicenseAdmin)
+                    // localStorage.setItem('chopKeeperCompanyIds', res.data.chopKeeperCompanyIds)
+                    // localStorage.setItem('licenseAdminCompanyIds', res.data.licenseAdminCompanyIds)
+                    // localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
+
+                    Authorize.setCookies(res.data)
 
                     console.log(res.data)
 
                     if (res.data.status === "success") {
                         let param = qs.parse(this.props.location.search.slice(1))
-                        if(param.workflow && param.taskid && param.userid){
-                            if(param.workflow){
+
+                        if(param.workflow && param.companyid && param.userid){
+                            if(param.workflow === 'license'){
+                                
+                                const page = param.userrole === 'approver' ? 'mypendingtask' : 'myapplication'
+
                                 localStorage.setItem('application', param.workflow.toUpperCase())
+                                localStorage.setItem('legalEntity', param.companyid.toUpperCase())
                                 fakeAuth.authenticate(() => {});
                                 this.props.history.push({
-                                  pathname:`${param.workflow}/mypendingtask/details/`,
-                                  state:{redirected:true, taskId:param.taskid}
+                                  pathname:`${param.workflow}/${page}/details/`,
+                                  state:{redirected:true, taskId:param.licenseid}
                                 })
                               }
                               else{
+
+                                const page = param.userrole === 'approver' ? 'mypendingtask' : 'myapps'
+
                                 localStorage.setItem('application', param.workflow.toUpperCase())
+                                localStorage.setItem('legalEntity', param.companyid.toUpperCase())
                                 fakeAuth.authenticate(() => {});
                                 this.props.history.push({
-                                  pathname:`${param.workflow}/mypendingtask/details/`,
+                                  pathname:`/${page}/details/`,
                                   state:{redirected:true, taskId:param.taskid}
                                 })
                             }
@@ -162,7 +206,7 @@ class Login extends Component {
             }   
         }
     }
-
+    
     redirect(){
         fakeAuth.authenticate(() => {
             this.setState({ redirectToReferrer: true })
@@ -248,7 +292,7 @@ class Login extends Component {
                     </Nav>
                 </Navbar>
 
-                <Modal size="md " centered isOpen={true}>
+                <Modal size="md " centered isOpen={this.state.modal}>
                     <ModalHeader cssModule={{'modal-title': 'w-100 text-center'}}> Login to Chop Workflow System </ModalHeader>
                     <ModalBody>
                         <Form>
@@ -278,8 +322,8 @@ class Login extends Component {
                                 </Button>
                             </Col> */}
                             <Col className="text-center">
-                                <Button className="btn-openid btn-brand" onClick= {event =>  window.location.href = pathname} >
-                                    <i className="fa fa-openid"></i><span>Daimler OpenID Auth</span>
+                                <Button className="btn-openid btn-brand" onClick= {event =>  window.location.href = config.openid} >
+                                    <i className="fa fa-openid"></i><span>Login with Daimler OpenID</span>
                                 </Button>
                             </Col>
                         </Row>

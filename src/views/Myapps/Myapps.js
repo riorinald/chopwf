@@ -11,11 +11,15 @@ import ReactTable from "react-table";
 import "react-table/react-table.css"
 import Axios from 'axios';
 import config from '../../config';
+import { format } from 'date-fns';
 // import ApplicationDetail from './ApplicationDetail';
 import { Redirect } from 'react-router-dom';
 // import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
+import theme from '../theme.css'
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import {Authorize, CommonFn} from '../../functions/'
+
 
 class Myapps extends Component {
   constructor(props) {
@@ -34,7 +38,7 @@ class Myapps extends Component {
       limit: 10,
 
 
-      username: localStorage.getItem('userId'),
+      username: Authorize.getCookies().userId,
 
       applications: [],
       applicationDetail: [],
@@ -43,8 +47,10 @@ class Myapps extends Component {
       applicationTypes: [],
       chopTypes: [],
       filtered: [],
+      createdDateView: "",
 
       searchOption: {
+        page:"chopMyApplication",
         requestNum: "",
         applicationTypeName: "",
         chopTypeName: "",
@@ -54,7 +60,7 @@ class Myapps extends Component {
         statusName: "",
         createdDate: "",
         createdByName: "",
-        departmentId: ""
+        departmentName: ""
       },
 
       status: [],
@@ -66,13 +72,26 @@ class Myapps extends Component {
   }
 
   componentDidMount() {
-    this.getApplications(1, this.state.limit);
-    // resetMounted.setMounted();
+    const searchOption = Authorize.getCookie('searchOption')
+        if(searchOption && searchOption.page === "chopMyApplication"){
+            this.setState({
+                searchOption: searchOption,
+                createdDateView: CommonFn.convertDate(searchOption.createdDate)
+            }, () => {this.getApplications(1, this.state.limit)
+            })
+        }
+        else{
+            this.getApplications(this.state.page, this.state.limit)
+        }
 
     this.getData("applicationTypes", `${config.url}/apptypes`);
     this.getData("chopTypes", `${config.url}/choptypes?companyid=${this.props.legalName}`);
     this.getData("departments", `${config.url}/departments`);
     this.getStatusList();
+  }
+
+  componentWillMount() {
+    Authorize.delCookie('searchOption')
   }
 
   async getStatusList() {
@@ -83,10 +102,10 @@ class Myapps extends Component {
   async getApplications(pageNumber, pageSize) {
     this.setState({ loading: true })
     // await Axios.get(`https://5b7aa3bb6b74010014ddb4f6.mockapi.io/application`).then(res => {
-    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentId=${this.state.searchOption.departmentId}&page=${pageNumber}&pagesize=${pageSize}`,
+    await Axios.get(`${config.url}/tasks?category=requestor&userid=${this.state.username}&companyid=${this.props.legalName}&requestNum=${this.state.searchOption.requestNum}&applicationTypeId=${this.state.searchOption.applicationTypeName}&chopTypeId=${this.state.searchOption.chopTypeName}&departmentHeadName=${this.state.searchOption.departmentHeadName}&teamName=${this.state.searchOption.teamName}&documentCheckByName=${this.state.searchOption.documentCheckByName}&statusName=${this.state.searchOption.statusName}&createdDate=${this.state.searchOption.createdDate}&createdByName=${this.state.searchOption.createdByName}&departmentname=${this.state.searchOption.departmentName}&page=${pageNumber}&pagesize=${pageSize}`,
       { headers: { Pragma: 'no-cache' } })
       .then(res => {
-        this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false })
+        this.setState({ applications: res.data.tasks, totalPages: res.data.pageCount, loading: false, page: res.data.page, limit: res.data.pageSize })
         console.log(res.data)
       })
 
@@ -102,17 +121,38 @@ class Myapps extends Component {
   goToDetails(id, url) {
     this.props.history.push({
       pathname: url,
-      state: { taskId: id }
+      state: { taskId: id, searchOption: this.state.searchOption}
     })
   }
 
   search = () => {
-    this.getApplications(this.state.page, this.state.limit)
+    this.getApplications(1, this.state.limit)
+  }
+
+  clearSearch = () => {
+    Authorize.delCookie('searchOption')
+    this.setState({
+        page: 1,
+        searchOption: {
+            page:"chopMyApplication",
+            requestNum: "",
+            applicationTypeName: "",
+            chopTypeName: "",
+            departmentHeadName: "",
+            teamName: "",
+            documentCheckByName: "",
+            statusName: "",
+            createdDate: "",
+            createdByName: "",
+            departmentName: ""
+        }
+    }, () => {this.getApplications(1, this.state.limit)} 
+    )
   }
 
   onKeyPressed = (e) => {
     if (e.key === "Enter") {
-      this.getApplications(this.state.page, this.state.limit)
+      this.getApplications(1, this.state.limit)
     }
   }
 
@@ -158,7 +198,7 @@ class Myapps extends Component {
   }
 
   convertDate(dateValue) {
-    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
     return regEx
   }
 
@@ -167,8 +207,8 @@ class Myapps extends Component {
 
     let dates = ""
     if (date) {
-      let month = date.getMonth()
-      dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+      let tempDate = format(date, "yyyy-MM-dd").split('T')[0];
+      dates = tempDate.replace(/-/g, "")
     }
 
     // console.log(this.state.page, this.state.limit)
@@ -230,12 +270,38 @@ class Myapps extends Component {
 
   render() {
     const { applications, totalPages } = this.state
+    const getYear = date => {
+      return date.getFullYear()
+    }
+
+    const year = (new Date()).getFullYear();
+    const years = Array.from(new Array(3), (val, index) => index + (year - 1));
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
+    const getMonth = date => {
+      let month = date.getMonth()
+      return months[month]
+    }
     // let columnData = Object.keys(applications[0])
     return (
       <div className="animated fadeIn">
         <h4>My Applications</h4>
         <Card>
-          <CardHeader>My Applications <Button className="float-right" onClick={this.search} >Search</Button>
+          <CardHeader>My Applications 
+              <Button className="float-right" onClick={this.clearSearch} > Reset <i className="icon-reload"></i></Button>
+              <Button className="float-right mr-2" onClick={this.search} > Search <i className="icon-magnifier ml-1"></i> </Button>
           </CardHeader>
           <CardBody onKeyDown={this.onKeyPressed}>
             <ReactTable
@@ -245,6 +311,32 @@ class Myapps extends Component {
                 this.setState({ filtered: filtered })
                 this.onFilteredChangeCustom(value, column.id || column.accessor);
               }}
+              defaultFiltered={[
+                {
+                    id: 'requestNum',
+                    value: this.state.searchOption.requestNum,
+                },
+                {
+                    id: 'departmentName',
+                    value: this.state.searchOption.departmentName,
+                },
+                {
+                    id: 'departmentHeadName',
+                    value: this.state.searchOption.departmentHeadName,
+                },
+                {
+                    id: 'teamName',
+                    value: this.state.searchOption.teamName,
+                },
+                {
+                    id: 'documentCheckByName',
+                    value: this.state.searchOption.documentCheckByName,
+                },
+                {
+                    id: 'createdByName',
+                    value: this.state.searchOption.createdByName,
+                },
+              ]}
               getTheadFilterThProps={() => { return { style: { position: "inherit", overflow: "inherit" } } }}
               defaultFilterMethod={(filter, row, column) => {
                 const id = filter.pivotId || filter.id;
@@ -334,20 +426,6 @@ class Myapps extends Component {
                   accessor: "departmentName",
                   width: this.getColumnWidth('departmentName', "Department"),
                   Cell: this.renderEditable,
-                  filterMethod: (filter, row) => {
-                    return row[filter.id] === filter.value;
-                  },
-                  Filter: ({ filter, onChange }) => {
-                    return (
-                      <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
-                        <option value="" >Please Select </option>
-                        {this.state.departments.map((dept, index) =>
-                          <option key={index} value={dept.deptId} >{dept.deptName}</option>
-                        )}
-                      </Input>
-
-                    )
-                  },
                   style: { textAlign: "center" },
                 },
                 {
@@ -412,13 +490,53 @@ class Myapps extends Component {
                     return (
                       <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                         className="form-control" dateFormat="yyyy/MM/dd"
+                        renderCustomHeader={({
+                          date,
+                          changeYear,
+                          changeMonth,
+                          decreaseMonth,
+                          increaseMonth,
+                          prevMonthButtonDisabled,
+                          nextMonthButtonDisabled
+                        }) => (
+                            <div
+                              style={{
+                                margin: 10,
+                                display: "flex",
+                                justifyContent: "center"
+                              }}
+                            >
+                              <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                              <Input
+                                value={getYear(date)}
+                                onChange={({ target: { value } }) => changeYear(value)}
+                                type="select">
+                                {years.map(option => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                changeMonth(months.indexOf(value))
+                              } type="select">
+                                {months.map((option) => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                            </div>
+                          )}
                         peekNextMonth
                         showMonthDropdown
                         showYearDropdown
-                        selected={this.state.dateView1}
+                        selected={this.state.createdDateView}
                         isClearable
                         getTheadFilterThProps
-                        onChange={this.dateChange("createdDate", "dateView1")}
+                        onChange={this.dateChange("createdDate", "createdDateView")}
                       />
                     )
                   },
@@ -431,20 +549,21 @@ class Myapps extends Component {
                   Cell: this.renderEditable,
                   style: { textAlign: "center" }
                 },
-                {
-                  Header: "New Return Date",
-                  accessor: "newReturnDate",
-                  filterable: false,
-                  width: this.getColumnWidth('newReturnDate', "New Return Date"),
-                  // Cell: this.renderEditable,
-                  Cell: row => (
-                    <div> {this.convertDate(row.original.newReturnDate)} </div>
-                  ),
-                  style: { textAlign: "center" }
-                },
+                // {
+                //   Header: "New Return Date",
+                //   accessor: "newReturnDate",
+                //   filterable: false,
+                //   width: this.getColumnWidth('newReturnDate', "New Return Date"),
+                //   // Cell: this.renderEditable,
+                //   Cell: row => (
+                //     <div> {this.convertDate(row.original.newReturnDate)} </div>
+                //   ),
+                //   style: { textAlign: "center" }
+                // },
               ]}
               defaultPageSize={this.state.limit}
               manual
+              page={this.state.page - 1}
               onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getApplications(e + 1, this.state.limit)) }}
               onPageSizeChange={(pageSize, page) => {
                 this.setState({ limit: pageSize, page: page + 1 });
@@ -478,7 +597,7 @@ class Myapps extends Component {
                         this.goToEditRequest(rowInfo.original.taskId)
                       }
                       else {
-                        this.goToDetails(rowInfo.original.taskId, `/myapps/details/${rowInfo.original.applicationTypeId}`)
+                        this.goToDetails(rowInfo.original.taskId, `/myapps/details`)
                       }
 
                     },

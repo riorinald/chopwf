@@ -1,0 +1,273 @@
+<Col className="mb-4">
+                                <FormGroup row>
+                                    <Col md lg>
+                                        <Label>Tel.</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.telephoneNum} name="text-input" placeholder="/" />
+                                    </Col>
+                                    <Col md lg>
+                                        <Label>Department</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.departmentName} name="text-input" placeholder="/" />
+                                    </Col>
+                                </FormGroup>
+                                <FormGroup row>
+                                    <Col md lg>
+                                        <Label>License Name</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <TextareaAutosize className="form-control" disabled type="text" name="text-input" value={taskDetails.licenseName} placeholder="/" />
+                                    </Col>
+                                    <Col md lg>
+                                        <Label>Purpose</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <TextareaAutosize className="form-control" disabled value={taskDetails.purposeType === "PS" ? taskDetails.purposeComment : taskDetails.purposeTypeName} placeholder="/" />
+                                    </Col>
+                                </FormGroup>
+                                <FormGroup row>
+                                    <Col md lg>
+                                        <Label>Document Type</Label>
+                                    </Col>
+                                    <Col md lg>
+                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.documentTypeName} name="text-input" placeholder="/" />
+                                    </Col>
+                                    {taskDetails.documentTypeId === "ORIGINAL"
+                                        ? <>
+                                            <Col md lg>
+                                                <Label>Planned Return Date</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertDate(taskDetails.plannedReturnDate)} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </>
+                                        : <>
+                                            <Col md lg>
+                                                <Label> Watermark </Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.needWatermark === "Y" ? taskDetails.watermark : "No Watermark"} name="text-input" placeholder="/" />
+                                            </Col>
+                                            {
+                                            }
+                                        </>
+
+                                    }
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Reason for no watermark</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="/" />
+                                                </Col>
+                                                < Col md lg>
+                                                    <Label>Deliver Ways</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                            : <>
+                                                < Col md lg>
+                                                    <Label>Deliver Ways</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Delivery Address</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                        : <>
+                                            < Col md lg>
+                                                <Label>Deliver Ways</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
+                                            </Col>
+                                            <Col md lg>
+                                                <Label>Delivery Address</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </>
+                                    }
+
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Delivery Address</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Receiver</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                            : <>
+                                                <Col md lg>
+                                                    <Label>Receiver</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Deliver Express Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                        : <>
+                                            <Col md lg>
+                                                <Label>Receiver</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
+                                            </Col>
+                                            <Col md lg>
+                                                <Label>Deliver Express Number</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </>
+                                    }
+
+
+
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Deliver Express Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Receiver Mobile Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                            : <>
+                                                <Col md lg>
+                                                    <Label>Receiver Mobile Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Return Way</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                        : <>
+                                            <Col md lg>
+                                                <Label>Receiver Mobile Number</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
+                                            </Col>
+                                            <Col md lg>
+                                                <Label>Return Way</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </>
+                                    }
+
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Return Way</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Senior Manager or above of Requestor Department</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                            : <>
+                                                <Col md lg>
+                                                    <Label>Senior Manager or above of Requestor Department</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label>Return Express Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
+                                                </Col>
+                                            </>
+                                        : <>
+                                            <Col md lg>
+                                                <Label>Senior Manager or above of Requestor Department</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
+                                            </Col>
+                                            <Col md lg>
+                                                <Label>Return Express Number</Label>
+                                            </Col>
+                                            <Col md lg>
+                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </>
+                                    }
+                                </FormGroup>
+                                <FormGroup row>
+                                    {taskDetails.documentTypeId !== "ORIGINAL"
+                                        ? taskDetails.needWatermark === "N"
+                                            ? <>
+                                                <Col md lg>
+                                                    <Label>Return Express Number</Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
+                                                </Col>
+                                                <Col md lg>
+                                                    <Label></Label>
+                                                </Col>
+                                                <Col md lg>
+                                                    {/* <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" /> */}
+                                                </Col>
+                                            </>
+                                            : null
+                                        : null
+                                    }
+                                </FormGroup>
+                            </Col>

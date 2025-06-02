@@ -16,6 +16,8 @@ import Select from 'react-select'
 import Swal from 'sweetalert2';
 import AsyncSelect from 'react-select/async';
 import makeAnimated from 'react-select/animated';
+import {Authorize, CommonFn} from '../../../functions/'
+
 
 
 const animatedComponents = makeAnimated();
@@ -79,18 +81,24 @@ class LicenseCreate extends Component {
 
     async getLicenseNames() {
         const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
-        this.setState({ licenseNames: res.data })
-    }
+        .then( res => {
+            res.data.sort((a, b) => {
+            // return CommonFn.sortingString(a, b, ["zh-CN"])
+            return a.name.localeCompare(b.name, [ "zh-CN-u-co-pinyin" ], {numeric: true}); 
+            })
+            this.setState({ licenseNames: res.data })
+        })
+    }   
 
     async getData(name) {
-        let res = await axios.get(`${config.url}/${name}`)
+        let res = await axios.get(`${config.url}/${name}`, { headers: { Pragma: 'no-cache' } })
         this.setState({ [name]: res.data })
     }
 
     //Get User Infromation from database
     async getUserData() {
         let ticket = localStorage.getItem('ticket')
-        let userId = localStorage.getItem('userId')
+        let userId = Authorize.getCookies().userId
         const res = await axios.get(`${config.url}/users/` + userId, { headers: { Pragma: 'no-cache', 'ticket': ticket } })
         this.setState(state => {
             let formData = this.state.formData
@@ -102,8 +110,8 @@ class LicenseCreate extends Component {
     }
 
     async getSeniorManagers() {
-        // console.log(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`)
-        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
+        // console.log(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${Authorize.getCookies().userId}`)
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${Authorize.getCookies().userId}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let arr1 = []
@@ -221,6 +229,12 @@ class LicenseCreate extends Component {
         if (id === "deliverWay1" || id === "deliverWay2") {
             document.getElementById('deliverWay1').className = "custom-control-input"
             document.getElementById('deliverWay2').className = "custom-control-input"
+            this.setState(state => {
+                let formData = state.formData
+                formData.address = ""
+                formData.reciever = ""
+                formData.recieverPhone = ""
+                })
         }
         else if (id === "documentType1" || id === "documentType2") {
             document.getElementById('documentType1').className = "custom-control-input"
@@ -240,14 +254,23 @@ class LicenseCreate extends Component {
     handleRadio = name => event => {
         let id = event.target.id
         let value = ""
+        let watermark = this.state.formData.watermark
         if (name === "isWatermark") {
             document.getElementById("watermark1").className = "custom-control-input"
             document.getElementById("watermark2").className = "custom-control-input"
             if (event.target.id === "inputWatermark1" || event.target.id === "inputWatermark2") {
                 value = event.target.id === "inputWatermark1" ? "Y" : "N"
+                watermark = ""
+                this.setState(state => {
+                    let formData = state.formData
+                    formData.address = ""
+                    formData.reciever = ""
+                    formData.recieverPhone = ""
+                    })
             }
             else if (event.target.id === "watermark1" || event.target.id === "watermark2") {
                 value = event.target.id === "watermark1" ? "Y" : "N"
+                watermark = ""
             }
         }
         else if (name === "licensePurpose") {
@@ -260,6 +283,7 @@ class LicenseCreate extends Component {
         this.setState(state => {
             let formData = this.state.formData
             formData[name] = value
+            formData.watermark = watermark
             return formData
         })
     }
@@ -272,7 +296,7 @@ class LicenseCreate extends Component {
         if (date) {
             dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${tempDate.toLocaleString().length === 1 ? 0 : ""}${tempDate}`
         }
-        console.log(dates)
+        //console.log(dates)
         this.setState({ [view]: date });
         this.setState(state => {
             let formData = this.state.formData
@@ -283,7 +307,7 @@ class LicenseCreate extends Component {
 
     handleSelectReciever(event) {
         let value = event ? event.value : ""
-        console.log(value)
+        //console.log(value)
         var element = document.getElementById("reciever")
         if (value !== "") {
             element.className = "css-2b097c-container"
@@ -465,24 +489,38 @@ class LicenseCreate extends Component {
             callback(filterReceiver(inputValue));
         }
 
+        const getYear = date => {
+            return date.getFullYear()
+        }
+
+        const year = (new Date()).getFullYear();
+        const years = Array.from(new Array(2), (val, index) => index + year);
+        const months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
+        const getMonth = date => {
+            let month = date.getMonth()
+            return months[month]
+        }
+
         return (
             <div className="animated fadeIn">
                 <h4>Create</h4>
                 <Card>
-                    <CardHeader>REQUEST LICENSE</CardHeader>
+                    <CardHeader>Create new request</CardHeader>
                     <CardBody>
                         <Form className="form-horizontal" innerRef={this.formRef}>
-                            <FormGroup>
-                                <Label>Employee Number</Label>
-                                <div className="controls">
-                                    <InputGroup className="input-prepend">
-                                        <InputGroupAddon addonType="prepend">
-                                            <InputGroupText>ID</InputGroupText>
-                                        </InputGroupAddon>
-                                        <Input autoComplete="off" disabled value={formData.employeeNum} id="prependedInput" size="16" type="text" />
-                                    </InputGroup>
-                                </div>
-                            </FormGroup>
                             <FormGroup>
                                 <Label>Telephone Number </Label>
                                 <InputGroup>
@@ -492,7 +530,7 @@ class LicenseCreate extends Component {
                             <FormGroup>
                                 <Label>Department </Label>
                                 <InputGroup>
-                                    <Input id="department" onChange={this.handleChange("department")} defaultValue="0" type="select">
+                                    <Input id="department" onChange={this.handleChange("department")} defaultValue="0" type="select" onWheel={event => { event.preventDefault(); }}>
                                         <option disabled value="0">Please selet a department</option>
                                         {departments.map((dept, index) =>
                                             <option key={index} value={dept.deptId} > {dept.deptName} </option>
@@ -504,7 +542,7 @@ class LicenseCreate extends Component {
                             <FormGroup>
                                 <Label>License Name </Label>
                                 <InputGroup>
-                                    <Input id="licenseName" onChange={this.handleChange("licenseName")} defaultValue="0" type="select">
+                                    <Input id="licenseName" onChange={this.handleChange("licenseName")} defaultValue="0" type="select" onWheel={event => { event.preventDefault(); }}>
                                         <option disabled value="0" >Please select a License Name</option>
                                         {licenseNames.map((license, index) =>
                                             <option key={index} value={license.licenseNameId} > {license.name} </option>
@@ -515,12 +553,12 @@ class LicenseCreate extends Component {
                             </FormGroup>
 
                             <FormGroup onChange={this.handleRadio("licensePurpose")} >
-                                <Label >License Purpose</Label>
+                                <Label >Purpose</Label>
                                 <CustomInput type="radio" id="licensePurpose1" name="licensePurpose" value="LVFP" label="城市备案 Local VRB Filling Purpose" />
-                                <CustomInput type="radio" id="licensePurpose2" name="licensePurpose" value="MFP" label="城抵押 Mortgage Filling Purpose" />
+                                <CustomInput type="radio" id="licensePurpose2" name="licensePurpose" value="MFP" label="抵押 Mortgage Filling Purpose" />
                                 <CustomInput type="radio" id="licensePurpose3" name="licensePurpose" value="PS" label="其他 Please specify:">
                                     <Collapse isOpen={formData.licensePurpose === "PS"}>
-                                        <Input id="specificPurpose" type="text" maxLength={500} onChange={this.handleChange("specificPurpose")} value={formData.specificPurpose} />
+                                        <Input id="specificPurpose" type="text" maxLength={500} onChange={this.handleChange("specificPurpose")} value={formData.specificPurpose} autoComplete="off"/>
                                         {formData.licensePurpose === "PS"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Specify Purpose', formData.specificPurpose, 'required')}</small>
                                             : null}
@@ -538,11 +576,11 @@ class LicenseCreate extends Component {
 
 
                             <Collapse isOpen={formData.documentType === "SCANCOPY"}>
-                                <FormGroup onChange={this.handleRadio("isWatermark")}>
-                                    <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
-                                    <CustomInput type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes, Please specify watermark here:">
+                                <FormGroup>
+                                    <Label> Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked.)</small>
+                                    <CustomInput onChange={this.handleRadio("isWatermark")} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes. Please specify watermark here:" >
                                         <Collapse isOpen={formData.isWatermark === "Y"}>
-                                            <Input id="inputWatermark1" type="text" maxLength={50} value={formData.watermark} onChange={this.handleChange("watermark")} />
+                                            <Input id="inputWatermark1" type="text" maxLength={500} value={formData.watermark} onChange={this.handleChange("watermark")} autoComplete="off" />
                                             {formData.documentType === "SCANCOPY"
                                                 ? formData.isWatermark === "Y"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', formData.watermark, 'required')}</small>
@@ -551,9 +589,9 @@ class LicenseCreate extends Component {
                                             }
                                         </Collapse>
                                     </CustomInput>
-                                    <CustomInput type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No, Please specify the reason of not adding watermark:">
+                                    <CustomInput onChange={this.handleRadio("isWatermark")} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No. Please specify the reason of not adding watermark:">
                                         <Collapse isOpen={formData.isWatermark === "N"}>
-                                            <Input id="inputWatermark2" type="text" maxLength={50} value={formData.watermark} onChange={this.handleChange("watermark")} />
+                                            <Input id="inputWatermark2" type="text" maxLength={500} value={formData.watermark} onChange={this.handleChange("watermark")} autoComplete="off" />
                                             {formData.documentType === "SCANCOPY"
                                                 ? formData.isWatermark === "N"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('', formData.watermark, 'required')}</small>
@@ -573,6 +611,46 @@ class LicenseCreate extends Component {
                                     <Label>Planned Return Date:</Label>
                                     <DatePicker autoComplete="off" id="returnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
                                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                                        renderCustomHeader={({
+                                            date,
+                                            changeYear,
+                                            changeMonth,
+                                            decreaseMonth,
+                                            increaseMonth,
+                                            prevMonthButtonDisabled,
+                                            nextMonthButtonDisabled
+                                        }) => (
+                                                <div
+                                                    style={{
+                                                        margin: 10,
+                                                        display: "flex",
+                                                        justifyContent: "center"
+                                                    }}
+                                                >
+                                                    <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                    <Input
+                                                        value={getYear(date)}
+                                                        onChange={({ target: { value } }) => changeYear(value)}
+                                                        type="select">
+                                                        {years.map(option => (
+                                                            <option key={option} value={option}>
+                                                                {option}
+                                                            </option>
+                                                        ))}
+                                                    </Input>
+                                                    <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                        changeMonth(months.indexOf(value))
+                                                    } type="select">
+                                                        {months.map((option) => (
+                                                            <option key={option} value={option}>
+                                                                {option}
+                                                            </option>
+                                                        ))}
+                                                    </Input>
+                                                    <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                                                </div>
+                                            )}
                                         showMonthDropdown
                                         minDate={new Date()}
                                         maxDate={addDays(new Date(), 30)}
@@ -588,8 +666,8 @@ class LicenseCreate extends Component {
                             <Collapse isOpen={formData.documentType === "ORIGINAL"}> */}
                                 <FormGroup onChange={this.handleChange("deliverWay")} >
                                     <Label>Deliver Way</Label>
-                                    <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                    <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number" />
+                                    <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面 Face to face" />
+                                    <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express" />
                                     {formData.documentType === "ORIGINAL"
                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', formData.deliverWay, 'required')}</small>
                                         : null}
@@ -598,7 +676,7 @@ class LicenseCreate extends Component {
                                 <Collapse isOpen={formData.deliverWay === "Express"}>
                                     <FormGroup>
                                         <Label>Address</Label>
-                                        <Input autoComplete="off" placeholder="Please specify Address" id="address" onChange={this.handleChange("address")} type="text" />
+                                        <Input maxLength="500" autoComplete="off" placeholder="Please specify Address" id="address" value={this.state.formData.address} onChange={this.handleChange("address")} type="text" />
                                         {formData.documentType === "ORIGINAL"
                                             ? formData.deliverWay === "Express"
                                                 ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', formData.address, 'required')}</small>
@@ -614,11 +692,11 @@ class LicenseCreate extends Component {
                                             id="reciever"
                                             loadOptions={loadReciever}
                                             isClearable
-                                            onChange={this.handleSelectReciever}
+                                            value={this.state.formData} onChange={this.handleSelectReciever}
                                             menuPortalTarget={document.body}
                                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         /> */}
-                                        <Input autoComplete="off" placeholder="Please specify Reciever" id="reciever" onChange={this.handleChange("reciever")} type="text" />
+                                        <Input maxLength="500" autoComplete="off" placeholder="Please specify Reciever" id="reciever" value={this.state.formData.reciever} onChange={this.handleChange("reciever")} type="text" />
                                         {formData.documentType === "ORIGINAL"
                                             ? formData.deliverWay === "Express"
                                                 ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', formData.reciever, 'required')}</small>
@@ -629,7 +707,7 @@ class LicenseCreate extends Component {
 
                                     <FormGroup>
                                         <Label>Reciever Mobile Phone</Label>
-                                        <Input autoComplete="off" placeholder={`Please specify Reciever's phone`} id="recieverPhone" onChange={this.handleChange("recieverPhone")} type="text" />
+                                        <Input maxLength="500" autoComplete="off" placeholder={`Please specify Reciever's phone`} id="recieverPhone" value={this.state.formData.recieverPhone} onChange={this.handleChange("recieverPhone")} type="text" />
                                         {formData.documentType === "ORIGINAL"
                                             ? formData.deliverWay === "Express" ?
                                                 <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, formData.recieverPhone, 'required')}</small>
@@ -666,10 +744,10 @@ class LicenseCreate extends Component {
                                 <Col className="mr-2" >
                                     {/* {formData.isConfirm === "Y" */}
                                     {/* ?  */}
-                                    <Button className="mr-2" type="submit" onClick={() => this.handleAgreeTerms()} color="success">Submit</Button>
+                                    <Button className="mr-2" type="submit" onClick={(e) => this.handleAgreeTerms() + e.currentTarget.blur()} color="success">Submit</Button>
                                     {/* : <Button className="mr-2" type="submit" disabled color="secondary">Submit</Button> */}
                                     {/* } */}
-                                    <Button type="submit" onClick={() => this.submitRequest("N")} color="primary" > Save </Button>
+                                    <Button type="submit" onClick={(e) => this.submitRequest("N") + e.currentTarget.blur()} color="primary" > Save </Button>
 
                                 </Col>
                             </Row>

@@ -17,8 +17,12 @@ import {
     Collapse
 } from 'reactstrap';
 import config from '../../../config';
+import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
+import theme from '../../theme.css'
 import "react-datepicker/dist/react-datepicker.css";
+import {Authorize, CommonFn} from '../../../functions/'
+
 
 class LicenseApplication extends Component {
     constructor(props) {
@@ -29,15 +33,16 @@ class LicenseApplication extends Component {
             approvalHistories: [],
             selectedRow: [],
             searchOption: {
+                page:"licenseApplication",
                 requestNum: "",
                 licenseName: "",
                 documentType: "",
-                seniorManagerAbove: "",
+                seniorManagerName: "",
                 status: "",
                 plannedReturnDate: "",
                 createdDate: "",
                 createdByName: "",
-                departmentId: ""
+                departmentName: ""
             },
             totalPages: 1,
             page: 1,
@@ -49,7 +54,8 @@ class LicenseApplication extends Component {
             seniorManagers: [],
             departments: [],
             licenseNames: [],
-            statusName: []
+            statusName: [],
+            isAdmin: false
         }
         this.onFilteredChangeCustom = this.onFilteredChangeCustom.bind(this)
         this.getLicenseApplications = this.getLicenseApplications.bind(this)
@@ -57,18 +63,45 @@ class LicenseApplication extends Component {
     }
 
     componentDidMount() {
-        this.getLicenseApplications(this.state.page, this.state.limit)
-        this.getLicenseNames();
-        this.getData('seniorManagers');
-        // this.getSeniorManagers();
-        this.getData('departments');
-        this.getStatusList();
+        const legalEntity = this.props.legalName
+        const adminEntity = Authorize.getCookies().licenseAdminCompanyIds
+        const isAdmin = Authorize.check(legalEntity, adminEntity)
+        const searchOption = Authorize.getCookie('searchOption')
+            if (isAdmin) {
+                if(searchOption && searchOption.page === "licenseApplication"){
+                    this.setState({
+                        searchOption: searchOption,
+                        returnDateView: CommonFn.convertDate(searchOption.plannedReturnDate),
+                        createdDateView: CommonFn.convertDate(searchOption.createdDate)
+                    }, () => {this.getLicenseApplications(1, this.state.limit)
+                    })
+                }
+                else{
+                    this.getLicenseApplications(this.state.page, this.state.limit)
+                }
+                this.setState({ isAdmin: isAdmin })
+                this.getLicenseNames();
+                this.getData('seniorManagers');
+                this.getData('departments');
+                this.getStatusList();
+                // this.getSeniorManagers();
+            }
+   }
+
+   componentWillMount() {
+    Authorize.delCookie('searchOption')
     }
 
     async getLicenseNames() {
 
-        const res = await Axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
-        this.setState({ licenseNames: res.data })
+        const res = await Axios.get(`${config.url}/licensenames/all?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
+        .then( res => {
+            res.data.sort((a, b) => {
+            // return CommonFn.sortingString(a, b, ["zh-CN"])
+            return a.name.localeCompare(b.name, [ "zh-CN-u-co-pinyin" ], {numeric: true}); 
+            })
+            this.setState({ licenseNames: res.data })
+        })   
     }
 
     async getData(name) {
@@ -77,32 +110,32 @@ class LicenseApplication extends Component {
             res = await Axios.get(`${config.url}/${name}`, { headers: { Pragma: 'no-cache' } })
         }
         else if (name === "seniorManagers") {
-            res = await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
+            res = await Axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${Authorize.getCookies().userId}`,
                 { headers: { Pragma: 'no-cache' } })
         }
 
         this.setState({ [name]: res.data })
     }
     goToDetails(taskId, status) {
-        if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACKED") {
-            this.props.history.push({
-                pathname: `admin-apps/edit`,
-                state: { redirected: true, taskId: taskId }
-            })
-        }
-        else {
-            this.props.history.push({
-                pathname: `admin-apps/details`,
-                state: { redirected: true, taskId: taskId }
-            })
-        }
+        // if (status === "RECALLED" || status === "DRAFTED" || status === "SENDBACKED") {
+        //     this.props.history.push({
+        //         pathname: `admin-apps/edit`,
+        //         state: { redirected: true, taskId: taskId }
+        //     })
+        // }
+        // else {
+        this.props.history.push({
+            pathname: `admin-apps/details`,
+            state: { redirected: true, taskId: taskId, searchOption: this.state.searchOption}
+        })
+        // }
 
     }
 
     async getLicenseApplications(page, pageSize) {
         const searchOption = this.state.searchOption
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses?userId=${localStorage.getItem("userId")}&companyid=${this.props.legalName}&category=all&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&departmentId=${searchOption.departmentId}&page=${page}&pageSize=${pageSize}`,
+        await Axios.get(encodeURI(`${config.url}/licenses?userId=${Authorize.getCookies().userId}&companyid=${this.props.legalName}&category=all&requestNum=${searchOption.requestNum}&licenseName=${searchOption.licenseName}&documentTypeName=${searchOption.documentType}&statusName=${searchOption.status}&createdDate=${searchOption.createdDate}&createdByName=${searchOption.createdByName}&plannedReturnDate=${searchOption.plannedReturnDate}&seniorManagerName=${searchOption.seniorManagerName}&departmentname=${searchOption.departmentName}&page=${page}&pageSize=${pageSize}`),
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 this.setState({ licenseApplication: res.data.licenses, totalPages: res.data.pageCount, loading: false })
@@ -111,7 +144,7 @@ class LicenseApplication extends Component {
 
     async getStatusList() {
         const res = await Axios.get(`${config.url}/statuses?category=license`, { headers: { Pragma: 'no-cache' } })
-        console.log(res.data)
+        // console.log(res.data)
         this.setState({ statusName: res.data })
     }
 
@@ -170,7 +203,7 @@ class LicenseApplication extends Component {
     }
 
     convertDate(dateValue) {
-        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
         return regEx
     }
 
@@ -183,21 +216,45 @@ class LicenseApplication extends Component {
                 searchOption
             }
         })
-        console.log(this.state.searchOption)
+        // console.log(this.state.searchOption)
         // this.search()
+    }
+
+    search = () => {
+        this.getLicenseApplications(1, this.state.limit)
+    }
+
+    clearSearch = () => {
+        Authorize.delCookie('searchOption')
+        this.setState({
+            page: 1,
+            searchOption: {
+                page: "licenseApplication",
+                requestNum: "",
+                licenseName: "",
+                documentType: "",
+                seniorManagerName: "",
+                status: "",
+                plannedReturnDate: "",
+                createdDate: "",
+                createdByName: "",
+                departmentName: ""
+            }
+        }, () => {this.getLicenseApplications(1, this.state.limit)} 
+        )
     }
 
     handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            this.getLicenseApplications(this.state.page, this.state.limit)
+            this.getLicenseApplications(1, this.state.limit)
         }
     }
 
     dateChange = (name, view) => date => {
         let dates = ""
         if (date) {
-            let month = date.getMonth()
-            dates = `${date.getFullYear()}${month !== 10 && month !== 11 ? 0 : ""}${date.getMonth() + 1}${date.getDate()}`
+            let tempDate = format(date, "yyyy-MM-dd").split('T')[0];
+            dates = tempDate.replace(/-/g, "")
         }
         this.setState({ [view]: date });
         this.setState(state => {
@@ -208,13 +265,44 @@ class LicenseApplication extends Component {
     };
 
     render() {
-        const { licenseApplication, licenseNames, seniorManagers, departments, statusName, returnDateView, createdDateView, totalPages } = this.state
+        const { isAdmin, licenseApplication, licenseNames, seniorManagers, departments, statusName, returnDateView, createdDateView, totalPages } = this.state
+        const getYear = date => {
+            return date.getFullYear()
+        }
+
+        const year = (new Date()).getFullYear();
+        const years = Array.from(new Array(3), (val, index) => index + (year - 1));
+        const months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
+        const getMonth = date => {
+            let month = date.getMonth()
+            return months[month]
+        }
+
+        if (!isAdmin){
+            return (<Card><CardBody><h4>Not Authorized</h4></CardBody></Card>)
+        }
         return (
             <div className="animated fadeIn" >
                 <h4>License Applications</h4>
                 <Card onKeyDown={this.handleKeyDown}>
 
-                    <CardHeader>LICENSE APPLICATIONS <Button className="float-right" onClick={() => this.getLicenseApplications(this.state.page, this.state.limit)} >Search</Button></CardHeader>
+                    <CardHeader>License Applications 
+                        <Button className="float-right" onClick={this.clearSearch} > Reset <i className="icon-reload"></i></Button>
+                        <Button className="float-right mr-2" onClick={this.search} > Search <i className="icon-magnifier ml-1"></i> </Button>
+                        </CardHeader>
                     <CardBody>
                         <ReactTable
                             data={licenseApplication}
@@ -228,6 +316,24 @@ class LicenseApplication extends Component {
                                 const id = filter.pivotId || filter.id;
                                 return row[id]
                             }}
+                            defaultFiltered={[
+                                {
+                                    id: 'requestNum',
+                                    value: this.state.searchOption.requestNum,
+                                },
+                                {
+                                    id: 'licenseName',
+                                    value: this.state.searchOption.licenseName,
+                                },
+                                {
+                                    id: 'seniorManagerName',
+                                    value: this.state.searchOption.seniorManagerName,
+                                },
+                                {
+                                    id: 'createdByName',
+                                    value: this.state.searchOption.createdByName,
+                                },
+                              ]}
                             columns={[
                                 {
                                     Header: "Request Number",
@@ -263,20 +369,6 @@ class LicenseApplication extends Component {
                                     accessor: "departmentName",
                                     width: this.getColumnWidth('departmentName', "Department"),
                                     Cell: this.renderEditable,
-                                    filterMethod: (filter, row) => {
-                                        return row[filter.id] === filter.value;
-                                    },
-                                    Filter: ({ filter, onChange }) => {
-                                        return (
-                                            <Input type="select" value={this.state.searchOption.departmentId} onChange={this.handleSearch('departmentId')} >
-                                                <option value="" >Please Select a department</option>
-                                                {this.state.departments.map((dept, index) =>
-                                                    <option key={index} value={dept.deptId} >{dept.deptName}</option>
-                                                )}
-                                            </Input>
-
-                                        )
-                                    },
                                     style: { textAlign: "center" },
                                 },
                                 {
@@ -312,6 +404,46 @@ class LicenseApplication extends Component {
                                         return (
                                             <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                                                 className="form-control" dateFormat="yyyy/MM/dd"
+                                                renderCustomHeader={({
+                                                    date,
+                                                    changeYear,
+                                                    changeMonth,
+                                                    decreaseMonth,
+                                                    increaseMonth,
+                                                    prevMonthButtonDisabled,
+                                                    nextMonthButtonDisabled
+                                                }) => (
+                                                        <div
+                                                            style={{
+                                                                margin: 10,
+                                                                display: "flex",
+                                                                justifyContent: "center"
+                                                            }}
+                                                        >
+                                                            <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                            <Input
+                                                                value={getYear(date)}
+                                                                onChange={({ target: { value } }) => changeYear(value)}
+                                                                type="select">
+                                                                {years.map(option => (
+                                                                    <option key={option} value={option}>
+                                                                        {option}
+                                                                    </option>
+                                                                ))}
+                                                            </Input>
+                                                            <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                                changeMonth(months.indexOf(value))
+                                                            } type="select">
+                                                                {months.map((option) => (
+                                                                    <option key={option} value={option}>
+                                                                        {option}
+                                                                    </option>
+                                                                ))}
+                                                            </Input>
+                                                            <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                                                        </div>
+                                                    )}
                                                 peekNextMonth
                                                 showMonthDropdown
                                                 showYearDropdown
@@ -326,25 +458,25 @@ class LicenseApplication extends Component {
                                 },
                                 {
                                     Header: "Senior Manager or above of Requestor Department",
-                                    accessor: `seniorManager`,
-                                    width: this.getColumnWidth('seniorManager', "Senior Manager or above of Requestor Department"),
+                                    accessor: `seniorManagerName`,
+                                    width: this.getColumnWidth('seniorManagerName', "Senior Manager or above of Requestor Department"),
                                     Cell: row => (
                                         <div> {this.converManagers(row.original.seniorManagers)} </div>
                                     ),
                                     style: { textAlign: "center" },
-                                    filterMethod: (filter, row) => {
-                                        return row[filter.id] === filter.value;
-                                    },
-                                    Filter: ({ filter, onChange }) => {
-                                        return (
-                                            <Input type="select" value={this.state.searchOption.seniorManagerAbove} onChange={this.handleSearch('seniorManagerAbove')} >
-                                                <option value="">Please Select a senior Manager</option>
-                                                {seniorManagers.map((mgr, index) =>
-                                                    <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
-                                                )}
-                                            </Input>
-                                        )
-                                    },
+                                    // filterMethod: (filter, row) => {
+                                    //     return row[filter.id] === filter.value;
+                                    // },
+                                    // Filter: ({ filter, onChange }) => {
+                                    //     return (
+                                    //         <Input type="select" value={this.state.searchOption.seniorManagerName} onChange={this.handleSearch('seniorManagerName')} >
+                                    //             <option value="">Please Select a senior Manager</option>
+                                    //             {seniorManagers.map((mgr, index) =>
+                                    //                 <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
+                                    //             )}
+                                    //         </Input>
+                                    //     )
+                                    // },
                                 },
                                 {
                                     Header: "Status",
@@ -365,31 +497,23 @@ class LicenseApplication extends Component {
                                     },
                                 },
                                 {
-                                    Header: "Deliver Ways",
-                                    accessor: "deliveryWayName",
-                                    width: this.getColumnWidth('deliveryWayName', "Deliver Ways"),
-                                    // Cell: this.renderEditable,
-                                    filterable: false,
-                                    style: { textAlign: "center" }
-                                },
-                                {
                                     Header: "Created By",
                                     accessor: "createdByName",
                                     width: this.getColumnWidth('createdByName', "Created By"),
                                     // Cell: this.renderEditable,
-                                    filterMethod: (filter, row) => {
-                                        return row[filter.id] === filter.value;
-                                    },
-                                    Filter: ({ filter, onChange }) => {
-                                        return (
-                                            <Input type="select" value={this.state.searchOption.createdByName} onChange={this.handleSearch('createdByName')} >
-                                                <option value="">Please Select a name</option>
-                                                {seniorManagers.map((mgr, index) =>
-                                                    <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
-                                                )}
-                                            </Input>
-                                        )
-                                    },
+                                    // filterMethod: (filter, row) => {
+                                    //     return row[filter.id] === filter.value;
+                                    // },
+                                    // Filter: ({ filter, onChange }) => {
+                                    //     return (
+                                    //         <Input type="select" value={this.state.searchOption.createdByName} onChange={this.handleSearch('createdByName')} >
+                                    //             <option value="">Please Select a name</option>
+                                    //             {seniorManagers.map((mgr, index) =>
+                                    //                 <option key={index} value={mgr.displayName} > {mgr.displayName} </option>
+                                    //             )}
+                                    //         </Input>
+                                    //     )
+                                    // },
                                     style: { textAlign: "center" }
                                 },
                                 {
@@ -406,6 +530,46 @@ class LicenseApplication extends Component {
                                         return (
                                             <DatePicker placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                                                 className="form-control" dateFormat="yyyy/MM/dd"
+                                                renderCustomHeader={({
+                                                    date,
+                                                    changeYear,
+                                                    changeMonth,
+                                                    decreaseMonth,
+                                                    increaseMonth,
+                                                    prevMonthButtonDisabled,
+                                                    nextMonthButtonDisabled
+                                                }) => (
+                                                        <div
+                                                            style={{
+                                                                margin: 10,
+                                                                display: "flex",
+                                                                justifyContent: "center"
+                                                            }}
+                                                        >
+                                                            <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                            <Input
+                                                                value={getYear(date)}
+                                                                onChange={({ target: { value } }) => changeYear(value)}
+                                                                type="select">
+                                                                {years.map(option => (
+                                                                    <option key={option} value={option}>
+                                                                        {option}
+                                                                    </option>
+                                                                ))}
+                                                            </Input>
+                                                            <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                                changeMonth(months.indexOf(value))
+                                                            } type="select">
+                                                                {months.map((option) => (
+                                                                    <option key={option} value={option}>
+                                                                        {option}
+                                                                    </option>
+                                                                ))}
+                                                            </Input>
+                                                            <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                                                        </div>
+                                                    )}
                                                 peekNextMonth
                                                 showMonthDropdown
                                                 showYearDropdown
@@ -419,10 +583,33 @@ class LicenseApplication extends Component {
                                     style: { textAlign: "center" }
                                 },
                                 {
-                                    Header: "Delivery Express Number",
+                                    Header: "Deliver Way",
+                                    accessor: "deliveryWayName",
+                                    width: this.getColumnWidth('deliveryWayName', "Deliver Way"),
+                                    // Cell: this.renderEditable,
+                                    filterable: false,
+                                    style: { textAlign: "center" }
+                                },
+                                {
+                                    Header: "License Admin Deliver Way",
+                                    accessor: "licenseAdminDeliverWay",
+                                    width: this.getColumnWidth('licenseAdminDeliverWay', "License Admin Deliver Way"),
+                                    filterable: false,
+                                    style: { textAlign: "center" }
+                                },
+                                {
+                                    Header: "Deliver Express Number",
                                     accessor: "expDeliveryNumber",
                                     filterable: false,
-                                    width: this.getColumnWidth('expDeliveryNumber', "Delivery Express Number"),
+                                    width: this.getColumnWidth('expDeliveryNumber', "Deliver Express Number"),
+                                    // Cell: this.renderEditable,
+                                    style: { textAlign: "center" }
+                                },
+                                {
+                                    Header: "Return Way",
+                                    accessor: "returnWayName",
+                                    width: this.getColumnWidth('returnWayName', "Return Way"),
+                                    filterable: false,
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" }
                                 },
@@ -433,18 +620,11 @@ class LicenseApplication extends Component {
                                     width: this.getColumnWidth('expReturnNumber', "Return Express Number"),
                                     // Cell: this.renderEditable,
                                     style: { textAlign: "center" }
-                                },
-                                {
-                                    Header: "Return Ways",
-                                    accessor: "returnWayName",
-                                    width: this.getColumnWidth('returnWayName', "Return Ways"),
-                                    filterable: false,
-                                    // Cell: this.renderEditable,
-                                    style: { textAlign: "center" }
                                 }
                             ]}
                             defaultPageSize={this.state.limit}
                             manual
+                            page={this.state.page - 1}
                             onPageChange={(e) => { this.setState({ page: e + 1 }, () => this.getLicenseApplications(e + 1, this.state.limit)) }}
                             onPageSizeChange={(pageSize, page) => {
                                 this.setState({ limit: pageSize, page: page + 1 });

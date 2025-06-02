@@ -13,6 +13,8 @@ import {
 
 import Axios from 'axios';
 import config from '../../config'
+import Authorize from '../../functions/Authorize'
+
 
 
 class Help extends Component {
@@ -27,7 +29,8 @@ class Help extends Component {
             editable: false,
             dropdownOpen: false,
             existingCKLength: 0,
-            existingQALength: 0
+            existingQALength: 0,
+            loading: false
         };
         this.makeEditable = this.makeEditable.bind(this);
         this.toggleDropdown = this.toggleDropdown.bind(this);
@@ -50,7 +53,7 @@ class Help extends Component {
     }
 
     async getQA() {
-        let qaArray = []
+        /*let qaArray = []
         for (let i = 0; i < 50; i++) {
             let isError = false
             let obj = {}
@@ -69,10 +72,11 @@ class Help extends Component {
 
             qaArray.push(obj)
         }
-        this.setState({ QA: qaArray, existingQALength: qaArray.length })
+        console.log(qaArray)
+        this.setState({ QA: qaArray, existingQALength: qaArray.length })*/
     }
 
-    async getChopKeeper() {
+    /*async getChopKeeper() {
         let chopKeeperArray = []
         for (let i = 0; i < 50; i++) {
             let isError = false
@@ -100,9 +104,92 @@ class Help extends Component {
             chopKeepers.table = chopKeeperArray
             return chopKeepers
         })
+        console.log(chopKeeperArray)
+    }*/
+
+    getChopKeeper() {
+        let chopKeeperArray = []
+        let qaArray = []
+        for (let i = 0; i < 1; i++) {
+            let isError = false
+            let obj = {}
+            Axios.get(`${config.url}/helps/chop`, { headers: { Pragma: 'no-cache' } })
+                .then(res => {
+                    for (let i = 0; i < res.data.length; i++) {
+                        //alert(1)
+                        if (res.data[i]['sectionId'].includes("chopKeeper")) {
+                            let obj = {}
+                            let arr = res.data[i]['sectionData'].split(';')
+                            obj.chopType = arr[0].split(',')
+                            if (arr[0][0]) {
+                                obj.chopTypeSort = arr[0].trim().toLowerCase()
+                            }else{
+                                obj.chopTypeSort = ' ';
+                            }
+                            // console.log(obj.chopTypeSort)
+                            obj.chopKeeper = arr[1]
+                            obj.sectionId =  res.data[i]['sectionId']
+                            obj.contactPerson = arr[2].split(',')
+                            obj.location = arr[3]
+                            isError = false
+                            chopKeeperArray.push(obj)
+                        }
+                        if (res.data[i]['sectionId'].includes("question")) {
+                            let obj = {}
+                             isError = false
+                            let arr = res.data[i]['sectionData'].split('@@@')
+                            obj.sectionId =  res.data[i]['sectionId']
+                            obj.question = arr[0]
+                            obj.answer = arr[1]
+                            qaArray.push(obj)
+                        }
+                    }
+                    /*let arr = res.data.sectionData.split(';')
+                    obj.chopType = arr[0].split(',')
+                    obj.chopKeeper = arr[1]
+                    obj.contactPerson = arr[2].split(',')
+                    obj.location = arr[3]
+                    isError = false*/
+                    // console.log(obj)
+                    //chopKeeperArray.sort(this.dynamicSort("chopTypeSort"));
+                    chopKeeperArray.sort(function(a, b) { 
+                        return a.chopTypeSort > b.chopTypeSort || -(a.chopTypeSort < b.chopTypeSort);
+                    });
+
+                    this.setState({ QA: qaArray, existingQALength: qaArray.length })
+                    this.setState({ existingCKLength: chopKeeperArray.length })
+                    this.setState(state => {
+                        let { chopKeepers } = this.state
+                        chopKeepers.table = chopKeeperArray
+                        return chopKeepers
+                    })
+                })
+                .catch(error => {
+                    isError = true
+                });
+            if (isError)
+                break;
+            //chopKeeperArray.push(obj)
+        }
     }
 
+    dynamicSort(property) {
+        var sortOrder = 1;
+        if(property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
 
+        return function (a,b) {
+            // console.log(a,'9999999')
+
+            if(sortOrder == -1){
+                return b[property].localeCompare(a[property]);
+            }else{
+                return a[property].localeCompare(b[property]);
+            }
+        }
+    }
 
     handleQAChange = (name, mainIndex) => event => {
         let value = event.target.value
@@ -135,45 +222,45 @@ class Help extends Component {
 
     }
 
-    async getData() {
-        await Axios.get(`${config.url}/helps/chop`).then(res => {
+    async getData(){
+        await Axios.get(`${config.url}/helps/chop`, { headers: { Pragma: 'no-cache' } }).then(res => {
             // console.log(res.data)
         })
         // this.setState({ chopKeepers: response.data.chopKeepers, QA: response.data.QA })
     }
 
-    async addNewChopKeeperDetails(details, index, name) {
+    addNewChopKeeperDetails(details, index, name) {
         let postData = new FormData()
         postData.append('sectionData', details)
         postData.append('sectionId', `${name}${index}`)
-        await Axios.post(`${config.url}/helps/chop/${localStorage.getItem('userId')}`, postData)
+        Axios.post(`${config.url}/helps/chop/${Authorize.getCookies().userId}`, postData)
             .then(result => {
-                // console.log(result.data)
+                // console.log(`ADDED ${name}`)
             })
             .catch(error => {
-                // console.log(error)
+                console.log(error)
             })
     }
 
-    async updateChopKeeperDetails(details, index, name) {
+    updateChopKeeperDetails(details, index, name) {
         let postData = new FormData()
         postData.append('sectionData', details)
-        await Axios.put(`${config.url}/helps/chop/${name}${index}/${localStorage.getItem('userId')}`, postData)
+        Axios.put(`${config.url}/helps/chop/${index}/${Authorize.getCookies().userId}`, postData)
             .then(result => {
-                // console.log(result.data)
+                console.log(`UPDATED ${name}`)
             })
             .catch(error => {
-                // console.log(error)
+                console.log(error)
             })
     }
 
     async deleteChopKeeper(index, name) {
-        await Axios.delete(`${config.url}/helps/chop/${name}${index}/${localStorage.getItem('userId')}`)
+        await Axios.delete(`${config.url}/helps/chop/${index}`)
             .then(result => {
-                console.log(result.data)
+               this.getChopKeeper();
             })
             .catch(error => {
-                console.log(error)
+                console.error(error)
             })
     }
 
@@ -181,43 +268,80 @@ class Help extends Component {
         if (this.state.editable) {
             let chopKeepers = this.state.chopKeepers.table
             let qa = this.state.QA
-            for (let i = 0; i < chopKeepers.length; i++) {
+            let i = 0
+            let p = 0
+            this.setState({ loading: true })
+            for (i = 0; i < chopKeepers.length; i++) {
                 let array = []
                 let chopTypes = chopKeepers[i].chopType.join(',')
                 let contactPersons = chopKeepers[i].contactPerson.join(',')
+                if (chopKeepers[i].chopType[0][0]) {
+                    chopKeepers[i].chopTypeSort = chopKeepers[i].chopType[0].trim().toLowerCase();
+                }
+                else{
+                    chopKeepers[i].chopTypeSort = '';
+                }
+                
                 array.push(chopTypes)
                 array.push(chopKeepers[i].chopKeeper)
                 array.push(contactPersons)
                 array.push(chopKeepers[i].location)
                 let finalString = array.join(';')
                 // console.log(finalString)
-                if (i < this.state.existingCKLength) {
-                    this.updateChopKeeperDetails(finalString, i, "chopKeeper")
+                if (chopKeepers[i].sectionId) {
+                //if (i < this.state.existingCKLength) {
+                    this.updateChopKeeperDetails(finalString, chopKeepers[i].sectionId, "chopKeeper")
                     // console.log("Chop keeper details updated")
                 }
                 else {
-                    this.addNewChopKeeperDetails(finalString, i, "chopKeeper")
+                    var secId = Math.floor(Date.now() / 1000)+i
+                    this.addNewChopKeeperDetails(finalString, secId, "chopKeeper")
+                    this.state.chopKeepers.table[i]['sectionId'] = 'chopKeeper'+secId;
                     // console.log("Chop keeper details added")
                 }
             }
-            for (let i = 0; i < qa.length; i++) {
+            for (p = 0; p < qa.length; p++) {
                 let array = []
-                array.push(qa[i].question)
-                array.push(qa[i].answer)
-                let qaString = array.join(',')
+                array.push(qa[p].question)
+                array.push(qa[p].answer)
+                let qaString = array.join('@@@')
                 // console.log(qaString)
-                if (i < this.state.existingQALength) {
+                if (qa[p].sectionId) {
+                //if (p < this.state.existingQALength) {
                     // console.log("QA Updated")
-                    this.updateChopKeeperDetails(qaString, i, "question")
+                    this.updateChopKeeperDetails(qaString, qa[p].sectionId, "question")
                 }
                 else {
                     // console.log("New QA Added")
-                    this.addNewChopKeeperDetails(qaString, i, "question")
+                    var secId = Math.floor(Date.now() / 1000)+p
+                    this.addNewChopKeeperDetails(qaString, secId, "question")
+                    this.state.QA[p]['sectionId'] = 'question'+secId;
+
+                    //this.addNewChopKeeperDetails(qaString, secId, "question")
                 }
 
             }
-            window.location.reload()
+            // console.log(i, p)
+            // console.log(chopKeepers.length, qa.length)
+            if (i === chopKeepers.length && p === qa.length) {
+                this.setState({ loading: false })
+            }
+            // window.location.reload()
             //codes to update instructions to the database
+            /*this.setState({
+                QA: []
+            })*/
+            //chopKeepers.sort(this.dynamicSort("chopTypeSort"));
+            chopKeepers.sort(function(a, b) { 
+                return a.chopTypeSort > b.chopTypeSort || -(a.chopTypeSort < b.chopTypeSort);
+            });
+            this.setState({
+                chopKeepers: {
+                    columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
+                    table: chopKeepers
+                }
+            })
+            //this.getChopKeeper();
         }
         this.setState(state => ({
             editable: !state.editable,
@@ -242,12 +366,17 @@ class Help extends Component {
     }
 
     deleteData(index) {
+        //alert()
         let chopKeepersCopy = JSON.parse(JSON.stringify(this.state.chopKeepers))
+        let sectionId = chopKeepersCopy.table[index].sectionId;
         chopKeepersCopy.table.splice(index, 1)
         this.setState({
-            chopKeepers: chopKeepersCopy
+            chopKeepers: {
+                columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
+                table: []
+            }
         })
-        this.deleteChopKeeper(index, "chopKeeper")
+        this.deleteChopKeeper(sectionId, "chopKeeper")
     }
 
     addQA() {
@@ -264,11 +393,12 @@ class Help extends Component {
         // console.log(index)
         // let QaCopy = JSON.parse(JSON.stringify(this.state.QA))
         const QaCopy = this.state.QA.slice()
+        let sectionId = QaCopy[index].sectionId;
         QaCopy.splice(index, 1)
         this.setState({
-            QA: QaCopy
+            QA: []
         })
-        this.deleteChopKeeper(index, "question")
+        this.deleteChopKeeper(sectionId, "question")
     }
 
     addChopType(index) {
@@ -325,16 +455,16 @@ class Help extends Component {
             <tr key={index}>
                 <td>{table.chopType.map((type, i) =>
                     <div key={i}>
-                        <Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the chop type" defaultValue={type}></Input><Button onClick={() => this.deleteChopType(index, i)} color="danger">Delete</Button></Form><br />
+                        <Form style={{ display: "flex" }}><Input type="text" maxLength={1000} onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the chop type" defaultValue={type}></Input><Button onClick={() => this.deleteChopType(index, i)} color="danger">Delete</Button></Form><br />
                     </div>
                 )}
                     <Button onClick={() => this.addChopType(index)} >Add New Chop Type</Button>
                 </td>
-                <td><Form><Input type="text" placeholder="Please enter the chop keeper" onChange={this.handleChange("chopKeeper", index)} defaultValue={table.chopKeeper}></Input></Form></td>
+                <td><Form><Input type="text" maxLength={1000} placeholder="Please enter the chop keeper" onChange={this.handleChange("chopKeeper", index)} defaultValue={table.chopKeeper}></Input></Form></td>
                 <td> {table.contactPerson.map((person, i) =>
-                    <div key={i}><Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("contactPerson", i, index)} placeholder="Please enter the name of the contact person" defaultValue={person}></Input><Button onClick={() => this.deleteContactPerson(index, i)} color="danger">Delete</Button></Form><br /></div>)}
+                    <div key={i}><Form style={{ display: "flex" }}><Input type="text" maxLength={1000} onChange={this.handleChopKeeper("contactPerson", i, index)} placeholder="Please enter the name of the contact person" defaultValue={person}></Input><Button onClick={() => this.deleteContactPerson(index, i)} color="danger">Delete</Button></Form><br /></div>)}
                     <Button onClick={() => this.addContactPerson(index)} >Add New Contact Person</Button></td>
-                <td><Form><Input type="text" placeholder="Please add the location" onChange={this.handleChange("location", index)} defaultValue={table.location}></Input></Form></td>
+                <td><Form><Input type="text" maxLength={1000} placeholder="Please add the location" onChange={this.handleChange("location", index)} defaultValue={table.location}></Input></Form></td>
                 <td><Button onClick={() => this.deleteData(index)} color="danger">Delete</Button></td>
             </tr>)
         const QA = this.state.QA.map((qnsAns, index) =>
@@ -348,49 +478,54 @@ class Help extends Component {
                 <Form>
                     <Label style={{ float: "left" }}><b>Question: {index + 1}</b></Label>
                     <img style={{ float: "right" }} onClick={() => this.deleteQA(index)} height="20px" width="20px" src={deleteIcon} />
-                    <Input type="textarea" onChange={this.handleQAChange("question", index)} placeholder="Please enter your question." defaultValue={qnsAns.question}></Input>
+                    <Input type="textarea" maxLength={1999} onChange={this.handleQAChange("question", index)} placeholder="Please enter your question." defaultValue={qnsAns.question}></Input>
                     <Label><b>Answer</b></Label>
-                    <Input type="textarea" onChange={this.handleQAChange("answer", index)} placeholder="Please enter your answer." defaultValue={qnsAns.answer}></Input>
+                    <Input type="textarea" maxLength={1999} onChange={this.handleQAChange("answer", index)} placeholder="Please enter your answer." defaultValue={qnsAns.answer}></Input>
                 </Form>
                 <br />
             </div>)}<Button onClick={this.addQA}>Add New Question and Answer</Button></div>
         const Edit = <img onClick={this.makeEditable} width="20px" src={editIcon} />
         const Apply = <Button color="success" onClick={this.makeEditable}>APPLY</Button>
         return (
-            <div className="animated fadeIn">
-                <h2 >Help</h2>
-                <Card>
-                    <CardBody>
-                        <div style={{ float: "left", marginTop: "5px", paddingRight: "10px" }} ><b>Chop Keeper Information</b></div>
-                        <div style={{ float: "left" }}>
-                            {this.state.editable ? (<Button onClick={this.addData}> Add New Data</Button>) : ""}
+            <div>
+                {this.state.loading
+                    ? ""
+                    : <div className="animated fadeIn">
+                        <h4 >Help</h4>
+                        <Card>
+                            <CardBody>
+                                <div style={{ float: "left", marginTop: "5px", paddingRight: "10px" }} ><b>Chop Keeper Information</b></div>
+                                <div style={{ float: "left" }}>
+                                    {this.state.editable ? (<Button onClick={this.addData}> Add New Data</Button>) : ""}
 
-                        </div>
+                                </div>
 
 
-                        {localStorage.getItem('viewAdminChop') === "true"
-                            ? <div style={{ float: "right" }}>
-                                {!this.state.editable ? Edit : Apply}
-                            </div>
-                            : null
-                        }
-                        <br /><br />
-                        <Table bordered >
-                            <thead>
-                                <tr>
-                                    {chopKeepersColumnHeaders}
-                                    {!this.state.editable ? null : <th></th>}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {!this.state.editable ? chopKeepers : chopKeepersEditable}
-                            </tbody>
-                        </Table>
-                        <br />
-                        {!this.state.editable ? QA : QaEditable}
-                    </CardBody>
-                </Card>
+                                {localStorage.getItem('viewAdminChop') === "true"
+                                    ? <div style={{ float: "right" }}>
+                                        {!this.state.editable ? Edit : Apply}
+                                    </div>
+                                    : null
+                                }
+                                <br /><br />
+                                <Table bordered >
+                                    <thead>
+                                        <tr>
+                                            {chopKeepersColumnHeaders}
+                                            {!this.state.editable ? null : <th></th>}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {!this.state.editable ? chopKeepers : chopKeepersEditable}
+                                    </tbody>
+                                </Table>
+                                <br />
+                                {!this.state.editable ? QA : QaEditable}
+                            </CardBody>
+                        </Card>
+                    </div>}
             </div>
+
         );
     }
 }

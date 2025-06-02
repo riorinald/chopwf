@@ -1,6 +1,6 @@
 {
-  "short_name": "CoreUI-React",
-  "name": "CoreUI-React sample",
+  "short_name": "chop-workflow",
+  "name": "Chop & License Workflow",
   "icons": [
     {
       "src": "./assets/img/favicon.png",

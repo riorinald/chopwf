@@ -1,12 +1,17 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import {Spinner} from 'reactstrap';
+import Cookies from 'universal-cookie';
 
 // import { renderRoutes } from 'react-router-config';
 import './App.scss';
 
+const cookies = new Cookies();
+
 export const fakeAuth = {
-  isAuthenticated: localStorage.getItem('authenticate')  === 'true' ? true : false,
+  isAuthenticated: cookies.get('userInfo', {path:'/'}) ? true : false,
+  // isAuthenticated: localStorage.getItem('authenticate')  === 'true' ? true : false,
+  
   authenticate(cb) {
     
     this.isAuthenticated = true
@@ -16,9 +21,10 @@ export const fakeAuth = {
   signOut(cb) {
     this.isAuthenticated = false
     localStorage.clear();
-    setTimeout(cb, 100)
+    setTimeout(cb,cookies.remove('userInfo',{path:'/'}), 100)
   }
 }
+
 
 const Login = React.lazy(() => import('./views/Login/Login'));
 const Logout = React.lazy(() => import('./views/Logout/Logout'));
@@ -36,16 +42,22 @@ const Oauth = React.lazy(()=> import('./views/Login/oauth'))
 
 const PrivateRoute = ({component: Component, ...rest}) => (
   <Route {...rest} render={props => (
-    fakeAuth.isAuthenticated === true 
+    fakeAuth.isAuthenticated === true && cookies.get('userInfo', {path:'/'})
     ? <Component {...props}/>
-    : <Redirect to='/login'/>
+    : cookies.get('userInfo', {path:'/'})
+      ? <Redirect to='/login'/>
+      : <Redirect to='/authenticated?session=expired'/>
   )}/>
 )
 
 
 class App extends Component {
 
-  render() {
+// addChangeListener(fakeAuth){
+//   fakeAuth.signOut()
+// }
+
+render() {
     return (
       <Router basename='/CLWF/'>
         <React.Suspense fallback={loading()}>
@@ -54,8 +66,8 @@ class App extends Component {
             <Route exact path="/authenticated" name="auth" render={props => <AuthPage {...props} />} />
             <Route exact path="/page404" name="Page 404" render={props => <Page404 {...props} />} />
             <Route exact path="/portal" name="Portal" render={props => <Portal {...props} />} />
-            <Route path='/login' component={Login} /> 
-            <Route path='/Logout' component={Logout} />  
+            <Route path='/login' name="login" render={props=> <Login {...props} />} /> 
+            <Route path='/Logout' name="logout" render={props=> <Logout {...props} />} />  
             {/* {fakeAuth.isAuthenticated
               ? <Route path="/" name="Home" render={props => <DefaultLayout {...props} />} />
               : <Redirect to='/login' />

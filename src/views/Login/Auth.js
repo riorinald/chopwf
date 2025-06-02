@@ -1,12 +1,20 @@
-import React, { Component,useEffect } from 'react';
+import React, { Component } from 'react';
 import axios from 'axios';
-import { Redirect,NavLink } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { fakeAuth } from '../../App';
-import {Card, CardBody, Row, Spinner, Alert } from 'reactstrap';
+import {Card, CardBody, Button, Spinner, Alert } from 'reactstrap';
 import config from '../../config';
-import { access } from 'fs';
 import qs from 'querystring';
 import JWT from 'jsonwebtoken';
+import Cookies from 'universal-cookie';
+import Authorize from '../../functions/Authorize'
+
+
+import {
+  AppHeader
+} from '@coreui/react';
+
+const cookies = new Cookies();
 
 class Authenticated extends Component { 
   constructor(props) {
@@ -19,7 +27,8 @@ class Authenticated extends Component {
       info: '',
       redirectTo: '/login',
       color:'',
-      timer: 6
+      timer: 10,
+      title: 'Authenticated as'
     };
   }
   
@@ -29,64 +38,149 @@ class Authenticated extends Component {
     if (code){
       this.exchangeToken(code);
     }
-    if (param){
-      console.log(param)
-      if(localStorage.getItem('userId') === param.userid){
-        if(param.workflow){
-          this.props.history.push({
-            pathname:`${param.workflow}/mypendingtask/details/`,
-            state:{redirected:true, taskId:param.taskid}
-          })
+    else {
+      if(param.session === 'expired'){
+      this.setState({
+          loading:false,
+          title: 'Session Expired',
+          info: "Your Session is expired. Please do relogin",
+          color: "danger",
+          isExpired:true,
+          // timer: 2,
+          // redirectTo: '/login'+this.props.location.search    
+        })
+        localStorage.clear()
+        // this.countDown()
+      }
+      else if (param.workflow && param.companyid && param.userid){
+        const userInfo = cookies.get('userInfo', {path:'/'})
+        const CCuser = param.ccUserIds ? param.ccUserIds.split(',') : ""
+
+        if(userInfo && userInfo.userId === param.userid){          
+          if(param.workflow === 'license'){
+          const page = param.userrole === 'approver' ? 'mypendingtask' : 'myapplication'
+
+            localStorage.setItem('legalEntity', param.companyid.toUpperCase())
+            localStorage.setItem('application', param.workflow.toUpperCase())
+            this.props.history.push({
+              pathname:`${param.workflow}/${page}/details/`,
+              state:{redirected:true, taskId:param.licenseid}
+            })
+          }
+          else{
+            const page = param.userrole === 'approver' ? 'mypendingtask' : 'myapps'
+
+            localStorage.setItem('legalEntity', param.companyid.toUpperCase())
+            localStorage.setItem('application', param.workflow.toUpperCase())
+            this.props.history.push({
+              pathname:`/${page}/details/`,
+              state:{redirected:true, taskId:param.taskid}
+            })
+          }
+        }
+        else if(userInfo && this.checkCCuser(CCuser, userInfo.userId)){
+          if(param.workflow === 'license'){
+            const page = Authorize.check(param.companyid, userInfo.licenseAdminCompanyIds) ? 'details' : ''
+
+            localStorage.setItem('legalEntity', param.companyid.toUpperCase())
+            localStorage.setItem('application', param.workflow.toUpperCase())
+            this.props.history.push({
+              pathname:`${param.workflow}/admin-apps/${page}`,
+              state:{redirected:true, taskId:param.licenseid}
+            })
+          }
+          else{
+            const page = Authorize.check(param.companyid, userInfo.chopKeeperCompanyIds) ? 'details' : ''
+
+            localStorage.setItem('legalEntity', param.companyid.toUpperCase())
+            localStorage.setItem('application', param.workflow.toUpperCase())
+            this.props.history.push({
+              pathname:`/chopapps/${page}`,
+              state:{redirected:true, taskId:param.taskid}
+            })
+          }
         }
         else{
-          this.props.history.push({
-            pathname:`${param.workflow}/mypendingtask/details/`,
-            state:{redirected:true, taskId:param.taskid}
-          })
-      }
-    }
-    else{
-      if(param.workflow){
-        this.setState({
-          loading:false,
-          info: "Login required",
-          color: "danger",
-          redirectTo: '/login'+this.props.location.search        
-        })
-        this.countDown()
+          if(param.workflow && userInfo){
+            this.setState({
+              loading:false,
+              title: 'You are not Authorized',
+              info: "Session user does not match with the redirect URL",
+              isExpired: false,
+              color: "danger",
+              // timer:5,
+              // redirectTo: '/login' + this.props.location.search        
+            })
+            // cookies.remove('userInfo',{path:'/'})
+            // this.countDown()
+          }
+          else {
+            console.log(param)
+            cookies.set('redirectInfo', param, { path:'/'});
+            this.setState({
+              loading:false,
+              title: 'You are not Authenticated',
+              info: "Opening the login page, please wait ...",
+              color: "danger",
+              timer:3,
+              redirectTo: '/oauth'
+            })
+            this.countDown()
+            }
+        }
       }
       else {
-        this.setState({
-          loading:false,
-          info: "Login required",
-          color: "danger",
-          redirectTo: '/login'
-        })
-        this.countDown()
+        if(Authorize.getCookies()){
+          this.setState({
+            loading:false,
+            title: 'Authenticated with session',
+            info: "login as "+ Authorize.getCookies().userId,
+            color: "success",
+            timer:3,
+            redirectTo: '/portal'
+          })
+          this.countDown()
+        }
+        else{
+          this.setState({
+            loading:false,
+            title: 'You are not Authenticated',
+            info: "Login required",
+            color: "danger",
+            timer:5,
+            redirectTo: '/login'
+          })
+          this.countDown()
         }
       }
     }
+  }
+
+  checkCCuser(CCusers, LoginUser){
+    let result = CCusers.indexOf(LoginUser) > -1 ? true : false
+    console.log(result)
+    return result
   }
   
   exchangeToken(code){
     const requestBody = {
       grant_type: 'authorization_code',
-      code: code,
-      redirect_uri: "https://docms.es.corpintra.net/clwf/login?authhandler=Daimler_OpenID"
+      code: code, 
+      redirect_uri: `${config.domain}/clwf/login?authhandler=Daimler_OpenID`
     }
 
-    const config = {
+    const axiosConfig = {
       // withCredentials: false,
       headers: {
-        "Authorization": "Basic ODEyZGE3ZDItYjc0YS00ODRkLTgyYTMtZDMwZmY4YWU2ZjljOjVkZDA4NGY2LWQ5ZGEtNDUyYS04NmVlLTQ1YTZkMzAxNDM5Zg==",
+        "Authorization": `Basic ${config.clientBase64}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }
 
-    axios.post(`https://sso-int.daimler.com/as/token.oauth2`, qs.stringify(requestBody), config)
+    axios.post(`${config.OAdomain}/as/token.oauth2`, qs.stringify(requestBody), axiosConfig)
 
         .then((result) => {
-            console.log(result)
+            //console.log(result)
             this.setState({token:result.data})
             localStorage.setItem('accessToken',result.data.access_token)
             localStorage.setItem('idToken',result.data.id_token)
@@ -96,18 +190,21 @@ class Authenticated extends Component {
             if(err.response){
               this.setState({
                 loading: false,
-                info:'error:' + err.response,
+                title: 'You are not Authenticated',
+                info:'error: can not retrieve token | ' + err.response.statusText,
+                timer:5,
                 color: "danger",
-                isExpired:true
               })
                 console.log(err.response)
-                console.log(err.response.statusText)}
+                // console.log(err.response.statusText)
+              }
             else {
               this.setState({
                 loading: false,
+                title: 'You are not Authenticated',
                 info:"OAuth server unreachable",
+                timer:5,
                 color: "danger",
-                isExpired:true
               })
                 console.log(err)
             }
@@ -117,7 +214,7 @@ class Authenticated extends Component {
   }
 
   async getOpenId(token) {
-    const config = {
+    const axiosConfig = {
       headers: {
         "Authorization": "Bearer "+ token,
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -125,10 +222,14 @@ class Authenticated extends Component {
     }
     let credentials= {username: '', password: ''}
 
-       await axios.get(`https://sso-int.daimler.com/idp/userinfo.openid`, config)
+       await axios.get(`${config.OAdomain}/idp/userinfo.openid`, axiosConfig)
           .then(res => {
 
-            this.setState({ loading: false, userDetails: res.data})
+            this.setState({ 
+              loading: false, 
+              userDetails: res.data,
+              title: "Authenticated as " + res.data.sub
+              })
             localStorage.setItem('userId', res.data.sub)
             credentials.username = res.data.sub
             this.validate(credentials)
@@ -137,6 +238,7 @@ class Authenticated extends Component {
             console.log(err)
             this.setState({
               loading:false,
+              title: 'You are not Authenticated',
               info: "openId not authenticated",
               color: "danger",
             })  
@@ -148,37 +250,112 @@ class Authenticated extends Component {
         await axios.post(`${config.url}/login`, credentials
             , { headers: { 'Content-Type': '  application/json' } })
             .then(res => {
-                let info = "User " + res.data.userId + " is authorized in the system."
-                localStorage.setItem('authenticate', true)
+                localStorage.setItem('application', 'CHOP')
                 localStorage.setItem('legalEntity', 'MBAFC')
-                localStorage.setItem('ticket', res.data.ticket)
-                localStorage.setItem('userId', res.data.userId)
-                localStorage.setItem('roleId', res.data.roleId)
-                localStorage.setItem('token', res.data.token)
-                localStorage.setItem('isLicenseAdmin', res.data.isLicenseAdmin)
-                localStorage.setItem('chopKeeperCompanyIds', res.data.chopKeeperCompanyIds)
-                localStorage.setItem('licenseAdminCompanyIds', res.data.licenseAdminCompanyIds)
-                localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
+                // localStorage.setItem('ticket', res.data.ticket)
+                // localStorage.setItem('userId', res.data.userId)
+                // localStorage.setItem('roleId', res.data.roleId)
+                // localStorage.setItem('token', res.data.token)
+                // localStorage.setItem('isLicenseAdmin', res.data.isLicenseAdmin)
+                // localStorage.setItem('chopKeeperCompanyIds', res.data.chopKeeperCompanyIds)
+                // localStorage.setItem('licenseAdminCompanyIds', res.data.licenseAdminCompanyIds)
+                // localStorage.setItem('isChopKeeper', res.data.isChopKeeper)
 
-                console.log(res.data)
+                // console.log(res.data)
 
                 if (res.data.status === "success") {
-                  this.setState({
-                    loading: false, 
-                    info: info,
-                    color: "danger",
-                    redirectTo:'/portal'
-                  })
-                  this.countDown()
-                  this.redirect()
+                  const redirectInfo = cookies.get('redirectInfo', {path:'/'})
+                  Authorize.setCookies(res.data)
+                  if(redirectInfo){
+                    const CCuser = redirectInfo.ccUserIds ? redirectInfo.ccUserIds.split(',') : ""
+                    if(redirectInfo.userid === res.data.userId){
+                      if(redirectInfo.workflow === 'license'){
+                        const page = redirectInfo.userrole === 'approver' ? 'mypendingtask' : 'myapplication'
+              
+                          localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
+                          localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
+                          this.redirect()
+                          this.props.history.push({
+                            pathname:`${redirectInfo.workflow}/${page}/details/`,
+                            state:{redirected:true, taskId:redirectInfo.licenseid}
+                          }, cookies.remove('redirectInfo', {path:'/'}))
+                        }
+                        else{
+                          const page = redirectInfo.userrole === 'approver' ? 'mypendingtask' : 'myapps'
+              
+                          localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
+                          localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
+                          this.redirect()
+                          this.props.history.push({
+                            pathname:`/${page}/details/`,
+                            state:{redirected:true, taskId:redirectInfo.taskid}
+                          }, cookies.remove('redirectInfo', {path:'/'}))
+                        }
+                    }
+                    else if(this.checkCCuser(CCuser, res.data.userId)){
+                      if(redirectInfo.workflow === 'license'){
+                        const page = Authorize.check(redirectInfo.companyid, res.data.licenseAdminCompanyIds) ? 'details' : ''
+
+                        localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
+                        localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
+                        this.props.history.push({
+                          pathname:`${redirectInfo.workflow}/admin-apps/${page}`,
+                          state:{redirected:true, taskId:redirectInfo.licenseid}
+                        })
+                      }
+                      else{
+                        const page = Authorize.check(redirectInfo.companyid, res.data.chopKeeperCompanyIds) ? 'details' : ''
+
+                        localStorage.setItem('legalEntity', redirectInfo.companyid.toUpperCase())
+                        localStorage.setItem('application', redirectInfo.workflow.toUpperCase())
+                        this.props.history.push({
+                          pathname:`/chopapps/${page}`,
+                          state:{redirected:true, taskId:redirectInfo.taskid}
+                        })
+                      }
+                    }
+                    else{
+                      if(redirectInfo.workflow && res.data.userId){
+                        this.setState({
+                          loading:false,
+                          title: 'You are not Authorized',
+                          info: "Session user does not match with the redirect URL",
+                          isExpired: false,
+                          color: "danger",
+                          // timer:5,
+                          // redirectTo: '/login' + this.props.location.search        
+                        })
+                        // cookies.remove('userInfo',{path:'/'})
+                        // this.countDown()
+                      }
+                    } 
+                  }
+                  else {
+                    let info = "User " + res.data.userId + " is authorized in the system."
+                      this.setState({
+                        loading: false, 
+                        info: info,
+                        color: "success",
+                        timer:2,
+                      isExpired:false,
+                      redirectTo:'/portal'
+                      })
+                      // Authorize.setCookies(res.data)
+                      this.countDown()
+                      this.redirect() 
+                  } 
                 }
-            })
+              }
+            )
     } catch (error) {
         if (error.response){
-        this.setState({ info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.", color:"success" });
+        this.setState({ 
+          info: error.response.statusText+" : user " + credentials.username + " is not authorized in the system.",
+          color:"danger",
+        });
         }
         else {
-        this.setState({ info: "server unreachable", color: "danger",});
+        this.setState({ info: "CLWFB API is unreachable", color: "danger",});
         }   
     }
 }
@@ -227,27 +404,32 @@ class Authenticated extends Component {
     if (this.state.timer === 0){
         return <Redirect to={this.state.redirectTo} />
     }
-
-    const authenticated = <label className="display-5 mb-4">Authenticated as {this.state.userDetails.sub || localStorage.getItem('userId')}</label>
-    const notAuth = <label className="display-5 mb-4">You are not Authenticated</label>
-    const loading = <div className="display-5">Loading <Spinner type='grow' color="info" /> </div>
-    return(
-    <div style={{ backgroundColor: "#2F353A" }}>
-      <Card className="centerd shadow-lg mt-5
-       p-3 rounded">
-        <CardBody>
-          {this.state.loading ? loading : 
-          <div>
-            {this.state.userDetails || localStorage.getItem('userId') ? authenticated : notAuth}
-            <Alert color={this.state.color} ><center>{this.state.info}</center></Alert >
-            <p className="mt-3"><center style={{color:'grey'}}>Redirect in {this.state.timer}</center></p>
-          </div>  
+    return (
+    <div>
+      <AppHeader fixed>
+          <span className="navbar-nav mr-5">{this.state.userDetails.displayName}</span>
+      </AppHeader>
+      <div>
+      <Card className="centerd shadow-lg mt-5 p-3 rounded">
+        <CardBody className="text-center">
+          {this.state.loading
+           ? <div className="display-5">Loading <Spinner type='grow' color="info" /> </div>
+           : <> 
+            <label className="display-5 mb-4 ">{this.state.title}</label>
+            <Alert color={this.state.color} >{this.state.info}</Alert >
+            {this.state.isExpired ?
+            <Button className="btn-openid btn-brand mb-2" onClick= {event =>  window.location.href = config.openid} >
+                <i className="fa fa-openid"></i><span>Daimler OpenID Auth</span> </Button>
+            : null }
+            {/* {this.state.timer === 0 ? <p className="mt-3 mb-0"><span style={{color:'grey'}}>Redirect in {this.state.timer}</span></p>:null} */}
+            </>
           }   
         </CardBody>
       </Card>
-    </div >
-    )}
-  
+      </div>
+    </div>
+    );
   }
+}
   
   export default Authenticated;

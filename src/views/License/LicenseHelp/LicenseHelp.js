@@ -13,6 +13,8 @@ import {
 
 import Axios from 'axios';
 import config from '../../../config'
+import Authorize from '../../../functions/Authorize'
+
 
 
 class LicenseHelp extends Component {
@@ -20,7 +22,7 @@ class LicenseHelp extends Component {
         super(props)
         this.state = {
             chopKeepers: {
-                columnHeader: ["Chop Type", "Chop Keeper", "Contact Person", "Location"],
+                columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
                 table: []
             },
             QA: [],
@@ -50,7 +52,7 @@ class LicenseHelp extends Component {
     }
 
     async getQA() {
-        let qaArray = []
+        /*let qaArray = []
         for (let i = 0; i < 50; i++) {
             let isError = false
             let obj = {}
@@ -69,37 +71,94 @@ class LicenseHelp extends Component {
 
             qaArray.push(obj)
         }
-        this.setState({ QA: qaArray, existingQALength: qaArray.length })
+        this.setState({ QA: qaArray, existingQALength: qaArray.length })*/
     }
 
-    async getChopKeeper() {
+    getChopKeeper() {
+
         let chopKeeperArray = []
-        for (let i = 0; i < 50; i++) {
+        let qaArray = []
+        for (let i = 0; i < 1; i++) {
             let isError = false
             let obj = {}
-            await Axios.get(`${config.url}/helps/license/chopKeeper${i}`)
+            Axios.get(`${config.url}/helps/license`, { headers: { Pragma: 'no-cache' } })
                 .then(res => {
-                    let arr = res.data.sectionData.split(';')
+                    for (let i = 0; i < res.data.length; i++) {
+                        //alert(1)
+                        if (res.data[i]['sectionId'].includes("chopKeeper")) {
+                            let obj = {}
+                            let arr = res.data[i]['sectionData'].split(';')
+                            obj.chopType = arr[0].split(',')
+                            if (arr[0][0]) {
+                                obj.chopTypeSort = arr[0].trim().toLowerCase()
+                            }else{
+                                obj.chopTypeSort = ' ';
+                            }
+                            //obj.chopTypeSort = arr[0][0].trim().toLowerCase()
+                            obj.chopKeeper = arr[1]
+                            obj.sectionId =  res.data[i]['sectionId']
+                            obj.contactPerson = arr[2].split(',')
+                            obj.location = arr[3]
+                            isError = false
+                            chopKeeperArray.push(obj)
+                        }
+                        if (res.data[i]['sectionId'].includes("question")) {
+                            let obj = {}
+                             isError = false
+                            let arr = res.data[i]['sectionData'].split('@@@')
+                            obj.sectionId =  res.data[i]['sectionId']
+                            obj.question = arr[0]
+                            obj.answer = arr[1]
+                            qaArray.push(obj)
+                        }
+                    }
+                    /*let arr = res.data.sectionData.split(';')
                     obj.chopType = arr[0].split(',')
                     obj.chopKeeper = arr[1]
                     obj.contactPerson = arr[2].split(',')
                     obj.location = arr[3]
-                    isError = false
+                    isError = false*/
                     // console.log(obj)
+                    // console.log('Updated on 28 Feb');
+                    //chopKeeperArray.sort(this.dynamicSort("chopTypeSort"));
+                    chopKeeperArray.sort(function(a, b) { 
+                        return a.chopTypeSort > b.chopTypeSort || -(a.chopTypeSort < b.chopTypeSort);
+                    });
+
+                    this.setState({ QA: qaArray, existingQALength: qaArray.length })
+                    this.setState({ existingCKLength: chopKeeperArray.length })
+                    this.setState(state => {
+                        let { chopKeepers } = this.state
+                        chopKeepers.table = chopKeeperArray
+                        return chopKeepers
+                    })
                 })
                 .catch(error => {
                     isError = true
                 });
             if (isError)
                 break;
-            chopKeeperArray.push(obj)
+            //chopKeeperArray.push(obj)
         }
-        this.setState({ existingCKLength: chopKeeperArray.length })
-        this.setState(state => {
-            let { chopKeepers } = this.state
-            chopKeepers.table = chopKeeperArray
-            return chopKeepers
-        })
+    }
+
+
+    dynamicSort(property) {
+        var sortOrder = 1;
+        if(property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+
+        return function (a,b) {
+            //console.log(a,'9999999')
+
+            if(sortOrder == -1){
+                return b[property].localeCompare(a[property]);
+            }else{
+                return a[property].localeCompare(b[property]);
+            }
+        }
     }
 
 
@@ -136,34 +195,44 @@ class LicenseHelp extends Component {
     }
 
     async getData() {
-        await Axios.get(`${config.url}/helps/license`).then(res => {
-            // console.log(res.data)
+        await Axios.get(`${config.url}/helps/license`, { headers: { Pragma: 'no-cache' } }).then(res => {
+            //console.log(res.data)
         })
         // this.setState({ chopKeepers: response.data.chopKeepers, QA: response.data.QA })
     }
 
-    async addNewChopKeeperDetails(details, index, name) {
+    addNewChopKeeperDetails(details, index, name) {
         let postData = new FormData()
         postData.append('sectionData', details)
         postData.append('sectionId', `${name}${index}`)
-        await Axios.post(`${config.url}/helps/license/${localStorage.getItem('userId')}`, postData)
+        Axios.post(`${config.url}/helps/license/${Authorize.getCookies().userId}`, postData)
             .then(result => {
-                // console.log(result.data)
+               // console.log(result.data)
             })
             .catch(error => {
-                // console.log(error)
+                console.log(error)
             })
     }
 
-    async updateChopKeeperDetails(details, index, name) {
+    updateChopKeeperDetails(details, index, name) {
         let postData = new FormData()
         postData.append('sectionData', details)
-        await Axios.put(`${config.url}/helps/license/${name}${index}/${localStorage.getItem('userId')}`, postData)
+        Axios.put(`${config.url}/helps/license/${index}/${Authorize.getCookies().userId}`, postData)
             .then(result => {
-                // console.log(result.data)
+               // console.log(result.data)
             })
             .catch(error => {
-                // console.log(error)
+                console.log(error)
+            })
+    }
+
+    async deleteChopKeeper(index, name) {
+        await Axios.delete(`${config.url}/helps/license/${index}`)
+            .then(result => {
+                this.getChopKeeper();
+            })
+            .catch(error => {
+                console.log(error)
             })
     }
 
@@ -175,43 +244,74 @@ class LicenseHelp extends Component {
                 let array = []
                 let chopTypes = chopKeepers[i].chopType.join(',')
                 let contactPersons = chopKeepers[i].contactPerson.join(',')
+                if (chopKeepers[i].chopType[0][0]) {
+                    chopKeepers[i].chopTypeSort = chopKeepers[i].chopType[0].trim().toLowerCase();
+                }
+                else{
+                    chopKeepers[i].chopTypeSort = '';
+                }
                 array.push(chopTypes)
                 array.push(chopKeepers[i].chopKeeper)
                 array.push(contactPersons)
                 array.push(chopKeepers[i].location)
                 let finalString = array.join(';')
                 // console.log(finalString)
-                if (i < this.state.existingCKLength) {
-                    this.updateChopKeeperDetails(finalString, i, "chopKeeper")
+                if (chopKeepers[i].sectionId) {
+
+                //if (i < this.state.existingCKLength) {
+                    this.updateChopKeeperDetails(finalString, chopKeepers[i].sectionId, "chopKeeper")
                     // console.log("Chop keeper details updated")
                 }
                 else {
-                    this.addNewChopKeeperDetails(finalString, i, "chopKeeper")
-                    // console.log("Chop keeper details added")
+                    var secId = Math.floor(Date.now() / 1000)+i
+                    this.addNewChopKeeperDetails(finalString, secId, "chopKeeper")
+                    this.state.chopKeepers.table[i]['sectionId'] = 'chopKeeper'+secId;
                 }
             }
             for (let i = 0; i < qa.length; i++) {
                 let array = []
                 array.push(qa[i].question)
                 array.push(qa[i].answer)
-                let qaString = array.join(',')
+                let qaString = array.join('@@@')
                 // console.log(qaString)
-                if (i < this.state.existingQALength) {
-                    // console.log("QA Updated")
-                    this.updateChopKeeperDetails(qaString, i, "question")
+                if (qa[i].sectionId) {
+                    this.updateChopKeeperDetails(qaString, qa[i].sectionId, "question")
                 }
                 else {
                     // console.log("New QA Added")
-                    this.addNewChopKeeperDetails(qaString, i, "question")
+                    var secId = Math.floor(Date.now() / 1000)+i
+                    this.addNewChopKeeperDetails(qaString, secId, "question")
+                    this.state.QA[i]['sectionId'] = 'question'+secId;
                 }
 
             }
-            window.location.reload()
+            chopKeepers.sort(function(a, b) { 
+                return a.chopTypeSort > b.chopTypeSort || -(a.chopTypeSort < b.chopTypeSort);
+            });
+            //chopKeepers.sort(this.dynamicSort("chopTypeSort"));
+            this.setState({
+                chopKeepers: {
+                    columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
+                    table: chopKeepers
+                }
+            })
+            // window.location.reload()
             //codes to update instructions to the database
+            /*this.setState({
+                QA: []
+            })
+            this.setState({
+                chopKeepers: {
+                    columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
+                    table: []
+                }
+            })
+            this.getChopKeeper();*/
         }
         this.setState(state => ({
             editable: !state.editable,
         }))
+
     }
 
     toggleDropdown() {
@@ -233,10 +333,15 @@ class LicenseHelp extends Component {
 
     deleteData(index) {
         let chopKeepersCopy = JSON.parse(JSON.stringify(this.state.chopKeepers))
+        let sectionId = chopKeepersCopy.table[index].sectionId;
         chopKeepersCopy.table.splice(index, 1)
         this.setState({
-            chopKeepers: chopKeepersCopy
+            chopKeepers: {
+                columnHeader: ["Company", "License Admin", "Contact Person", "Location"],
+                table: []
+            }
         })
+        this.deleteChopKeeper(sectionId, "chopKeeper")
     }
 
     addQA() {
@@ -250,13 +355,16 @@ class LicenseHelp extends Component {
     }
 
     deleteQA(index) {
+        //alert()
         // console.log(index)
         // let QaCopy = JSON.parse(JSON.stringify(this.state.QA))
         const QaCopy = this.state.QA.slice()
+        let sectionId = QaCopy[index].sectionId;
         QaCopy.splice(index, 1)
         this.setState({
-            QA: QaCopy
+            QA: []
         })
+        this.deleteChopKeeper(sectionId, "question")
     }
 
     addChopType(index) {
@@ -313,16 +421,16 @@ class LicenseHelp extends Component {
             <tr key={index}>
                 <td>{table.chopType.map((type, i) =>
                     <div key={i}>
-                        <Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the license type" defaultValue={type}></Input><Button onClick={() => this.deleteChopType(index, i)} color="danger">Delete</Button></Form><br />
+                        <Form style={{ display: "flex" }}><Input maxLength={1000} type="text" onChange={this.handleChopKeeper("chopType", i, index)} placeholder="Please enter the chop type" defaultValue={type}></Input></Form><br />
                     </div>
                 )}
-                    <Button onClick={() => this.addChopType(index)} >Add New Chop Type</Button>
+                   
                 </td>
-                <td><Form><Input type="text" placeholder="Please enter the license keeper" onChange={this.handleChange("chopKeeper", index)} defaultValue={table.chopKeeper}></Input></Form></td>
+                <td><Form><Input type="text" maxLength={1000} placeholder="Please enter the chop keeper" onChange={this.handleChange("chopKeeper", index)} defaultValue={table.chopKeeper}></Input></Form></td>
                 <td> {table.contactPerson.map((person, i) =>
-                    <div key={i}><Form style={{ display: "flex" }}><Input type="text" onChange={this.handleChopKeeper("contactPerson", i, index)} placeholder="Please enter the name of the contact person" defaultValue={person}></Input><Button onClick={() => this.deleteContactPerson(index, i)} color="danger">Delete</Button></Form><br /></div>)}
+                    <div key={i}><Form style={{ display: "flex" }}><Input type="text" maxLength={1000} onChange={this.handleChopKeeper("contactPerson", i, index)} placeholder="Please enter the name of the contact person" defaultValue={person}></Input><Button onClick={() => this.deleteContactPerson(index, i)} color="danger">Delete</Button></Form><br /></div>)}
                     <Button onClick={() => this.addContactPerson(index)} >Add New Contact Person</Button></td>
-                <td><Form><Input type="text" placeholder="Please add the location" onChange={this.handleChange("location", index)} defaultValue={table.location}></Input></Form></td>
+                <td><Form><Input type="text" maxLength={1000} placeholder="Please add the location" onChange={this.handleChange("location", index)} defaultValue={table.location}></Input></Form></td>
                 <td><Button onClick={() => this.deleteData(index)} color="danger">Delete</Button></td>
             </tr>)
         const QA = this.state.QA.map((qnsAns, index) =>
@@ -336,9 +444,9 @@ class LicenseHelp extends Component {
                 <Form>
                     <Label style={{ float: "left" }}><b>Question: {index + 1}</b></Label>
                     <img style={{ float: "right" }} onClick={() => this.deleteQA(index)} height="20px" width="20px" src={deleteIcon} />
-                    <Input type="textarea" onChange={this.handleQAChange("question", index)} placeholder="Please enter your question." defaultValue={qnsAns.question}></Input>
+                    <Input type="textarea" maxLength={1999} onChange={this.handleQAChange("question", index)} placeholder="Please enter your question." defaultValue={qnsAns.question}></Input>
                     <Label><b>Answer</b></Label>
-                    <Input type="textarea" onChange={this.handleQAChange("answer", index)} placeholder="Please enter your answer." defaultValue={qnsAns.answer}></Input>
+                    <Input type="textarea" maxLength={1999} onChange={this.handleQAChange("answer", index)} placeholder="Please enter your answer." defaultValue={qnsAns.answer}></Input>
                 </Form>
                 <br />
             </div>)}<Button onClick={this.addQA}>Add New Question and Answer</Button></div>
@@ -346,10 +454,10 @@ class LicenseHelp extends Component {
         const Apply = <Button color="success" onClick={this.makeEditable}>APPLY</Button>
         return (
             <div className="animated fadeIn">
-                <h2 >Help</h2>
+                <h4 >Help</h4>
                 <Card>
                     <CardBody>
-                        <div style={{ float: "left", marginTop: "5px", paddingRight: "10px" }} ><b>Chop Keeper Information</b></div>
+                        <div style={{ float: "left", marginTop: "5px", paddingRight: "10px" }} ><b>License Admin Information</b></div>
                         <div style={{ float: "left" }}>
                             {this.state.editable ? (<Button onClick={this.addData}> Add New Data</Button>) : ""}
 

@@ -1,9 +1,9 @@
 {
   "name": "chop-workflow",
   "version": "0.0.0",
-  "description": "Workflow system for request chop",
+  "description": "Chop & License Workflow",
   "author": "",
-  "homepage": "http://192.168.1.47/CLWF",
+  "homepage": "https://ndocms.es.corpintra.net/CLWF",
   "copyright": "",
   "license": "",
   "private": true,
@@ -52,7 +52,9 @@
     "reactstrap": "^8.0.1",
     "simple-line-icons": "^2.4.1",
     "simple-react-validator": "^1.2.4",
-    "sweetalert2": "^8.18.3"
+    "sweetalert2": "^8.18.3",
+    "universal-cookie": "^4.0.3",
+    "xlsx": "^0.15.6"
   },
   "devDependencies": {
     "react-scripts": "^3.2.0"

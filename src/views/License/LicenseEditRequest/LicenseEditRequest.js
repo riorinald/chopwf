@@ -37,6 +37,8 @@ import config from '../../../config'
 import axios from 'axios'
 import makeAnimated from 'react-select/animated';
 import Swal from 'sweetalert2';
+import {Authorize, CommonFn} from '../../../functions/'
+
 
 
 
@@ -78,15 +80,25 @@ class LicenseEditRequest extends Component {
             this.getLicenseNames();
             this.getSeniorManagers();
             this.getData('departments');
+            this.getTaskDetails(this.props.location.state.taskId)
         }
-
-
-        this.getTaskDetails(this.props.location.state.taskId)
-
     }
+
+    componentWillUnmount(){
+        if(this.props.location.state !== undefined){
+            Authorize.setCookie('searchOption', this.props.location.state.searchOption, 5)
+        }
+    }
+
     async getLicenseNames() {
         const res = await axios.get(`${config.url}/licensenames?companyId=${this.props.legalName}`, { headers: { Pragma: 'no-cache' } })
-        this.setState({ licenseNames: res.data })
+        .then( res => {
+            res.data.sort((a, b) => {
+            // return CommonFn.sortingString(a, b, ["zh-CN"])
+            return a.name.localeCompare(b.name, [ "zh-CN-u-co-pinyin" ], {numeric: true}); 
+            })
+            this.setState({ licenseNames: res.data })
+        })
     }
 
     async getData(name) {
@@ -95,7 +107,7 @@ class LicenseEditRequest extends Component {
     }
 
     async getSeniorManagers() {
-        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${localStorage.getItem("userId")}`,
+        await axios.get(`${config.url}/users?category=normal&companyid=${this.props.legalName}&displayname=&userid=${Authorize.getCookies().userId}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let arr1 = []
@@ -141,9 +153,10 @@ class LicenseEditRequest extends Component {
         return regEx
     }
 
+
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem('userId')}`,
+        await Axios.get(`${config.url}/licenses/${taskId}?userId=${Authorize.getCookies().userId}`,
             { headers: { Pragma: 'no-cache' } })
             .then(res => {
                 let temp = res.data
@@ -151,7 +164,7 @@ class LicenseEditRequest extends Component {
                     temp.needWatermark = ""
                 }
                 temp.plannedReturnDate = temp.plannedReturnDate === "/" ? null : temp.plannedReturnDate
-                console.log(temp)
+                // console.log(temp)
                 this.setState({ taskDetails: temp, loading: false, returnDateView: this.convertDateView(res.data.plannedReturnDate) })
             })
     }
@@ -163,6 +176,13 @@ class LicenseEditRequest extends Component {
         if (id === "deliverWay1" || id === "deliverWay2") {
             document.getElementById('deliverWay1').className = "custom-control-input"
             document.getElementById('deliverWay2').className = "custom-control-input"
+            this.setState(state => {
+                let taskDetails = state.taskDetails
+                taskDetails.expDeliveryAddress = ""
+                taskDetails.expDeliveryMobileNo = ""
+                taskDetails.expDeliveryReceiver = ""
+                taskDetails.expDeliveryReceiverId = ""
+                })
         }
         else if (id === "documentType1" || id === "documentType2") {
             document.getElementById('documentType1').className = "custom-control-input"
@@ -193,16 +213,18 @@ class LicenseEditRequest extends Component {
 
     handleRadio = name => event => {
         let id = event.target.id
-
         let value = ""
+        let watermark = this.state.taskDetails.watermark
         if (name === "needWatermark") {
             document.getElementById("watermark1").className = "custom-control-input"
             document.getElementById("watermark2").className = "custom-control-input"
             if (event.target.id === "inputWatermark1" || event.target.id === "inputWatermark2") {
                 value = event.target.id === "inputWatermark1" ? "Y" : "N"
+                watermark = ""
             }
             else if (event.target.id === "watermark1" || event.target.id === "watermark2") {
                 value = event.target.id === "watermark1" ? "Y" : "N"
+                watermark = ""
             }
         }
         else if (name === "purposeType") {
@@ -215,6 +237,7 @@ class LicenseEditRequest extends Component {
         this.setState(state => {
             let taskDetails = this.state.taskDetails
             taskDetails[name] = value
+            taskDetails.watermark = watermark
             return taskDetails
         })
     }
@@ -240,7 +263,6 @@ class LicenseEditRequest extends Component {
     handleSelectOption(event) {
         // console.log(event)
         let value = event ? event : []
-        console.log(value)
         var element = document.getElementById("seniorManagers")
         if (value.length !== 0) {
             element.className = "css-2b097c-container"
@@ -300,7 +322,7 @@ class LicenseEditRequest extends Component {
             keys = keys.filter(key => key !== "watermark1" || key !== "watermark2")
         }
         keys.map(key => {
-            console.log(key)
+            // console.log(key)
             var element = document.getElementById(key)
             if (key === "deliverWay1" || key === "deliverWay2") {
                 if (!data.deliverWayId) {
@@ -404,7 +426,7 @@ class LicenseEditRequest extends Component {
 
     submitRequest(isSubmitted) {
         let postReq = new FormData();
-        postReq.append("UserId", localStorage.getItem("userId"));
+        postReq.append("UserId", Authorize.getCookies().userId);
         postReq.append("EmployeeNumber", this.state.taskDetails.employeeNum);
         postReq.append("TelephoneNumber", this.state.taskDetails.telephoneNum);
         postReq.append("CompanyId", this.props.legalName);
@@ -528,7 +550,7 @@ class LicenseEditRequest extends Component {
 
                         Swal.update({
                             title: "Request Deleted",
-                            text: `The request has been successfully deleted.`,
+                            text: `The request has been deleted.`,
                             type: "success",
 
                         })
@@ -603,6 +625,31 @@ class LicenseEditRequest extends Component {
             callback(filterReceiver(inputValue));
         }
 
+        const getYear = date => {
+            return date.getFullYear()
+        }
+
+        const year = (new Date()).getFullYear();
+        const years = Array.from(new Array(2), (val, index) => index + year);
+        const months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
+        const getMonth = date => {
+            let month = date.getMonth()
+            return months[month]
+        }
+
         return (
             <div>
                 <h4>Edit Request</h4>
@@ -613,7 +660,7 @@ class LicenseEditRequest extends Component {
                             &nbsp;&nbsp; EDIT REQUEST - {taskDetails.requestNum}
                         </CardHeader>
                         <CardBody>
-                            {taskDetails.currentStatusId === "SENDBACKED"
+                            {taskDetails.currentStatusId === "SENDBACKED" || taskDetails.currentStatusId === "RECALLED"
                                 ? <Row>
                                     <Col className="mb-4">
                                         <Progress multi>
@@ -626,7 +673,26 @@ class LicenseEditRequest extends Component {
                                                         bar
                                                         animated={stage.state === "CURRENT" ? true : false}
                                                         striped={stage.state !== "CURRENT"}
-                                                        color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                        color=
+                                                        {
+                                                            taskDetails.currentStatusId === "SENDBACKED" ?
+                                                                stage.state === "CURRENT" ?
+                                                                    "danger" :
+                                                                    stage.state === "FINISHED" ?
+                                                                        "success" :
+                                                                        "secondary" :
+                                                                taskDetails.currentStatusId === "RECALLED" ?
+                                                                    stage.state === "CURRENT" ?
+                                                                        "primary" :
+                                                                        stage.state === "FINISHED" ?
+                                                                            "success" :
+                                                                            "secondary" :
+                                                                    stage.state === "CURRENT" ?
+                                                                        "warning" :
+                                                                        stage.state === "FINISHED" ?
+                                                                            "success" :
+                                                                            "secondary"
+                                                        }
                                                         // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                         value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                     </Progress>
@@ -646,26 +712,15 @@ class LicenseEditRequest extends Component {
                                     </InputGroup>
                                 </FormGroup>
                                 <FormGroup>
-                                    <Label>Employee Number</Label>
-                                    <div className="controls">
-                                        <InputGroup className="input-prepend">
-                                            <InputGroupAddon addonType="prepend">
-                                                <InputGroupText>ID</InputGroupText>
-                                            </InputGroupAddon>
-                                            <Input disabled readOnly value={taskDetails.employeeNum} id="prependedInput" size="16" type="text" />
-                                        </InputGroup>
-                                    </div>
-                                </FormGroup>
-                                <FormGroup>
                                     <Label>Telephone Number </Label>
                                     <InputGroup>
-                                        <Input onChange={this.handleChange("telephoneNum")} value={taskDetails.telephoneNum} id="telephoneNum" size="16" type="text" />
+                                        <Input onChange={this.handleChange("telephoneNum")} value={taskDetails.telephoneNum} id="telephoneNum" size="16" type="text" autoComplete="off"/>
                                     </InputGroup>
                                 </FormGroup>
                                 <FormGroup>
                                     <Label>Department </Label>
                                     <InputGroup>
-                                        <Input id="departmentId" onChange={this.handleChange("departmentId")} value={taskDetails.departmentId} type="select">
+                                        <Input id="departmentId" onWheel={event => { event.preventDefault(); }} onChange={this.handleChange("departmentId")} value={taskDetails.departmentId} type="select" onWheel={event => { event.preventDefault(); }}>
                                             <option value="">Please selet a department</option>
                                             {departments.map((dept, index) =>
                                                 <option key={index} value={dept.deptId} > {dept.deptName} </option>
@@ -677,7 +732,7 @@ class LicenseEditRequest extends Component {
                                 <FormGroup>
                                     <Label>License Name </Label>
                                     <InputGroup>
-                                        <Input id="licenseNameId" onChange={this.handleChange("licenseNameId")} value={taskDetails.licenseNameId} type="select">
+                                        <Input id="licenseNameId" onWheel={event => { event.preventDefault(); }} onChange={this.handleChange("licenseNameId")} value={taskDetails.licenseNameId} type="select" onWheel={event => { event.preventDefault(); }}>
                                             <option value="" >Please select a License Name</option>
                                             {licenseNames.map((license, index) =>
                                                 <option key={index} value={license.licenseNameId} > {license.name} </option>
@@ -688,12 +743,12 @@ class LicenseEditRequest extends Component {
                                 </FormGroup>
 
                                 <FormGroup onChange={this.handleRadio("purposeType")} >
-                                    <Label >License Purpose</Label>
+                                    <Label >Purpose</Label>
                                     <CustomInput type="radio" id="licensePurpose1" name="purposeType" defaultChecked={taskDetails.purposeType === "LVFP"} value="LVFP" label="城市备案 Local VRB Filling Purpose" />
                                     <CustomInput type="radio" id="licensePurpose2" name="purposeType" defaultChecked={taskDetails.purposeType === "MFP"} value="MFP" label="城抵押 Mortgage Filling Purpose" />
                                     <CustomInput type="radio" id="licensePurpose3" name="purposeType" defaultChecked={taskDetails.purposeType === "PS"} value="PS" label="其他 Please specify:">
                                         <Collapse isOpen={taskDetails.purposeType === "PS"}>
-                                            <Input id="purposeComment" type="text" maxLength={500} onChange={this.handleChange("purposeComment")} value={taskDetails.purposeComment} />
+                                            <Input id="purposeComment" type="text" maxLength={500} onChange={this.handleChange("purposeComment")} value={taskDetails.purposeComment} autoComplete="off"/>
                                             {taskDetails.purposeType === "PS"
                                                 ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Specify Purpose', taskDetails.purposeComment, 'required')}</small>
                                                 : null}
@@ -711,11 +766,11 @@ class LicenseEditRequest extends Component {
 
 
                                 <Collapse isOpen={taskDetails.documentTypeId === "SCANCOPY"}>
-                                    <FormGroup onChange={this.handleRadio("needWatermark")}>
-                                        <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked)</small>
-                                        <CustomInput defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes, Please specify watermark here:">
+                                    <FormGroup >
+                                        <Label>Watermark</Label> <small>(To fulfill Legal’ s requirements, the scan copy of Licenses should be watermarked.)</small>
+                                        <CustomInput onChange={this.handleRadio("needWatermark")} defaultChecked={taskDetails.needWatermark === "Y"} type="radio" id="watermark1" name="watermark" value="Y" about="watermark1" label="Yes. Please specify watermark here:">
                                             <Collapse isOpen={taskDetails.needWatermark === "Y"}>
-                                                <Input id="inputWatermark1" type="text" maxLength={50} value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
+                                                <Input id="inputWatermark1" type="text" maxLength={500} value={taskDetails.watermark} onChange={this.handleChange("watermark")} autoComplete="off"/>
                                                 {taskDetails.documentTypeId === "SCANCOPY"
                                                     ? taskDetails.needWatermark === "Y"
                                                         ? <small style={{ color: '#F86C6B' }} > {this.validator.message('Watermark', taskDetails.watermark, 'required')}</small>
@@ -724,9 +779,9 @@ class LicenseEditRequest extends Component {
                                                 }
                                             </Collapse>
                                         </CustomInput>
-                                        <CustomInput defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No, Please specify the reason of not adding watermark:">
+                                        <CustomInput onChange={this.handleRadio("needWatermark")} defaultChecked={taskDetails.needWatermark === "N"} type="radio" id="watermark2" name="watermark" value="N" about="watermark2" label="No. Please specify the reason of not adding watermark:">
                                             <Collapse isOpen={taskDetails.needWatermark === "N"}>
-                                                <Input id="inputWatermark2" type="text" maxLength={50} value={taskDetails.watermark} onChange={this.handleChange("watermark")} />
+                                                <Input id="inputWatermark2" type="text" maxLength={500} value={taskDetails.watermark} onChange={this.handleChange("watermark")} autoComplete="off"/>
                                                 {taskDetails.documentTypeId === "SCANCOPY"
                                                     ? taskDetails.needWatermark === "N"
                                                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Watermark', taskDetails.watermark, 'required')}</small>
@@ -746,6 +801,46 @@ class LicenseEditRequest extends Component {
                                         <Label>Planned Return Date:</Label>
                                         <DatePicker id="plannedReturnDate" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" todayButton="Today"
                                             className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                                            renderCustomHeader={({
+                                                date,
+                                                changeYear,
+                                                changeMonth,
+                                                decreaseMonth,
+                                                increaseMonth,
+                                                prevMonthButtonDisabled,
+                                                nextMonthButtonDisabled
+                                            }) => (
+                                                    <div
+                                                        style={{
+                                                            margin: 10,
+                                                            display: "flex",
+                                                            justifyContent: "center"
+                                                        }}
+                                                    >
+                                                        <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                                                        <Input
+                                                            value={getYear(date)}
+                                                            onChange={({ target: { value } }) => changeYear(value)}
+                                                            type="select">
+                                                            {years.map(option => (
+                                                                <option key={option} value={option}>
+                                                                    {option}
+                                                                </option>
+                                                            ))}
+                                                        </Input>
+                                                        <Input value={getMonth(date)} onChange={({ target: { value } }) =>
+                                                            changeMonth(months.indexOf(value))
+                                                        } type="select">
+                                                            {months.map((option) => (
+                                                                <option key={option} value={option}>
+                                                                    {option}
+                                                                </option>
+                                                            ))}
+                                                        </Input>
+                                                        <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                                                    </div>
+                                                )}
                                             showMonthDropdown
                                             showYearDropdown
                                             minDate={new Date()}
@@ -762,8 +857,8 @@ class LicenseEditRequest extends Component {
 
                                     <FormGroup onChange={this.handleChange("deliverWayId")} >
                                         <Label>Deliver Way</Label>
-                                        <CustomInput type="radio" id="deliverWay1" defaultChecked={taskDetails.deliverWayId === "F2F"} name="deliverWayId" value="F2F" label="面对面, Face to face" />
-                                        <CustomInput type="radio" id="deliverWay2" defaultChecked={taskDetails.deliverWayId === "EXPRESS"} name="deliverWayId" value="EXPRESS" label="快递 Express: Express Number" />
+                                        <CustomInput type="radio" id="deliverWay1" defaultChecked={taskDetails.deliverWayId === "F2F"} name="deliverWayId" value="F2F" label="面对面 Face to face" />
+                                        <CustomInput type="radio" id="deliverWay2" defaultChecked={taskDetails.deliverWayId === "EXPRESS"} name="deliverWayId" value="EXPRESS" label="快递 Express" />
                                         {taskDetails.documentTypeId === "ORIGINAL"
                                             ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Delivery Way', taskDetails.deliverWayId, 'required')}</small>
                                             : null}
@@ -773,7 +868,7 @@ class LicenseEditRequest extends Component {
                                     <Collapse isOpen={taskDetails.deliverWayId === "EXPRESS"}>
                                         <FormGroup>
                                             <Label>Address</Label>
-                                            <Input placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" />
+                                            <Input maxLength="500" placeholder="Please specify Address" id="expDeliveryAddress" onChange={this.handleChange("expDeliveryAddress")} value={taskDetails.expDeliveryAddress} type="text" autoComplete="off"/>
                                             {taskDetails.documentTypeId === "ORIGINAL"
                                                 ? taskDetails.deliverWayId === "EXPRESS"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Address', taskDetails.expDeliveryAddress, 'required')}</small>
@@ -785,7 +880,7 @@ class LicenseEditRequest extends Component {
 
                                         <FormGroup>
                                             <Label>Receiver</Label>
-                                            <Input type="text" id="expDeliveryReceiver" onChange={this.handleChange("expDeliveryReceiver")} placeholder="Please specify receiver" value={taskDetails.expDeliveryReceiver} />
+                                            <Input maxLength="500" type="text" id="expDeliveryReceiver" onChange={this.handleChange("expDeliveryReceiver")} placeholder="Please specify receiver" value={taskDetails.expDeliveryReceiver} autoComplete="off" />
                                             {taskDetails.documentTypeId === "ORIGINAL"
                                                 ? taskDetails.deliverWayId === "EXPRESS"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Reciever', taskDetails.expDeliveryReceiver, 'required')}</small>
@@ -797,7 +892,7 @@ class LicenseEditRequest extends Component {
                                         <FormGroup>
                                             <Label>Reciever Mobile Phone</Label>
                                             {/* <input type="number" id="phoneNumber"></input> */}
-                                            <Input placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="number" />
+                                            <Input maxLength="500" placeholder={`Please specify Reciever's phone`} id="expDeliveryMobileNo" value={taskDetails.expDeliveryMobileNo} onChange={this.handleChange("expDeliveryMobileNo")} type="text" autoComplete="off"/>
                                             {taskDetails.documentTypeId === "ORIGINAL"
                                                 ? taskDetails.deliverWayId === "EXPRESS"
                                                     ? <small style={{ color: '#F86C6B' }} >{this.validator.message(`Reciever's Phone`, taskDetails.expDeliveryMobileNo, 'required')}</small>
@@ -830,17 +925,17 @@ class LicenseEditRequest extends Component {
                                     <Col className="d-flex justify-content-start">
                                         {/* {taskDetails.isConfirm === "Y"
                                             ?  */}
-                                        <Button type="submit" color="success" onClick={() => { this.handleAgreeTerms() }}>Submit</Button>
+                                        <Button type="submit" color="success" onClick={(e) => this.handleAgreeTerms() + e.currentTarget.blur()}>Submit</Button>
                                         {/* : <Button type="submit" color="success" */}
                                         {/* // onMouseEnter={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} */}
                                         {/* id="disabledSubmit" disabled >Submit</Button>} */}
                                         {/* <Tooltip placement="left" isOpen={this.state.tooltipOpen} target="disabledSubmit"> */}
                                         {/* please confirm the agree terms </Tooltip> */}
                                         <span>&nbsp;</span>
-                                        <Button type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
+                                        <Button type="submit" color="primary" onClick={(e) => this.submitRequest('N') + e.currentTarget.blur()}>Save</Button>
                                     </Col>
                                     <Col className="d-flex justify-content-end">
-                                        <Button onClick={this.deleteTask} color="danger" >Delete</Button>
+                                        <Button onClick={(e) => this.deleteTask() + e.currentTarget.blur()} color="danger" >Delete</Button>
                                     </Col>
                                 </Row>
                                 {taskDetails.histories ? <hr></hr> : null}

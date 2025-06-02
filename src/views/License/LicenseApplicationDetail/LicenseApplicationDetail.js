@@ -5,8 +5,10 @@ import Axios from 'axios';
 import {
     Card, CardBody, CardHeader, Table, Col, Row, CardFooter,
     Input,
+    FormFeedback,
     Button,
     FormGroup,
+    InputGroup,
     Label,
     Progress, Badge, Spinner,
     UncontrolledTooltip, CustomInput, Collapse
@@ -14,6 +16,8 @@ import {
 import config from '../../../config';
 import Swal from 'sweetalert2';
 import TextareaAutosize from 'react-autosize-textarea';
+import Authorize from '../../../functions/Authorize'
+
 
 
 class LicenseApplicationDetail extends Component {
@@ -26,11 +30,13 @@ class LicenseApplicationDetail extends Component {
             loading: true,
             page: "",
             comments: "",
+            wrongDocError: "",
             currentStatus: "",
             deliverWay: "",
             expressNumber: "",
-            comments: "",
+            invalidExpress: false,
             documents: [],
+            fields: []
         }
         this.goBack = this.goBack.bind(this)
         this.handleRadio = this.handleRadio.bind(this)
@@ -49,19 +55,162 @@ class LicenseApplicationDetail extends Component {
         }
     }
 
+    componentWillUnmount(){
+        if(this.props.location.state !== undefined){
+            Authorize.setCookie('searchOption', this.props.location.state.searchOption, 5)
+        }
+    }
+            
+
 
     async getTaskDetails(taskId) {
         this.setState({ loading: true })
-        await Axios.get(`${config.url}/licenses/${taskId}?userId=${localStorage.getItem("userId")}`, { headers: { Pragma: 'no-cache' } })
+        await Axios.get(`${config.url}/licenses/${taskId}?userId=${Authorize.getCookies().userId}`, { headers: { Pragma: 'no-cache' } })
             .then(res => {
-                console.log(res.data)
-                let currentStatusArr = res.data.allStages.filter(stage => stage.state === "CURRENT")
+                //console.log(res.data)
                 this.setState({ taskDetails: res.data, currentStatus: res.data.currentStatusId, loading: false, })
+
+
+
+                /// TESTING - ANAND //
+                // let obj = { label: "", value: "" }
+                let arr = []
+                let keys = ["telephoneNum", "departmentName", "licenseName", "purposeType", "documentTypeName", "plannedReturnDate"
+                    , "needWatermark", "watermark", "deliveryWayName", "expDeliveryAddress", "expDeliveryReceiver"
+                    , "expDeliveryMobileNo",  "seniorManagers","licenseAdminDeliverWay","expDeliveryNumber", "returnWayName","expReturnNumber"]
+                keys.map(key => {
+                    var obj = {}
+                    switch (key) {
+                        case "telephoneNum":
+                            obj.label = "Tel."
+                            obj.value = res.data[key]
+                            arr.push(obj)
+                            break;
+                        case "departmentName":
+                            obj.label = "Department"
+                            obj.value = res.data[key]
+                            arr.push(obj)
+                            break;
+                        case "licenseName":
+                            obj.label = "License Name"
+                            obj.value = res.data[key]
+                            arr.push(obj)
+                            break;
+                        case "purposeType":
+                            obj.label = "Purpose"
+                            obj.value = res.data[key] === "PS" ? res.data.purposeComment : res.data.purposeTypeName
+                            arr.push(obj)
+                            break;
+                        case "documentTypeName":
+                            obj.label = "Document Type"
+                            obj.value = res.data[key]
+                            arr.push(obj)
+                            break;
+                        case "plannedReturnDate":
+                            obj.label = "Planned Return Date"
+                            obj.value = res.data.plannedReturnDate !== "/" ? this.convertDate(res.data[key]) : ""
+                            arr.push(obj)
+                            break;
+                        case "needWatermark":
+                            if (res.data.documentTypeId === "SCANCOPY") {
+                                obj.label = "Watermark"
+                                obj.value = res.data[key] === "Y" ? res.data.watermark : "No Watermark"
+                                arr.push(obj)
+                            }
+                            break;
+                        case "watermark":
+                            if (res.data.documentTypeId === "SCANCOPY" && res.data.needWatermark === "N") {
+                                obj.label = "Reason for no watermark"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
+                        case "deliveryWayName":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                obj.label = "Deliver Way"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
+                        case "expDeliveryAddress":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                // if (res.data.deliverWay === "Express") {
+                                obj.label = "Address"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                                // }
+                            }
+                            break;
+                        case "expDeliveryReceiver":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                // if (res.data.deliverWay === "Express") {
+                                obj.label = "Reciever"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                                // }
+                            }
+                            break;
+                        case "expDeliveryNumber":
+                            if (res.data.documentTypeId === "ORIGINAL" ) {
+                                // if (res.data.deliverWay === "Express") {
+                                obj.label = "Deliver Express Number"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                                // }
+                            }
+                            break;
+                        case "expDeliveryMobileNo":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                obj.label = "Receiver Mobile Phone"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
+                        case "returnWayName":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                obj.label = "Return Way"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
+                        case "seniorManagers":
+                            obj.label = "Senior Manager or above of requestor department"
+                            obj.value = this.convertMgrs(res.data[key])
+                            arr.push(obj)
+                            break;
+                        case "expReturnNumber":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                obj.label = "Return Express Number"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
+                        case "licenseAdminDeliverWay":
+                            if (res.data.documentTypeId === "ORIGINAL") {
+                                obj.label = "License Admin Deliver Way"
+                                obj.value = res.data[key]
+                                arr.push(obj)
+                            }
+                            break;
+                        default :
+                            obj.value = res.data[key]
+                            arr.push(obj)
+                            break;
+                    }
+                })
+                this.setState({ fields: arr })
+                //console.log(arr)
+                //TESTING -- ANAND//
+            })
+            .catch(
+                err => {
+                this.setState({ loading: false })
+                console.log(err)
             })
     }
 
     goBack() {
-        console.log(`/license/${this.props.match.params.page}`)
+        //console.log(`/license/${this.props.match.params.page}`)
         this.props.history.push({
             pathname: `/license/${this.props.match.params.page}`
         })
@@ -69,7 +218,7 @@ class LicenseApplicationDetail extends Component {
 
 
     convertDate(dateValue) {
-        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
         return regEx
     }
 
@@ -83,7 +232,7 @@ class LicenseApplicationDetail extends Component {
 
     validate() {
         let valid = false
-        if (this.state.currentStatus === "PENDINGLICENSEADMIN") {
+        if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || this.state.currentStatus === "PENDINGLICENSEADMIN") {
             if (this.state.taskDetails.documentTypeId === "ORIGINAL") {
                 if (this.state.deliverWay === "Express") {
                     if (this.state.expressNumber !== "") {
@@ -91,11 +240,12 @@ class LicenseApplicationDetail extends Component {
                     }
                     else {
                         valid = false
-                        Swal.fire({
-                            title: "No Express Number",
-                            html: "Please add express number !",
-                            type: "warning"
-                        })
+                        // Swal.fire({
+                        //     title: "No Express Number",
+                        //     html: "Please add express number !",
+                        //     type: "warning"
+                        // })
+                        this.setState({ invalidExpress: true })
                     }
                 }
                 else if (this.state.deliverWay === "F2F") {
@@ -104,8 +254,8 @@ class LicenseApplicationDetail extends Component {
                 else {
                     valid = false
                     Swal.fire({
-                        title: "No Delivery Way Selected",
-                        html: "Please select a way of delivery !",
+                        title: "No Deliver Way Selected",
+                        html: "Please select a way of deliver. ",
                         type: "warning"
                     })
                 }
@@ -118,7 +268,7 @@ class LicenseApplicationDetail extends Component {
                     valid = false
                     Swal.fire({
                         title: "No Documents attached",
-                        html: "Please attach documents for approval !",
+                        html: "Please attach documents for approval.",
                         type: "warning"
                     })
                 }
@@ -141,11 +291,12 @@ class LicenseApplicationDetail extends Component {
                     }
                     else {
                         valid = false
-                        Swal.fire({
-                            title: "No Express Number",
-                            html: "Please add express number !",
-                            type: "warning"
-                        })
+                        // Swal.fire({
+                        //     title: "No Express Number",
+                        //     html: "Please add express number !",
+                        //     type: "warning"
+                        // })
+                        this.setState({ invalidExpress: true })
                     }
                 }
                 else if (this.state.deliverWay === "F2F") {
@@ -154,8 +305,8 @@ class LicenseApplicationDetail extends Component {
                 else {
                     valid = false
                     Swal.fire({
-                        title: "No Delivery Way Selected",
-                        html: "Please select a way of delivery !",
+                        title: "No Return Way Selected",
+                        html: "Please select a way of return.",
                         type: "warning"
                     })
                 }
@@ -169,14 +320,17 @@ class LicenseApplicationDetail extends Component {
     }
 
     updated(action) {
-        console.log(action)
-        let valid = false
-        if (this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
-
-            if (action === "approve" || action === "requestorreturn") {
+        //console.log(action)
+        let valid = true
+        let deliverWay = this.state.deliverWay
+        if (this.state.currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || this.state.currentStatus === "PENDINGLICENSEADMIN" || this.state.currentStatus === "PENDINGREQUESTORRETURN") {
+            if (action === "licenseadminacklendout" || action === "requestorreturn" || action === "approve") {
                 valid = this.validate()
             }
             else {
+                if (action === "reject" || action === "sendback") {
+                    deliverWay = ""
+                }
                 valid = true
             }
         }
@@ -184,9 +338,9 @@ class LicenseApplicationDetail extends Component {
             valid = true
         }
         let postReq = new FormData();
-        postReq.append("UserId", localStorage.getItem("userId"));
+        postReq.append("UserId", Authorize.getCookies().userId);
         postReq.append("Comments", this.state.comments);
-        postReq.append("ReturnWay", this.state.deliverWay);
+        postReq.append("ReturnWay", deliverWay);
         postReq.append("ExpressNumber", this.state.expressNumber);
         postReq.append("ExpressAddress", this.state.taskDetails.expDeliveryAddress);
         for (let i = 0; i < this.state.documents.length; i++) {
@@ -219,7 +373,7 @@ class LicenseApplicationDetail extends Component {
 
                             Swal.update({
                                 title: res.data.message,
-                                text: `The request has been ${res.data.message}`,
+                                text: `The request has been ${res.data.message.toLowerCase()}.`,
                                 type: "success",
 
                             })
@@ -236,23 +390,6 @@ class LicenseApplicationDetail extends Component {
                         })
                 }
             })
-
-            // Axios.post(`${config.url}/licenses/${this.props.location.state.taskId}/${action}`, postReq, { headers: { 'Content-Type': 'multipart/form-data' } })
-            //     .then(res => {
-            //         Swal.fire({
-            //             title: res.data.message,
-            //             html: `The request has been ${res.data.message}`,
-            //             type: "success",
-            //             onClose: () => { this.goBack(true) }
-            //         })
-            //     })
-            //     .catch(error => {
-            //         Swal.fire({
-            //             title: "ERROR",
-            //             html: error.response.data.message,
-            //             type: "error"
-            //         })
-            //     })
         }
 
     }
@@ -266,8 +403,18 @@ class LicenseApplicationDetail extends Component {
 
     handleChange = name => event => {
         let value = event.target.value
-        this.setState({ [name]: value })
+        this.setState({ invalidExpress: false, [name]: value })
     }
+
+    /*handleChangeExpress = name => event => {
+        let value = event.target.value
+        let id = event.target.id
+        this.setState(state => {
+            let taskDetails = this.state.taskDetails
+            taskDetails[name] = value
+            return taskDetails
+        })
+    }*/
 
     convertApprovedDate(dateValue) {
 
@@ -276,7 +423,11 @@ class LicenseApplicationDetail extends Component {
     }
 
     uploadDocument(event) {
+        let ext = config.allowedExtension
+        let extValid = false
         if (event.target.files.length !== 0) {
+            let last = event.target.files[0].name.split('.').length
+            let extension = event.target.files[0].name.split('.')[last - 1]
             let valid = true
             let file = event.target.files[0]
             let fileName = file.name
@@ -289,7 +440,16 @@ class LicenseApplicationDetail extends Component {
                     valid = true
                 }
             }
-            if (valid) {
+            for (let i = 0; i < ext.length; i++) {
+                if (ext[i] === extension || ext[i].toUpperCase() === extension) {
+                    extValid = true
+                    break;
+                }
+                else {
+                    extValid = false
+                }
+            }
+            if (valid && extValid) {
                 let Url = URL.createObjectURL(file)
 
                 let obj = {
@@ -297,17 +457,23 @@ class LicenseApplicationDetail extends Component {
                     fileName: fileName,
                     url: Url
                 }
+                this.setState({ wrongDocError: "" })
                 this.setState(state => {
                     const documents = this.state.documents.concat(obj)
                     return { documents }
                 })
             }
             else {
-                Swal.fire({
-                    title: "Document Exists ",
-                    html: `The document has already been added to the list !`,
-                    type: "warning",
-                })
+                if (!valid) {
+                    Swal.fire({
+                        title: "Document Exists ",
+                        html: `The document has already been added to the list !`,
+                        type: "warning",
+                    })
+                }
+                else if (!extValid) {
+                    this.setState({ wrongDocError: "Please attach a valid document !" })
+                }
             }
         }
     }
@@ -325,7 +491,7 @@ class LicenseApplicationDetail extends Component {
 
 
     dataURLtoFile(dataurl, filename) {
-        console.log(dataurl.split(','))
+        //console.log(dataurl.split(','))
         var arr = dataurl.split(','),
             mime = arr[0].match(/:(.*?);/)[1],
             bstr = atob(arr[1]),
@@ -342,7 +508,7 @@ class LicenseApplicationDetail extends Component {
 
 
     render() {
-        const { taskDetails, loading, page, currentStatus, expressNumber, deliverWay, documents } = this.state
+        const { taskDetails, loading, page, currentStatus, expressNumber, deliverWay, documents, invalidExpress } = this.state
         return (
             <div>
                 {!loading ?
@@ -363,7 +529,17 @@ class LicenseApplicationDetail extends Component {
                                                 {action.actionName}
                                             </Button>
                                         )
-                                        : null
+                                        : taskDetails.actions.map((action, index) =>
+                                            action.action === "copy" ?
+                                                <Button key={index}
+                                                    className="mr-1"
+                                                    color="info"
+                                                    onClick={() => this.updated(action.action)}
+                                                >
+                                                    {action.actionName}
+                                                </Button>
+                                                : null
+                                        )
                                     : null}
                             </Row></CardHeader>
                         <CardBody>
@@ -378,7 +554,25 @@ class LicenseApplicationDetail extends Component {
                                                     bar
                                                     animated={stage.state === "CURRENT" ? true : false}
                                                     striped={true}
-                                                    color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACK" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                    color={
+                                                        taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ?
+                                                            stage.state === "CURRENT" ?
+                                                                "danger" :
+                                                                stage.state === "FINISHED" ?
+                                                                    "success"
+                                                                    : "secondary"
+                                                            : taskDetails.currentStatusId === "RECALLED" ?
+                                                                stage.state === "CURRENT" ?
+                                                                    "primary" :
+                                                                    stage.state === "FINISHED" ?
+                                                                        "success"
+                                                                        : "secondary"
+                                                                : stage.state === "CURRENT" ?
+                                                                    "warning" :
+                                                                    stage.state === "FINISHED" ?
+                                                                        "success" :
+                                                                        "secondary"
+                                                    }
                                                     // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "green" : "secondary  "}
                                                     value={100 / taskDetails.allStages.length}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" ? "white" : stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                                 </Progress>
@@ -396,9 +590,9 @@ class LicenseApplicationDetail extends Component {
                                         {/* <Col xs={12} sm={12} md={4} lg={2}>
                                             <img src={taskDetails.histories[0].approvedByAvatarUrl} className="img-avaa img-responsive center-block" alt="picture" />
                                         </Col> */}
-                                        <Col md><h5> {taskDetails.employeeName} </h5>
+                                        <Col md><h5> {taskDetails.requestorUser.displayName} </h5>
                                             <Row>
-                                                <Col md><h6> DFS/CN, MBAFC </h6></Col>
+                                                <Col md><h6> {taskDetails.requestorUser.departmentAbbr},  {taskDetails.requestorUser.companyId} </h6></Col>
                                             </Row>
                                             <Row>
                                                 <Col xs={12} sm={12} md={6} lg={6}>
@@ -410,289 +604,36 @@ class LicenseApplicationDetail extends Component {
                                 </Col>
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col md><h5><i className="fa fa-tablet mr-2" /> +86 10 {taskDetails.telephoneNum} </h5></Col>
+                                        <Col md><h5><i className="fa fa-tablet mr-2" />{taskDetails.requestorUser.telephoneNum} </h5></Col>
                                     </Row>
                                     <Row>
                                         <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.email}</h5></Col>
                                     </Row>
                                 </Col>
                             </Row>
-                            <Col className="mb-4">
-                                <FormGroup row>
-                                    <Col md lg>
-                                        <Label>Employee Number</Label>
+                            <Row>
+                                {this.state.fields.map((field, i) => (
+                                    field.value !== "" ?
+                                    <Col key={i} sm="6">
+                                        <Row style={{ marginBottom: "15px" }} >
+                                            <Col sm="6">
+                                                <Label>{field.label}</Label>
+                                            </Col>
+                                            <Col sm="6">
+                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={field.value} name="text-input" placeholder="/" />
+                                            </Col>
+                                        </Row>
                                     </Col>
-                                    <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.employeeNum} name="text-input" placeholder="/" />
-                                    </Col>
-                                    <Col md lg>
-                                        <Label>Department</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.departmentName} name="text-input" placeholder="/" />
-                                    </Col>
-                                </FormGroup>
-                                <FormGroup row>
-                                    <Col md lg>
-                                        <Label>License Name</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled type="text" name="text-input" value={taskDetails.licenseName} placeholder="/" />
-                                    </Col>
-                                    <Col md lg>
-                                        <Label>Purpose</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled value={taskDetails.purposeType === "PS" ? taskDetails.purposeComment : taskDetails.purposeTypeName} placeholder="/" />
-                                    </Col>
-                                </FormGroup>
-                                <FormGroup row>
-                                    <Col md lg>
-                                        <Label>Document Type</Label>
-                                    </Col>
-                                    <Col md lg>
-                                        <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.documentTypeName} name="text-input" placeholder="/" />
-                                    </Col>
-                                    {taskDetails.documentTypeId === "ORIGINAL"
-                                        ? <>
-                                            <Col md lg>
-                                                <Label>Planned Return Date</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertDate(taskDetails.plannedReturnDate)} name="text-input" placeholder="/" />
-                                            </Col>
-                                        </>
-                                        : <>
-                                            <Col md lg>
-                                                <Label> Watermark </Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.needWatermark === "Y" ? taskDetails.watermark : "No Watermark"} name="text-input" placeholder="/" />
-                                            </Col>
-                                            {
-                                            }
-                                        </>
-
-                                    }
-                                </FormGroup>
-                                <FormGroup row>
-                                    {taskDetails.documentTypeId !== "ORIGINAL"
-                                        ? taskDetails.needWatermark === "N"
-                                            ? <>
-                                                <Col md lg>
-                                                    <Label>Reason for no watermark</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.watermark} name="text-input" placeholder="/" />
-                                                </Col>
-                                                < Col md lg>
-                                                    <Label>Deliver Ways</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                            : <>
-                                                < Col md lg>
-                                                    <Label>Deliver Ways</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Delivery Address</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                        : <>
-                                            < Col md lg>
-                                                <Label>Deliver Ways</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.deliveryWayName} name="text-input" placeholder="/" />
-                                            </Col>
-                                            <Col md lg>
-                                                <Label>Delivery Address</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
-                                            </Col>
-                                        </>
-                                    }
-
-                                </FormGroup>
-                                <FormGroup row>
-                                    {taskDetails.documentTypeId !== "ORIGINAL"
-                                        ? taskDetails.needWatermark === "N"
-                                            ? <>
-                                                <Col md lg>
-                                                    <Label>Delivery Address</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryAddress} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Receiver</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                            : <>
-                                                <Col md lg>
-                                                    <Label>Receiver</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Deliver Express Number</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                        : <>
-                                            <Col md lg>
-                                                <Label>Receiver</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryReceiver} name="text-input" placeholder="/" />
-                                            </Col>
-                                            <Col md lg>
-                                                <Label>Deliver Express Number</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
-                                            </Col>
-                                        </>
-                                    }
+                                    : console.log( "excluded: ", field)
+                                    )
+                                )}
+                            </Row>
 
 
 
-                                </FormGroup>
-                                <FormGroup row>
-                                    {taskDetails.documentTypeId !== "ORIGINAL"
-                                        ? taskDetails.needWatermark === "N"
-                                            ? <>
-                                                <Col md lg>
-                                                    <Label>Deliver Express Number</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expDeliveryNumber} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Receiver Mobile Number</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                            : <>
-                                                <Col md lg>
-                                                    <Label>Receiver Mobile Number</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Return Way</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                        : <>
-                                            <Col md lg>
-                                                <Label>Receiver Mobile Number</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={taskDetails.expDeliveryMobileNo} name="text-input" placeholder="/" />
-                                            </Col>
-                                            <Col md lg>
-                                                <Label>Return Way</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
-                                            </Col>
-                                        </>
-                                    }
-
-                                </FormGroup>
-                                <FormGroup row>
-                                    {taskDetails.documentTypeId !== "ORIGINAL"
-                                        ? taskDetails.needWatermark === "N"
-                                            ? <>
-                                                <Col md lg>
-                                                    <Label>Return Way</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.returnWayName} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Senior Manager or above of Requestor Department</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                            : <>
-                                                <Col md lg>
-                                                    <Label>Senior Manager or above of Requestor Department</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label>Return Express Number</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
-                                                </Col>
-                                            </>
-                                        : <>
-                                            <Col md lg>
-                                                <Label>Senior Manager or above of Requestor Department</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" defaultValue={this.convertMgrs(taskDetails.seniorManagers)} name="text-input" placeholder="/" />
-                                            </Col>
-                                            <Col md lg>
-                                                <Label>Return Express Number</Label>
-                                            </Col>
-                                            <Col md lg>
-                                                <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
-                                            </Col>
-                                        </>
-                                    }
-                                </FormGroup>
-                                <FormGroup row>
-                                    {taskDetails.documentTypeId !== "ORIGINAL"
-                                        ? taskDetails.needWatermark === "N"
-                                            ? <>
-                                                <Col md lg>
-                                                    <Label>Return Express Number</Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    <TextareaAutosize className="form-control" disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" />
-                                                </Col>
-                                                <Col md lg>
-                                                    <Label></Label>
-                                                </Col>
-                                                <Col md lg>
-                                                    {/* <Input disabled type="text" value={taskDetails.expReturnNumber} name="text-input" placeholder="/" /> */}
-                                                </Col>
-                                            </>
-                                            : null
-                                        : null
-                                    }
-                                </FormGroup>
-                            </Col>
                             {page === "mypendingtask"
                                 ? <div>
-                                    {currentStatus === "PENDINGLICENSEADMIN"
+                                    {currentStatus === "PENDINGLICENSEADMINACKLENDOUT" || currentStatus === "PENDINGLICENSEADMIN"
                                         ?
                                         <Row>
                                             <Col>
@@ -700,25 +641,24 @@ class LicenseApplicationDetail extends Component {
                                                     ?
                                                     <FormGroup onChange={this.handleRadio} >
                                                         <Label>Deliver Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
-                                                            <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面 Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express">
+                                                            <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
+                                                                <Label>Express Number</Label>
+                                                                <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                                <FormFeedback>Express Number is required.</FormFeedback>
                                                                 <Row> &nbsp; </Row>
-                                                                <div>Reciever: {taskDetails.expDeliveryReceiver}</div>
-                                                                <div>Address: {taskDetails.expDeliveryAddress}</div>
-                                                                <div>Mobile No. : {taskDetails.expDeliveryMobileNo}</div>
-                                                                <div>Express Number: {expressNumber} </div>
-
                                                             </Collapse>
                                                         </CustomInput>
                                                     </FormGroup>
                                                     :
                                                     <FormGroup>
                                                         <Label>Attach Document</Label>
-                                                        <CustomInput id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" />
-                                                        &nbsp;
-                                                    <Collapse isOpen={documents.length !== 0}>
+                                                        <CustomInput
+                                                            accept=".jpg, .png, .xls, .xlsm, .xlsx, .msg, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp"
+                                                            id="docFileName" onChange={this.uploadDocument} type="file" bsSize="lg" color="primary" />
+                                                        &nbsp; <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
+                                                        <Collapse isOpen={documents.length !== 0}>
                                                             {documents.map((doc, index) =>
                                                                 <div key={index} style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(doc.file)}> {doc.fileName} </div>
                                                             )}
@@ -727,30 +667,30 @@ class LicenseApplicationDetail extends Component {
                                                 }
                                             </Col>
                                         </Row>
-                                        : currentStatus === "PENDINGREQUESTORRETURN"
-                                            ? <Row>
-                                                <Col>
-                                                    <FormGroup onChange={this.handleRadio} >
-                                                        <Label>Return Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
-                                                            <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
-                                                                <Row> &nbsp; </Row>
-                                                                {/* <div>Reciever: </div>
-                                                                <div>Address: </div>
-                                                                <div>Mobile No. :</div> */}
-                                                                <div>Express Number: {expressNumber} </div>
+                                        : taskDetails.requestorUser.userId === Authorize.getCookies().userId
+                                            ?
+                                            currentStatus === "PENDINGREQUESTORRETURN"
+                                                ? <Row>
+                                                    <Col>
+                                                        <FormGroup onChange={this.handleRadio} >
+                                                            <Label>Return Way</Label>
+                                                            <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面 Face to face" />
+                                                            <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express">
+                                                                <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
+                                                                    <Label>Express Number</Label>
+                                                                    <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                                    <FormFeedback>Express Number field is required.</FormFeedback>
+                                                                    <Row> &nbsp; </Row>
+                                                                </Collapse>
+                                                            </CustomInput>
 
-                                                            </Collapse>
-                                                        </CustomInput>
+                                                        </FormGroup>
+                                                    </Col>
+                                                </Row>
+                                                : null
+                                            : null}
 
-                                                    </FormGroup>
-                                                </Col>
-                                            </Row>
-                                            : null
-                                    }
-                                    <Row>
+                                    < Row >
                                         <Col> <h4>Comments</h4></Col>
                                     </Row>
                                     <Row>
@@ -764,84 +704,55 @@ class LicenseApplicationDetail extends Component {
                                     <Row>
                                         <Col>
                                             {taskDetails.actions.map((action, index) =>
-                                                <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
+                                                action.action !== "copy" ?
+                                                    <Button className="mx-1" key={index} color={action.action !== "reject" && action.action !== "sendback" ? "success" : "danger"} onClick={() => this.updated(action.action)} > {action.actionName}</Button>
+                                                    : null
                                             )}
                                         </Col>
                                     </Row>
                                 </div>
 
-                                : page === "myapplication"
+                                : page === "mypendingtask"
                                     ? <div>
                                         {currentStatus === "PENDINGREQUESTORRETURN"
                                             ? <Row>
                                                 <Col>
                                                     <FormGroup onChange={this.handleRadio} >
                                                         <Label>Return Way</Label>
-                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面, Face to face" />
-                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express: Express Number">
-                                                            <Collapse isOpen={deliverWay === "Express"}>
-                                                                <Input id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                        <CustomInput type="radio" id="deliverWay1" name="deliverWay" value="F2F" label="面对面 Face to face" />
+                                                        <CustomInput type="radio" id="deliverWay2" name="deliverWay" value="Express" label="快递 Express">
+                                                            <Collapse className="mt-1" isOpen={deliverWay === "Express"}>
+                                                                <Label>Express Number</Label>
+                                                                <Input invalid={invalidExpress} id="expressNumber" onChange={this.handleChange("expressNumber")} value={expressNumber} type="text" placeholder="Please enter the Express Number" />
+                                                                <FormFeedback>Express Number field is required.</FormFeedback>
                                                                 <Row> &nbsp; </Row>
-                                                                {/* <div>Reciever: </div>
-                                                            <div>Address: </div>
-                                                            <div>Mobile No. :</div> */}
-                                                                <div>Express Number: {expressNumber} </div>
-
                                                             </Collapse>
                                                         </CustomInput>
 
                                                     </FormGroup>
                                                 </Col>
                                             </Row>
-                                            : null}
-                                        {currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
+                                            :
+                                            null}
+                                        {page === "mypendingtask" && currentStatus === "PENDINGREQUESTORACK" || currentStatus === "PENDINGREQUESTORRETURN"
                                             ?
                                             taskDetails.actions.map((action, index) =>
-                                                <Button
-                                                    key={index}
-                                                    className="mr-1"
-                                                    color="success"
-                                                    onClick={() => this.updated(action.action)}
-                                                >
-                                                    {action.actionName}
-                                                </Button>
+                                                action.action !== "copy"
+                                                    ? <Button
+                                                        key={index}
+                                                        className="mr-1"
+                                                        color="success"
+                                                        onClick={() => this.updated(action.action)}
+                                                    >
+                                                        {action.actionName}
+                                                    </Button>
+                                                    : null
                                             )
                                             : null}
 
                                     </div>
-                                    : null}
-                            {currentStatus === "COMPLETED"
-                                ?
-                                <Collapse isOpen={taskDetails.documents.length !== 0}>
-                                    <Col className="mb-4">
-                                        <FormGroup>
-                                            <Label>Documents</Label>
-                                            <Table responsive hover bordered size="sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th className="smallTd">#</th>
-                                                        <th>Attached File</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {taskDetails.documents.map((doc, index) =>
-                                                        <tr key={index} >
-                                                            <td className="smallTd"> {index + 1} </td>
-                                                            <td>
-                                                                <div style={{ color: "blue", cursor: "pointer" }} onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${doc.documentFileType};base64,${doc.documentBase64String}`, doc.documentName))} > {doc.documentName} </div>
-                                                                {/* <a href={doc.documentUrl} target='_blank' rel="noopener noreferrer">{doc.documentName}</a> */}
-                                                            </td>
-                                                        </tr>
-                                                    )}
-
-                                                </tbody>
-                                            </Table>
-                                        </FormGroup>
-                                    </Col>
-                                </Collapse>
-                                // </Row>
-                                : ""
-                            }
+                                    :
+                                    null}
                         </CardBody>
                         <CardFooter>
                             {taskDetails.histories.length !== 0
@@ -864,7 +775,7 @@ class LicenseApplicationDetail extends Component {
                             )}
                         </CardFooter>
                     </Card>
-                    : <div style={{ textAlign: "center" }} ><Spinner size="md" style={{ width: '3rem', height: '3rem' }} ></Spinner></div>
+                    : <div style={{ textAlign: "center" }} ><Spinner size="sm" style={{ width: '3rem', height: '3rem' }} ></Spinner></div>
                 }
             </div>)
     }

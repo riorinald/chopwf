@@ -1,5 +1,7 @@
 import React from 'react';
 import {Redirect} from 'react-router-dom';
+import config from '../../config';
+
 
 
 const scope ="openid"
@@ -10,9 +12,9 @@ const pathname=`https://sso-int.daimler.com/as/authorization.oauth2?response_typ
 
 
 const Oauth = (props) => {  
-console.log('redirect', pathname)
+// console.log('redirect', pathname)
   return <>
-    {window.location.replace(pathname)}
+    {window.location.replace(config.openid)}
   </>
 } 
 

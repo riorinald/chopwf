@@ -1,21 +1,23 @@
 import React, { Component } from 'react';
 import {
-    Card, CardBody, CardHeader, CardFooter, Table, Col, Row,
+    Card, CardBody, CardHeader, Col, Row,
     Input,
     Button,
     FormGroup,
     Label,
     Progress, UncontrolledTooltip,
     Badge,
-    Modal, ModalBody, ModalFooter, ModalHeader,
+    Modal, ModalBody, ModalFooter, ModalHeader, Spinner,
 } from 'reactstrap';
 import Axios from 'axios';
 import config from '../../config';
 import Swal from 'sweetalert2';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
+import Authorize from '../../functions/Authorize'
 import { STU, LTU, LTI, CNIPS } from './viewDetails';
 import { BSTU, BLTU, BLTI, BCNIPS } from './viewBranchDetails';
+
 // import { resetMounted } from '../MyPendingTasks/MyPendingTasks'
 
 
@@ -33,6 +35,8 @@ class TaskDetails extends Component {
             loading: true,
             page: "",
             appType: "",
+            isExpired: false,
+            isLoading: false,
         }
 
         this.goBack = this.goBack.bind(this)
@@ -46,28 +50,55 @@ class TaskDetails extends Component {
             this.goBack(false)
         }
         else {
-            this.setState({ page: this.props.match.params.page, appType: this.props.match.params.appid })
+            this.setState({ page: this.props.match.params.page })
             this.getTaskDetails(this.props.location.state.taskId)
+        }
+    }
+
+    componentWillUnmount(){
+        if(this.props.location.state !== undefined){
+            Authorize.setCookie('searchOption', this.props.location.state.searchOption, 5)
         }
     }
 
     async getTaskDetails(id) {
         this.setState({ loading: true })
-        let userId = localStorage.getItem('userId')
+        let userId = Authorize.getCookies().userId
         await Axios.get(`${config.url}/tasks/${id}?userid=${userId}`, { headers: { Pragma: 'no-cache' } }).then(res => {
             // await Axios.get(`https://localhost:44301/api/v1/tasks/${id}?userid=${userId}`).then(res => {
-            this.setState({ taskDetails: res.data, loading: false })
-            console.log(res.data)
+
+            if(res.data.actions.length === 0){
+                //console.log('expired')
+                this.setState({isExpired: true})
+            }
+
+            this.setState({ taskDetails: res.data, appType: res.data.applicationTypeId, loading: false })
+            this.convertTaskDetails()
+            //console.log(res.data)
         })
         // this.getUserDetails()
 
+    }
+
+    async getDocuments(taskId) {
+        this.setState({isLoading: true, showModal: true})
+        await Axios.get(`${config.url}/documents?category=normal&taskid=${taskId}`, { headers: { Pragma: 'no-cache' } })
+        .then( res => {
+            this.setState( state => ({
+                isLoading: false,
+                taskDetails:{
+                ...state.taskDetails,
+                documents: res.data
+            }
+            }))
+        })
     }
 
     async getUserDetails() {
         this.setState({ loading: true })
         await Axios.get(`${config.url}/users/${this.state.taskDetails.histories[0].approvedBy}`, { headers: { Pragma: 'no-cache' } }).then(res => {
             this.setState({ userDetails: res.data, loading: false })
-            console.log(res.data)
+            //console.log(res.data)
         })
     }
 
@@ -76,7 +107,20 @@ class TaskDetails extends Component {
     }
 
     setArray(data) {
-        return data.join("; ")
+        //console.log(Array.isArray(data))
+        if(Array.isArray(data)){
+            return data.join("; ")
+        } else {
+            return data
+        }
+    }
+
+    convertBool(data){
+        if (data === 'Y'){
+            return 'Yes'
+        }else{
+            return 'No'
+        }
     }
 
     // setArray = () => {
@@ -104,7 +148,7 @@ class TaskDetails extends Component {
     }
 
     convertDate(dateValue) {
-        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
         return regEx
     }
 
@@ -112,7 +156,7 @@ class TaskDetails extends Component {
 
     approve(action) {
         let data = {
-            userId: localStorage.getItem('userId'),
+            userId: Authorize.getCookies().userId,
             comments: this.state.comments
         }
 
@@ -129,11 +173,11 @@ class TaskDetails extends Component {
             onOpen: () => {
                 Axios.post(`${config.url}/tasks/${this.state.taskDetails.taskId}/${action}`, data, { headers: { 'Content-Type': 'application/json' } })
                     .then(res => {
-                        console.log(res.data)
+                        //console.log(res.data)
 
                         Swal.update({
                             title: res.data.message,
-                            text: `The request has been ${res.data.message.toLowerCase()}`,
+                            text: `The request has been ${res.data.message.toLowerCase()}.`,
                             type: "success",
 
                         })
@@ -177,14 +221,14 @@ class TaskDetails extends Component {
     changeDeptHeads(heads) {
         let dh = ""
         heads.map(head => {
-            dh = dh + head.displayName + "; "
+            return dh = dh + head.displayName + "; " ;
         })
         return dh
     }
 
 
     convertExpDate(dateValue) {
-        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+        let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
         return regEx;
     }
 
@@ -213,47 +257,71 @@ class TaskDetails extends Component {
         }
     }
 
+
+    convertTaskDetails(){
+        //console.log(this.setArray(this.state.taskDetails.departmentHeadsName))
+        this.setState(prevState  =>({
+            taskDetails:{
+            ...prevState.taskDetails,
+                returnDate: this.convertDate(this.state.taskDetails.returnDate),
+                effectivePeriod: this.convertDate(this.state.taskDetails.effectivePeriod),
+                isUseInOffice: this.convertBool(this.state.taskDetails.isUseInOffice),
+                connectChop: this.convertBool(this.state.taskDetails.connectChop),
+                departmentHeadsName: this.setArray(this.state.taskDetails.departmentHeadsName), 
+                documentCheckByName: this.setArray(this.state.taskDetails.documentCheckByName)
+            }
+        }))
+    }
+
     handleViews(appType) {
         if (this.state.taskDetails.branchId !== '') {
             switch (appType) {
                 case 'STU':
-                    return <BSTU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <BSTU taskDetails={this.state.taskDetails} />
                         ;
                 case 'LTU':
-                    return <BLTU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <BLTU taskDetails={this.state.taskDetails} />
                         ;
                 case 'LTI':
-                    return <BLTI setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <BLTI taskDetails={this.state.taskDetails} />
                         ;
                 case 'CNIPS':
-                    return <BCNIPS setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <BCNIPS taskDetails={this.state.taskDetails} />
                         ;
                 default:
-                    return <BSTU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <BSTU taskDetails={this.state.taskDetails} />
                         ;
             }
         }
         else {
             switch (appType) {
                 case 'STU':
-                    return <STU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <STU taskDetails={this.state.taskDetails} />
                         ;
                 case 'LTU':
-                    return <LTU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <LTU taskDetails={this.state.taskDetails} />
                         ;
                 case 'LTI':
-                    return <LTI setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <LTI taskDetails={this.state.taskDetails} />
                         ;
                 case 'CNIPS':
-                    return <CNIPS setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <CNIPS taskDetails={this.state.taskDetails} />
                         ;
                 default:
-                    return <STU setArray={this.setArray} taskDetails={this.state.taskDetails} />
+                    return <STU taskDetails={this.state.taskDetails} />
                         ;
             }
         }
     }
 
+
+    blobToFile(theBlob: Blob, fileName: string): File {
+       const b: any = theBlob;
+       b.lastModifiedDate = new Date();
+       b.name = fileName;
+       return b;
+    }
+   
     dataURLtoFile(dataurl, filename) {
 
         var arr = dataurl.split(','),
@@ -266,31 +334,106 @@ class TaskDetails extends Component {
             u8arr[n] = bstr.charCodeAt(n);
         }
 
-        return new File([u8arr], filename, { type: mime });
+        if (navigator.userAgent.indexOf('Edge') >= 0){
+           var file = new Blob([u8arr], { type: mime });
+           return this.blobToFile(file, filename);
+        } else {
+           return new File([u8arr], filename, { type: mime });
+        }
+        //return new File([u8arr], filename, { type: mime });
     }
 
-    viewOrDownloadFile(b64, type, name) {
-        if (b64 !== "") {
-            let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
-            var blobUrl = new Blob([file], { type: type })
-            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-                window.navigator.msSaveOrOpenBlob(blobUrl, name)
-                return;
+    viewOrDownloadFile(documentId) {
+        // if (b64 !== "") {
+        let {b64, type, name} = ""
+        Swal.fire({
+            title: `Downloading the file ... `,
+            type: "info",
+            text: 'Please wait ...',
+            footer: '',
+            allowOutsideClick: false,
+            // onClose: () => { this.goBack(true) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                Axios.get(`${config.url}/documents/${documentId}`, { headers: { Pragma: 'no-cache' } })
+                    .then(res => {
+                        b64 = res.data.documentBase64String
+                        type = res.data.documentFileType
+                        name = res.data.documentFileName
+                        
+                        let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+                        var blobUrl = new Blob([file], { type: type })
+                        // Swal.update({
+                        //     title: res.data.message,
+                        //     text: `File Downloaded.`,
+                        //     type: "success",
+                        // })
+                        Swal.close()
+                        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                            window.navigator.msSaveOrOpenBlob(blobUrl, name)
+                            return;
+                        }
+                        else {
+                            window.open(URL.createObjectURL(file), "_blank")
+                        }
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
             }
-            else {
-                window.open(URL.createObjectURL(file), "_blank")
-            }
-        }
-        else {
-            alert("BASE 64 String is empty !!!")
-        }
+        })
+        // Axios.get(`${config.url}/documents/${documentId}`, { headers: { Pragma: 'no-cache' } })
+        // .then(res => {
+        //     b64 = res.data.documentBase64String
+        //     type = res.data.documentFileType
+        //     name = res.data.documentFileName
+
+        //     let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+        //     var blobUrl = new Blob([file], { type: type })
+        //     if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+        //         window.navigator.msSaveOrOpenBlob(blobUrl, name)
+        //         return;
+        //     }
+        //     else {
+        //         window.open(URL.createObjectURL(file), "_blank")
+        //     }
+        //     // }
+        //     // else {
+        //     //     alert("BASE 64 String is empty !!!")
+        //     // }
+        // })
+        // .catch(error => {
+        //     if (error.response) {
+        //         Swal.fire({
+        //             title: "ERROR",
+        //             html: error.response.data.message,
+        //             type: "error"
+        //         })
+        //     }
+        // })
     }
 
     render() {
 
-        const { taskDetails, userDetails, loading, showModal, page, appType } = this.state
-        const viewDetail = null
+        const { taskDetails, loading, showModal, page, appType, isExpired, isLoading } = this.state
 
+        if (page === 'mypendingtask' && isExpired){
+            return <>
+                <Card className="animated fadeIn">
+                    <CardBody>
+                        <h5>Task is no longer in the pending list.</h5>
+                    </CardBody>
+                </Card>
+                </>
+        }
         return (
             <div className="animated fadeIn">
                 {!loading ?
@@ -298,7 +441,7 @@ class TaskDetails extends Component {
                         <CardHeader>
                             {/* <Button onClick={this.goBack} > Back &nbsp; </Button>  {taskDetails.requestNum} */}
                             <Row className="align-items-left">
-                                <Button className="ml-1 mr-1" color="primary" onClick={() => this.goBack(this.state.updated)}><i className="fa fa-angle-left" /> Back </Button>
+                                <Button className="mx-2" color="primary" onClick={() => this.goBack(this.state.updated)}><i className="fa fa-angle-left" /> Back </Button>
                                 {page === "myapps"
                                     ? taskDetails.actions.map(((action, index) =>
                                         <span key={index}>
@@ -321,7 +464,25 @@ class TaskDetails extends Component {
                                                 bar
                                                 animated={stage.state === "CURRENT" ? true : false}
                                                 striped={stage.state !== "CURRENT"}
-                                                color={taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ? stage.state === "CURRENT" ? "danger" : stage.state === "FINISHED" ? "success" : "secondary" : stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
+                                                color={
+                                                    taskDetails.currentStatusId === "REJECTED" || taskDetails.currentStatusId === "SENDBACKED" ?
+                                                        stage.state === "CURRENT" ?
+                                                            "danger" :
+                                                            stage.state === "FINISHED" ?
+                                                                "success" :
+                                                                "secondary" :
+                                                        taskDetails.currentStatusId === "RECALLED" ?
+                                                            stage.state === "CURRENT" ?
+                                                                "primary" :
+                                                                stage.state === "FINISHED" ?
+                                                                    "success" :
+                                                                    "secondary" :
+                                                            stage.state === "CURRENT" ?
+                                                                "warning" :
+                                                                stage.state === "FINISHED" ?
+                                                                    "success" :
+                                                                    "secondary"
+                                                }
                                                 // color={stage.state === "CURRENT" ? "warning" : stage.state === "FINISHED" ? "success" : "secondary"}
                                                 value={100 / (taskDetails.allStages.length)}> <div id={"status" + index} style={{ color: stage.state === "FINISHED" || stage.state === "CURRENT" ? "white" : "black" }} >{stage.statusName}</div>
                                             </Progress>
@@ -331,7 +492,7 @@ class TaskDetails extends Component {
                                 </Progress>
                             </Col>
                             <Row className="mb-3">
-                                <Col xs="12" md lg><span className="display-5"> {taskDetails.requestNum}</span></Col>
+                                <Col xs="12" md lg><span className=" ml-3 display-5"> {taskDetails.requestNum}</span></Col>
                             </Row>
                             <Row>
                                 {/* <Col> */}
@@ -344,18 +505,18 @@ class TaskDetails extends Component {
 
                             </Row>
                             <Row className="mb-4">
-                                <Col xs="12" sm="12" md lg className="text-md-left text-center">
+                                <Col xs="12" sm="12" md lg className="ml-3 text-md-left text-center">
                                     <Row>
                                         {/* <Col xs={12} sm={12} md={4} lg={2}>
                                             <img src={taskDetails.createdByPhotoUrl} className="img-avaa img-responsive center-block" alt="picture" />
                                         </Col> */}
                                         <Col md><h5> {taskDetails.requestorUser.displayName} </h5>
                                             <Row>
-                                                <Col md><h6> DFS/CN, {taskDetails.requestorUser.companyCode} </h6></Col>
+                                                <Col md><h6> {taskDetails.requestorUser.departmentAbbr}, {taskDetails.requestorUser.companyId} </h6></Col>
                                             </Row>
                                             <Row>
                                                 <Col xs={12} sm={12} md={6} lg={6}>
-                                                    <h6><center className="boxs">APPLICANT</center></h6>
+                                                    <h6><center className="boxs mr-4">APPLICANT</center></h6>
                                                 </Col>
                                             </Row>
                                         </Col>
@@ -363,29 +524,31 @@ class TaskDetails extends Component {
                                 </Col>
                                 <Col xs="12" sm="12" md lg className="text-md-left text-center">
                                     <Row>
-                                        <Col md><h5><i className="fa fa-tablet mr-2" /> {taskDetails.requestorUser.telephoneNum} </h5></Col>
+                                        <Col className="pl-0" md><h5><i className="fa fa-tablet mr-2" /> {taskDetails.requestorUser.telephoneNum} </h5></Col>
                                     </Row>
                                     <Row>
-                                        <Col md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.requestorUser.email}</h5></Col>
+                                        <Col className="pl-0" md><h5><i className="fa fa-envelope mr-2" /> {taskDetails.requestorUser.email}</h5></Col>
                                     </Row>
                                 </Col>
                             </Row>
                             {this.handleViews(appType)}
-                            <Row>
-                                <FormGroup>
-                                    <Col>
-                                        <Label>Documents</Label>
-                                    </Col>
-                                    <Col>
-
-                                        <Button color="primary" onClick={this.toggleView}>View Documents</Button>
+                            {/* <Row> */}
+                            {/* <FormGroup> */}
+                            <Col>
+                                <Row>
+                                    <Col className="mx-2 mb-2">
+                                        <FormGroup>
+                                            <Label className="row mx-1">Documents</Label>
+                                            <Button color="primary" onClick={() => this.getDocuments(this.props.location.state.taskId)}>View Documents</Button>
+                                        </FormGroup>
 
                                         <Modal color="info" size="xl" toggle={this.toggleView} isOpen={showModal} >
-                                            <ModalHeader className="center"> Documents </ModalHeader>
+                                            <ModalHeader toggle={this.toggleView} className="center"> Documents </ModalHeader>
                                             <ModalBody>
                                                 <ReactTable
                                                     data={taskDetails.documents}
                                                     sortable
+                                                    loading={isLoading}
                                                     columns={[
                                                         {
                                                             Header: "#",
@@ -394,7 +557,7 @@ class TaskDetails extends Component {
                                                                 <div>{row.index + 1}</div>
                                                             ),
                                                             width: 40,
-                                                            // style: { textAlign: "center" }
+                                                            style: { textAlign: "center" }
                                                         },
                                                         {
                                                             Header: "Contract Number",
@@ -402,7 +565,7 @@ class TaskDetails extends Component {
                                                             Cell: row => (
                                                                 <div> {this.convertContractNums(row.original.contractNums)} </div>
                                                             ),
-                                                            style: { textAlign: "center", 'whiteSpace': 'unset' },
+                                                            // style: { textAlign: "center", 'whiteSpace': 'unset' },
                                                             width: 135,
                                                             show: appType === "CNIPS"
                                                         },
@@ -410,14 +573,14 @@ class TaskDetails extends Component {
                                                             Header: "Document Name (English)",
                                                             accessor: "documentNameEnglish",
                                                             width: 250,
-                                                            style: { 'white-space': 'normal' }
+                                                            style: { 'whiteSpace': 'normal' }
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
                                                             Header: "Document Name (Chinese)",
                                                             accessor: "documentNameChinese",
                                                             width: 250,
-                                                            style: { 'white-space': 'normal' }
+                                                            style: { 'whiteSpace': 'normal' }
                                                             // style: { textAlign: "center" },
                                                         },
                                                         {
@@ -425,7 +588,7 @@ class TaskDetails extends Component {
                                                             accessor: "expiryDate",
                                                             width: 250,
                                                             Cell: row => (
-                                                                <div onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} style={{ color: "blue", cursor: "pointer" }} >
+                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentId)} >
                                                                     {this.convertExpDate(row.original.expiryDate)}
                                                                 </div>
                                                             ),
@@ -434,22 +597,20 @@ class TaskDetails extends Component {
                                                         {
                                                             Header: "DH Approved",
                                                             accessor: "documentNameChinese",
-                                                            width: 250,
                                                             Cell: row => (
-                                                                <div onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} style={{ color: "blue", cursor: "pointer" }} >
+                                                                <span className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentId)} >
                                                                     {this.changeDeptHeads(row.original.departmentHeads)}
-                                                                </div>
+                                                                </span>
 
                                                             ),
                                                             show: appType === "LTU"
-                                                            // style: {textAlign: "center" },
                                                         },
 
                                                         {
                                                             Header: "Attached Document",
                                                             accessor: "documentName",
                                                             Cell: row => (
-                                                                <div style={{ cursor: "pointer", color: "blue" }} onClick={() => this.viewOrDownloadFile(row.original.documentBase64String, row.original.documentFileType, row.original.documentFileName)} >{row.original.documentFileName}</div>
+                                                                <div className="blobLink" onClick={() => this.viewOrDownloadFile(row.original.documentId)} >{row.original.documentFileName}</div>
                                                             ),
                                                             show: appType !== "LTU"
                                                             // style: {textAlign: "center" },
@@ -462,10 +623,12 @@ class TaskDetails extends Component {
                                             </ModalFooter>
                                         </Modal>
                                     </Col>
-                                </FormGroup>
-                            </Row>
+                                </Row>
+                            </Col>
+                            {/* </FormGroup> */}
+                            {/* </Row> */}
                             {page === "mypendingtask"
-                                ? <div>
+                                ? <div className="px-2 pt-2">
                                     <Row>
                                         <Col> <h4>Comments</h4></Col>
                                     </Row>
@@ -494,7 +657,7 @@ class TaskDetails extends Component {
 
                             {taskDetails.histories.length !== 0
                                 ? <Row>
-                                    <Col> <h4>Approval Histories</h4></Col>
+                                    <Col className="mx-3 mt-2"> <h4>Approval Histories</h4></Col>
                                 </Row>
                                 : null}
 
@@ -505,7 +668,7 @@ class TaskDetails extends Component {
                                         {/* <Col xs="12" sm="12" md="2" lg="1">
                                             <img src={history.approvedByAvatarUrl} className="img-avaa img-responsive" alt="Avatar" />
                                         </Col> */}
-                                        <Col sm md="10" lg>
+                                        <Col  className="mx-3" sm md="10" lg>
                                             <h5>{history.approvedByName}<span> <Badge color={history.stateIndicatorColor.toLowerCase()}> {history.stateIndicator} </Badge></span></h5>
                                             <h6><Badge className="mb-1" color="light">{this.convertApprovedDate(history.approvedDate)}</Badge></h6>
                                             <Col className="p-0"> <p>{history.comments}</p> </Col>
@@ -516,7 +679,8 @@ class TaskDetails extends Component {
 
                         </CardBody>
                     </Card>
-                    : null
+                    : 
+                    <div className="animated fadeIn pt-3 text-center"><Spinner /> <br />Loading ...</div>
                 }
             </div>
         )

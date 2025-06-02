@@ -21,6 +21,8 @@ import "react-table/react-table.css"
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import PropTypes from "prop-types";
 import LegalEntity from '../../context';
+
+import {Authorize, CommonFn} from '../../functions/'
 // import Skeleton from 'react-loading-skeleton';
 
 
@@ -59,6 +61,7 @@ import {
 const SelectTable = selectTableHOC(ReactTable);
 
 const animatedComponents = makeAnimated();
+
 
 // var NewFormData = require('formdata-polyfill')
 
@@ -169,7 +172,7 @@ class Create extends Component {
       contractValid: true,
 
       checkDetails: {},
-
+      wrongDocError: "",
 
       reqInfo: [
         { id: "deptSelected", valid: false },
@@ -184,16 +187,7 @@ class Create extends Component {
         { id: "documentTableLTI", valid: false },
       ],
       validateForm: [],
-      noteInfo: [
-        {
-          chinese: "如您需申请人事相关的证明文件包括但不限于“在职证明”，“收入证明”，“离职证明”以及员工福利相关的申请材料等，请直接通过邮件提交您的申请至人力资源部。如对申请流程有任何疑问或问题，请随时联系HR。",
-          english: "For HR related certificates including but not limited to the certificates of employment, income, resignation and benefits-related application materials, please submit your requests to HR department by email directly. If you have any questions regarding the application process, please feel free to contact HR."
-        },
-        {
-          chinese: "如您需要在含有个人身份信息（如身份信息、护照信息）的文件上盖章，请不要上传附件或者遮盖关键信息后再上传。",
-          english: "If you need to chop on personal information (e.g. ID info, Passport info) related documents, please don’t upload them into system or upload after covering key information. "
-        }
-      ],
+      noteInfo: [],
       mask: [/(?!.*[A-HJ-QT-Z])[IS]/i, "-", /[A-Z]/i, /[A]/i, "-", /(?!.*[A-NQRT-Z])[PSO]/i, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, "-", /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/],
       // mask: "a-a-a-9999-9999",
       selectInfo: '',
@@ -218,7 +212,7 @@ class Create extends Component {
     this.handleSelectOption = this.handleSelectOption.bind(this);
     this.checkDept = this.checkDept.bind(this);
 
-    this.validator = new SimpleReactValidator({autoForceUpdate: this, locale: 'en'});
+    this.validator = new SimpleReactValidator({ autoForceUpdate: this, locale: 'en' });
     this.formRef = React.createRef()
     this.selectDocument = this.selectDocument.bind(this);
     this.hideDoc = this.hideDoc.bind(this);
@@ -234,8 +228,25 @@ class Create extends Component {
     this.getData("chopTypes", `${config.url}/choptypes?companyid=` + this.props.legalName);
     // resetMounted.setMounted()
     this.setContractNotes();
+    this.getNotes()
 
 
+  }
+
+  getNotes() {
+    axios.get(`${config.url}/notes/0`, { headers: { Pragma: 'no-cache' } })
+      .then(res => {
+        let tempNotes = res.data.noteContent.split('%')
+        for (let i = 0; i < tempNotes.length; i++) {
+          let obj = {
+            chinese: tempNotes[i].split('#')[0],
+            english: tempNotes[i].split('#')[1]
+          }
+          this.setState({
+            noteInfo: this.state.noteInfo.concat(obj)
+          })
+        }
+      })
   }
 
   setContractNotes() {
@@ -288,7 +299,7 @@ class Create extends Component {
         element.classList.contains("form-control")
           ? element.className = "is-invalid form-control"
           : element.className = "notValid"
-        console.log(`${validateForm[i]} is INVALID`)
+        // console.log(`${validateForm[i]} is INVALID`)
       }
 
     }
@@ -325,6 +336,18 @@ class Create extends Component {
 
 
   async submitRequest(isSubmitted) {
+
+    const userCookie = Authorize.getCookies()
+
+    if (this.state.appTypeSelected === "") {
+      Swal.fire({
+        title: 'Appliction Type Required',
+        type: 'info',
+        label: 'required',
+        text: 'Please select an Application Type to get started !'
+      })
+    }
+    else {
     console.log("SUBMIT")
     let useInOffice = "Y"
     let isConnectChop = "N"
@@ -334,7 +357,7 @@ class Create extends Component {
     isConnectChop = this.state.connectingChop ? "Y" : "N"
     IsConfirmed = this.state.agreeTerms ? "Y" : "N"
     let postReq = new FormData();
-    postReq.append("UserId", this.state.userId);
+    postReq.append("UserId", userCookie.userId);
     postReq.append("EmployeeNum", this.state.employeeId);
     postReq.append("TelephoneNum", this.state.telNumber);
     postReq.append("CompanyId", this.props.legalName);
@@ -357,6 +380,7 @@ class Create extends Component {
     postReq.append("IsSubmitted", isSubmitted);
     postReq.append("isConnectChop", isConnectChop);
     postReq.append("BranchId", this.state.branchSelected)
+
 
     //Single Document Check By in LTU
     if (this.state.isLTU) {
@@ -400,7 +424,7 @@ class Create extends Component {
 
     //console for dev
     for (var pair of postReq.entries()) {
-      console.log(pair[0] + ', ' + pair[1]);
+      // console.log(pair[0] + ', ' + pair[1]);
     }
 
 
@@ -421,7 +445,7 @@ class Create extends Component {
     // else if (this.state.valid && this.state.inOffice) {
     // this.postData(postReq, isSubmitted)
     // }
-
+    }
   }
 
   checkDepartment = () => {
@@ -473,7 +497,6 @@ class Create extends Component {
     document.getElementById("chopTypeSelected").value = "0"
   }
 
-  Axios
   async getData(state, url) {
     try {
       const response = await axios.get(url, { headers: { Pragma: 'no-cache' } });
@@ -492,7 +515,7 @@ class Create extends Component {
     try {
       await axios.get(url, { headers: { Pragma: 'no-cache' } }).then(res => {
         this.setState({ documents: res.data })
-        console.log(res.data.length)
+        // console.log(res.data.length)
         callback(res.data.length)
       })
     } catch (error) {
@@ -513,6 +536,7 @@ class Create extends Component {
       text: '',
       footer: '',
       allowOutsideClick: false,
+      showConfirmButton: true,
       onClose: () => { if (!showError) { this.formReset() } },
       onBeforeOpen: () => {
         Swal.showLoading()
@@ -537,13 +561,14 @@ class Create extends Component {
             let err3 = ""
             if (error.response) {
               console.log(error.response)
-              let keys = Object.keys(error.response.data.errors)
-              err = keys.join(',')
-              keys.map(key => {
-                // console.log(error.response.data.errors[key].join(','))
-                err2.push(error.response.data.errors[key].join(','))
-              })
-              err3 = err2.join(';')
+              err3 = error.response.message
+              // let keys = Object.keys(error.response.data.errors)
+              // err = keys.join(',')
+              // keys.map(key => {
+              // console.log(error.response.data.errors[key].join(','))
+              // err2.push(error.response.data.errors[key].join(','))
+              // })
+              // err3 = err2.join(';')
             }
             Swal.update({
               title: "Error",
@@ -569,7 +594,7 @@ class Create extends Component {
   }
 
   convertExpDate(dateValue) {
-    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1/$2/$3')
+    let regEx = dateValue.replace(/(\d{4})(\d{2})(\d{2})/g, '$1-$2-$3')
     return regEx;
   }
   changeDeptHeads(heads) {
@@ -582,7 +607,7 @@ class Create extends Component {
 
   async getUserData() {
     let ticket = localStorage.getItem('ticket')
-    let userId = localStorage.getItem('userId')
+    let userId = Authorize.getCookies().userId
     // let userId = "josh@otds.admin"
     // let userId = "daniel@otds.admin"
     await axios.get(`${config.url}/users/` + userId, { headers: { Pragma: 'no-cache', 'ticket': ticket } })
@@ -607,7 +632,7 @@ class Create extends Component {
   }
 
   async getDocCheckBy(chopType, teamId) {
-    console.log("Get document check by users")
+
     await axios.get(`${config.url}/users?category=lvlfour&companyid=${this.props.legalName}&departmentid=${this.state.deptSelected}&teamid=${teamId}&choptypeid=${chopType}&displayname=&userid=${this.state.userId}`,
       { headers: { Pragma: 'no-cache' } })
       .then(res => {
@@ -663,9 +688,41 @@ class Create extends Component {
     let value = event.target.value
     this.setState({ agreeTerms: false })
     if (name === "appTypeSelected") {
+      this.setState({
+        // deptSelected: "",
+        chopTypeSelected: "",
+        branchSelected: "",
+        effectivePeriod: "",
+        returnDate: "",
+        purposeOfUse: "",
+        numOfPages: "",
+        addressTo: "",
+        remark: "",
+        teamSelected: "",
+        pickUpBy: "",
+        resPerson: "",
+        contractSign1: "",
+        contractSign2: "",
+        documentCheckBy: "",
+        selectedDeptHeads: [],
+        departmentHeads: [],
+        dateView1: null,
+        dateView2: null,
+        documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [], 
+        selection: [], selectedDocs:[]
+      })
+
+      this.setState(state => {
+        let { selectedOption } = this.state
+        selectedOption.pickUpBy = ""
+        selectedOption.resPerson = ""
+        selectedOption.contractSign1 = ""
+        selectedOption.contractSign2 = ""
+        return selectedOption
+      })
       this.setValidateForm(event.target.value)
       //Clear Doc Table and agreeTerms
-      this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
+      // this.setState({ documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
 
       //Update Chop Types
       this.getChopTypes(this.props.legalName, event.target.value)
@@ -731,8 +788,9 @@ class Create extends Component {
 
     //CHOP TYPE
     else if (name === "chopTypeSelected") {
-      console.log(event.target.value)
-      this.setState({ selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
+      // console.log(event.target.value)
+      this.setState({ selectedOption: { docCheckBySelected: null }, docCheckBySelected: "",
+       documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [], selection: [], selectedDocs:[] })
       if (this.state.deptSelected !== "" && this.state.teamSelected !== "" && this.state.isLTU) {
         this.getDocCheckBy(event.target.value, this.state.teamSelected)
         // this.getDocuments(this.props.legalName, this.state.deptSelected, event.target.value, this.state.teamSelected, (callback) => {
@@ -766,7 +824,7 @@ class Create extends Component {
     else if (name === "deptSelected") {
       if (this.state.isLTU) {
         this.setState({
-          selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", documentTableLTU: []
+          selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", documentTableLTU: [], selection: [], selectedDocs:[]
         })
         this.getDocCheckBy(this.state.chopTypeSelected, this.state.teamSelected)
       }
@@ -785,12 +843,14 @@ class Create extends Component {
 
     //ENTITLED TEAM
     else if (name === "teamSelected") {
-      this.setState({ selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: [] })
+      this.setState({ selectedOption: { docCheckBySelected: null }, docCheckBySelected: "", 
+      documentTableCNIPS: [], documentTableLTI: [], documentTableLTU: []
+    })
       if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
         this.getDocCheckBy(this.state.chopTypeSelected, event.target.value)
         this.handleSelectOption('docCheckBySelected')
       }
-      this.setState({ documentTableCNIPS: [], documentTableLTI: [] })
+      this.setState({ documentTableCNIPS: [], documentTableLTI: [], selection: [], selectedDocs:[] })
       // if (this.state.chopTypeSelected !== "" && this.state.isLTU) {
       // this.getDocCheckBy(this.state.chopTypeSelected, event.target.value)
       // }
@@ -825,7 +885,7 @@ class Create extends Component {
     }
 
     else if (name === "numOfPages") {
-      if (value.length > 9) {
+      if (/[a-z]/i.test(value) | value.length > 9) {
         value = this.state.numOfPages
         this.setState({ invalidNumberOfPages: true })
         event.target.className = "is-invalidform-control"
@@ -910,65 +970,65 @@ class Create extends Component {
         let message = "Third value should be O / P / S"
         this.setState({ contractValid: false, contractError: message })
       }
-
-      for (let i = 7; i < 11; i++) {
-        isDigit = digit.test(value[i])
-        if (isThird && !isDigit) {
-          console.log("error", value[i], i)
-          let message = "Please input 4 digits of year"
-          this.setState({ contractValid: false, contractError: message })
-          break;
-        }
-        if (i === 10 && value[11] === '-') {
-          isdigit1 = true
-        }
-        else {
-          let message = "Please add ( - ) after 4 digits of year"
-          this.setState({ contractValid: false, contractError: message })
-        }
-        if (isdigit1 && value.length === 16) {
-          for (let i = 12; i < 16; i++) {
-            isDigit = digit.test(value[i])
-            if (!isDigit) {
-              console.log("error", value[i], i)
-              let message = "Please input last 4 digits"
-              this.setState({ contractValid: false, contractError: message })
-              break;
+      if(isThird){
+        for (let i = 7; i < 11; i++) {
+          isDigit = digit.test(value[i])
+          if (!isDigit) {
+            // console.log("error", value[i], i)
+            let message = "Please input 4 digits of year"
+            this.setState({ contractValid: false, contractError: message })
+            break;
+          }
+          if (i === 10 && value[11] === '-') {
+            isdigit1 = true
+          }
+          else {
+            let message = "Please add ( - ) after 4 digits of year"
+            this.setState({ contractValid: false, contractError: message })
+          }
+          if (isdigit1 && value.length === 16) {
+            for (let i = 12; i < 16; i++) {
+              isDigit = digit.test(value[i])
+              if (!isDigit) {
+                // console.log("error", value[i], i)
+                let message = "Please input last 4 digits"
+                this.setState({ contractValid: false, contractError: message })
+                break;
+              }
+              else {
+                valid = true
+                this.setState({ contractValid: true, contractError: "" })
+              }
             }
-            else {
-              valid = true
-              this.setState({ contractValid: true, contractError: "" })
+          }
+          if (isdigit1 && value.length === 15) {
+            for (let i = 12; i < 15; i++) {
+              isDigit = digit.test(value[i])
+              if (!isDigit) {
+                // console.log("error", value[i], i)
+                let message = "Please input last 4 digits"
+                this.setState({ contractValid: false, contractError: message })
+                break;
+              }
+              else {
+                valid = true
+                this.setState({ contractValid: true, contractError: "" })
+              }
             }
           }
         }
-        if (isdigit1 && value.length === 15) {
-          for (let i = 12; i < 15; i++) {
-            isDigit = digit.test(value[i])
-            if (!isDigit) {
-              console.log("error", value[i], i)
-              let message = "Please input last 4 digits"
-              this.setState({ contractValid: false, contractError: message })
-              break;
-            }
-            else {
-              valid = true
-              this.setState({ contractValid: true, contractError: "" })
-            }
-          }
+        if (isThird && isdigit1 && value.length < 15) {
+          // console.log('last digit should be 4')
+          let message = "Please input last 4 digits"
+          this.setState({ contractValid: false, contractError: message })
         }
-      }
-      if (isThird && isdigit1 && value.length < 15) {
-        console.log('last digit should be 4')
-        let message = "Please input last 4 digits"
-        this.setState({ contractValid: false, contractError: message })
-      }
-      if (isThird && isdigit1 && value.length > 16) {
-        valid = false
-        let message = "Invalid contract format"
-        this.setState({ contractValid: false, contractError: message })
+        if (isThird && isdigit1 && value.length > 16) {
+          valid = false
+          let message = "Invalid contract format"
+          this.setState({ contractValid: false, contractError: message })
+        }
       }
     }
-
     if (isSecond && value[2] !== 'I') {
       if (third.test(value[4])) {
         isThird = true
@@ -976,59 +1036,61 @@ class Create extends Component {
         let message = "Third value should be O / P / S"
         this.setState({ contractValid: false, contractError: message })
       }
-      for (let i = 6; i <= 9; i++) {
-        isDigit = digit.test(value[i])
-        if (isThird && !isDigit) {
-          console.log("error", value[i], i, value, value.length)
-          let message = "Please input 4 digits of year"
-          this.setState({ contractValid: false, contractError: message })
-          break;
-        }
-        if (i === 9 && value[10] === '-') {
-          console.log(i, value[i])
-          isdigit1 = true
-        }
-        else {
-          let message = "Please add ( - ) after 4 digits of year"
-          this.setState({ contractValid: false, contractError: message })
-        }
-      }
-
-      if (isdigit1 && value.length === 15) {
-
-        for (let i = 12; i < 14; i++) {
+        if(isThird){
+        for (let i = 6; i <= 9; i++) {
           isDigit = digit.test(value[i])
           if (!isDigit) {
-            console.log("error", value[i], i)
-            let message = "Please input last 4 digits"
+            // console.log("error", value[i], i, value, value.length)
+            let message = "Please input 4 digits of year"
             this.setState({ contractValid: false, contractError: message })
             break;
           }
-          else {
-            valid = true
-            this.setState({ contractValid: true, contractError: "" })
+          if (i === 9 && value[10] === '-') {
+            //console.log(i, value[i])
+            isdigit1 = true
           }
-        }
-      }
-      if (isdigit1 && value.length === 14) {
-        for (let i = 12; i < 13; i++) {
-          isDigit = digit.test(value[i])
-          if (!isDigit) {
-            console.log("error", value[i], i)
-            let message = "Please input last 4 digits"
+          else {
+            let message = "Please add ( - ) after 4 digits of year"
             this.setState({ contractValid: false, contractError: message })
-            break;
-          }
-          else {
-            valid = true
-            this.setState({ contractValid: true, contractError: "" })
           }
         }
-      }
-      if (isThird && isdigit1 && value.length < 14) {
-        console.log('last digit should be 4')
-        let message = "Please input last 4 digits"
-        this.setState({ contractValid: false, contractError: message })
+
+        if (isdigit1 && value.length === 15) {
+
+          for (let i = 12; i < 14; i++) {
+            isDigit = digit.test(value[i])
+            if (!isDigit) {
+              //console.log("error", value[i], i)
+              let message = "Please input last 4 digits"
+              this.setState({ contractValid: false, contractError: message })
+              break;
+            }
+            else {
+              valid = true
+              this.setState({ contractValid: true, contractError: "" })
+            }
+          }
+        }
+        if (isdigit1 && value.length === 14) {
+          for (let i = 12; i < 13; i++) {
+            isDigit = digit.test(value[i])
+            if (!isDigit) {
+              //console.log("error", value[i], i)
+              let message = "Please input last 4 digits"
+              this.setState({ contractValid: false, contractError: message })
+              break;
+            }
+            else {
+              valid = true
+              this.setState({ contractValid: true, contractError: "" })
+            }
+          }
+        }
+        if (isThird && isdigit1 && value.length < 14) {
+          //console.log('last digit should be 4')
+          let message = "Please input last 4 digits"
+          this.setState({ contractValid: false, contractError: message })
+        }
       }
     }
     if (isThird && isdigit1 && value.length > 16) {
@@ -1037,7 +1099,7 @@ class Create extends Component {
       this.setState({ contractValid: false, contractError: message })
     }
     if (isSecond && value[2] === 'I' && value[3] !== 'A' && value[3] !== undefined) {
-      console.log('please input IA')
+      //console.log('please input IA')
       let message = "Please input IA instead of I" + value[3]
       this.setState({ contractValid: false, contractError: message })
     } else if (isSecond && value[2] === 'I' && value[3] !== 'A') {
@@ -1107,13 +1169,23 @@ class Create extends Component {
     let typeValid = false
     let doc = this.state.documentTableLTI
     let errorMessage = []
-
+    if (this.state.appTypeSelected === "") {
+      errorMessage.push("Please select an Application Type.<br />")
+    }
     if (this.state.docSelected === null) {
       errorMessage.push("Please select a valid document.<br />")
     }
+      else if (this.state.docSelected.size === 0) {
+        errorMessage.push("Document you tried adding has no content.<br />")
+        this.setState({ wrongDocError: "Document is empty." })
+      }
     if (this.state.isLTI) {
-      if (this.state.engName === "" && this.state.cnName === "") {
-        errorMessage.push("Please input document name in English and Chinese.<br />")
+      if (this.state.engName === "") {
+        errorMessage.push("Please input document name in English.<br />")
+        typeValid = false
+      }
+      if (this.state.cnName === "") {
+        errorMessage.push("Please input document name in Chinese.<br />")
         typeValid = false
       }
       if (this.state.invalidEnglish === true) {
@@ -1142,7 +1214,7 @@ class Create extends Component {
       }
     }
     if (errorMessage.length !== 0) {
-      console.log(errorMessage)
+      //console.log(errorMessage)
       Swal.fire({
         title: "Invalid",
         html: errorMessage.join('\n\n'),
@@ -1153,10 +1225,41 @@ class Create extends Component {
     else {
       for (let i = 0; i < doc.length; i++) {
         if (doc[i].docName === this.state.docAttachedName) {
+          Swal.fire({
+            title: "Document Exists",
+            html: 'The selected document: <i>'+ this.state.docAttachedName +'</i> already exists in the list',
+            type: "warning"
+          })
           valid = false
           break
-        } else {
-          valid = true
+        }
+        else {
+          if(this.state.isLTI){
+            if (doc[i].cnName === this.state.cnName){
+              Swal.fire({
+                title: "Document name exists",
+                html: 'Document name: <i>'+ this.state.cnName +'</i> already exists in the list',
+                type: "warning"
+              })
+              valid = false
+              break
+            }
+            if (doc[i].engName === this.state.engName){
+              Swal.fire({
+                title: "Document name exists",
+                html: 'Document name: <i>'+ this.state.engName +'</i> already exists in the list',
+                type: "warning"
+              })
+              valid = false
+              break
+            }
+            else{
+              valid = true
+            }
+          }
+          else{
+            valid = true
+          }
         }
       }
       if (valid) {
@@ -1169,11 +1272,11 @@ class Create extends Component {
           docName: this.state.docAttachedName,
           docURL: URL.createObjectURL(this.state.docSelected),
         }
-        this.getBase64(this.state.docSelected, (result) => {
-          obj.documentBase64String = result
-        })
+        // this.getBase64(this.state.docSelected, (result) => {
+        //   obj.documentBase64String = result
+        // })
 
-        console.log(obj.docURL)
+        //console.log(obj.docURL)
         this.setState({
           invalidEnglish: false, invalidChinese: false
         })
@@ -1186,19 +1289,13 @@ class Create extends Component {
         document.getElementById("documentTableLTI").className = ""
         this.setState({ engName: "", cnName: "", docSelected: null, docAttachedName: "" })
       }
-      else {
-        Swal.fire({
-          title: "Document Exists",
-          html: 'The selected document already exists in the List',
-          type: "warning"
-        })
-      }
     }
   }
 
   getBase64(file, callback) {
     let reader = new FileReader();
     reader.onload = function () {
+      // console.log(reader.result)
       callback(reader.result.replace(/^data:.+;base64,/, ''))
     };
     reader.readAsDataURL(file)
@@ -1212,6 +1309,10 @@ class Create extends Component {
       if (this.state.docSelected === null) {
         contractError.push("Please select a valid document.<br />")
       }
+        else if (this.state.docSelected.size === 0) {
+          contractError.push("Document you tried adding has no content.<br />")
+          this.setState({ wrongDocError: "Document is empty." })
+        }
       if (this.state.engName === "") {
         contractError.push("Please input name in english.<br />")
       }
@@ -1300,6 +1401,9 @@ class Create extends Component {
       this.setState({ documentTableLTU: this.state.selectedDocs })
       document.getElementById("documentTableLTU").className = ""
     }
+    else {
+      this.setState({ documentTableLTU: [] })
+    }
   }
 
 
@@ -1349,7 +1453,9 @@ class Create extends Component {
         selectedDocs.push(item._original)
       });
     }
-    this.setState({ selectAll, selection, selectedDocs }, console.log(this.state.selectedDocs));
+    this.setState({ selectAll, selection, selectedDocs }
+      // , console.log(this.state.selectedDocs)
+    );
   };
 
   /**
@@ -1364,7 +1470,7 @@ class Create extends Component {
 
     return {
       onClick: (e) => {
-        console.log("It was in this row:", rowInfo);
+        console.log("this row:", rowInfo);
       },
       style: {
         background:
@@ -1375,19 +1481,39 @@ class Create extends Component {
   };
 
   uploadDocument = event => {
+    let ext = config.allowedExtension
+    let valid = false
     if (event.target.files[0]) {
-      this.setState({
-        docSelected: event.target.files[0],
-        docAttachedName: event.target.files[0].name
-
-      })
+      let last = event.target.files[0].name.split('.').length
+      let extension = event.target.files[0].name.split('.')[last - 1]
+      // console.log(extension)
+      for (let i = 0; i < ext.length; i++) {
+        if (ext[i] === extension || ext[i].toUpperCase() === extension) {
+          valid = true
+          break;
+        }
+        else {
+          valid = false
+        }
+      }
+      if (valid) {
+        this.setState({
+          docSelected: event.target.files[0],
+          docAttachedName: event.target.files[0].name,
+          wrongDocError: ""
+        })
+      }
+      else {
+        this.setState({ wrongDocError: "Please attach a valid document !" })
+      }
     }
     event.target.value = null
   }
 
   handleSelectOption = sname => newValue => {
+    // console.log(sname, newValue)
 
-    if (newValue)
+    if (newValue) {
       if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
         if (newValue) {
           this.setState({ selectedOption: { [sname]: newValue }, [sname]: newValue })
@@ -1404,6 +1530,15 @@ class Create extends Component {
         }
         this.setState({ selectedOption: { [sname]: newValue }, [sname]: newValue.value })
       }
+    }
+    else {
+      if (sname === "deptHeadSelected" || sname === "docCheckByLTI") {
+        this.setState({ selectedOption: { [sname]: newValue }, [sname]: [] })
+      }
+      else {
+        this.setState({ selectedOption: { [sname]: newValue }, [sname]: "" })
+      }
+    }
 
   }
 
@@ -1440,7 +1575,7 @@ class Create extends Component {
         if (teamSelected === "") {
           errorMessage.push("Please select Team.<br />")
         }
-        console.log(errorMessage)
+        // console.log(errorMessage)
         if (errorMessage.length !== 0) {
           Swal.update({
             title: "Field Required",
@@ -1454,7 +1589,7 @@ class Create extends Component {
             if (numberOfDocuments === 0) {
               Swal.update({
                 title: "No Documents",
-                html: 'there is no Documents in this appliction. ',
+                html: 'There is no documents in this appliction. ',
                 type: "warning"
               })
               Swal.hideLoading()
@@ -1501,24 +1636,93 @@ class Create extends Component {
     }
   }
 
+  blobToFile(theBlob: Blob, fileName: string): File {
+    const b: any = theBlob;
+    b.lastModifiedDate = new Date();
+    b.name = fileName;
+    return b;
+ }
+
   dataURLtoFile(dataurl, filename) {
-    if (dataurl !== "") {
-      var arr = dataurl.split(','),
+    // console.log(dataurl.split(','))
+
+    var arr = dataurl.split(','),
         mime = arr[0].match(/:(.*?);/)[1],
         bstr = atob(arr[1]),
         n = bstr.length,
         u8arr = new Uint8Array(n);
 
-      while (n--) {
+    while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
-      }
+    }
+    if (navigator.userAgent.indexOf('Edge') >= 0){
+       var file = new Blob([u8arr], { type: mime });
+       return this.blobToFile(file, filename);
+    } else {
+       return new File([u8arr], filename, { type: mime });
+    }
+}
 
-      return new File([u8arr], filename, { type: mime });
-    }
-    else {
-      alert("BASE64 String is empty :(")
-      return null
-    }
+  getDocumentById(documentId) {
+    let {b64, type, name} = ""
+        Swal.fire({
+            title: `Downloading the file ... `,
+            type: "info",
+            text: 'Please wait ...',
+            footer: '',
+            allowOutsideClick: false,
+            // onClose: () => { this.goBack(true) },
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            },
+            onOpen: () => {
+                axios.get(`${config.url}/documents/${documentId}`, { headers: { Pragma: 'no-cache' } })
+                    .then(res => {
+                        b64 = res.data.documentBase64String
+                        type = res.data.documentFileType
+                        name = res.data.documentFileName
+
+                        let file = this.dataURLtoFile(`data:${type};base64,${b64}`, name);
+                        var blobUrl = new Blob([file], { type: type })
+
+                        Swal.close()
+                            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                                window.navigator.msSaveOrOpenBlob(blobUrl, name)
+                                return;
+                            }
+                            else {
+                                window.open(URL.createObjectURL(file), "_blank")
+                            }
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            Swal.fire({
+                                title: "ERROR",
+                                html: error.response.data.message,
+                                type: "error"
+                            })
+                        }
+                    })
+            }
+        })
+    // if (dataurl !== "") {
+    //   var arr = dataurl.split(','),
+    //     mime = arr[0].match(/:(.*?);/)[1],
+    //     bstr = atob(arr[1]),
+    //     n = bstr.length,
+    //     u8arr = new Uint8Array(n);
+
+    //   while (n--) {
+    //     u8arr[n] = bstr.charCodeAt(n);
+    //   }
+    //   // console.log(mime, dataurl)
+
+    //   return new File([u8arr], filename, { type: mime });
+    // }
+    // else {
+    //   alert("BASE64 String is empty :(")
+    //   return null
+    // }
   }
 
   render() {
@@ -1546,6 +1750,31 @@ class Create extends Component {
     }
     else {
       pointer = {}
+    }
+
+    const getYear = date => {
+      return date.getFullYear()
+    }
+
+    const year = (new Date()).getFullYear();
+    const years = Array.from(new Array(2), (val, index) => index + year);
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
+    const getMonth = date => {
+      let month = date.getMonth()
+      return months[month]
     }
 
     const reactSelectControl = {
@@ -1626,9 +1855,9 @@ class Create extends Component {
               <td className="smallTd">{index + 1}</td>
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
-              <td id="viewDoc">
-                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
-              </td>
+              <td className="viewDoc blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)}> {document.docName} </td>
+                {/* <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div> */}
+              {/* </td> */}
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTI", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
           )}
@@ -1641,7 +1870,7 @@ class Create extends Component {
         <thead>
           <tr>
             <th className="smallTd" >No.</th>
-            <th>Contract Number</th>
+            <th className="mediumTd">Contract Number</th>
             <th>Contract Name in English</th>
             <th>Contract Name in Chinese</th>
             <th>Attached File</th>
@@ -1656,9 +1885,9 @@ class Create extends Component {
               <td className="mediumTd">{document.conNum}</td>
               <td className="descTd">{document.engName}</td>
               <td className="descTd">{document.cnName}</td>
-              <td id="viewDoc">
-                <div className="blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </div>
-              </td>
+              <td className="viewDoc blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)}>{document.docName} </td>
+                {/* <span className="blobLink" onClick={() => this.viewOrDownloadFile(document.docSelected)} > {document.docName} </span>
+              </td> */}
               <td className="smallTd"><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableCNIPS", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
             </tr>
           )}
@@ -1720,7 +1949,7 @@ class Create extends Component {
             <Col md>
               <FormGroup>
                 <Input invalid={this.state.invalidEnglish} autoComplete="off" value={this.state.engName}
-                  onChange={this.handleChange("engName")} type="text" maxLength="500" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
+                  onChange={this.handleChange("engName")} type="text" maxLength="200" name="textarea-input" id="docName" rows="3" placeholder="Please describe in English" />
                 {this.state.invalidEnglish
                   ? <small style={{ color: '#F86C6B' }}> Please input only English characters </small>
                   : null}
@@ -1730,14 +1959,14 @@ class Create extends Component {
               <FormGroup>
                 {this.state.isLTI ?
                   <>
-                    <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnNameLTI")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3"
+                    <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnNameLTI")} type="text" maxLength="200" name="textarea-input" id="cnName" rows="3"
                       placeholder="Please describe in Chinese" />
                     {this.state.invalidChinese
                       ? <small style={{ color: '#F86C6B' }}> Please input only Chinese characters </small>
                       : null}
                   </>
                   :
-                  <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="500" name="textarea-input" id="cnName" rows="3"
+                  <Input autoComplete="off" value={this.state.cnName} onChange={this.handleChange("cnName")} type="text" maxLength="200" name="textarea-input" id="cnName" rows="3"
                     placeholder="Please describe in Chinese (optional)" />
                 }
               </FormGroup>
@@ -1746,8 +1975,10 @@ class Create extends Component {
               <FormGroup>
                 {/* <Label>File Name</Label> */}
                 <CustomInput id="docFileName" onChange={this.uploadDocument}
-                  accept=".ipg, .png, .xls, .xlsm, .xlsx, .email, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp"
-                  type="file" bsSize="lg" color="primary" label={this.state.docAttachedName} />
+                  accept=".jpg, .png, .xls, .xlsm, .xlsx, .msg, .jpeg, .txt, .rtf, .tiff, .tif, .doc, .docx, .pdf, .pdfx, .bmp"
+                  type="file" bsSize="lg" color="primary" label={this.state.docAttachedName}>
+                </CustomInput>
+                <small style={{ color: '#F86C6B' }} > {this.state.wrongDocError} </small>
               </FormGroup>
             </Col>
             <Col xl={1}>
@@ -1790,7 +2021,7 @@ class Create extends Component {
             : null}
         </InputGroup>
         <Modal color="info" size="xl" toggle={this.hideDoc} isOpen={this.state.showDoc} >
-          <ModalHeader className="center"> Select Documents </ModalHeader>
+          <ModalHeader toggle={this.hideDoc} className="center"> Select Documents  </ModalHeader>
           <ModalBody>
             <SelectTable
               {...this.props}
@@ -1801,7 +2032,7 @@ class Create extends Component {
               toggleAll={this.toggleAll}
               isSelected={this.isSelected}
               getTrProps={this.rowFn}
-              defaultPageSize={5}
+              defaultPageSize={10}
               columns={[
                 {
                   Header: 'Document Name (English)',
@@ -1817,7 +2048,7 @@ class Create extends Component {
                   Header: 'Expiry Date',
                   accessor: 'expiryDate',
                   Cell: row => (
-                    <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} >
+                    <div className="blobLink" onClick={() => this.getDocumentById(row.original.documentId)} >
                       {this.convertExpDate(row.original.expiryDate)}
                     </div>
                   ),
@@ -1827,7 +2058,7 @@ class Create extends Component {
                   Header: 'DH Approved',
                   accessor: 'departmentHeads',
                   Cell: row => (
-                    <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${row.original.documentFileType};base64,${row.original.documentBase64String}`, row.original.documentFileName))} >
+                    <div className="blobLink" onClick={() => this.getDocumentById(row.original.documentId)} >
                       {this.changeDeptHeads(row.original.departmentHeads)}
                     </div>
 
@@ -1867,15 +2098,15 @@ class Create extends Component {
                     <td>{document.documentNameEnglish}</td>
                     <td>{document.documentNameChinese}</td>
                     <td id="viewDoc">
-                      <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
+                      <span className="blobLink" onClick={() => this.getDocumentById(document.documentId)} >
                         {this.convertExpDate(document.expiryDate)}
-                      </div>
+                      </span>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.convertExpDate(document.expiryDate)}</a> */}
                     </td>
                     <td id="viewDoc">
-                      <div className="blobLink" onClick={() => this.viewOrDownloadFile(this.dataURLtoFile(`data:${document.documentFileType};base64,${document.documentBase64String}`, document.documentFileName))} >
+                      <span className="blobLink" onClick={() => this.getDocumentById(document.documentId)} >
                         {this.changeDeptHeads(document.departmentHeads)}
-                      </div>
+                      </span>
                       {/* <a href={document.documentUrl} target='_blank' rel="noopener noreferrer">{this.changeDeptHeads(document.departmentHeads)}</a> */}
                     </td>
                     <td><img style={pointer} width="25px" onClick={() => this.deleteDocument("documentTableLTU", index)} onMouseOver={this.toggleHover} src={deleteBin} /></td>
@@ -1898,16 +2129,17 @@ class Create extends Component {
               <CardBody>
                 <FormGroup>
                   <h5><b>NOTES :</b></h5>
-                  <ol>
+                  <ol id="notes" className="font-weight-bold">
                     {this.state.noteInfo.map((info, index) => (
                       <li key={index} >
-                        <b><p> {info.chinese} </p></b>
-                        <b><p> {info.english} </p></b>
+                        <p> 
+                            {info.chinese} 
+                            <br/> 
+                            {info.english}
+                        </p>
                       </li>
                     ))}
                   </ol>
-                  {/* <p>{this.state.noteInfo.chinese}</p> */}
-                  {/* <p>{this.state.noteInfo.english}</p> */}
                 </FormGroup>
                 <Form className="form-horizontal" innerRef={this.formRef}>
                   {/* <FormGroup>
@@ -1926,13 +2158,13 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Tel. </Label>
                     <InputGroup>
-                      <Input ref={this.telNumber} value={this.state.telNumber} onChange={this.handleChange("telNumber")} id="appendedInput" size="16" type="text" />
+                      <Input autoComplete="off" maxLength={20} ref={this.telNumber} value={this.state.telNumber} onChange={this.handleChange("telNumber")} id="appendedInput" size="16" type="text" />
                     </InputGroup>
                   </FormGroup>
                   <FormGroup>
                     <Label>Dept.</Label>
-                    <Input id="deptSelected" type="select" onChange={this.handleChange("deptSelected")} defaultValue="0" name="dept">
-                      <option disabled value="0">Please select . . .</option>
+                    <Input value={this.state.deptSelected} id="deptSelected" type="select" onWheel={event => { event.preventDefault(); }} onChange={this.handleChange("deptSelected")} name="dept">
+                      <option disabled value="">Please select . . .</option>
                       {this.state.department.map((option, index) => (
                         <option value={option.deptId} label={option.dept} key={option.deptId}>
                           {option.deptName}
@@ -1954,9 +2186,11 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Application Type</Label>
                     <Input ref={this.appTypeSelected} type="select"
-                      onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" defaultValue="0" name="select"
+                      onWheel={event => { event.preventDefault(); }}
+                      onChange={this.handleChange("appTypeSelected")} id="appTypeSelected" name="select"
+                      defaultValue=""
                       onBlur={() => this.validator.showMessageFor('aplicationType')}>
-                      <option disabled value="0">Please select . . .</option>
+                      <option disabled value="">Please select . . .</option>
                       {this.state.applicationTypes.map((option, id) => (
 
                         <option value={option.appTypeId} key={option.appTypeId}>{option.appTypeName}</option>
@@ -1971,6 +2205,49 @@ class Create extends Component {
                       <Label>Effective Period</Label>
                       <DatePicker autoComplete="off" id="effectivePeriod" placeholderText="YYYY/MM/DD" popperPlacement="auto-center" showPopperArrow={false} todayButton="Today"
                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
+                        renderCustomHeader={({
+                          date,
+                          changeYear,
+                          changeMonth,
+                          decreaseMonth,
+                          increaseMonth,
+                          prevMonthButtonDisabled,
+                          nextMonthButtonDisabled
+                        }) => (
+                            <div
+                              style={{
+                                margin: 10,
+                                display: "flex",
+                                justifyContent: "center"
+                              }}
+                            >
+                              <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                              <Input
+                                autoComplete="off"
+                                value={getYear(date)}
+                                onChange={({ target: { value } }) => changeYear(value)}
+                                type="select">
+                                {years.map(option => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Input 
+                              autoComplete="off"
+                              value={getMonth(date)} onChange={({ target: { value } }) =>
+                                changeMonth(months.indexOf(value))
+                              } type="select">
+                                {months.map((option) => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+
+                            </div>
+                          )}
                         peekNextMonth
                         showMonthDropdown
                         showYearDropdown
@@ -1987,7 +2264,7 @@ class Create extends Component {
                     <FormGroup>
                       <Label>Entitled Team</Label>
                       <small className="ml-2">Please select your team's name from dropdown list, if your team is not included, please contact respective chop keeper. </small>
-                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} value={this.state.teamSelected} type="select">
+                      <Input id="teamSelected" name="team" value={this.state.teamSelected} onChange={this.handleChange("teamSelected")} value={this.state.teamSelected} type="select" onWheel={event => { event.preventDefault(); }}>
                         <option value="" disabled>Please select a team</option>
                         {this.state.teams.map((team, index) =>
                           <option key={index} value={team.teamId}>{team.teamName}</option>
@@ -1999,29 +2276,13 @@ class Create extends Component {
                     </FormGroup>
                   </Collapse>
 
-
-                  {/* 
-                  <Collapse isOpen={this.state.isLTU}>
-                    <FormGroup>
-                      <Label>Entitled Team</Label>
-                      <Input id="teamSelected" name="team" onChange={this.handleChange("teamSelected")} defaultValue="0" type="select">
-                        <option value="0" disabled>Please select a team</option>
-                        {this.state.teams.map((team, index) =>
-                          <option key={index} value={team.teamId}>{team.teamName}</option>
-                        )}
-                      </Input>
-                      {this.state.isLTU
-                        ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Entitled Team', this.state.teamSelected, 'required')}</small>
-                        : null}
-                    </FormGroup>
-                  </Collapse> */}
-
                   <FormGroup>
                     <Label>Chop Type</Label>
-                    <Input ref={this.chopTypeSelected} type="select" id="chopTypeSelected"
+                    <Input ref={this.chopTypeSelected} value={this.state.chopTypeSelected} type="select" id="chopTypeSelected"
                       onClick={() => { this.getChopTypes(this.props.legalName, this.state.appTypeSelected) }}
-                      onChange={this.handleChange("chopTypeSelected")} defaultValue="0" name="chopType" >
-                      <option disabled value="0">Please select ..</option>
+                      onWheel={event => { event.preventDefault(); }}
+                      onChange={this.handleChange("chopTypeSelected")} name="chopType" >
+                      <option disabled value="">Please select ..</option>
                       {this.state.chopTypes.map((option, id) => (
                         <option key={option.chopTypeId} value={option.chopTypeId}> {this.props.legalName} {option.chopTypeName}</option>
                       ))}
@@ -2033,8 +2294,9 @@ class Create extends Component {
                   {this.state.showBranches
                     ? <FormGroup>
                       <Label>Branch Company Chop</Label>
-                      <Input onChange={this.handleChange("branchSelected")} type="select" defaultValue="0">
-                        <option value="0" disabled>Please specify your Branch Company Chop</option>
+                      <Input onChange={this.handleChange("branchSelected")} type="select" value={this.state.branchSelected} onWheel={event => { event.preventDefault(); }}
+                      onClick={CommonFn.sortingArrayStr(this.state.branches, "branchName", "zh-CN-u-co-pinyin", true)}>
+                        <option value="" disabled>Please specify your Branch Company Chop</option>
                         {this.state.branches.map((branch, index) =>
                           <option value={branch.branchId} key={index}>{branch.branchName}</option>
                         )}
@@ -2056,7 +2318,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Purpose of Use</Label>
                     <InputGroup>
-                      <Input maxLength={500} spellCheck="true" ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
+                      <Input autoComplete="off" value={this.state.purposeOfUse} maxLength={500} spellCheck="true" ref={this.purposeOfUse} onChange={this.handleChange("purposeOfUse")} placeholder="Enter the Purpose of Use" type="textarea" name="textarea-input" id="purposeOfUse" rows="3" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Purpose of Use', this.state.purposeOfUse, 'required')}</small>
                   </FormGroup>
@@ -2064,7 +2326,7 @@ class Create extends Component {
                     <FormGroup>
                       <Label>Number of Pages to Be Chopped</Label>
                       <InputGroup>
-                        <Input ref={this.numOfPages} value={this.state.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
+                        <Input autoComplete="off" ref={this.numOfPages} value={this.state.numOfPages} onChange={this.handleChange("numOfPages")} id="numOfPages" size="16" type="number" min='0' max='10' />
                       </InputGroup>
                       {this.state.invalidNumberOfPages
                         ? <small style={{ color: '#F86C6B' }} >Number of pages cannot be more than 9</small>
@@ -2105,7 +2367,53 @@ class Create extends Component {
                         className="form-control" required dateFormat="yyyy/MM/dd" withPortal
                         selected={this.state.dateView2}
                         onChange={this.dateChange("returnDate", "dateView2")}
-                        minDate={new Date()} maxDate={addDays(new Date(), 30)} />
+                        minDate={new Date()} maxDate={addDays(new Date(), 30)}
+                        renderCustomHeader={({
+                          date,
+                          changeYear,
+                          changeMonth,
+                          decreaseMonth,
+                          increaseMonth,
+                          prevMonthButtonDisabled,
+                          nextMonthButtonDisabled
+                        }) => (
+                            <div
+                              style={{
+                                margin: 10,
+                                display: "flex",
+                                justifyContent: "center"
+                              }}
+                            >
+                              <Button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} >{`<`}</Button>
+                              <Input
+                                autoComplete="off"
+                                value={getYear(date)}
+                                onChange={({ target: { value } }) => changeYear(value)}
+                                type="select">
+                                {years.map(option => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Input
+                              autoComplete="off"
+                              value={getMonth(date)} onChange={({ target: { value } }) =>
+                                changeMonth(months.indexOf(value))
+                              } type="select">
+                                {months.map((option) => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </Input>
+                              <Button onClick={increaseMonth} disabled={nextMonthButtonDisabled} >{`>`}</Button>
+                            </div>
+                          )}
+                        peekNextMonth
+                        showMonthDropdown
+                        showYearDropdown
+                        />
                       {!this.state.collapse
                         ? <small style={{ color: '#F86C6B' }} >{this.validator.message('Return Date', this.state.returnDate, 'required')}</small>
                         : null}
@@ -2118,6 +2426,7 @@ class Create extends Component {
                         onBlur={this.checkDepartment}
                         isClearable
                         classNamePrefix="rs"
+                        value={this.state.selectedOption.resPerson}
                         loadOptions={loadUsers}
                         onChange={this.handleSelectOption("resPerson")}
                         menuPortalTarget={document.body}
@@ -2132,7 +2441,7 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Address to</Label>
                     <InputGroup>
-                      <Input maxLength={200} ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
+                      <Input autoComplete="off" value={this.state.addressTo} maxLength={200} ref={this.addressTo} onChange={this.handleChange("addressTo")} type="textarea" name="textarea-input" id="addressTo" rows="5" placeholder="Documents will be addressed to" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Address To', this.state.addressTo, 'required')}</small>
                   </FormGroup>
@@ -2145,6 +2454,7 @@ class Create extends Component {
                         id="pickUpBy"
                         isClearable
                         loadOptions={loadUsers}
+                        value={this.state.selectedOption.pickUpBy}
                         isClearable
                         onBlur={this.checkDepartment}
                         onChange={this.handleSelectOption("pickUpBy")}
@@ -2162,14 +2472,14 @@ class Create extends Component {
                   <FormGroup>
                     <Label>Remark <small className="ml-2"> Please enter the remarks, e.g. telephone number of pick up person.</small> </Label>
                     <InputGroup>
-                      <Input autoComplete="off" maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
+                      <Input value={this.state.remarks} autoComplete="off" maxLength={500} ref={this.remarks} onChange={this.handleChange("remarks")} id="remarks" size="16" type="textbox" placeholder="Please enter the remarks" />
                     </InputGroup>
                     <small style={{ color: '#F86C6B' }} >{this.validator.message('Remark', this.state.remarks, 'required')}</small>
                   </FormGroup>
 
                   {this.state.isLTI
                     ? <FormGroup>
-                      <Label>Document Check By <i className="fa fa-user" /></Label>
+                      <Label>Document Check By <i className="fa fa-user" /> PB7 or above </Label>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <AsyncSelect
                         id="docCheckByLTI"
@@ -2190,7 +2500,7 @@ class Create extends Component {
 
                   {this.state.isCNIPS
                     ? <FormGroup>
-                      <Label>Contract Signed By: <i className="fa fa-user" /></Label>
+                      <Label>Contract Signed By <i className="fa fa-user" /></Label>
                       <small className="ml-2"> Please fill in the DHs who signed the contract and keep in line with MOA; If for Direct Debit Agreements, Head of FGS and Head of Treasury are needed for approval.</small>
                       <Badge color="danger" className="ml-2">{this.state.selectInfo}</Badge>
                       <Row>
@@ -2199,6 +2509,7 @@ class Create extends Component {
                             id="contractSign1"
                             onBlur={this.checkDepartment}
                             loadOptions={loadOptionsContract1}
+                            value={this.state.selectedOption.contractSign1}
                             onChange={this.handleSelectOption("contractSign1")}
                             menuPortalTarget={document.body}
                             isClearable
@@ -2215,6 +2526,7 @@ class Create extends Component {
                             id="contractSign2"
                             onBlur={this.checkDepartment}
                             loadOptions={loadOptionsContract2}
+                            value={this.state.selectedOption.contractSign2}
                             onChange={this.handleSelectOption("contractSign2")}
                             menuPortalTarget={document.body}
                             isClearable
@@ -2303,8 +2615,9 @@ class Create extends Component {
                         ? <Button className="mr-2" id="submit" type="submit" color="success" onClick={() => { this.submitRequest('Y') }}>Submit</Button>
                         : <Button className="mr-2" id="disabledSubmit" type="submit" color="success" disabled
                         >Submit</Button>}
-                      <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} target="submitTooltip">Please confirm the agree terms</Tooltip>
+                      {/* <Tooltip placement="left" isOpen={this.state.tooltipOpen} toggle={() => this.setState({ tooltipOpen: !this.state.tooltipOpen })} target="submitTooltip">Please confirm the agree terms</Tooltip> */}
                       <Button id="saveAction" type="submit" color="primary" onClick={() => { this.submitRequest('N') }}>Save</Button>
+                      <UncontrolledTooltip placement="left" target="submitTooltip">Please confirm the ticking box</UncontrolledTooltip>
                       <UncontrolledTooltip placement="right" target="saveAction">Save current task as draft</UncontrolledTooltip>
                     </Col>
                   </Row>

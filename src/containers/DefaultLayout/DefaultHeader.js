@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import { UncontrolledDropdown, DropdownItem, DropdownMenu, DropdownToggle, Nav, Dropdown } from 'reactstrap';
+import { UncontrolledDropdown, DropdownItem, DropdownMenu, DropdownToggle, Nav, Dropdown, Spinner } from 'reactstrap';
 import PropTypes from 'prop-types';
 import { AppSidebarMinimizer, AppSidebarToggler } from '@coreui/react';
 import { fakeAuth } from '../../App';
 import { withRouter } from 'react-router-dom';
 import Axios from 'axios';
 import config from '../../config';
+import Authorize from '../../functions/Authorize'
+
 
 const propTypes = {
   children: PropTypes.node,
@@ -17,7 +19,7 @@ const AuthButton = withRouter(({ history }) => (
 
   fakeAuth.isAuthenticated
     // ? <Button onClick={() => { fakeAuth.signout(() => history.push('/')) }}>Sign out</Button>
-    ? <DropdownItem onClick={() => { fakeAuth.signOut(() => history.push('/')) }} ><i className="fa fa-lock" ></i> Logout</DropdownItem>
+    ? <DropdownItem onClick={() => { fakeAuth.signOut(() => history.push('/logout')) }} ><i className="fa fa-lock" ></i> Logout</DropdownItem>
     : ""
 )
 )
@@ -26,12 +28,13 @@ class DefaultHeader extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      userDetails: ''
+      userDetails: '',
+      displayName:''
     };
   }
 
   logout() {
-    console.log("logout")
+    // console.log("logout")
     fakeAuth.signOut()
   }
 
@@ -41,17 +44,16 @@ class DefaultHeader extends Component {
 
   async getUserDetails() {
     this.setState({ loading: true })
-    await Axios.get(`${config.url}/users/${localStorage.getItem('userId')}`,{ headers: { Pragma: 'no-cache' } }).then(res => {
-      this.setState({ userDetails: res.data, loading: false })
+    await Axios.get(`${config.url}/users/${Authorize.getCookies().userId}`,{ headers: { Pragma: 'no-cache' } }).then(res => {
+      let name = res.data.displayName
+      this.setState({ userDetails: res.data, displayName: name, loading: false })
     })
   }
 
   render() {
-
-
     const { state } = this.props;
-    const { userDetails } = this.state;
-
+    const { userDetails, displayName } = this.state;
+    
     return (
       <React.Fragment>
         <AppSidebarToggler className="d-lg-none" display="sm" mobile />
@@ -106,7 +108,7 @@ class DefaultHeader extends Component {
           </Dropdown>
           <UncontrolledDropdown nav direction="down" className="mr-4" >
             <DropdownToggle nav className="mr-2">
-              {userDetails.displayName}
+              {displayName !== '' ? displayName : <Spinner size="sm"/>}
             </DropdownToggle>
             <DropdownMenu right className="mt-3">
               <AuthButton />

@@ -2,6 +2,7 @@ import React, { Component, Suspense } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import * as router from 'react-router-dom';
 import { Container, Spinner } from 'reactstrap';
+import Authorize from '../../functions/Authorize' 
 
 import {
   AppAside,
@@ -27,6 +28,7 @@ const DefaultAside = React.lazy(() => import('./DefaultAside'));
 const DefaultFooter = React.lazy(() => import('./DefaultFooter'));
 const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
 
+
 class DefaultLayout extends Component {
 
   loading = () => <div className="animated fadeIn pt-1 text-center"><Spinner /></div>
@@ -35,22 +37,25 @@ class DefaultLayout extends Component {
     if (e) {
       e.preventDefault()
     }
-    this.props.history.push('/login')
+    this.props.history.push('/logout')
   }
+
 
   constructor(props) {
     super(props);
+    const cookiesInfo = Authorize.getCookies()
     this.state = {
       legalEntity: localStorage.getItem('legalEntity'),
-      roleId: localStorage.getItem("roleId"),
-      cAdmin: localStorage.getItem("isChopKeeper"),
-      lAdmin: localStorage.getItem('isLicenseAdmin'),
       application: localStorage.getItem('application'),
-      licenseAdminCompany: localStorage.getItem('licenseAdminCompanyIds').split(','),
-      chopKeeperCompany: localStorage.getItem('chopKeeperCompanyIds').split(','),
+      roleId: cookiesInfo.roleId,
+      cAdmin: cookiesInfo.isChopKeeper,
+      lAdmin: cookiesInfo.isLicenseAdmin,
+      licenseAdminCompany: cookiesInfo.licenseAdminCompanyIds,
+      chopKeeperCompany: cookiesInfo.chopKeeperCompanyIds,
       showChopAdmin: false,
       showLicenseAdmin: false,
-      newRoutes: []
+      newRoutes: [],
+      isLoading: false
     }
     this.handleLegalEntity = this.handleLegalEntity.bind(this)
   }
@@ -59,6 +64,14 @@ class DefaultLayout extends Component {
     this.setState({
       legalEntity: _State.legalEntity
     })
+  }
+  
+  componentDidUpdate(prevProps, prevState){
+    if (prevState.isLoading !== this.state.isLoading) {
+      this.setState({
+        isLoading: false
+      })
+    }
   }
 
   changeWorkflow = (value) => {
@@ -80,11 +93,14 @@ class DefaultLayout extends Component {
   changeEntity = workflow => event => {
     if (workflow === "LICENSE") {
       this.props.history.push(`/${workflow.toLowerCase()}/create`)
-      window.location.reload();
+      // window.location.reload();
+      this.setState({isLoading:true})
     }
     else {
       this.props.history.push(`/create/${event.target.value}`)
-      window.location.reload();
+      // window.location.reload();
+      this.setState({isLoading:true})
+
     }
 
     this.setState({
@@ -94,6 +110,35 @@ class DefaultLayout extends Component {
       localStorage.setItem("application", workflow),
       localStorage.setItem("legalEntity", event.target.value)
     )
+    // if (workflow === localStorage.getItem('application')){
+    //   this.setState({
+    //     legalEntity: event.target.value,
+    //     application: workflow,
+    //     isLoading: true
+    //   },    
+    //   localStorage.setItem("application", workflow),
+    //   localStorage.setItem("legalEntity", event.target.value)
+    //   )
+    //   if (this.props.location.pathname.match('create').index === 1) {
+    //     this.props.history.push(`/create/${event.target.value}`)
+    //   }
+    // }
+    // else{
+    //   if (workflow === "LICENSE") {
+    //     this.props.history.push(`/${workflow.toLowerCase()}/create`)
+    //   }
+    //   else {
+    //     this.props.history.push(`/create/${event.target.value}`)
+    //   }
+    //   this.setState({
+    //     legalEntity: event.target.value,
+    //     application: workflow,
+    //     isLoading: true
+    //   },    
+    //   localStorage.setItem("application", workflow),
+    //   localStorage.setItem("legalEntity", event.target.value)
+    //   )
+    // }
   }
 
   toggle = (name) => () => {
@@ -102,69 +147,7 @@ class DefaultLayout extends Component {
     });
   }
 
-  getRoute(application) {
-    let { licenseAdminCompany, legalEntity, chopKeeperCompany } = this.state
-    switch (application) {
-      case 'CHOP':
-        if (this.state.cAdmin === 'N') {
-          localStorage.setItem('viewAdminChop', false)
-          return routes.routesRequestor;
-        }
-        if (this.state.cAdmin === 'Y') {
-          let show = false
-          for (let i = 0; i < chopKeeperCompany.length; i++) {
-            if (chopKeeperCompany[i] === legalEntity) {
-              localStorage.setItem('viewAdminChop', true)
-              show = true
-              break;
-            }
-            else {
-              localStorage.setItem('viewAdminChop', false)
-              show = false
-            }
-          }
-          if (show)
-            return routes.routesChopAdmin;
-          else
-            return routes.routesRequestor;
-        }
-        else return this.signOut();
-        console.log('error! Roles not match, no sideBarNav');
-
-      case 'LICENSE':
-        if (this.state.lAdmin === 'N') {
-          localStorage.setItem('viewAdminLicense', false)
-          return routes.routesRequestor;
-        }
-        if (this.state.lAdmin === 'Y') {
-          let show = false
-          for (let i = 0; i < licenseAdminCompany.length; i++) {
-            if (licenseAdminCompany[i] === legalEntity) {
-              localStorage.setItem('viewAdminLicense', true)
-              show = true
-              break;
-            }
-            else {
-              localStorage.setItem('viewAdminLicense', false)
-              show = false
-            }
-          }
-          if (show)
-            return routes.routesLicenseAdmin;
-          else
-            return routes.routesRequestor;
-        }
-        else return this.signOut();
-        console.log('error! Roles not match, no sideBarNav');
-
-      default:
-        return this.signOut();
-        console.log('error! workflow application not match, no sideBarNav');
-    }
-  }
-
-
-  handleSideBarNav(application) {
+handleSideBarNav(application) {
     let { licenseAdminCompany, legalEntity, chopKeeperCompany } = this.state
     switch (application) {
       case 'CHOP':
@@ -227,7 +210,6 @@ class DefaultLayout extends Component {
 
 
   render() {
-    let { newRoutes } = this.state
     return (
       <div className="app">
         <LegalEntity.Provider value={{ legalEntity: label[this.state.legalEntity] }}>
@@ -236,6 +218,9 @@ class DefaultLayout extends Component {
               <DefaultHeader state={this.state} toggle={this.toggle} changeEntity={this.changeEntity} changeWorkflow={this.changeWorkflow} onLogout={e => this.signOut(e)} />
             </Suspense>
           </AppHeader>
+          {this.state.isLoading ?
+          <Spinner />
+          :
           <div className="app-body">
             <AppSidebar fixed display="lg">
               <AppSidebarHeader />
@@ -252,7 +237,7 @@ class DefaultLayout extends Component {
               <Container fluid >
                 <Suspense fallback={this.loading()}>
                   <Switch>
-                    {this.getRoute(localStorage.getItem('application')).map((route, idx) => {
+                    {routes.map((route, idx) => {
                       return route.component ? (
                         <Route
                           key={idx}
@@ -266,19 +251,14 @@ class DefaultLayout extends Component {
                               {...props} routes={route.routes} />
                           )} />
                       ) : (null);
-                    })
-                    }
+                    })}
                     <Redirect from="/" to={{ pathname: "/404" }} />
                   </Switch>
                 </Suspense>
               </Container>
             </main>
-            {/* <AppAside fixed>
-            <Suspense fallback={this.loading()}>
-              <DefaultAside />
-            </Suspense>
-          </AppAside> */}
           </div>
+          }
           <AppFooter>
             <Suspense fallback={this.loading()}>
               <DefaultFooter />
